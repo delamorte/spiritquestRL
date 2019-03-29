@@ -33,24 +33,32 @@ def blt_init():
     blt.clear()
 
 
-def player_init(game_map):
+def world_init():
 
-    px = randint(1, game_map.width)
-    py = randint(1, game_map.height)
-
-    return px, py
-
-
-def game_loop():
+    # Initialize map
     game_map = GameMap(MAP_WIDTH, MAP_HEIGHT)
-    px, py = player_init(game_map)
+    game_map.generate_forest(game_map.tiles)
+
+    # Initialize player, starting position and other entities
+    px, py = randint(1, game_map.width), randint(1, game_map.height)
     if game_map.is_blocked(px, py):
-        px, py = player_init(game_map)
+        px, py = randint(1, game_map.width), randint(1, game_map.height)
     player = Entity(px, py, 2, 0xE100 + 704, None)
+
     # npc = Entity(int(WINDOW_WIDTH / 2 - 5),
     #             int(WINDOW_HEIGHT / 2 - 5), 1, 0xE100 + 1829, None)
     entities = [player]
+
+    # Initialize game camera
     game_camera = Camera(player.x, player.y, WINDOW_WIDTH, WINDOW_HEIGHT)
+
+    return game_map, game_camera, entities, player
+
+
+def game_loop():
+
+    blt_init()
+    game_map, game_camera, entities, player = world_init()
     draw_all(game_map, game_camera, entities, player.x, player.y)
 
     key = None
@@ -83,5 +91,4 @@ def game_loop():
 
 
 if __name__ == '__main__':
-    blt_init()
     game_loop()
