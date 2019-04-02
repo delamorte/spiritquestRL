@@ -11,10 +11,6 @@ def draw_entities(entities, game_map, game_camera):
 
 def draw_map(game_map, game_camera, fov_map, fov_recompute):
 
-    for y in range(game_map.height):
-        for x in range(game_map.width):
-            blt.put(x, y, " ")
-
     if fov_recompute:
         # Draw all the tiles in the game map
         for y in range(game_map.height):
