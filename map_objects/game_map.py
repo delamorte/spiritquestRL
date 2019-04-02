@@ -10,7 +10,7 @@ class GameMap:
 
     def initialize_tiles(self):
 
-        tiles = [[Tile(False, False, False, x, y, randint(0, 100), False) for y in range(self.height)]
+        tiles = [[Tile(False, False, x, y, randint(0, 100), False) for y in range(self.height)]
                  for x in range(self.width)]
 
         return tiles

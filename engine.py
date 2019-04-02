@@ -3,14 +3,18 @@ from bearlibterminal import terminal as blt
 from camera import Camera
 from draw import draw_all, clear_entities
 from entity import Entity
+from fov import initialize_fov, recompute_fov
 from input_handlers import handle_keys
 from map_objects.game_map import GameMap
 from random import randint
 
 WINDOW_WIDTH = 40
 WINDOW_HEIGHT = 30
-MAP_WIDTH = 200
-MAP_HEIGHT = 200
+MAP_WIDTH = 40
+MAP_HEIGHT = 30
+FOV_ALGORITHM = 0
+FOV_LIGHT_WALLS = True
+FOV_RADIUS = 6
 
 
 def blt_init():
@@ -40,7 +44,7 @@ def world_init():
     game_map.generate_forest(game_map.tiles)
 
     # Initialize player, starting position and other entities
-    px, py = randint(1, game_map.width), randint(1, game_map.height)
+    px, py = randint(1, game_map.width - 1), randint(1, game_map.height - 1)
     if game_map.is_blocked(px, py):
         px, py = randint(1, game_map.width), randint(1, game_map.height)
     player = Entity(px, py, 2, 0xE100 + 704, None)
@@ -59,10 +63,23 @@ def game_loop():
 
     blt_init()
     game_map, game_camera, entities, player = world_init()
-    draw_all(game_map, game_camera, entities, player.x, player.y)
+    fov_recompute = True
+    fov_map = initialize_fov(game_map)
+    recompute_fov(fov_map, player.x, player.y, FOV_RADIUS,
+                  FOV_LIGHT_WALLS, FOV_ALGORITHM)
+    draw_all(game_map, game_camera, entities, player.x,
+             player.y, fov_map, fov_recompute)
 
     key = None
     while key not in (blt.TK_CLOSE, blt.TK_ESCAPE):
+
+        if fov_recompute:
+            recompute_fov(fov_map, player.x, player.y, FOV_RADIUS,
+                          FOV_LIGHT_WALLS, FOV_ALGORITHM)
+
+        draw_all(game_map, game_camera, entities, player.x,
+                 player.y, fov_map, fov_recompute)
+        fov_recompute = False
 
         blt.refresh()
 
@@ -78,14 +95,13 @@ def game_loop():
             dx, dy = move
             if not game_map.is_blocked(player.x + dx, player.y + dy):
                 player.move(dx, dy)
+                fov_recompute = True
 
         if exit:
             blt.close()
 
         if fullscreen:
             blt.set("window.fullscreen=true")
-
-        draw_all(game_map, game_camera, entities, player.x, player.y)
 
     blt.close()
 
