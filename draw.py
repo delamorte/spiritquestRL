@@ -20,7 +20,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
         for y in range(game_map.height):
             for x in range(game_map.width):
                 #map_x, map_y = game_camera.x + x, game_camera.y + y
-                visible = map_is_in_fov(fov_map, x, y)
+                visible = fov_map.fov[y, x]
                 #wall = game_map.tiles[x][y].block_sight
 
                 if visible:
