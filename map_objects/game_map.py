@@ -15,21 +15,19 @@ class GameMap:
 
         return tiles
 
-    def generate_forest(self, tiles):
+    def generate_forest(self, map):
 
         for y in range(self.height):
             for x in range(self.width):
                 if (x == 0 or x == self.width - 1 or
                         y == 0 or y == self.height - 1):
-                    tiles[x][y].blocked = True
-                    tiles[x][y].block_sight = True
+                    self.tiles[x][y].blocked = True
+                    self.tiles[x][y].block_sight = True
                 # Spawn forest seeds
                 elif randint(0, 100) < 25:
-                    tiles[x][y].forest = True
-                    tiles[x][y].blocked = True
-                    tiles[x][y].block_sight = True
-
-        return tiles
+                    self.tiles[x][y].forest = True
+                    self.tiles[x][y].blocked = True
+                    self.tiles[x][y].block_sight = True
 
     def is_blocked(self, x, y):
         if self.tiles[x][y].blocked:

@@ -10,11 +10,11 @@ from random import randint
 
 WINDOW_WIDTH = 40
 WINDOW_HEIGHT = 30
-MAP_WIDTH = 40
-MAP_HEIGHT = 30
+MAP_WIDTH = 100
+MAP_HEIGHT = 100
 FOV_ALGORITHM = 0
 FOV_LIGHT_WALLS = True
-FOV_RADIUS = 6
+FOV_RADIUS = 8
 
 
 def blt_init():
@@ -45,9 +45,9 @@ def world_init():
 
     # Initialize player, starting position and other entities
     px, py = randint(1, game_map.width - 1), randint(1, game_map.height - 1)
-    if game_map.is_blocked(px, py):
-        px, py = randint(1, game_map.width), randint(1, game_map.height)
-    player = Entity(px, py, 2, 0xE100 + 704, None)
+    while game_map.is_blocked(px, py):
+        px, py = randint(1, game_map.width - 1), randint(1, game_map.height - 1)
+    player = Entity(px, py, 0, 0xE100 + 704, None)
 
     # npc = Entity(int(WINDOW_WIDTH / 2 - 5),
     #             int(WINDOW_HEIGHT / 2 - 5), 1, 0xE100 + 1829, None)
