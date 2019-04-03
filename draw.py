@@ -23,72 +23,26 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
                     if wall:
                         blt.layer(0)
                         blt.color("darkest amber")
-                        blt.put(x, y, 0xE100 + 21)
+                        blt.put(x, y, game_map.tiles[map_x][map_y].char_ground)
                         blt.layer(1)
-                        blt.color("light orange")
-                        if game_map.tiles[map_x][map_y].seed < 50:
-                            blt.color("orange")
-                        if (0 <= game_map.tiles[map_x][map_y].seed <=
-                                int(100 / 6)):
-                            blt.put(x, y, 0xE100 + 87)
-                        if (int(100 / 6) <=
-                            game_map.tiles[map_x][map_y].seed <=
-                                100 / 6 * 2):
-                            blt.put(x, y, 0xE100 + 88)
-                        if (int(100 / 6 * 2) <=
-                            game_map.tiles[map_x][map_y].seed <=
-                                100 / 6 * 3):
-                            blt.put(x, y, 0xE100 + 89)
-                        if (int(100 / 6 * 3) <=
-                            game_map.tiles[map_x][map_y].seed <=
-                                100 / 6 * 4):
-                            blt.put(x, y, 0xE100 + 93)
-                        if (int(100 / 6 * 4) <=
-                            game_map.tiles[map_x][map_y].seed <=
-                                100 / 6 * 5):
-                            blt.put(x, y, 0xE100 + 94)
-                        if (int(100 / 6 * 5) <=
-                            game_map.tiles[map_x][map_y].seed <=
-                                100):
-                            blt.put(x, y, 0xE100 + 95)
+                        blt.color(game_map.tiles[map_x][map_y].color)
+                        blt.put(x, y, game_map.tiles[map_x][map_y].char)
                     else:
                         blt.color("darkest amber")
-                        blt.put(x, y, 0xE100 + 21)
+                        blt.put(x, y, game_map.tiles[map_x][map_y].char_ground)
+
                     game_map.tiles[map_x][map_y].explored = True
 
                 elif game_map.tiles[map_x][map_y].explored:
                     if wall:
                         blt.layer(0)
                         blt.color("darkest gray")
-                        blt.put(x, y, 0xE100 + 21)
+                        blt.put(x, y, game_map.tiles[map_x][map_y].char_ground)
                         blt.layer(1)
-                        blt.color("darkest gray")
-                        if (0 <= game_map.tiles[map_x][map_y].seed <=
-                                int(100 / 6)):
-                            blt.put(x, y, 0xE100 + 87)
-                        if (int(100 / 6) <=
-                            game_map.tiles[map_x][map_y].seed <=
-                                100 / 6 * 2):
-                            blt.put(x, y, 0xE100 + 88)
-                        if (int(100 / 6 * 2) <=
-                            game_map.tiles[map_x][map_y].seed <=
-                                100 / 6 * 3):
-                            blt.put(x, y, 0xE100 + 89)
-                        if (int(100 / 6 * 3) <=
-                            game_map.tiles[map_x][map_y].seed <=
-                                100 / 6 * 4):
-                            blt.put(x, y, 0xE100 + 93)
-                        if (int(100 / 6 * 4) <=
-                            game_map.tiles[map_x][map_y].seed <=
-                                100 / 6 * 5):
-                            blt.put(x, y, 0xE100 + 94)
-                        if (int(100 / 6 * 5) <=
-                            game_map.tiles[map_x][map_y].seed <=
-                                100):
-                            blt.put(x, y, 0xE100 + 95)
+                        blt.put(x, y, game_map.tiles[map_x][map_y].char)
                     else:
                         blt.color("darkest gray")
-                        blt.put(x, y, 0xE100 + 21)
+                        blt.put(x, y, game_map.tiles[map_x][map_y].char_ground)
                 else:
                     blt.layer(0)
                     blt.put(x, y, " ")

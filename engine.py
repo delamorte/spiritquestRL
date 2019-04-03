@@ -5,7 +5,7 @@ from entity import Entity
 from fov import initialize_fov, recompute_fov
 from input_handlers import handle_keys
 from map_objects.game_map import GameMap
-from random import randint
+from random import randint, choice
 
 WINDOW_WIDTH = 40
 WINDOW_HEIGHT = 30
@@ -40,7 +40,7 @@ def world_init():
 
     # Initialize map
     game_map = GameMap(MAP_WIDTH, MAP_HEIGHT)
-    game_map.generate_forest(game_map.tiles)
+    game_map.generate_forest(25)
 
     # Initialize player, starting position and other entities
     px, py = randint(1, game_map.width - 1), \
