@@ -1,8 +1,8 @@
-# import tcod as libtcodpy
 from bearlibterminal import terminal as blt
 from camera import Camera
 from draw import draw_all, clear_entities
 from entity import Entity
+from fov import initialize_fov, recompute_fov
 from input_handlers import handle_keys
 from map_objects.game_map import GameMap
 from random import randint
@@ -11,6 +11,9 @@ WINDOW_WIDTH = 40
 WINDOW_HEIGHT = 30
 MAP_WIDTH = 200
 MAP_HEIGHT = 200
+FOV_ALGORITHM = 0
+FOV_LIGHT_WALLS = True
+FOV_RADIUS = 6
 
 
 def blt_init():
@@ -33,28 +36,51 @@ def blt_init():
     blt.clear()
 
 
-def player_init(game_map):
+def world_init():
 
-    px = randint(1, game_map.width)
-    py = randint(1, game_map.height)
-
-    return px, py
-
-
-def game_loop():
+    # Initialize map
     game_map = GameMap(MAP_WIDTH, MAP_HEIGHT)
-    px, py = player_init(game_map)
-    if game_map.is_blocked(px, py):
-        px, py = player_init(game_map)
+    game_map.generate_forest(game_map.tiles)
+
+    # Initialize player, starting position and other entities
+    px, py = randint(1, game_map.width - 1), \
+        randint(1, game_map.height - 1)
+    while game_map.is_blocked(px, py):
+        px, py = randint(1, game_map.width - 1), \
+            randint(1, game_map.height - 1)
     player = Entity(px, py, 2, 0xE100 + 704, None)
+
     # npc = Entity(int(WINDOW_WIDTH / 2 - 5),
     #             int(WINDOW_HEIGHT / 2 - 5), 1, 0xE100 + 1829, None)
     entities = [player]
+
+    # Initialize game camera
     game_camera = Camera(player.x, player.y, WINDOW_WIDTH, WINDOW_HEIGHT)
-    draw_all(game_map, game_camera, entities, player.x, player.y)
+
+    return game_map, game_camera, entities, player
+
+
+def game_loop():
+
+    blt_init()
+    game_map, game_camera, entities, player = world_init()
+    fov_recompute = True
+    fov_map = initialize_fov(game_map)
+    recompute_fov(fov_map, player.x, player.y, FOV_RADIUS,
+                  FOV_LIGHT_WALLS, FOV_ALGORITHM)
+    draw_all(game_map, game_camera, entities, player.x,
+             player.y, fov_map, fov_recompute)
 
     key = None
     while key not in (blt.TK_CLOSE, blt.TK_ESCAPE):
+
+        if fov_recompute:
+            recompute_fov(fov_map, player.x, player.y, FOV_RADIUS,
+                          FOV_LIGHT_WALLS, FOV_ALGORITHM)
+
+        draw_all(game_map, game_camera, entities, player.x,
+                 player.y, fov_map, fov_recompute)
+        fov_recompute = False
 
         blt.refresh()
 
@@ -70,6 +96,7 @@ def game_loop():
             dx, dy = move
             if not game_map.is_blocked(player.x + dx, player.y + dy):
                 player.move(dx, dy)
+                fov_recompute = True
 
         if exit:
             blt.close()
@@ -77,11 +104,8 @@ def game_loop():
         if fullscreen:
             blt.set("window.fullscreen=true")
 
-        draw_all(game_map, game_camera, entities, player.x, player.y)
-
     blt.close()
 
 
 if __name__ == '__main__':
-    blt_init()
     game_loop()
