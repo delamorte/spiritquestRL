@@ -21,6 +21,10 @@ def handle_keys(key):
     elif key == blt.TK_KP_3:
         return {'move': (1, 1)}
 
+    # '<' and '> keys for stairs
+    if key == 41 or key == 49:
+        return {'stairs': True}
+
     # Toggle full screen
     if key == blt.TK_FULLSCREEN:
         return {'fullscreen': True}

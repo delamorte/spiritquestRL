@@ -20,3 +20,4 @@ class Tile:
         self.char_ground = char_ground
         self.layer = layer
         self.color = color
+        self.spawnable = False
