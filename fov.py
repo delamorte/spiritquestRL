@@ -1,8 +1,8 @@
-import tcod as libtcod
+from tcod import map
 
 
 def initialize_fov(game_map):
-    fov_map = libtcod.map.Map(game_map.width, game_map.height)
+    fov_map = map.Map(game_map.width, game_map.height)
     fov_map.walkable[:] = True
     fov_map.transparent[:] = True
 

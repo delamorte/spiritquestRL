@@ -40,7 +40,7 @@ def world_init():
 
     # Initialize map
     game_map = GameMap(MAP_WIDTH, MAP_HEIGHT)
-    game_map.generate_forest(game_map.tiles)
+    game_map.generate_forest(0, 0, game_map.width, game_map.height, 25)
 
     # Initialize player, starting position and other entities
     px, py = randint(1, game_map.width - 1), \
@@ -56,20 +56,17 @@ def world_init():
 
     # Initialize game camera
     game_camera = Camera(player.x, player.y, WINDOW_WIDTH, WINDOW_HEIGHT)
+    # Initialize field of view
+    fov_map = initialize_fov(game_map)
 
-    return game_map, game_camera, entities, player
+    return game_map, game_camera, entities, player, fov_map
 
 
 def game_loop():
 
     blt_init()
-    game_map, game_camera, entities, player = world_init()
+    game_map, game_camera, entities, player, fov_map = world_init()
     fov_recompute = True
-    fov_map = initialize_fov(game_map)
-    recompute_fov(fov_map, player.x, player.y, FOV_RADIUS,
-                  FOV_LIGHT_WALLS, FOV_ALGORITHM)
-    draw_all(game_map, game_camera, entities, player.x,
-             player.y, fov_map, fov_recompute)
 
     key = None
     while key not in (blt.TK_CLOSE, blt.TK_ESCAPE):
