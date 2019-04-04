@@ -7,8 +7,8 @@ class MessageLog:
 
     def send(self, msg):
 
+        self.history.append(str(msg))
         if len(self.buffer) >= self.max_length:
-            self.history.append(self.buffer)
             self.buffer = self.buffer[:len(self.buffer) - 1]
 
         self.buffer.insert(0, msg)
@@ -20,5 +20,4 @@ class MessageLog:
 
     def clear(self):
 
-        self.history.append(self.buffer)
         self.buffer = []

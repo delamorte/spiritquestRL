@@ -39,6 +39,9 @@ class GameMap:
         center_x = int((x1 + x2) / 2)
         center_y = int((y1 + y2) / 2)
 
+        door_x = []
+        door_y = []
+
         for y in range(y1, y2):
             for x in range(x1, x2):
                 if (x == x1 or x == x2 - 1 or
@@ -47,6 +50,8 @@ class GameMap:
                     self.tiles[x][y].char = 0xE100 + 83
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = True
+                    door_x.append(x)
+                    door_y.append(y)
                 else:
                     self.tiles[x][y].color = "darkest amber"
                     self.tiles[x][y].char_ground = 0xE100 + 21
@@ -57,32 +62,13 @@ class GameMap:
         self.tiles[center_x][center_y].color = "lightest orange"
         self.tiles[center_x][center_y].char = 0xE100 + 427
 
-        # Generate one door at a random position in the room.
-        # There has to be a simpler way of doing this....
-        door_y = randint(y1, y2 - 1)
-        door_x = randint(x1, x2 - 1)
-        door_seed = randint(0, 3)
 
-        if door_seed == 0:
-            self.tiles[x1][door_y].color = None
-            self.tiles[x1][door_y].char = 0xE100 + 67
-            self.tiles[x1][door_y].blocked = True
-            self.tiles[x1][door_y].block_sight = False
-        if door_seed == 1:
-            self.tiles[x2 - 1][door_y].color = None
-            self.tiles[x2 - 1][door_y].char = 0xE100 + 67
-            self.tiles[x2 - 1][door_y].blocked = True
-            self.tiles[x2 - 1][door_y].block_sight = False
-        if door_seed == 2:
-            self.tiles[door_x][y1].color = None
-            self.tiles[door_x][y1].char = 0xE100 + 67
-            self.tiles[door_x][y1].blocked = True
-            self.tiles[door_x][y1].block_sight = False
-        if door_seed == 3:
-            self.tiles[door_x][y2 - 1].color = None
-            self.tiles[door_x][y2 - 1].char = 0xE100 + 67
-            self.tiles[door_x][y2 - 1].blocked = True
-            self.tiles[door_x][y2 - 1].block_sight = True
+        # Generate one door at a random position in the room.
+        door_seed = randint(0, len(door_x))
+        self.tiles[door_x[door_seed]][door_y[door_seed]].color = None
+        self.tiles[door_x[door_seed]][door_y[door_seed]].char = 0xE100 + 67
+        self.tiles[door_x[door_seed]][door_y[door_seed]].blocked = True
+        self.tiles[door_x[door_seed]][door_y[door_seed]].block_sight = False
 
     def generate_forest(self, dx, dy, width, height, freq, block_sight):
         """Generate a forest to a rectangular area."""

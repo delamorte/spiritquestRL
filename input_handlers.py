@@ -20,6 +20,8 @@ def handle_keys(key):
         return {'move': (1, -1)}
     elif key == blt.TK_KP_3:
         return {'move': (1, 1)}
+    elif key == blt.TK_PERIOD:
+        return {'move': (0, 0)}
 
     # '<' and '> keys for stairs
     if key == 41 or key == 49:
