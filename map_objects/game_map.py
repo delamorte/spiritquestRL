@@ -27,7 +27,7 @@ class GameMap:
 
     def generate_hub(self):
 
-        self.generate_forest(0, 0, self.width, self.height, 75)
+        self.generate_forest(0, 0, self.width, self.height, 75, block_sight=None)
         width = 10
         height = 10
 
@@ -82,9 +82,9 @@ class GameMap:
             self.tiles[door_x][y2 - 1].color = None
             self.tiles[door_x][y2 - 1].char = 0xE100 + 67
             self.tiles[door_x][y2 - 1].blocked = True
-            self.tiles[door_x][y2 - 1].block_sight = False
+            self.tiles[door_x][y2 - 1].block_sight = True
 
-    def generate_forest(self, dx, dy, width, height, freq):
+    def generate_forest(self, dx, dy, width, height, freq, block_sight):
         """Generate a forest to a rectangular area."""
 
         forest_tiles = [87, 88, 89, 93, 94, 95]
@@ -105,7 +105,7 @@ class GameMap:
                         forest_tiles[randint(0, 5)]
                     self.tiles[x][y].color = forest_colors[randint(0, 5)]
                     self.tiles[x][y].blocked = True
-                    self.tiles[x][y].block_sight = True
+                    self.tiles[x][y].block_sight = block_sight
 
     def is_blocked(self, x, y):
         if self.tiles[x][y].blocked:
