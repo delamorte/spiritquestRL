@@ -4,12 +4,20 @@ class Tile:
     and may or may not block sight.
     """
 
-    def __init__(self, blocked, block_sight, seed, forest):
+    def __init__(self,
+                 blocked,
+                 block_sight,
+                 seed,
+                 char=" ",
+                 char_ground=0xE100 + 21,
+                 layer=0,
+                 color=None):
         self.blocked = blocked
-        self.forest = forest
         self.block_sight = block_sight
+        self.explored = False
         self.seed = seed
-
-        if forest:
-            self.blocked = True
-            self.block_sight = True
+        self.char = char
+        self.char_ground = char_ground
+        self.layer = layer
+        self.color = color
+        self.spawnable = False
