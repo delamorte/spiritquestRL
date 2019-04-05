@@ -9,6 +9,7 @@ class Entity:
         self.layer = layer
         self.char = char
         self.color = color
+        self.spirit_power = 0
 
     def move(self, dx, dy):
         # Move the entity by a given amount
