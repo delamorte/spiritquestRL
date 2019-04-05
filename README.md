@@ -6,9 +6,7 @@ Based on [Roguelike Tutorial Revised](http://rogueliketutorials.com/) and [jceri
 ## Installation
 Install [Python 3](https://www.python.org/downloads/).
 
-Install dependencies:
-- [tcod](https://python-tcod.readthedocs.io/en/latest/installation.html)
-- [bearlibterminal](http://foo.wyrd.name/en:bearlibterminal#download)
+Install dependencies: [tcod](https://python-tcod.readthedocs.io/en/latest/installation.html) and [bearlibterminal](http://foo.wyrd.name/en:bearlibterminal#download)
 
 `py -m pip install tcod bearlibterminal`
 
