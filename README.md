@@ -1,18 +1,20 @@
 # spiritquestRL
-A roguelike/adventure game using Python 3, tcod and BearLibTerminal.
+A roguelike/adventure game using Python 3.7.3, tcod 9.3.0 and BearLibTerminal 0.15.7.
 
 Based on [Roguelike Tutorial Revised](http://rogueliketutorials.com/) and [jcerise's roguelike tutorial for Go](https://jeremyceri.se/roguelikes/).
 
 ## Installation
-Install [Python 3](https://www.python.org/downloads/)
+Install [Python 3](https://www.python.org/downloads/).
 
 Install dependencies:
-- [bearlibterminal](http://foo.wyrd.name/en:bearlibterminal#download)
 - [tcod](https://python-tcod.readthedocs.io/en/latest/installation.html)
+- [bearlibterminal](http://foo.wyrd.name/en:bearlibterminal#download)
 
-For Windows you also need the latest [Microsoft Visual C++ Redistributable](https://support.microsoft.com/en-ca/help/2977003/the-latest-supported-visual-c-downloads).
+`py -m pip install tcod bearlibterminal`
 
-Run `python engine.py` or `py engine.py`.
+For Windows make sure you also have the latest [Microsoft Visual C++ Redistributable](https://support.microsoft.com/en-ca/help/2977003/the-latest-supported-visual-c-downloads).
+
+Run `py engine.py` or `python engine.py`.
 
 ## Resources
 - [Roguelike Tutorial Revised](http://rogueliketutorials.com/)
