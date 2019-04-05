@@ -3,7 +3,7 @@ A roguelike/adventure game using Python 3, tcod and BearLibTerminal.
 
 Based on [Roguelike Tutorial Revised](http://rogueliketutorials.com/) and [jcerise's roguelike tutorial for Go](https://jeremyceri.se/roguelikes/).
 
-# Installation
+## Installation
 Install [Python 3](https://www.python.org/downloads/)
 
 Install dependencies:
@@ -14,7 +14,7 @@ For Windows you also need the latest [Microsoft Visual C++ Redistributable](http
 
 Run `python engine.py` or `py engine.py`.
 
-# Resources
+## Resources
 - [Roguelike Tutorial Revised](http://rogueliketutorials.com/)
 - [jcerise's roguelike tutorial for Go](https://jeremyceri.se/roguelikes/)
 - [BearLibTerminal](http://foo.wyrd.name/en:bearlibterminal)
