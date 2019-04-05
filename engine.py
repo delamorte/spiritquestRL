@@ -35,8 +35,8 @@ FIX:
 """
 WINDOW_WIDTH = 140
 WINDOW_HEIGHT = 60
-MAP_WIDTH = 35
-MAP_HEIGHT = 25
+MAP_WIDTH = 50
+MAP_HEIGHT = 50
 FOV_ALGORITHM = 0
 FOV_LIGHT_WALLS = True
 FOV_RADIUS = 6
@@ -80,25 +80,24 @@ def level_init(game_map):
 def level_change(level_name, levels):
 
     if not levels:
-        levels = []
         game_map = GameMap(MAP_WIDTH, MAP_HEIGHT, "hub")
         game_map.generate_hub()
         levels.append(game_map)
 
-    if level_name == "hub":
+    if level_name is "hub":
         for level in levels:
             if level.name is level_name:
                 game_map = level
         game_map, game_camera, entities, player, fov_map = level_init(game_map)
 
-    if level_name == "dream":
+    if level_name is "dream":
         game_map = GameMap(MAP_WIDTH, MAP_HEIGHT, "dream")
         game_map.generate_forest(0, 0, game_map.width,
                                  game_map.height, 25, block_sight=True)
         game_map, game_camera, entities, player, fov_map = level_init(game_map)
 
     # Set debug level
-    if level_name == "debug":
+    if level_name is "debug":
         game_map = GameMap(int(WINDOW_WIDTH / 4),
                            int(WINDOW_HEIGHT / 2 - 5), "debug")
         game_map, game_camera, entities, player, fov_map = level_init(game_map)
@@ -134,7 +133,7 @@ def main():
     power_msg = "Spirit power left: " + str(player.spirit_power)
     draw_ui(viewport_x, viewport_y, msg_panel,
             msg_panel_borders, screen_borders)
-
+    turn_count = 0
     game_state = GameStates.PLAYER_TURN
     key = None
     while key not in (blt.TK_CLOSE, blt.TK_ESCAPE):
@@ -166,9 +165,14 @@ def main():
             if not game_map.is_blocked(destination_x, destination_y):
                 target = blocking_entity(
                     entities, destination_x, destination_y)
-
                 if target:
-                    message_log.send("Something block your way.")
+                    player.spirit_power -= 1
+                    if target.name is "Snake":
+                        message_log.send("I feel my power returning!")
+                        player.spirit_power += 11
+                        power_msg = "Spirit power left: " + \
+                            str(player.spirit_power)
+                        entities.remove(target)
                 else:
                     player.move(dx, dy)
 
@@ -201,9 +205,19 @@ def main():
                 "hub", levels)
             message_log.clear()
             message_log.send("I have no power to meditate longer..")
-            player.spirit_power = 100
+            player.spirit_power = 20
             power_msg = "Spirit power left: " + \
                         str(player.spirit_power)
+
+        if player.spirit_power >= 30:
+            message_log.send("My spirit has granted me new insights!")
+            game_map, game_camera, entities, player, fov_map = level_change(
+                "hub", levels)
+            for y in range(game_map.height):
+                for x in range(game_map.width):
+                    if game_map.tiles[x][y].char == 0xE100 + 67:
+                        game_map.tiles[x][y].char = 0xE100 + 68
+                        game_map.tiles[x][y].blocked = False
 
         if stairs:
             if game_map.tiles[player.x][player.y].char == 0xE100 + 427:
@@ -211,7 +225,8 @@ def main():
                     level_change("dream", levels)
                 message_log.clear()
                 message_log.send(
-                    "I'm dreaming... I feel my spirit power draining..")
+                    "I'm dreaming... I feel my spirit power draining.")
+                message_log.send("I'm hungry..")
                 fov_recompute = True
         if key == blt.TK_M:
             show_msg_history(
@@ -221,9 +236,11 @@ def main():
             fov_recompute = True
 
         if game_state == GameStates.ENEMY_TURN:
+
             for entity in entities:
-                if entity != player:
+                if entity != player and turn_count == 0:
                     message_log.send("You sense a snake hiding in the woods.")
+                    turn_count += 1
             game_state = GameStates.PLAYER_TURN
 
     blt.close()

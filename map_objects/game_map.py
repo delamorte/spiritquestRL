@@ -121,17 +121,24 @@ class GameMap:
 
         if self.name == "debug":
             player.x, player.y = 2, 2
-        player.spirit_power = 1000
 
+        player.spirit_power = 20
         entities = [player]
-
-        x = randint(1, self.width - 1)
-        y = randint(1, self.height - 1)
 
         if self.name is "dream":
 
-            monster = Entity(x, y, 2, 0xE100 + 1097, None, "Snake", True)
-            if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-                entities.append(monster)
+            number_of_monsters = randint(10, 20)
+
+            for i in range(number_of_monsters):
+                x = randint(1, self.width - 1)
+                y = randint(1, self.height - 1)
+                while self.is_blocked(x, y):
+                    x, y = randint(1, self.width -
+                                   1), randint(1, self.height - 1)
+
+                if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                    monster = Entity(x, y, 2, 0xE100 + 1097,
+                                     None, "Snake", True)
+                    entities.append(monster)
 
         return player, entities
