@@ -64,7 +64,7 @@ class GameMap:
 
 
         # Generate one door at a random position in the room.
-        door_seed = randint(0, len(door_x))
+        door_seed = randint(0, len(door_x) - 1)
         self.tiles[door_x[door_seed]][door_y[door_seed]].color = None
         self.tiles[door_x[door_seed]][door_y[door_seed]].char = 0xE100 + 67
         self.tiles[door_x[door_seed]][door_y[door_seed]].blocked = True
