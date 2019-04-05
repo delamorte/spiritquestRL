@@ -1,3 +1,4 @@
+from entity import Entity
 from map_objects.tile import Tile
 from random import randint
 
@@ -27,7 +28,8 @@ class GameMap:
 
     def generate_hub(self):
 
-        self.generate_forest(0, 0, self.width, self.height, 75, block_sight=None)
+        self.generate_forest(0, 0, self.width, self.height,
+                             75, block_sight=None)
         width = 10
         height = 10
 
@@ -39,8 +41,8 @@ class GameMap:
         center_x = int((x1 + x2) / 2)
         center_y = int((y1 + y2) / 2)
 
-        door_x = []
-        door_y = []
+        wall_x = []
+        wall_y = []
 
         for y in range(y1, y2):
             for x in range(x1, x2):
@@ -50,8 +52,8 @@ class GameMap:
                     self.tiles[x][y].char = 0xE100 + 83
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = True
-                    door_x.append(x)
-                    door_y.append(y)
+                    wall_x.append(x)
+                    wall_y.append(y)
                 else:
                     self.tiles[x][y].color = "darkest amber"
                     self.tiles[x][y].char_ground = 0xE100 + 21
@@ -62,13 +64,12 @@ class GameMap:
         self.tiles[center_x][center_y].color = "lightest orange"
         self.tiles[center_x][center_y].char = 0xE100 + 427
 
-
         # Generate one door at a random position in the room.
-        door_seed = randint(0, len(door_x) - 1)
-        self.tiles[door_x[door_seed]][door_y[door_seed]].color = None
-        self.tiles[door_x[door_seed]][door_y[door_seed]].char = 0xE100 + 67
-        self.tiles[door_x[door_seed]][door_y[door_seed]].blocked = True
-        self.tiles[door_x[door_seed]][door_y[door_seed]].block_sight = False
+        door_seed = randint(0, len(wall_x) - 1)
+        self.tiles[wall_x[door_seed]][wall_y[door_seed]].color = None
+        self.tiles[wall_x[door_seed]][wall_y[door_seed]].char = 0xE100 + 67
+        self.tiles[wall_x[door_seed]][wall_y[door_seed]].blocked = True
+        self.tiles[wall_x[door_seed]][wall_y[door_seed]].block_sight = False
 
     def generate_forest(self, dx, dy, width, height, freq, block_sight):
         """Generate a forest to a rectangular area."""
@@ -98,3 +99,39 @@ class GameMap:
             return True
 
         return False
+
+    def place_entities(self):
+
+        # Initialize player, starting position and other entities
+        px, py = randint(1, self.width - 1), \
+            randint(1, self.height - 1)
+
+        while self.is_blocked(px, py):
+            px, py = randint(1, self.width - 1), \
+                randint(1, self.height - 1)
+        player = Entity(px, py, 2, 0xE100 + 1587, None, "player", True)
+
+        if self.name == "hub":
+            player.char = 0xE100 + 704
+            for x in range(self.width - 1):
+                for y in range(self.height - 1):
+                    if self.tiles[x][y].spawnable:
+                        player.x = x - 1
+                        player.y = y - 1
+
+        if self.name == "debug":
+            player.x, player.y = 2, 2
+        player.spirit_power = 1000
+
+        entities = [player]
+
+        x = randint(1, self.width - 1)
+        y = randint(1, self.height - 1)
+
+        if self.name is "dream":
+
+            monster = Entity(x, y, 2, 0xE100 + 1097, None, "Snake", True)
+            if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                entities.append(monster)
+
+        return player, entities
