@@ -10,7 +10,7 @@ Install dependencies:
 - [bearlibterminal](http://foo.wyrd.name/en:bearlibterminal#download)
 - [tcod](https://python-tcod.readthedocs.io/en/latest/installation.html)
 
-For Windows you also need latest [Microsoft Visual C++ Redistributable](https://support.microsoft.com/en-ca/help/2977003/the-latest-supported-visual-c-downloads).
+For Windows you also need the latest [Microsoft Visual C++ Redistributable](https://support.microsoft.com/en-ca/help/2977003/the-latest-supported-visual-c-downloads).
 
 Run `python engine.py` or `py engine.py`.
 
