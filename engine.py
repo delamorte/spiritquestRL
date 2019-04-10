@@ -5,7 +5,6 @@ from entity import blocking_entity
 from game_states import GameStates
 from fov import initialize_fov, recompute_fov
 from input_handlers import handle_keys
-from manual_cellsize import test_manual_cellsize
 from map_objects.game_map import GameMap
 from math import floor
 from ui.elements import Panel
