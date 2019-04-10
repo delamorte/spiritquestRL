@@ -1,16 +1,17 @@
 from bearlibterminal import terminal as blt
 from camera import Camera
-from draw import draw_all, draw_ui, clear_entities
+from draw import draw_all, draw_ui, clear_entities, clear_camera
 from entity import blocking_entity
 from game_states import GameStates
 from fov import initialize_fov, recompute_fov
 from input_handlers import handle_keys
+from manual_cellsize import test_manual_cellsize
 from map_objects.game_map import GameMap
 from math import floor
 from ui.elements import Panel
 from ui.game_messages import MessageLog
 from ui.message_history import show_msg_history
-
+from sys import exit
 
 """
 TODO:
@@ -19,6 +20,7 @@ TODO:
 - Items and inventory
 - Npcs
 - Make maps more interesting
+- Minimap
 - Put tileset to dictionary and put corresponding
   ascii symbols
 - Menus
@@ -33,8 +35,6 @@ FIX:
 - Generate levels with a seed
 
 """
-WINDOW_WIDTH = 140
-WINDOW_HEIGHT = 60
 MAP_WIDTH = 50
 MAP_HEIGHT = 50
 FOV_ALGORITHM = 0
@@ -49,10 +49,10 @@ def blt_init():
     blt.open()
 
     window_title = 'SpiritQuestRL'
-    size = 'size=' + str(WINDOW_WIDTH) + 'x' + str(WINDOW_HEIGHT)
+    size = 'size=120x48'
     title = 'title=' + window_title
     cellsize = 'cellsize=auto'
-    resizable = 'resizable=true'
+    resizable = 'resizeable=false'
     window = "window: " + size + "," + title + "," + cellsize + "," + resizable
 
     blt.set(window)
@@ -69,8 +69,8 @@ def level_init(game_map):
     player, entities = game_map.place_entities()
 
     # Initialize game camera
-    game_camera = Camera(1, 1, int(WINDOW_WIDTH / 4),
-                         int(WINDOW_HEIGHT / 2 - 5))
+    game_camera = Camera(1, 1, floor(blt.state(blt.TK_WIDTH) / 4),
+                         floor(blt.state(blt.TK_HEIGHT) / 2 - 5))
     # Initialize field of view
     fov_map = initialize_fov(game_map)
 
@@ -98,15 +98,17 @@ def level_change(level_name, levels):
 
     # Set debug level
     if level_name is "debug":
-        game_map = GameMap(int(WINDOW_WIDTH / 4),
-                           int(WINDOW_HEIGHT / 2 - 5), "debug")
+        game_map = GameMap(floor(blt.state(blt.TK_WIDTH) / 4),
+                           floor(blt.state(blt.TK_HEIGHT) / 2 - 5), "debug")
         game_map, game_camera, entities, player, fov_map = level_init(game_map)
 
     return game_map, game_camera, entities, player, fov_map
 
 
-def init_ui(screen_w, screen_h):
+def init_ui():
 
+    screen_w = blt.state(floor(blt.TK_WIDTH))
+    screen_h = blt.state(floor(blt.TK_HEIGHT))
     w = floor(screen_w / 4)
     h = floor(screen_h / 2 - 5)
 
@@ -119,20 +121,76 @@ def init_ui(screen_w, screen_h):
     return viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders
 
 
+def main_menu(viewport_x, viewport_y):
+
+    current_range = 0
+    center_x = int(viewport_x / 2)
+    center_y = int(viewport_y / 2)
+    while True:
+
+        choices = ["New game", "Resize window", "Exit"]
+        blt.layer(0)
+        clear_camera(viewport_x, viewport_y)
+        blt.puts(center_x+2, center_y, "[color=white]Spirit Quest RL", 0, 0, blt.TK_ALIGN_CENTER)
+
+        for i, r in enumerate(choices):
+            selected = i == current_range
+            blt.color("orange" if selected else "light_gray")
+            blt.puts(center_x+2, center_y + 2 + i, "%s%s" %
+                     ("[U+203A]" if selected else " ", r), 0, 0, blt.TK_ALIGN_CENTER)
+
+        blt.refresh()
+
+        r = choices[current_range]
+
+        key = blt.read()
+        if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
+            exit()
+        if key == blt.TK_ENTER and r is "New game":
+            break
+        elif key == blt.TK_ENTER and r is "Exit":
+            exit()
+        elif key == blt.TK_ENTER and r is "Resize window":
+            blt.set("window: resizeable=true, minimum-size=40x20")
+            key = None
+            while key not in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_ENTER):
+                viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
+                center_x = int(viewport_x / 2)
+                center_y = int(viewport_y / 2)
+                draw_ui(viewport_x, viewport_y, msg_panel,
+                        msg_panel_borders, screen_borders)
+                clear_camera(viewport_x, viewport_y)
+                blt.puts(center_x + 2, center_y,
+                             "[color=white]Resize window by dragging from borders.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
+                blt.refresh()
+
+                key = blt.read()
+                if key == blt.TK_FULLSCREEN:
+                    blt.set("window.fullscreen=true")
+            blt.set("window: resizeable=false")
+        elif key == blt.TK_UP:
+            if current_range > 0:
+                current_range -= 1
+        elif key == blt.TK_DOWN:
+            if current_range < len(choices) - 1:
+                current_range += 1
+
+
 def main():
 
     blt_init()
+
     levels = []
     game_map, game_camera, entities, player, fov_map = level_change(
         "hub", levels)
 
     fov_recompute = True
-    viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui(
-        WINDOW_WIDTH, WINDOW_HEIGHT)
-    message_log = MessageLog(5)
-    power_msg = "Spirit power left: " + str(player.spirit_power)
+    viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
     draw_ui(viewport_x, viewport_y, msg_panel,
             msg_panel_borders, screen_borders)
+    message_log = MessageLog(5)
+    power_msg = "Spirit power left: " + str(player.spirit_power)
+    main_menu(viewport_x, viewport_y)
     turn_count = 0
     game_state = GameStates.PLAYER_TURN
     key = None
@@ -195,7 +253,7 @@ def main():
                 game_state = GameStates.ENEMY_TURN
 
         if exit:
-            blt.close()
+            exit()
 
         if fullscreen:
             blt.set("window.fullscreen=true")
