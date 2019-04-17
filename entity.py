@@ -8,6 +8,7 @@ class Entity:
         self.y = y
         self.layer = layer
         self.char = char
+        self.char_hub = 0xE100 + 704
         self.color = color
         self.name = name
         self.blocks = blocks

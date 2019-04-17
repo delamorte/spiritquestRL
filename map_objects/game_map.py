@@ -79,8 +79,7 @@ class GameMap:
                          "lighter orange",
                          "light orange",
                          "dark orange",
-                         "darker orange",
-                         "darkest orange"]
+                         "darker orange"]
         ground_tiles = [21]
 
         for y in range(dy, height):
@@ -90,7 +89,7 @@ class GameMap:
                 if randint(0, 100) < freq:
                     self.tiles[x][y].char = 0xE100 + \
                         forest_tiles[randint(0, 5)]
-                    self.tiles[x][y].color = forest_colors[randint(0, 5)]
+                    self.tiles[x][y].color = forest_colors[randint(0, 4)]
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = block_sight
 
@@ -100,7 +99,7 @@ class GameMap:
 
         return False
 
-    def place_entities(self):
+    def place_entities(self, player):
 
         # Initialize player, starting position and other entities
         px, py = randint(1, self.width - 1), \
@@ -109,10 +108,10 @@ class GameMap:
         while self.is_blocked(px, py):
             px, py = randint(1, self.width - 1), \
                 randint(1, self.height - 1)
-        player = Entity(px, py, 2, 0xE100 + 1587, None, "player", True)
+        player.x = px
+        player.y = py
 
         if self.name == "hub":
-            player.char = 0xE100 + 704
             for x in range(self.width - 1):
                 for y in range(self.height - 1):
                     if self.tiles[x][y].spawnable:
@@ -127,7 +126,7 @@ class GameMap:
 
         if self.name is "dream":
 
-            number_of_monsters = randint(10, 20)
+            number_of_monsters = randint(15, 25)
 
             for i in range(number_of_monsters):
                 x = randint(1, self.width - 1)

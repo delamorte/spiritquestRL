@@ -7,8 +7,10 @@ def draw(entity, game_map, x, y):
     # Draw the entity to the screen
     blt.layer(entity.layer)
     blt.color(blt.color_from_name(entity.color))
-    blt.put(x * 4, y * 2, entity.char)
-
+    if game_map.name is "hub" and entity.name is "player":
+        blt.put(x * 4, y * 2, entity.char_hub)
+    else:
+        blt.put(x * 4, y * 2, entity.char)
 
 def draw_entities(entities, game_map, game_camera, fov_map):
 
@@ -35,7 +37,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute, viewport_x, viewport
                     # Draw layer 0 + 1 first
                     if not game_map.tiles[map_x][map_y].char == " ":
                         blt.layer(0)
-                        blt.color("darkest amber")
+                        blt.color("#827662")
                         blt.put(x * 4, y * 2,
                                 game_map.tiles[map_x][map_y].char_ground)
                         blt.layer(1)
@@ -44,7 +46,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute, viewport_x, viewport
                                 game_map.tiles[map_x][map_y].char)
                     # Fill rest of fov with ground tiles
                     else:
-                        blt.color("darkest amber")
+                        blt.color("#827662")
                         blt.put(x * 4, y * 2,
                                 game_map.tiles[map_x][map_y].char_ground)
                     # Set everything in fov as explored

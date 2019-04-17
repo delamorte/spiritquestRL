@@ -1,7 +1,7 @@
 from bearlibterminal import terminal as blt
 from camera import Camera
 from draw import draw_all, draw_ui, clear_entities, clear_camera
-from entity import blocking_entity
+from entity import Entity, blocking_entity
 from game_states import GameStates
 from fov import initialize_fov, recompute_fov
 from input_handlers import handle_keys
@@ -62,10 +62,10 @@ def blt_init():
     blt.clear()
 
 
-def level_init(game_map):
+def level_init(game_map, player):
 
     # Initialize entities
-    player, entities = game_map.place_entities()
+    player, entities = game_map.place_entities(player)
 
     # Initialize game camera
     game_camera = Camera(1, 1, floor(blt.state(blt.TK_WIDTH) / 4),
@@ -76,7 +76,7 @@ def level_init(game_map):
     return game_map, game_camera, entities, player, fov_map
 
 
-def level_change(level_name, levels):
+def level_change(level_name, levels, player):
 
     if not levels:
         game_map = GameMap(MAP_WIDTH, MAP_HEIGHT, "hub")
@@ -87,19 +87,22 @@ def level_change(level_name, levels):
         for level in levels:
             if level.name is level_name:
                 game_map = level
-        game_map, game_camera, entities, player, fov_map = level_init(game_map)
+        game_map, game_camera, entities, player, fov_map = level_init(
+            game_map, player)
 
     if level_name is "dream":
         game_map = GameMap(MAP_WIDTH, MAP_HEIGHT, "dream")
         game_map.generate_forest(0, 0, game_map.width,
                                  game_map.height, 25, block_sight=True)
-        game_map, game_camera, entities, player, fov_map = level_init(game_map)
+        game_map, game_camera, entities, player, fov_map = level_init(
+            game_map, player)
 
     # Set debug level
     if level_name is "debug":
         game_map = GameMap(floor(blt.state(blt.TK_WIDTH) / 4),
                            floor(blt.state(blt.TK_HEIGHT) / 2 - 5), "debug")
-        game_map, game_camera, entities, player, fov_map = level_init(game_map)
+        game_map, game_camera, entities, player, fov_map = level_init(
+            game_map, player)
 
     return game_map, game_camera, entities, player, fov_map
 
@@ -130,12 +133,13 @@ def main_menu(viewport_x, viewport_y):
         choices = ["New game", "Resize window", "Exit"]
         blt.layer(0)
         clear_camera(viewport_x, viewport_y)
-        blt.puts(center_x+2, center_y, "[color=white]Spirit Quest RL", 0, 0, blt.TK_ALIGN_CENTER)
+        blt.puts(center_x + 2, center_y,
+                 "[color=white]Spirit Quest RL", 0, 0, blt.TK_ALIGN_CENTER)
 
         for i, r in enumerate(choices):
             selected = i == current_range
             blt.color("orange" if selected else "light_gray")
-            blt.puts(center_x+2, center_y + 2 + i, "%s%s" %
+            blt.puts(center_x + 2, center_y + 2 + i, "%s%s" %
                      ("[U+203A]" if selected else " ", r), 0, 0, blt.TK_ALIGN_CENTER)
 
         blt.refresh()
@@ -145,8 +149,41 @@ def main_menu(viewport_x, viewport_y):
         key = blt.read()
         if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
             exit()
+
         if key == blt.TK_ENTER and r is "New game":
-            break
+            key = None
+            while True:
+                clear_camera(viewport_x, viewport_y)
+                animals = {"Cat": 0xE100 + 1252,
+                           "Crow": 0xE100 + 1587, "Snake": 0xE100 + 1097}
+                blt.layer(0)
+                blt.puts(center_x + 2, center_y,
+                         "[color=white]Choose your spirit animal...", 0, 0, blt.TK_ALIGN_CENTER)
+                for i, (r, c) in enumerate(animals.items()):
+                    selected = i == current_range
+                    blt.color("orange" if selected else "default")
+                    blt.puts(center_x - 10, center_y + 2 + i * 2, "%s%s" %
+                             ("[U+203A]" if selected else " ", r), 0, 0)
+                    blt.put_ext(center_x - 2, center_y + 2 + i * 2, 0, -8, c)
+                    if selected:
+                        choice = r
+
+                blt.refresh()
+                key = blt.read()
+
+                if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
+                    main_menu(viewport_x, viewport_y)
+                elif key == blt.TK_UP:
+                    if current_range > 0:
+                        current_range -= 1
+                elif key == blt.TK_DOWN:
+                    if current_range < len(animals) - 1:
+                        current_range += 1
+                elif key == blt.TK_ENTER:
+                    player = Entity(
+                        1, 1, 2, animals[choice], None, "player", True)
+                    return player
+
         elif key == blt.TK_ENTER and r is "Exit":
             exit()
         elif key == blt.TK_ENTER and r is "Resize window":
@@ -160,7 +197,7 @@ def main_menu(viewport_x, viewport_y):
                         msg_panel_borders, screen_borders)
                 clear_camera(viewport_x, viewport_y)
                 blt.puts(center_x + 2, center_y,
-                             "[color=white]Resize window by dragging from borders.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
+                         "[color=white]Resize window by dragging from borders.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
                 blt.refresh()
 
                 key = blt.read()
@@ -178,18 +215,16 @@ def main_menu(viewport_x, viewport_y):
 def main():
 
     blt_init()
-
-    levels = []
-    game_map, game_camera, entities, player, fov_map = level_change(
-        "hub", levels)
-
     fov_recompute = True
     viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
     draw_ui(viewport_x, viewport_y, msg_panel,
             msg_panel_borders, screen_borders)
     message_log = MessageLog(5)
+    player = main_menu(viewport_x, viewport_y)
+    levels = []
+    game_map, game_camera, entities, player, fov_map = level_change(
+        "dream", levels, player)
     power_msg = "Spirit power left: " + str(player.spirit_power)
-    main_menu(viewport_x, viewport_y)
     turn_count = 0
     game_state = GameStates.PLAYER_TURN
     key = None
@@ -259,7 +294,7 @@ def main():
 
         if player.spirit_power <= 0:
             game_map, game_camera, entities, player, fov_map = level_change(
-                "hub", levels)
+                "hub", levels, player)
             message_log.clear()
             message_log.send("I have no power to meditate longer..")
             player.spirit_power = 20
@@ -269,7 +304,9 @@ def main():
         if player.spirit_power >= 30:
             message_log.send("My spirit has granted me new insights!")
             game_map, game_camera, entities, player, fov_map = level_change(
-                "hub", levels)
+                "hub", levels, player)
+
+            # Currently opens the door in hub
             for y in range(game_map.height):
                 for x in range(game_map.width):
                     if game_map.tiles[x][y].char == 0xE100 + 67:
@@ -279,7 +316,7 @@ def main():
         if stairs:
             if game_map.tiles[player.x][player.y].char == 0xE100 + 427:
                 game_map, game_camera, entities, player, fov_map = \
-                    level_change("dream", levels)
+                    level_change("dream", levels, player)
                 message_log.clear()
                 message_log.send(
                     "I'm dreaming... I feel my spirit power draining.")
