@@ -161,7 +161,7 @@ def draw_all(game_map, game_camera, entities, px, py, fov_map,
 def clear(entity, x, y):
     # Clear the entity from the screen
     blt.layer(entity.layer)
-    blt.put(x * 4, y * 2, " ")
+    blt.clear_area(x * 4, y * 2, 1, 1)
 
 
 def clear_entities(entities, game_camera):
