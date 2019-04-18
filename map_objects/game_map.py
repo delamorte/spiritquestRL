@@ -76,10 +76,10 @@ class GameMap:
         for i in range(self.width):
             dx = randint(1, self.width - 1)
             dy = randint(1, self.height - 1)
-            width = dx+randint(5, self.width/5)
+            width = dx + randint(5, self.width / 5)
             if width > self.width:
                 width = self.width
-            height = dy+randint(5, self.width/5)
+            height = dy + randint(5, self.width / 5)
             if height > self.height:
                 height = self.height
             freq = randint(10, 40)
@@ -133,14 +133,17 @@ class GameMap:
                         player.x = x - 1
                         player.y = y - 1
 
-        #if self.name == "debug":
+        # if self.name == "debug":
         #    player.x, player.y = 2, 2
 
         entities = [player]
 
         if self.name is "dream":
 
-            number_of_monsters = randint(self.width/2-20, self.width/2)
+            number_of_monsters = randint(self.width / 2 - 20, self.width / 2)
+            monsters = [("Cat", 0xE100 + 1252),
+                        ("Crow", 0xE100 + 1587),
+                        ("Snake", 0xE100 + 1097)]
 
             for i in range(number_of_monsters):
                 x = randint(1, self.width - 1)
@@ -150,8 +153,10 @@ class GameMap:
                                    1), randint(1, self.height - 1)
 
                 if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-                    monster = Entity(x, y, 2, 0xE100 + 1097,
-                                     None, "Snake", blocks=True, fighter=True, ai=True)
+                    r = randint(0, 2)
+                    name, char = monsters[r]
+                    monster = Entity(x, y, 50, char,
+                                     None, name, blocks=True, fighter=True, ai=True)
                     entities.append(monster)
 
         return player, entities

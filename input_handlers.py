@@ -4,24 +4,23 @@ from bearlibterminal import terminal as blt
 def handle_keys(key):
 
     # Movement keys
-    if key == blt.TK_LEFT:
+    if key == blt.TK_LEFT or key == blt.TK_H:
         return {'move': (-1, 0)}
-    elif key == blt.TK_DOWN:
+    elif key == blt.TK_DOWN or key == blt.TK_J:
         return {'move': (0, 1)}
-    elif key == blt.TK_UP:
+    elif key == blt.TK_UP or key == blt.TK_K:
         return {'move': (0, -1)}
-    elif key == blt.TK_RIGHT:
+    elif key == blt.TK_RIGHT or key == blt.TK_L:
         return {'move': (1, 0)}
-    elif key == blt.TK_KP_7:
+    elif key == blt.TK_KP_7 or key == blt.TK_Y:
         return {'move': (-1, -1)}
-    elif key == blt.TK_KP_1:
+    elif key == blt.TK_KP_1 or key == blt.TK_B:
         return {'move': (-1, 1)}
-    elif key == blt.TK_KP_9:
+    elif key == blt.TK_KP_9 or key == blt.TK_U:
         return {'move': (1, -1)}
-    elif key == blt.TK_KP_3:
+    elif key == blt.TK_KP_3 or key == blt.TK_N:
         return {'move': (1, 1)}
-    elif key == blt.TK_PERIOD:
-        return {'move': (0, 0)}
+
 
     # '<' and '> keys for stairs
     if key == 41 or key == 49:

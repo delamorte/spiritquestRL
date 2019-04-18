@@ -6,7 +6,7 @@ def draw(entity, game_map, x, y):
 
     # Draw the entity to the screen
     blt.layer(entity.layer)
-    blt.color(blt.color_from_name(entity.color))
+    blt.color(blt.color(entity.color))
     if game_map.name is "hub" and entity.player:
         blt.put(x * 4, y * 2, entity.char_hub)
     else:
@@ -78,12 +78,17 @@ def draw_messages(msg_panel, message_log, player, power_msg, viewport_x, viewpor
     blt.printf(int(viewport_x / 2 - len(power_msg) / 2),
                viewport_y + 3, "[offset=0,-2, align=middle]" + power_msg)
 
+
     hp = "HP:" + str(player.fighter_c.hp) + "/" + str(player.fighter_c.max_hp)
     ac = "AC:" + str(player.fighter_c.ac)
     ev = "EV:" + str(player.fighter_c.ev)
     power = "ATK:" + str(player.fighter_c.power)
 
+    if player.fighter_c.hp / player.fighter_c.max_hp < 0.34:
+        blt.color("light red")
+
     blt.puts(3, viewport_y + 3, "[offset=0,-2]" + hp)
+    blt.color("default")
     blt.puts(5+len(hp), viewport_y + 3, "[offset=0,-2]" + ac)
     blt.puts(7+len(hp)+len(ac), viewport_y + 3, "[offset=0,-2]" + ev)
     blt.puts(9+len(hp)+len(ac)+len(ev), viewport_y + 3, "[offset=0,-2]" + power)

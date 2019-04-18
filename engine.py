@@ -1,5 +1,6 @@
 from bearlibterminal import terminal as blt
 from camera import Camera
+from death_functions import kill_monster, kill_player
 from draw import draw_all, draw_ui, clear_entities, clear_camera
 from entity import Entity, blocking_entity
 from game_states import GameStates
@@ -48,7 +49,7 @@ def blt_init():
     blt.open()
 
     window_title = 'SpiritQuestRL'
-    size = 'size=120x48'
+    size = 'size=128x50'
     title = 'title=' + window_title
     cellsize = 'cellsize=auto'
     resizable = 'resizeable=false'
@@ -169,6 +170,10 @@ def main_menu(viewport_x, viewport_y):
                     blt.color("orange" if selected else "default")
                     blt.puts(center_x - 10, center_y + 2 + i * 2, "%s%s" %
                              ("[U+203A]" if selected else " ", r), 0, 0)
+                    blt.layer(0)
+                    blt.put_ext(center_x - 2, center_y +
+                                2 + i * 2, 0, -8, 0xE100 + 3)
+                    blt.layer(1)
                     blt.put_ext(center_x - 2, center_y + 2 + i * 2, 0, -8, c)
                     if selected:
                         choice = r
@@ -191,6 +196,7 @@ def main_menu(viewport_x, viewport_y):
 
         elif key == blt.TK_ENTER and r is "Exit":
             exit()
+
         elif key == blt.TK_ENTER and r is "Resize window":
             blt.set("window: resizeable=true, minimum-size=40x20")
             key = None
@@ -202,12 +208,28 @@ def main_menu(viewport_x, viewport_y):
                         msg_panel_borders, screen_borders)
                 clear_camera(viewport_x, viewport_y)
                 blt.puts(center_x + 2, center_y,
-                         "[color=white]Resize window by dragging from borders.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
+                         "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
                 blt.refresh()
 
                 key = blt.read()
                 if key == blt.TK_FULLSCREEN:
                     blt.set("window.fullscreen=true")
+                if key == blt.TK_UP:
+                    h = blt.state(blt.TK_HEIGHT)
+                    w = blt.state(blt.TK_WIDTH)
+                    blt.set("window: size=" + str(w) + "x" + (str(h + 2)))
+                if key == blt.TK_DOWN:
+                    h = blt.state(blt.TK_HEIGHT)
+                    w = blt.state(blt.TK_WIDTH)
+                    blt.set("window: size=" + str(w) + "x" + (str(h - 2)))
+                if key == blt.TK_RIGHT:
+                    h = blt.state(blt.TK_HEIGHT)
+                    w = blt.state(blt.TK_WIDTH)
+                    blt.set("window: size=" + (str(w + 4)) + "x" + str(h))
+                if key == blt.TK_LEFT:
+                    h = blt.state(blt.TK_HEIGHT)
+                    w = blt.state(blt.TK_WIDTH)
+                    blt.set("window: size=" + (str(w - 4)) + "x" + str(h))
             blt.set("window: resizeable=false")
         elif key == blt.TK_UP:
             if current_range > 0:
@@ -271,6 +293,7 @@ def main():
                         entities.remove(target)
                         message_log.send("I feel my power returning!")
                         player.spirit_power += 11
+                        player.fighter_c.hp += target.fighter_c.power
                         power_msg = "Spirit power left: " + \
                             str(player.spirit_power)
                 else:
@@ -295,6 +318,13 @@ def main():
                 turn_count += 1
                 game_state = GameStates.ENEMY_TURN
 
+        if key == blt.TK_PERIOD or key == blt.TK_KP_5:
+            turn_count += 1
+            player.spirit_power -= 1
+            power_msg = "Spirit power left: " + \
+                str(player.spirit_power)
+            game_state = GameStates.ENEMY_TURN
+
         if exit:
             exit()
 
@@ -306,11 +336,12 @@ def main():
                 "hub", levels, player)
             message_log.clear()
             message_log.send("I have no power to meditate longer..")
-            player.spirit_power = 20
+            player.spirit_power = 50
+            player.fighter_c.hp = player.fighter_c.max_hp
             power_msg = "Spirit power left: " + \
                         str(player.spirit_power)
 
-        if player.spirit_power >= 30:
+        if player.spirit_power >= 60:
             message_log.send("My spirit has granted me new insights!")
             game_map, game_camera, entities, player, fov_map = level_change(
                 "hub", levels, player)
@@ -342,10 +373,20 @@ def main():
 
             for entity in entities:
                 if entity.ai:
-                    combat_msg = entity.ai_c.take_turn(player, fov_map, game_map, entities)
+                    combat_msg = entity.ai_c.take_turn(
+                        player, fov_map, game_map, entities)
                     if combat_msg:
                         message_log.send(combat_msg)
-            game_state = GameStates.PLAYER_TURN
+                if entity.fighter_c.dead:
+                    if entity.player:
+                        kill_msg, game_state = kill_player(player)
+                        message_log.send(kill_msg)
+                    else:
+                        message_log.send(kill_monster(entity))
+                    if game_state == GameStates.PLAYER_DEAD:
+                        break
+            if not game_state == GameStates.PLAYER_DEAD:
+                game_state = GameStates.PLAYER_TURN
 
     blt.close()
 

@@ -24,7 +24,7 @@ class Entity:
         self.ai_c = None
 
         if self.player:
-            self.spirit_power = 30
+            self.spirit_power = 50
             self.char_hub = 0xE100 + 704
 
         if self.fighter:
