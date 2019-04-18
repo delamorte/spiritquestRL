@@ -7,10 +7,11 @@ def draw(entity, game_map, x, y):
     # Draw the entity to the screen
     blt.layer(entity.layer)
     blt.color(blt.color_from_name(entity.color))
-    if game_map.name is "hub" and entity.name is "player":
+    if game_map.name is "hub" and entity.player:
         blt.put(x * 4, y * 2, entity.char_hub)
     else:
         blt.put(x * 4, y * 2, entity.char)
+
 
 def draw_entities(entities, game_map, game_camera, fov_map):
 
@@ -69,14 +70,23 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute, viewport_x, viewport
                                 game_map.tiles[map_x][map_y].char_ground)
 
 
-def draw_messages(msg_panel, message_log, power_msg, viewport_x, viewport_y):
+def draw_messages(msg_panel, message_log, player, power_msg, viewport_x, viewport_y):
 
     blt.layer(8)
     blt.color("default")
-    blt.clear_area(int(viewport_x / 2 - len(power_msg) / 2 - 10),
-                   viewport_y + 3, viewport_x, 1)
+    blt.clear_area(2, viewport_y + 3, viewport_x, 1)
     blt.printf(int(viewport_x / 2 - len(power_msg) / 2),
                viewport_y + 3, "[offset=0,-2, align=middle]" + power_msg)
+
+    hp = "HP:" + str(player.fighter_c.hp) + "/" + str(player.fighter_c.max_hp)
+    ac = "AC:" + str(player.fighter_c.ac)
+    ev = "EV:" + str(player.fighter_c.ev)
+    power = "ATK:" + str(player.fighter_c.power)
+
+    blt.puts(3, viewport_y + 3, "[offset=0,-2]" + hp)
+    blt.puts(5+len(hp), viewport_y + 3, "[offset=0,-2]" + ac)
+    blt.puts(7+len(hp)+len(ac), viewport_y + 3, "[offset=0,-2]" + ev)
+    blt.puts(9+len(hp)+len(ac)+len(ev), viewport_y + 3, "[offset=0,-2]" + power)
 
     if message_log.update:
         blt.layer(1)
@@ -89,7 +99,8 @@ def draw_messages(msg_panel, message_log, power_msg, viewport_x, viewport_y):
         if i > message_log.max_length:
             i = 0
         for msg in message_log.buffer:
-            msg = shorten(msg, msg_panel.w * 4 - 2, placeholder="..(Press 'M' for log)")
+            msg = shorten(msg, msg_panel.w * 4 - 2,
+                          placeholder="..(Press 'M' for log)")
             blt.puts(msg_panel.x * 4 + 1, msg_panel.y *
                      2 + i, "[offset=0,9]" + msg, msg_panel.w * 4 - 2, 1, align=blt.TK_ALIGN_LEFT)
             i += 1
@@ -147,15 +158,16 @@ def draw_ui(viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders
     blt.put_ext(int(viewport_x / 2) + 12, y * 2 + 1, 0, 5, 0xE100 + 476)
 
 
-def draw_all(game_map, game_camera, entities, px, py, fov_map,
-             fov_recompute, message_log, msg_panel, power_msg, viewport_x, viewport_y):
+def draw_all(game_map, game_camera, entities, player, px, py, fov_map,
+             fov_recompute, message_log, msg_panel, power_msg,
+             viewport_x, viewport_y):
 
     game_camera.move_camera(
         px, py, game_map.width, game_map.height)
     draw_map(game_map, game_camera, fov_map,
              fov_recompute, viewport_x, viewport_y)
     draw_entities(entities, game_map, game_camera, fov_map)
-    draw_messages(msg_panel, message_log, power_msg, viewport_x, viewport_y)
+    draw_messages(msg_panel, message_log, player, power_msg, viewport_x, viewport_y)
 
 
 def clear(entity, x, y):

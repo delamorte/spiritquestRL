@@ -92,7 +92,7 @@ def level_change(level_name, levels, player):
 
     if level_name is "dream":
         game_map = GameMap(MAP_WIDTH, MAP_HEIGHT, "dream")
-        #game_map.generate_trees(0, 0, game_map.width,
+        # game_map.generate_trees(0, 0, game_map.width,
         #                         game_map.height, 25, block_sight=True)
         game_map.generate_forest()
         game_map, game_camera, entities, player, fov_map = level_init(
@@ -100,12 +100,12 @@ def level_change(level_name, levels, player):
 
     # Set debug level
     if level_name is "debug":
-        #game_map = GameMap(floor(blt.state(blt.TK_WIDTH) / 4),
+        # game_map = GameMap(floor(blt.state(blt.TK_WIDTH) / 4),
         #                   floor(blt.state(blt.TK_HEIGHT) / 2 - 5), "debug")
         game_map = GameMap(50, 50, "debug")
         game_map.generate_trees(0, 0, game_map.width,
-                                 game_map.height, 20, block_sight=True)
-        #game_map.generate_forest()
+                                game_map.height, 20, block_sight=True)
+        # game_map.generate_forest()
         game_map, game_camera, entities, player, fov_map = level_init(
             game_map, player)
 
@@ -186,7 +186,7 @@ def main_menu(viewport_x, viewport_y):
                         current_range += 1
                 elif key == blt.TK_ENTER:
                     player = Entity(
-                        1, 1, 50, animals[choice], None, "player", True)
+                        1, 1, 50, animals[choice], None, choice, blocks=True, player=True, fighter=True)
                     return player
 
         elif key == blt.TK_ENTER and r is "Exit":
@@ -239,8 +239,9 @@ def main():
             recompute_fov(fov_map, player.x, player.y, FOV_RADIUS,
                           FOV_LIGHT_WALLS, FOV_ALGORITHM)
 
-        draw_all(game_map, game_camera, entities, player.x,
-                 player.y, fov_map, fov_recompute, message_log, msg_panel, power_msg, viewport_x, viewport_y)
+        draw_all(game_map, game_camera, entities, player, player.x, player.y,
+                 fov_map, fov_recompute, message_log, msg_panel, power_msg,
+                 viewport_x, viewport_y)
 
         fov_recompute = False
         blt.refresh()
@@ -263,13 +264,15 @@ def main():
                 target = blocking_entity(
                     entities, destination_x, destination_y)
                 if target:
+                    combat_msg = player.fighter_c.attack(target)
+                    message_log.send(combat_msg)
                     player.spirit_power -= 1
-                    if target.name is "Snake":
+                    if target.fighter_c.hp <= 0:
+                        entities.remove(target)
                         message_log.send("I feel my power returning!")
                         player.spirit_power += 11
                         power_msg = "Spirit power left: " + \
                             str(player.spirit_power)
-                        entities.remove(target)
                 else:
                     player.move(dx, dy)
 
@@ -283,12 +286,13 @@ def main():
                         message_log.send(
                             "Meditate and go to dream world with '<' or '>'")
                     fov_recompute = True
-
+                turn_count += 1
                 game_state = GameStates.ENEMY_TURN
 
             if game_map.tiles[destination_x][destination_y].char == \
                     0xE100 + 67:
                 message_log.send("The door is locked...")
+                turn_count += 1
                 game_state = GameStates.ENEMY_TURN
 
         if exit:
@@ -337,9 +341,10 @@ def main():
         if game_state == GameStates.ENEMY_TURN:
 
             for entity in entities:
-                if entity != player and turn_count == 0:
-                    message_log.send("You sense a snake hiding in the woods.")
-                    turn_count += 1
+                if entity.ai:
+                    combat_msg = entity.ai_c.take_turn(player, fov_map, game_map, entities)
+                    if combat_msg:
+                        message_log.send(combat_msg)
             game_state = GameStates.PLAYER_TURN
 
     blt.close()

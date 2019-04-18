@@ -7,11 +7,19 @@ class MessageLog:
 
     def send(self, msg):
 
-        self.history.append(str(msg))
-        if len(self.buffer) >= self.max_length:
-            self.buffer = self.buffer[:len(self.buffer) - 1]
+        if isinstance(msg, list):
+            for n in msg:
+                self.history.append(n)
+                if len(self.buffer) >= self.max_length:
+                    self.buffer = self.buffer[:len(self.buffer) - 1]
+                self.buffer.insert(0, n)
+        else:
 
-        self.buffer.insert(0, msg)
+            self.history.append(str(msg))
+            if len(self.buffer) >= self.max_length:
+                self.buffer = self.buffer[:len(self.buffer) - 1]
+
+            self.buffer.insert(0, msg)
 
     def update(self, buffer):
         buffer_state = buffer
