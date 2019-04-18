@@ -37,7 +37,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute, viewport_x, viewport
                     # Draw layer 0 + 1 first
                     if not game_map.tiles[map_x][map_y].char == " ":
                         blt.layer(0)
-                        blt.color("#827662")
+                        blt.color("darkest amber")
                         blt.put(x * 4, y * 2,
                                 game_map.tiles[map_x][map_y].char_ground)
                         blt.layer(1)
@@ -46,7 +46,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute, viewport_x, viewport
                                 game_map.tiles[map_x][map_y].char)
                     # Fill rest of fov with ground tiles
                     else:
-                        blt.color("#827662")
+                        blt.color("darkest amber")
                         blt.put(x * 4, y * 2,
                                 game_map.tiles[map_x][map_y].char_ground)
                     # Set everything in fov as explored

@@ -34,8 +34,8 @@ FIX:
 - Generate levels with a seed
 
 """
-MAP_WIDTH = 50
-MAP_HEIGHT = 50
+MAP_WIDTH = 100
+MAP_HEIGHT = 100
 FOV_ALGORITHM = 0
 FOV_LIGHT_WALLS = True
 FOV_RADIUS = 6
@@ -92,15 +92,20 @@ def level_change(level_name, levels, player):
 
     if level_name is "dream":
         game_map = GameMap(MAP_WIDTH, MAP_HEIGHT, "dream")
-        game_map.generate_forest(0, 0, game_map.width,
-                                 game_map.height, 25, block_sight=True)
+        #game_map.generate_trees(0, 0, game_map.width,
+        #                         game_map.height, 25, block_sight=True)
+        game_map.generate_forest()
         game_map, game_camera, entities, player, fov_map = level_init(
             game_map, player)
 
     # Set debug level
     if level_name is "debug":
-        game_map = GameMap(floor(blt.state(blt.TK_WIDTH) / 4),
-                           floor(blt.state(blt.TK_HEIGHT) / 2 - 5), "debug")
+        #game_map = GameMap(floor(blt.state(blt.TK_WIDTH) / 4),
+        #                   floor(blt.state(blt.TK_HEIGHT) / 2 - 5), "debug")
+        game_map = GameMap(50, 50, "debug")
+        game_map.generate_trees(0, 0, game_map.width,
+                                 game_map.height, 20, block_sight=True)
+        #game_map.generate_forest()
         game_map, game_camera, entities, player, fov_map = level_init(
             game_map, player)
 
@@ -181,7 +186,7 @@ def main_menu(viewport_x, viewport_y):
                         current_range += 1
                 elif key == blt.TK_ENTER:
                     player = Entity(
-                        1, 1, 2, animals[choice], None, "player", True)
+                        1, 1, 50, animals[choice], None, "player", True)
                     return player
 
         elif key == blt.TK_ENTER and r is "Exit":
