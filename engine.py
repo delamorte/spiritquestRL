@@ -21,8 +21,6 @@ TODO:
 - Items and inventory
 - Npcs
 - Minimap
-- Put tileset to dictionary and put corresponding
-  ascii symbols
 - Saving and loading
 
 FIX:
