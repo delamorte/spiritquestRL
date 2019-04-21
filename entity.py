@@ -1,5 +1,6 @@
 from components.ai import BasicMonster
 from components.fighter import Fighter
+from map_objects.tilemap import tilemap
 from math import sqrt
 from tcod import map, path
 
@@ -25,27 +26,27 @@ class Entity:
 
         if self.player:
             self.spirit_power = 50
-            self.char_hub = 0xE100 + 704
+            self.char_hub = tilemap()["player"]
 
         if self.fighter:
-            if name is 'Player':
+            if name is 'player':
                 fighter_component = Fighter(hp=20, ac=3, ev=3, power=3)
-            elif name is 'Cat':
+            elif name is 'cat':
                 fighter_component = Fighter(hp=10, ac=1, ev=5, power=2)
-            elif name is 'Crow':
+            elif name is 'crow':
                 fighter_component = Fighter(hp=8, ac=1, ev=5, power=5)
-            elif name is 'Snake':
+            elif name is 'snake':
                 fighter_component = Fighter(hp=10, ac=3, ev=3, power=3)
             self.fighter_c = fighter_component
             self.fighter_c.max_hp = self.fighter_c.hp
             self.fighter_c.owner = self
 
         if self.ai:
-            if name is 'Cat':
+            if name is 'cat':
                 ai_component = BasicMonster()
-            elif name is 'Crow':
+            elif name is 'crow':
                 ai_component = BasicMonster()
-            elif name is 'Snake':
+            elif name is 'snake':
                 ai_component = BasicMonster()
             self.ai_c = ai_component
             self.ai_c.owner = self

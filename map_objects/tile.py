@@ -1,3 +1,6 @@
+from map_objects.tilemap import tilemap
+
+
 class Tile:
     """
     A tile on a map. It may or may not be blocked,
@@ -9,7 +12,7 @@ class Tile:
                  block_sight,
                  seed,
                  char=" ",
-                 char_ground=0xE100 + 21,
+                 char_ground=tilemap()["floor"],
                  layer=0,
                  color=None):
         self.blocked = blocked

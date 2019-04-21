@@ -1,5 +1,6 @@
 from entity import Entity
 from map_objects.tile import Tile
+from map_objects.tilemap import tilemap
 from random import randint
 
 
@@ -12,7 +13,7 @@ class GameMap:
 
     def initialize_tiles(self):
 
-        tiles = [[Tile(False, False, randint(0, 100))
+        tiles = [[Tile(False, False, randint(0, 100), " ", tilemap()["floor"])
                   for y in range(self.height)]
                  for x in range(self.width)]
 
@@ -49,25 +50,25 @@ class GameMap:
                 if (x == x1 or x == x2 - 1 or
                         y == y1 or y == y2 - 1):
                     self.tiles[x][y].color = "orange"
-                    self.tiles[x][y].char = 0xE100 + 83
+                    self.tiles[x][y].char = tilemap()["wall_brick"]
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = True
                     wall_x.append(x)
                     wall_y.append(y)
                 else:
                     self.tiles[x][y].color = "darkest amber"
-                    self.tiles[x][y].char_ground = 0xE100 + 21
-                    self.tiles[x][y].char = 0xE100 + 21
+                    self.tiles[x][y].char_ground = tilemap()["floor"]
+                    self.tiles[x][y].char = tilemap()["floor"]
                     self.tiles[x][y].blocked = False
                     self.tiles[x][y].block_sight = False
                     self.tiles[x][y].spawnable = True
         self.tiles[center_x][center_y].color = "lightest orange"
-        self.tiles[center_x][center_y].char = 0xE100 + 427
+        self.tiles[center_x][center_y].char = tilemap()["campfire"]
 
         # Generate one door at a random position in the room.
         door_seed = randint(0, len(wall_x) - 1)
         self.tiles[wall_x[door_seed]][wall_y[door_seed]].color = None
-        self.tiles[wall_x[door_seed]][wall_y[door_seed]].char = 0xE100 + 67
+        self.tiles[wall_x[door_seed]][wall_y[door_seed]].char = tilemap()["door_closed"]
         self.tiles[wall_x[door_seed]][wall_y[door_seed]].blocked = True
         self.tiles[wall_x[door_seed]][wall_y[door_seed]].block_sight = False
 
@@ -89,21 +90,18 @@ class GameMap:
     def generate_trees(self, dx, dy, width, height, freq, block_sight):
         """Generate a forest to a rectangular area."""
 
-        forest_tiles = [87, 88, 89, 93, 94, 95]
         forest_colors = ["lightest orange",
                          "lighter orange",
                          "light orange",
                          "dark orange",
                          "darker orange"]
-        ground_tiles = [21]
 
         for y in range(dy, height):
             for x in range(dx, width):
-                self.tiles[x][y].char_ground = 0xE100 + ground_tiles[0]
+                self.tiles[x][y].char_ground = tilemap()["ground_soil"]
                 # Generate forest tiles
                 if randint(0, 100) < freq:
-                    self.tiles[x][y].char = 0xE100 + \
-                        forest_tiles[randint(0, 5)]
+                    self.tiles[x][y].char = tilemap()["tree"][randint(0,(len(tilemap()["tree"])-1))]
                     self.tiles[x][y].color = forest_colors[randint(0, 4)]
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = block_sight
@@ -141,9 +139,9 @@ class GameMap:
         if self.name is "dream":
 
             number_of_monsters = randint(self.width / 2 - 20, self.width / 2)
-            monsters = [("Cat", 0xE100 + 1252),
-                        ("Crow", 0xE100 + 1587),
-                        ("Snake", 0xE100 + 1097)]
+            monsters = []
+            for x,y in tilemap()["monsters"].items():
+                monsters.append((x, y))
 
             for i in range(number_of_monsters):
                 x = randint(1, self.width - 1)

@@ -8,26 +8,22 @@ from fov import initialize_fov, recompute_fov
 from input_handlers import handle_keys
 from map_objects.game_map import GameMap
 from math import floor
+from map_objects.tilemap import tilemap
 from ui.elements import Panel
 from ui.game_messages import MessageLog
 from ui.message_history import show_msg_history
 from sys import exit
+import options
 
 """
 TODO:
 
-- Improve UI
 - Items and inventory
 - Npcs
-- Make maps more interesting
 - Minimap
 - Put tileset to dictionary and put corresponding
   ascii symbols
-- Menus
 - Saving and loading
-- Combat
-- Dying and winning
-- New game and character creation
 
 FIX:
 
@@ -93,20 +89,16 @@ def level_change(level_name, levels, player):
 
     if level_name is "dream":
         game_map = GameMap(MAP_WIDTH, MAP_HEIGHT, "dream")
-        # game_map.generate_trees(0, 0, game_map.width,
-        #                         game_map.height, 25, block_sight=True)
         game_map.generate_forest()
         game_map, game_camera, entities, player, fov_map = level_init(
             game_map, player)
 
     # Set debug level
     if level_name is "debug":
-        # game_map = GameMap(floor(blt.state(blt.TK_WIDTH) / 4),
-        #                   floor(blt.state(blt.TK_HEIGHT) / 2 - 5), "debug")
         game_map = GameMap(50, 50, "debug")
-        game_map.generate_trees(0, 0, game_map.width,
-                                game_map.height, 20, block_sight=True)
-        # game_map.generate_forest()
+        # game_map.generate_trees(0, 0, game_map.width,
+        #                        game_map.height, 20, block_sight=True)
+        game_map.generate_forest()
         game_map, game_camera, entities, player, fov_map = level_init(
             game_map, player)
 
@@ -136,7 +128,8 @@ def main_menu(viewport_x, viewport_y):
     center_y = int(viewport_y / 2)
     while True:
 
-        choices = ["New game", "Resize window", "Exit"]
+        choices = ["New game", "Resize window",
+                   "Graphics: " + options.gfx, "Exit"]
         blt.layer(0)
         clear_camera(viewport_x, viewport_y)
         blt.puts(center_x + 2, center_y,
@@ -156,12 +149,16 @@ def main_menu(viewport_x, viewport_y):
         if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
             exit()
 
+        if key == blt.TK_ENTER and current_range == 2:
+            if options.gfx is "tiles":
+                options.gfx = "ascii"
+            elif options.gfx is "ascii":
+                options.gfx = "tiles"
+
         if key == blt.TK_ENTER and r is "New game":
-            key = None
             while True:
                 clear_camera(viewport_x, viewport_y)
-                animals = {"Cat": 0xE100 + 1252,
-                           "Crow": 0xE100 + 1587, "Snake": 0xE100 + 1097}
+                animals = tilemap()["monsters"]
                 blt.layer(0)
                 blt.puts(center_x + 2, center_y,
                          "[color=white]Choose your spirit animal...", 0, 0, blt.TK_ALIGN_CENTER)
@@ -169,7 +166,7 @@ def main_menu(viewport_x, viewport_y):
                     selected = i == current_range
                     blt.color("orange" if selected else "default")
                     blt.puts(center_x - 10, center_y + 2 + i * 2, "%s%s" %
-                             ("[U+203A]" if selected else " ", r), 0, 0)
+                             ("[U+203A]" if selected else " ", r.capitalize()), 0, 0)
                     blt.layer(0)
                     blt.put_ext(center_x - 2, center_y +
                                 2 + i * 2, 0, -8, 0xE100 + 3)
@@ -305,7 +302,7 @@ def main():
                         power_msg = "Spirit power left: " + \
                             str(player.spirit_power)
 
-                    if game_map.tiles[player.x][player.y].char == 0xE100 + 427:
+                    if game_map.tiles[player.x][player.y].char == tilemap()["campfire"]:
                         message_log.send(
                             "Meditate and go to dream world with '<' or '>'")
                     fov_recompute = True
@@ -313,7 +310,7 @@ def main():
                 game_state = GameStates.ENEMY_TURN
 
             if game_map.tiles[destination_x][destination_y].char == \
-                    0xE100 + 67:
+                    tilemap()["door_closed"]:
                 message_log.send("The door is locked...")
                 turn_count += 1
                 game_state = GameStates.ENEMY_TURN
@@ -339,7 +336,7 @@ def main():
             player.spirit_power = 50
             player.fighter_c.hp = player.fighter_c.max_hp
             power_msg = "Spirit power left: " + \
-                        str(player.spirit_power)
+                str(player.spirit_power)
 
         if player.spirit_power >= 60:
             message_log.send("My spirit has granted me new insights!")
@@ -349,14 +346,14 @@ def main():
             # Currently opens the door in hub
             for y in range(game_map.height):
                 for x in range(game_map.width):
-                    if game_map.tiles[x][y].char == 0xE100 + 67:
-                        game_map.tiles[x][y].char = 0xE100 + 68
+                    if game_map.tiles[x][y].char == tilemap()["door_closed"]:
+                        game_map.tiles[x][y].char = tilemap()["door_open"]
                         game_map.tiles[x][y].blocked = False
 
         if stairs:
-            if game_map.tiles[player.x][player.y].char == 0xE100 + 427:
-                game_map, game_camera, entities, player, fov_map = \
-                    level_change("dream", levels, player)
+            if game_map.tiles[player.x][player.y].char == tilemap()["campfire"]:
+                game_map, game_camera, entities, player, fov_map = level_change(
+                    "dream", levels, player)
                 message_log.clear()
                 message_log.send(
                     "I'm dreaming... I feel my spirit power draining.")
