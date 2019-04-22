@@ -1,3 +1,6 @@
+import options
+
+
 class Camera:
 
     def __init__(self, x, y, width, height):
@@ -11,13 +14,13 @@ class Camera:
         y = target_y - int(self.height / 2)
 
         if x < 0:
-            x = 0
+            x = -int(options.camera_offset/2)
         if y < 0:
-            y = 0
+            y = -int(options.camera_offset/2)
         if x > map_width - self.width:
-            x = map_width - self.width
+            x = map_width - self.width + int(options.camera_offset/2)
         if y > map_height - self.height:
-            y = map_height - self.height
+            y = map_height - self.height + int(options.camera_offset/2)
         self.x, self.y = x, y
 
     def get_coordinates(self, map_x, map_y):

@@ -46,6 +46,8 @@ def blt_init():
     size = 'size=128x50'
     title = 'title=' + window_title
     cellsize = 'cellsize=auto'
+    tilesize = options.tilesize + 'x' + options.tilesize
+    ui_size = options.ui_size + 'x' + options.ui_size
     resizable = 'resizeable=false'
     window = "window: " + size + "," + title + "," + cellsize + "," + resizable
 
@@ -53,7 +55,18 @@ def blt_init():
     blt.set("font: default")
     # Load tilesets
     blt.set("U+E100: ./tilesets/adam_bolt_angband16x16_fix.png, \
-        size=16x16, resize=32x32, resize-filter=nearest, align=top-left")
+        size=16x16, resize=" + tilesize + ", resize-filter=nearest, align=top-left")
+    blt.set("U+E900: ./tilesets/adam_bolt_angband16x16_fix.png, \
+        size=16x16, resize=" + ui_size + ", resize-filter=nearest, align=top-left")
+    options.tile_offset_x = int(
+        int(options.tilesize) / blt.state(blt.TK_CELL_WIDTH))
+    options.tile_offset_y = int(
+        int(options.tilesize) / blt.state(blt.TK_CELL_HEIGHT))
+    options.ui_offset_x = int(
+        int(options.ui_size) / blt.state(blt.TK_CELL_WIDTH))
+    options.ui_offset_y = int(
+        int(options.ui_size) / blt.state(blt.TK_CELL_HEIGHT))
+    options.camera_offset = int(options.ui_size) / int(options.tilesize)
     blt.clear()
 
 
@@ -63,8 +76,8 @@ def level_init(game_map, player):
     player, entities = game_map.place_entities(player)
 
     # Initialize game camera
-    game_camera = Camera(1, 1, floor(blt.state(blt.TK_WIDTH) / 4),
-                         floor(blt.state(blt.TK_HEIGHT) / 2 - 5))
+    game_camera = Camera(1, 1, int(floor(blt.state(blt.TK_WIDTH) / options.ui_offset_x) * options.camera_offset),
+                         int(floor(blt.state(blt.TK_HEIGHT) / options.ui_offset_y - 5) * options.camera_offset))
     # Initialize field of view
     fov_map = initialize_fov(game_map)
 
@@ -93,10 +106,10 @@ def level_change(level_name, levels, player):
 
     # Set debug level
     if level_name is "debug":
-        game_map = GameMap(50, 50, "debug")
+        game_map = GameMap(100, 100, "debug")
         # game_map.generate_trees(0, 0, game_map.width,
         #                        game_map.height, 20, block_sight=True)
-        game_map.generate_forest()
+        # game_map.generate_forest()
         game_map, game_camera, entities, player, fov_map = level_init(
             game_map, player)
 
@@ -107,19 +120,20 @@ def init_ui():
 
     screen_w = blt.state(floor(blt.TK_WIDTH))
     screen_h = blt.state(floor(blt.TK_HEIGHT))
-    w = floor(screen_w / 4)
-    h = floor(screen_h / 2 - 5)
+
+    w = floor(screen_w / options.ui_offset_x)
+    h = floor(screen_h / options.ui_offset_y - 5)
 
     msg_panel = Panel(1, h + 1, w - 1, h + 4)
     msg_panel_borders = Panel(0, h, w, h + 5)
     screen_borders = Panel(0, 0, w, h)
 
-    viewport_x = w * 4 - 5
-    viewport_y = h * 2 - 3
+    viewport_x = w * options.ui_offset_x - (options.ui_offset_x + 1)
+    viewport_y = h * options.ui_offset_y - (options.ui_offset_y + 1)
     return viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders
 
 
-def main_menu(viewport_x, viewport_y):
+def main_menu(viewport_x, viewport_y, msg_panel):
 
     current_range = 0
     center_x = int(viewport_x / 2)
@@ -127,7 +141,7 @@ def main_menu(viewport_x, viewport_y):
     while True:
 
         choices = ["New game", "Resize window",
-                   "Graphics: " + options.gfx, "Exit"]
+                   "Graphics: " + options.gfx, "Tilesize: "+ options.tilesize+"x"+options.tilesize, "Exit"]
         blt.layer(0)
         clear_camera(viewport_x, viewport_y)
         blt.puts(center_x + 2, center_y,
@@ -153,7 +167,24 @@ def main_menu(viewport_x, viewport_y):
             elif options.gfx is "ascii":
                 options.gfx = "tiles"
 
+        if key == blt.TK_ENTER and current_range == 3:
+            if int(options.tilesize) < 48:
+                options.tilesize = str(int(options.tilesize) + 16)
+                blt.close()
+                blt_init()
+                viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
+                draw_ui(viewport_x, viewport_y, msg_panel,
+                        msg_panel_borders, screen_borders)
+            else:
+                options.tilesize = str(16)
+                blt.close()
+                blt_init()
+                viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
+                draw_ui(viewport_x, viewport_y, msg_panel,
+                        msg_panel_borders, screen_borders)
+
         if key == blt.TK_ENTER and r is "New game":
+            key = None
             while True:
                 clear_camera(viewport_x, viewport_y)
                 animals = tilemap()["monsters"]
@@ -163,13 +194,14 @@ def main_menu(viewport_x, viewport_y):
                 for i, (r, c) in enumerate(animals.items()):
                     selected = i == current_range
                     blt.color("orange" if selected else "default")
-                    blt.puts(center_x - 10, center_y + 2 + i * 2, "%s%s" %
+                    blt.puts(center_x - 10, center_y + 2 + i * options.tile_offset_y, "%s%s" %
                              ("[U+203A]" if selected else " ", r.capitalize()), 0, 0)
                     blt.layer(0)
                     blt.put_ext(center_x - 2, center_y +
-                                2 + i * 2, 0, -8, 0xE100 + 3)
+                                2 + i * options.tile_offset_y, 0, -8, 0xE100 + 3)
                     blt.layer(1)
-                    blt.put_ext(center_x - 2, center_y + 2 + i * 2, 0, -8, c)
+                    blt.put_ext(center_x - 2, center_y + 2 + i *
+                                options.tile_offset_y, 0, -8, c)
                     if selected:
                         choice = r
 
@@ -177,7 +209,7 @@ def main_menu(viewport_x, viewport_y):
                 key = blt.read()
 
                 if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
-                    main_menu(viewport_x, viewport_y)
+                    main_menu(viewport_x, viewport_y, msg_panel)
                 elif key == blt.TK_UP:
                     if current_range > 0:
                         current_range -= 1
@@ -187,7 +219,7 @@ def main_menu(viewport_x, viewport_y):
                 elif key == blt.TK_ENTER:
                     player = Entity(
                         1, 1, 50, animals[choice], None, choice, blocks=True, player=True, fighter=True)
-                    return player
+                    return player, viewport_x, viewport_y, msg_panel
 
         elif key == blt.TK_ENTER and r is "Exit":
             exit()
@@ -212,19 +244,24 @@ def main_menu(viewport_x, viewport_y):
                 if key == blt.TK_UP:
                     h = blt.state(blt.TK_HEIGHT)
                     w = blt.state(blt.TK_WIDTH)
-                    blt.set("window: size=" + str(w) + "x" + (str(h + 2)))
+                    blt.set("window: size=" + str(w) + "x" +
+                            (str(h + options.tile_offset_y)))
                 if key == blt.TK_DOWN:
                     h = blt.state(blt.TK_HEIGHT)
                     w = blt.state(blt.TK_WIDTH)
-                    blt.set("window: size=" + str(w) + "x" + (str(h - 2)))
+                    blt.set("window: size=" + str(w) + "x" +
+                            (str(h - options.tile_offset_y)))
                 if key == blt.TK_RIGHT:
                     h = blt.state(blt.TK_HEIGHT)
                     w = blt.state(blt.TK_WIDTH)
-                    blt.set("window: size=" + (str(w + 4)) + "x" + str(h))
+                    blt.set("window: size=" +
+                            (str(w + options.tile_offset_x)) + "x" + str(h))
                 if key == blt.TK_LEFT:
                     h = blt.state(blt.TK_HEIGHT)
                     w = blt.state(blt.TK_WIDTH)
-                    blt.set("window: size=" + (str(w - 4)) + "x" + str(h))
+                    blt.set("window: size=" +
+                            (str(w - options.tile_offset_x)) + "x" + str(h))
+
             blt.set("window: resizeable=false")
         elif key == blt.TK_UP:
             if current_range > 0:
@@ -242,12 +279,14 @@ def main():
     draw_ui(viewport_x, viewport_y, msg_panel,
             msg_panel_borders, screen_borders)
     message_log = MessageLog(5)
-    player = main_menu(viewport_x, viewport_y)
+    player, viewport_x, viewport_y, msg_panel = main_menu(
+        viewport_x, viewport_y, msg_panel)
     levels = []
     game_map, game_camera, entities, player, fov_map = level_change(
         "dream", levels, player)
     power_msg = "Spirit power left: " + str(player.spirit_power)
     turn_count = 0
+    insights = 60
     game_state = GameStates.PLAYER_TURN
     key = None
     while key not in (blt.TK_CLOSE, blt.TK_ESCAPE):
@@ -284,13 +323,15 @@ def main():
                     combat_msg = player.fighter_c.attack(target)
                     message_log.send(combat_msg)
                     player.spirit_power -= 1
+                    """
                     if target.fighter_c.hp <= 0:
-                        entities.remove(target)
+                        message_log.send(kill_monster(entity))
                         message_log.send("I feel my power returning!")
                         player.spirit_power += 11
                         player.fighter_c.hp += target.fighter_c.power
                         power_msg = "Spirit power left: " + \
                             str(player.spirit_power)
+                    """    
                 else:
                     player.move(dx, dy)
 
@@ -321,7 +362,7 @@ def main():
             game_state = GameStates.ENEMY_TURN
 
         if exit:
-            exit()
+            break
 
         if fullscreen:
             blt.set("window.fullscreen=true")
@@ -336,7 +377,8 @@ def main():
             power_msg = "Spirit power left: " + \
                 str(player.spirit_power)
 
-        if player.spirit_power >= 60:
+        if player.spirit_power >= insights:
+            insights += 10
             message_log.send("My spirit has granted me new insights!")
             game_map, game_camera, entities, player, fov_map = level_change(
                 "hub", levels, player)
@@ -372,14 +414,17 @@ def main():
                         player, fov_map, game_map, entities)
                     if combat_msg:
                         message_log.send(combat_msg)
-                if entity.fighter_c.dead:
-                    if entity.player:
+                    if player.fighter_c.dead:
                         kill_msg, game_state = kill_player(player)
                         message_log.send(kill_msg)
-                    else:
-                        message_log.send(kill_monster(entity))
-                    if game_state == GameStates.PLAYER_DEAD:
                         break
+                if entity.fighter_c and entity.fighter_c.dead:
+                    player.spirit_power += 11
+                    player.fighter_c.hp += entity.fighter_c.power
+                    message_log.send(kill_monster(entity))
+                    message_log.send("I feel my power returning!")
+                    power_msg = "Spirit power left: " + \
+                        str(player.spirit_power)
             if not game_state == GameStates.PLAYER_DEAD:
                 game_state = GameStates.PLAYER_TURN
 

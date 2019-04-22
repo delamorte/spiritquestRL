@@ -11,7 +11,6 @@ class Fighter:
         results = []
         self.hp -= amount
         if self.hp <= 0:
-            results.append(self.owner.name + " is dead.")
             self.dead = True
         return results
 

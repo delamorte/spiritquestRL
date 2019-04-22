@@ -17,5 +17,6 @@ def kill_monster(monster):
     monster.ai = False
     monster.ai_c = None
     monster.name = "Remains of " + monster.name
+    monster.layer = 49
 
     return death_message
