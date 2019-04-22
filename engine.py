@@ -18,10 +18,12 @@ import options
 """
 TODO:
 
+- Improve combat mechanics
 - Items and inventory
 - Npcs
 - Minimap
 - Saving and loading
+- Examine/view mode
 
 FIX:
 
@@ -273,7 +275,6 @@ def main_menu(viewport_x, viewport_y, msg_panel):
 
 def main():
 
-    blt_init()
     fov_recompute = True
     viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
     draw_ui(viewport_x, viewport_y, msg_panel,
@@ -289,7 +290,7 @@ def main():
     insights = 60
     game_state = GameStates.PLAYER_TURN
     key = None
-    while key not in (blt.TK_CLOSE, blt.TK_ESCAPE):
+    while True:
 
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, FOV_RADIUS,
@@ -323,15 +324,7 @@ def main():
                     combat_msg = player.fighter_c.attack(target)
                     message_log.send(combat_msg)
                     player.spirit_power -= 1
-                    """
-                    if target.fighter_c.hp <= 0:
-                        message_log.send(kill_monster(entity))
-                        message_log.send("I feel my power returning!")
-                        player.spirit_power += 11
-                        player.fighter_c.hp += target.fighter_c.power
-                        power_msg = "Spirit power left: " + \
-                            str(player.spirit_power)
-                    """    
+
                 else:
                     player.move(dx, dy)
 
@@ -344,6 +337,12 @@ def main():
                     if game_map.tiles[player.x][player.y].char == tilemap()["campfire"]:
                         message_log.send(
                             "Meditate and go to dream world with '<' or '>'")
+
+                    for entity in entities:
+                        if not entity.fighter_c:
+                            if player.x == entity.x and player.y == entity.y:
+                                message_log.send("You see "+ entity.name + ".")
+
                     fov_recompute = True
                 turn_count += 1
                 game_state = GameStates.ENEMY_TURN
@@ -354,6 +353,7 @@ def main():
                 turn_count += 1
                 game_state = GameStates.ENEMY_TURN
 
+
         if key == blt.TK_PERIOD or key == blt.TK_KP_5:
             turn_count += 1
             player.spirit_power -= 1
@@ -363,6 +363,10 @@ def main():
 
         if exit:
             break
+
+        if key == blt.TK_ESCAPE:
+            blt.clear()
+            main()
 
         if fullscreen:
             blt.set("window.fullscreen=true")
@@ -432,4 +436,5 @@ def main():
 
 
 if __name__ == '__main__':
+    blt_init()
     main()
