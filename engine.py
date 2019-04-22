@@ -227,12 +227,14 @@ def main_menu(viewport_x, viewport_y, msg_panel):
             exit()
 
         elif key == blt.TK_ENTER and r is "Resize window":
-            blt.set("window: resizeable=true, minimum-size=40x20")
+            blt.set("window: resizeable=true, minimum-size=60x20")
             key = None
             while key not in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_ENTER):
                 viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
                 center_x = int(viewport_x / 2)
                 center_y = int(viewport_y / 2)
+                h = blt.state(blt.TK_HEIGHT)
+                w = blt.state(blt.TK_WIDTH)
                 draw_ui(viewport_x, viewport_y, msg_panel,
                         msg_panel_borders, screen_borders)
                 clear_camera(viewport_x, viewport_y)
@@ -244,25 +246,21 @@ def main_menu(viewport_x, viewport_y, msg_panel):
                 if key == blt.TK_FULLSCREEN:
                     blt.set("window.fullscreen=true")
                 if key == blt.TK_UP:
-                    h = blt.state(blt.TK_HEIGHT)
-                    w = blt.state(blt.TK_WIDTH)
                     blt.set("window: size=" + str(w) + "x" +
                             (str(h + options.tile_offset_y)))
                 if key == blt.TK_DOWN:
-                    h = blt.state(blt.TK_HEIGHT)
-                    w = blt.state(blt.TK_WIDTH)
                     blt.set("window: size=" + str(w) + "x" +
                             (str(h - options.tile_offset_y)))
+                    if h <= 30:
+                        blt.set("window: size=" + str(w) + "x" + "30")
                 if key == blt.TK_RIGHT:
-                    h = blt.state(blt.TK_HEIGHT)
-                    w = blt.state(blt.TK_WIDTH)
                     blt.set("window: size=" +
                             (str(w + options.tile_offset_x)) + "x" + str(h))
                 if key == blt.TK_LEFT:
-                    h = blt.state(blt.TK_HEIGHT)
-                    w = blt.state(blt.TK_WIDTH)
                     blt.set("window: size=" +
                             (str(w - options.tile_offset_x)) + "x" + str(h))
+                    if w <= 60:
+                        blt.set("window: size=60" + "x" + str(h))
 
             blt.set("window: resizeable=false")
         elif key == blt.TK_UP:

@@ -77,10 +77,25 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute, viewport_x, viewport
 def draw_messages(msg_panel, message_log, player, power_msg, viewport_x, viewport_y):
 
     blt.layer(8)
-    blt.color("default")
     blt.clear_area(2, viewport_y + options.ui_offset_y + 1, viewport_x, 1)
-    blt.puts(int(viewport_x / 2),
-               viewport_y + options.ui_offset_y + 1, "[offset=0,-2]" + power_msg,0,0, blt.TK_ALIGN_CENTER)
+    blt.color("gray")
+
+    if viewport_x > 90:
+        blt.puts(int(viewport_x / 2) - int(len(power_msg) / 2) - 5,
+                 viewport_y + options.ui_offset_y, "[offset=0,5]" + "[U+E2B8]", 0, 0, blt.TK_ALIGN_CENTER)
+        blt.puts(int(viewport_x / 2) + int(len(power_msg) / 2 + 3),
+                 viewport_y + options.ui_offset_y, "[offset=0,2]" + "[U+E2DC]", 0, 0, blt.TK_ALIGN_CENTER)
+        blt.color("default")
+        blt.puts(int(viewport_x / 2),
+                 viewport_y + options.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0, blt.TK_ALIGN_CENTER)
+    else:
+        blt.puts(viewport_x - len(power_msg) - 5,
+                 viewport_y + options.ui_offset_y, "[offset=0,5]" + "[U+E2B8]", 0, 0, blt.TK_ALIGN_CENTER)
+        blt.puts(viewport_x,
+                 viewport_y + options.ui_offset_y, "[offset=0,2]" + "[U+E2DC]", 0, 0, blt.TK_ALIGN_CENTER)
+        blt.color("default")
+        blt.puts(viewport_x - len(power_msg),
+                 viewport_y + options.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0, blt.TK_ALIGN_LEFT)
 
     hp = "HP:" + str(player.fighter_c.hp) + "/" + str(player.fighter_c.max_hp)
     ac = "AC:" + str(player.fighter_c.ac)
@@ -154,8 +169,6 @@ def draw_ui(viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders
                 blt.put_ext(x * options.ui_offset_x, y *
                             options.ui_offset_y, -10, -10, 0xE900 + 468)
 
-
-
     blt.layer(8)
     blt.color("gray")
     for y in range(screen_borders.y, screen_borders.h):
@@ -185,12 +198,6 @@ def draw_ui(viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders
                 blt.put(x * options.ui_offset_x, y *
                         options.ui_offset_y, 0xE900 + 468)
 
-    blt.put_ext(int(viewport_x / 2) - 15, y *
-                options.ui_offset_y + 1, 0, 5, 0xE900 + 440)
-    blt.put_ext(int(viewport_x / 2) + 12, y *
-                options.ui_offset_y + 1, 0, 5, 0xE900 + 476)
-    #blt.set("U+E100: ./tilesets/adam_bolt_angband16x16_fix.png, \
-    #    size=16x16, resize=48x48, resize-filter=nearest, align=top-left")
 
 def draw_all(game_map, game_camera, entities, player, px, py, fov_map,
              fov_recompute, message_log, msg_panel, power_msg,
