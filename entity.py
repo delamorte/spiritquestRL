@@ -32,15 +32,15 @@ class Entity:
 
         if self.fighter:
             if name is 'player':
-                fighter_component = Fighter(hp=20, ac=3, ev=3, power=3)
+                fighter_component = Fighter(hp=20, ac=3, ev=3, power=3, mv_spd=1)
             elif name is 'rat':
-                fighter_component = Fighter(hp=10, ac=1, ev=4, power=4)
+                fighter_component = Fighter(hp=10, ac=1, ev=4, power=4, mv_spd=2, atk_spd=1)
                 self.fov = 4
             elif name is 'crow':
-                fighter_component = Fighter(hp=8, ac=1, ev=6, power=3)
+                fighter_component = Fighter(hp=8, ac=1, ev=6, power=3, mv_spd=1.2, atk_spd=1)
                 self.fov = 8
             elif name is 'snake':
-                fighter_component = Fighter(hp=12, ac=1, ev=2, power=5)
+                fighter_component = Fighter(hp=12, ac=1, ev=2, power=5, mv_spd=1, atk_spd=1)
             self.fighter_c = fighter_component
             if self.player:
                 self.fighter_c.hp += 10

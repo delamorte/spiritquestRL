@@ -281,12 +281,12 @@ def main():
     game_map, game_camera, entities, player, fov_map = level_change(
         "dream", levels, player)
     power_msg = "Spirit power left: " + str(player.spirit_power)
-    turn_count = 0
+    time_counter = variables.TimeCounter()
     insights = 60
     game_state = GameStates.PLAYER_TURN
     key = None
     while True:
-        print(str(turn_count))
+        print(str(time_counter.turn))
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, player.fov)
 
@@ -317,16 +317,13 @@ def main():
                     combat_msg = player.fighter_c.attack(target)
                     message_log.send(combat_msg)
                     player.spirit_power -= 0.5
-                    turn_count += 1
+                    time_counter.take_turn(1)
                     draw_stats(player, viewport_x, viewport_y, power_msg, target)
 
                 else:
                     player.move(dx, dy)
-
-                    if player.name is "rat":
-                        turn_count += 0.5
-                    else:
-                        turn_count += 1
+                    
+                    time_counter.take_turn(1 / player.fighter_c.mv_spd)
                     
                     if (game_map.name is not "hub" and
                             game_map.name is not "debug"):
@@ -352,11 +349,11 @@ def main():
             if game_map.tiles[destination_x][destination_y].char == \
                     tilemap()["door_closed"]:
                 message_log.send("The door is locked...")
-                turn_count += 1
+                time_counter.take_turn(1)
                 game_state = GameStates.ENEMY_TURN
 
         if key == blt.TK_PERIOD or key == blt.TK_KP_5:
-            turn_count += 1
+            time_counter.take_turn(1)
             player.spirit_power -= 1
             power_msg = "Spirit power left: " + \
                 str(player.spirit_power)
@@ -417,7 +414,7 @@ def main():
             for entity in entities:
                 if entity.ai:
                     combat_msg = entity.ai_c.take_turn(
-                        player, fov_map, game_map, entities)
+                        player, fov_map, game_map, entities, time_counter)
                     if combat_msg:
                         message_log.send(combat_msg)
                         draw_stats(player, viewport_x, viewport_y, power_msg)

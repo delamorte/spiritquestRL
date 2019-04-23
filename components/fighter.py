@@ -2,12 +2,14 @@ from random import randint
 
 
 class Fighter:
-    def __init__(self, hp, ac, ev, power):
+    def __init__(self, hp, ac, ev, power, mv_spd, atk_spd):
         self.max_hp = hp
         self.hp = hp
         self.ac = ac
         self.ev = ev
         self.power = power
+        self.mv_spd = mv_spd
+        self.atk_spd = atk_spd
         self.dead = False
 
     def take_damage(self, amount):
