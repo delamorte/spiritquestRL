@@ -141,7 +141,7 @@ def show_msg_history(message_log, viewport_x, viewport_y):
         key = blt.read()
 
         if key in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_M):
-            blt.clear()
+            clear_camera(viewport_x, viewport_y)
             break
 
         elif key == blt.TK_UP:

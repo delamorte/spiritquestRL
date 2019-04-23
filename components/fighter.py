@@ -1,3 +1,6 @@
+from random import randint
+
+
 class Fighter:
     def __init__(self, hp, ac, ev, power):
         self.max_hp = hp
@@ -16,9 +19,17 @@ class Fighter:
 
     def attack(self, target):
         results = []
-        damage = self.power - target.fighter_c.ac
+        hit_chance = randint(1, 100)
+        damage = randint(1,self.power) - target.fighter_c.ac
+        if target.fighter_c.ev * 5 >= hit_chance:
+            if self.owner.player:
+                results.append(
+                    "You attack {0}, but miss.".format(target.name))
+            else:
+                results.append("{0} attacks you, but misses.".format(
+                    self.owner.name.capitalize()))
 
-        if damage > 0:
+        elif damage > 0:
             if self.owner.player:
                 results.append("You attack {0} for {1} hit points.".format(
                     target.name, str(damage)))

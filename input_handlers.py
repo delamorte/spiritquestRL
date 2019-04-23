@@ -30,9 +30,5 @@ def handle_keys(key):
     if key == blt.TK_FULLSCREEN:
         return {'fullscreen': True}
 
-    # Exit the game
-    elif key == blt.TK_CLOSE:
-        return {'exit': True}
-
     # No key was pressed
     return {}
