@@ -415,6 +415,7 @@ def main():
                 if entity.ai:
                     combat_msg = entity.ai_c.take_turn(
                         player, fov_map, game_map, entities, time_counter)
+                    fov_recompute = True
                     if combat_msg:
                         message_log.send(combat_msg)
                         draw_stats(player, viewport_x, viewport_y, power_msg)

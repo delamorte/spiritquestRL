@@ -1,3 +1,5 @@
+from fov import recompute_fov
+
 class BasicMonster:
     def __init__(self):
         self.action_begin = False
@@ -10,7 +12,9 @@ class BasicMonster:
         time_to_act = time.get_turn() - self.last_action
         action_cost = 0
         combat_msg = []
-        if fov_map.fov[monster.y, monster.x]:
+        recompute_fov(fov_map, monster.x, monster.y, monster.fov)
+        
+        if fov_map.fov[target.y, target.x]:
 
             self.action_begin = True
             
@@ -19,7 +23,7 @@ class BasicMonster:
                 if 1 / self.owner.fighter_c.mv_spd <= time_to_act - action_cost and monster.distance_to(target) >= 2:
 
                     monster.move_astar(target, entities, game_map)
-                    action_cost += 1 / self.owner.fighter_c.mv_spd
+                    action_cost += 1 / monster.fighter_c.mv_spd
                     #self.last_action += action_cost
                     self.action_begin = False
 
