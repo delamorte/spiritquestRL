@@ -103,17 +103,17 @@ def draw_stats(player, viewport_x, viewport_y, power_msg, target=None):
     #Draw spirit power left and position it depending on window size
     if viewport_x > 90:
         blt.puts(int(viewport_x / 2) - int(len(power_msg) / 2) - 5,
-                 viewport_y + variables.ui_offset_y, "[offset=0,5]" + "[U+E2B8]", 0, 0, blt.TK_ALIGN_CENTER)
+                 viewport_y + variables.ui_offset_y, "[offset=0,5]" + "[U+EAB8]", 0, 0, blt.TK_ALIGN_CENTER)
         blt.puts(int(viewport_x / 2) + int(len(power_msg) / 2 + 3),
-                 viewport_y + variables.ui_offset_y, "[offset=0,2]" + "[U+E2DC]", 0, 0, blt.TK_ALIGN_CENTER)
+                 viewport_y + variables.ui_offset_y, "[offset=0,2]" + "[U+EADC]", 0, 0, blt.TK_ALIGN_CENTER)
         blt.color("default")
         blt.puts(int(viewport_x / 2),
                  viewport_y + variables.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0, blt.TK_ALIGN_CENTER)
     else:
         blt.puts(viewport_x - len(power_msg) - 5,
-                 viewport_y + variables.ui_offset_y, "[offset=0,5]" + "[U+E2B8]", 0, 0, blt.TK_ALIGN_CENTER)
+                 viewport_y + variables.ui_offset_y, "[offset=0,5]" + "[U+EAB8]", 0, 0, blt.TK_ALIGN_CENTER)
         blt.puts(viewport_x,
-                 viewport_y + variables.ui_offset_y, "[offset=0,2]" + "[U+E2DC]", 0, 0, blt.TK_ALIGN_CENTER)
+                 viewport_y + variables.ui_offset_y, "[offset=0,2]" + "[U+EADC]", 0, 0, blt.TK_ALIGN_CENTER)
         blt.color("default")
         blt.puts(viewport_x - len(power_msg),
                  viewport_y + variables.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0, blt.TK_ALIGN_LEFT)
