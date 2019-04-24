@@ -30,3 +30,9 @@ def tilemap():
                  "wall_brick": "#"}
 
     return tiles
+
+def bestiary():
+    animals = {"crow": "quick, very agile, very weak, excellent vision",
+               "rat": "very quick, agile, weak, poor vision",
+               "snake": "strong, slow, average vision"}
+    return animals

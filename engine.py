@@ -9,7 +9,7 @@ from fov import initialize_fov, recompute_fov
 from input_handlers import handle_keys
 from map_objects.game_map import GameMap
 from math import floor
-from map_objects.tilemap import tilemap
+from map_objects.tilemap import tilemap, bestiary
 from ui.elements import Panel
 from ui.game_messages import MessageLog
 from ui.message_history import show_msg_history
@@ -187,27 +187,35 @@ def main_menu(viewport_x, viewport_y, msg_panel):
                 clear_camera(viewport_x, viewport_y)
                 animals = tilemap()["monsters"]
                 blt.layer(0)
-                blt.puts(center_x + 2, center_y,
+                blt.puts(center_x, center_y - 5,
                          "[color=white]Choose your spirit animal...", 0, 0, blt.TK_ALIGN_CENTER)
                 for i, (r, c) in enumerate(animals.items()):
                     selected = i == current_range
+
+                    # Draw select symbol, monster name and description
                     blt.color("orange" if selected else "default")
-                    blt.puts(center_x - 10, center_y + 2 + i * variables.tile_offset_y, "%s%s" %
-                             ("[U+203A]" if selected else " ", r.capitalize()), 0, 0)
+                    blt.puts(center_x - 14, center_y - 2 + i * 3, "%s%s" %
+                             ("[U+203A]" if selected else " ", r.capitalize() + ":"+"\n "+bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
+                    
+                    # Draw a bg tile
                     blt.layer(0)
-                    blt.put_ext(center_x - 2, center_y +
-                                2 + i * variables.tile_offset_y, 0, -8, 0xE100 + 3)
+                    blt.puts(center_x - 20 + 1, center_y - 2 + i * 3, "[U+"+hex(0xE900+3)+"]", 0, 0)
+
+                    # Draw monster tile
                     blt.layer(1)
-                    blt.put_ext(center_x - 2, center_y + 2 + i *
-                                variables.tile_offset_y, 0, -8, c)
+                    if variables.gfx is "ascii":
+                        blt.puts(center_x - 20 + 1, center_y - 2 + i * 3, c, 0, 0)
+                    else:
+                        blt.puts(center_x - 20 + 1, center_y - 2 + i * 3, "[U+"+hex(c+2048)+"]", 0, 0)
+
                     if selected:
                         choice = r
 
                 blt.refresh()
                 key = blt.read()
 
-                if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
-                    main_menu(viewport_x, viewport_y, msg_panel)
+                if key == blt.TK_ESCAPE:
+                    break
                 elif key == blt.TK_UP:
                     if current_range > 0:
                         current_range -= 1
@@ -217,6 +225,9 @@ def main_menu(viewport_x, viewport_y, msg_panel):
                 elif key == blt.TK_ENTER:
                     player = Entity(
                         1, 1, 12, animals[choice], None, choice, blocks=True, player=True, fighter=True)
+                    if variables.gfx is "ascii":
+                        player.char = tilemap()["player"]
+                        player.color = "lightest green"
                     return player, viewport_x, viewport_y, msg_panel
 
         elif key == blt.TK_ENTER and r is "Exit":
@@ -340,7 +351,7 @@ def main():
                         if not entity.fighter_c:
                             if player.x == entity.x and player.y == entity.y:
                                 stack.append(entity.name)
-                    
+
                     if len(stack) > 0:
                         d = dict(Counter(stack))
                         formatted_stack = []
@@ -349,7 +360,8 @@ def main():
                                 formatted_stack.append(i + " x" + str(d[i]))
                             else:
                                 formatted_stack.append(i)
-                        message_log.send("You see " + ", ".join(formatted_stack) + ".")
+                        message_log.send(
+                            "You see " + ", ".join(formatted_stack) + ".")
 
                     fov_recompute = True
 
