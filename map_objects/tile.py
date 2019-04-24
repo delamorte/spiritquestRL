@@ -9,18 +9,15 @@ class Tile:
     random events. Tile characters are stored
     in a dictionary, so that each tile can have
     different characters in different layers.
-    Floor tiles are drawn on layer 0, walls and
-    other blocked tiles on layer 1 etc.
     """
 
     def __init__(self,
                  blocked,
-                 block_sight,
-                 seed=randint(1,100)):
+                 block_sight):
         self.blocked = blocked
         self.block_sight = block_sight
         self.explored = False
-        self.seed = seed
+        self.seed = randint(1,100)
         self.char = {0: tilemap()["floor"], 1: " "}
         self.color = {0: "darkest amber", 1: None}
         self.spawnable = False

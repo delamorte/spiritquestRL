@@ -26,9 +26,6 @@ TODO:
 - Minimap
 - Saving and loading
 - Examine/view mode
-
-FIX:
-
 - Generate levels with a seed
 
 """
@@ -87,7 +84,7 @@ def level_init(game_map, player):
 def level_change(level_name, levels, player):
 
     if not levels:
-        game_map = GameMap(MAP_WIDTH, MAP_HEIGHT, "hub")
+        game_map = GameMap(50, 50, "hub")
         game_map.generate_hub()
         levels.append(game_map)
 
@@ -287,7 +284,7 @@ def main():
         viewport_x, viewport_y, msg_panel)
     levels = []
     game_map, game_camera, entities, player, fov_map = level_change(
-        "dream", levels, player)
+        "hub", levels, player)
     power_msg = "Spirit power left: " + str(player.spirit_power)
     time_counter = variables.TimeCounter()
     insights = 600
