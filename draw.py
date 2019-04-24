@@ -4,11 +4,13 @@ from textwrap import shorten
 import variables
 
 
-def draw(entity, game_map, x, y):
+def draw(entity, game_map, x, y, fov_map):
 
     # Draw the entity to the screen
     blt.layer(entity.layer)
     blt.color(blt.color(entity.color))
+    if not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.x][entity.y].explored:
+        blt.color("gray")
     if game_map.name is "hub" and entity.player:
         blt.put(x * variables.tile_offset_x, y *
                 variables.tile_offset_y, entity.char_hub)
@@ -22,7 +24,16 @@ def draw_entities(entities, game_map, game_camera, fov_map):
     for entity in entities:
         x, y = game_camera.get_coordinates(entity.x, entity.y)
         if fov_map.fov[entity.y, entity.x]:
-            draw(entity, game_map, x, y)
+            clear(entity, entity.last_seen_x, entity.last_seen_y)
+            entity.last_seen_x = entity.x
+            entity.last_seen_y = entity.y
+            draw(entity, game_map, x, y, fov_map)
+
+        elif not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.x][entity.y].explored:
+            x, y = game_camera.get_coordinates(
+                entity.last_seen_x, entity.last_seen_y)
+            if x > ceil(variables.camera_offset) and y > ceil(variables.camera_offset) and x < game_camera.width - ceil(variables.camera_offset) and y < game_camera.height - ceil(variables.camera_offset):
+                draw(entity, game_map, x, y, fov_map)
 
 
 def draw_map(game_map, game_camera, fov_map, fov_recompute, viewport_x, viewport_y):
@@ -84,7 +95,7 @@ def draw_messages(msg_panel, message_log, player, power_msg, viewport_x, viewpor
         # Print the game messages, one line at a time. Display newest
         # msg at the bottom and scroll others up
         i = 5
-        #if i > message_log.max_length:
+        # if i > message_log.max_length:
         #    i = 0
         for msg in message_log.buffer:
             msg = shorten(msg, msg_panel.w * variables.ui_offset_x - 2,
@@ -94,13 +105,15 @@ def draw_messages(msg_panel, message_log, player, power_msg, viewport_x, viewpor
             i -= 1
         message_log.update(message_log.buffer)
 
+
 def draw_stats(player, viewport_x, viewport_y, power_msg, target=None):
 
     blt.layer(8)
-    blt.clear_area(2, viewport_y + variables.ui_offset_y + 1, int(viewport_x / 2) + int(len(power_msg) / 2 + 5) - 5, 1)
+    blt.clear_area(2, viewport_y + variables.ui_offset_y + 1,
+                   int(viewport_x / 2) + int(len(power_msg) / 2 + 5) - 5, 1)
     blt.color("gray")
 
-    #Draw spirit power left and position it depending on window size
+    # Draw spirit power left and position it depending on window size
     if viewport_x > 90:
         blt.puts(int(viewport_x / 2) - int(len(power_msg) / 2) - 5,
                  viewport_y + variables.ui_offset_y, "[offset=0,5]" + "[U+EAB8]", 0, 0, blt.TK_ALIGN_CENTER)
@@ -120,34 +133,46 @@ def draw_stats(player, viewport_x, viewport_y, power_msg, target=None):
 
     # Draw player stats
     if player.fighter_c.hp / player.fighter_c.max_hp < 0.34:
-        hp_player = "[color=light red]HP:" + str(player.fighter_c.hp) + "/" + str(player.fighter_c.max_hp) + "  "
+        hp_player = "[color=light red]HP:" + \
+            str(player.fighter_c.hp) + "/" + \
+            str(player.fighter_c.max_hp) + "  "
     else:
-        hp_player = "[color=default]HP:" + str(player.fighter_c.hp) + "/" + str(player.fighter_c.max_hp) + "  "
-    
+        hp_player = "[color=default]HP:" + \
+            str(player.fighter_c.hp) + "/" + \
+            str(player.fighter_c.max_hp) + "  "
+
     ac_player = "[color=default]AC:" + str(player.fighter_c.ac) + "  "
     ev_player = "EV:" + str(player.fighter_c.ev) + "  "
     power_player = "ATK:" + str(player.fighter_c.power)
-    
-    blt.puts(4, viewport_y + variables.ui_offset_y + 1, "[offset=0,-2]" + "[color=lightest green]Player:  " + hp_player + ac_player + ev_player + power_player, 0, 0, blt.TK_ALIGN_LEFT)
-    
+
+    blt.puts(4, viewport_y + variables.ui_offset_y + 1,
+             "[offset=0,-2]" + "[color=lightest green]Player:  " + hp_player + ac_player + ev_player + power_player, 0, 0, blt.TK_ALIGN_LEFT)
+
     # Draw target stats
     if target:
-        blt.clear_area(int(viewport_x / 2) - int(len(power_msg) / 2) - 5, viewport_y + variables.ui_offset_y + 1, viewport_x, 1)
+        blt.clear_area(int(viewport_x / 2) - int(len(power_msg) / 2) - 5,
+                       viewport_y + variables.ui_offset_y + 1, viewport_x, 1)
         if target.fighter_c.hp / target.fighter_c.max_hp < 0.34:
-            hp_target = "[color=light red]HP:" + str(target.fighter_c.hp) + "/" + str(target.fighter_c.max_hp) + "  "
+            hp_target = "[color=light red]HP:" + \
+                str(target.fighter_c.hp) + "/" + \
+                str(target.fighter_c.max_hp) + "  "
         else:
-            hp_target = "[color=default]HP:" + str(target.fighter_c.hp) + "/" + str(target.fighter_c.max_hp) + "  "
+            hp_target = "[color=default]HP:" + \
+                str(target.fighter_c.hp) + "/" + \
+                str(target.fighter_c.max_hp) + "  "
         ac_target = "[color=default]AC:" + str(target.fighter_c.ac) + "  "
         ev_target = "EV:" + str(target.fighter_c.ev) + "  "
         power_target = "ATK:" + str(target.fighter_c.power) + " "
-    
-        blt.puts(viewport_x, viewport_y + variables.ui_offset_y + 1, "[offset=0,-2]" + "[color=lightest red]Enemy:  " + hp_target + ac_target + ev_target + power_target, 0, 0, blt.TK_ALIGN_RIGHT)
-        
+
+        blt.puts(viewport_x, viewport_y + variables.ui_offset_y + 1,
+                 "[offset=0,-2]" + "[color=lightest red]Enemy:  " + hp_target + ac_target + ev_target + power_target, 0, 0, blt.TK_ALIGN_RIGHT)
+
         if target.fighter_c.hp <= 0:
-            blt.clear_area(2, viewport_y + variables.ui_offset_y + 1, viewport_x, 1)
+            blt.clear_area(2, viewport_y +
+                           variables.ui_offset_y + 1, viewport_x, 1)
 
 
-def draw_ui(viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders):
+def draw_ui(msg_panel, msg_panel_borders, screen_borders):
     blt.layer(0)
     blt.color("dark gray")
 
@@ -226,17 +251,22 @@ def draw_all(game_map, game_camera, entities, player, px, py, fov_map,
                   power_msg, viewport_x, viewport_y)
     draw_stats(player, viewport_x, viewport_y, power_msg)
 
+
 def clear(entity, x, y):
     # Clear the entity from the screen
     blt.layer(entity.layer)
-    blt.clear_area(x * variables.tile_offset_x, y * variables.tile_offset_y, 1, 1)
+    blt.clear_area(x * variables.tile_offset_x, y *
+                   variables.tile_offset_y, 1, 1)
 
 
 def clear_entities(entities, game_camera):
 
     for entity in entities:
         x, y = game_camera.get_coordinates(entity.x, entity.y)
+        dx, dy = game_camera.get_coordinates(
+            entity.last_seen_x, entity.last_seen_y)
         clear(entity, x, y)
+        clear(entity, dx, dy)
 
 
 def clear_camera(viewport_x, viewport_y):

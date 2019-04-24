@@ -4,6 +4,9 @@ class BasicMonster:
     def __init__(self):
         self.action_begin = False
         self.last_action = 0
+        self.target_seen = False
+        self.target_last_seen_x = 0
+        self.target_last_seen_y = 0
 
     def take_turn(self, target, fov_map, game_map, entities, time):
         monster = self.owner
@@ -12,10 +15,13 @@ class BasicMonster:
         time_to_act = time.get_turn() - self.last_action
         action_cost = 0
         combat_msg = []
-        recompute_fov(fov_map, monster.x, monster.y, monster.fov)
+        recompute_fov(fov_map, monster.x, monster.y, monster.fov, True, 8)
         
         if fov_map.fov[target.y, target.x]:
-
+            
+            self.target_seen = True
+            self.target_last_seen_x = target.x
+            self.target_last_seen_y = target.y
             self.action_begin = True
             
             while action_cost < time_to_act: 
@@ -33,12 +39,17 @@ class BasicMonster:
                         action_cost += 1
                         #self.last_action += action_cost
                         self.action_begin = False
+                    else:
+                        break
                         
                 else:
-                    self.last_action = time.get_last_turn()
                     break
 
-        if action_cost > 0:
-            time.take_turn(action_cost)
-            return combat_msg
+        elif self.target_seen:
+            self.action_begin = False
+            if not monster.x == self.target_last_seen_x and not monster.y == self.target_last_seen_y:
+                monster.move_astar(target, entities, game_map)
+                #monster.move_towards(self.target_last_seen_x, self.target_last_seen_y, game_map, entities)
+
+        return combat_msg
     

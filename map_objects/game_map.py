@@ -153,7 +153,7 @@ class GameMap:
                 if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                     r = randint(0, 2)
                     name, char = monsters[r]
-                    monster = Entity(x, y, 50, char,
+                    monster = Entity(x, y, 12, char,
                                      None, name, blocks=True, fighter=True, ai=True)
                     entities.append(monster)
 

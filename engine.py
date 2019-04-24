@@ -1,5 +1,6 @@
 from bearlibterminal import terminal as blt
 from camera import Camera
+from collections import Counter
 from death_functions import kill_monster, kill_player
 from draw import draw_all, draw_stats, draw_ui, clear_entities, clear_camera
 from entity import Entity, blocking_entity
@@ -172,15 +173,13 @@ def main_menu(viewport_x, viewport_y, msg_panel):
                 blt.close()
                 blt_init()
                 viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(viewport_x, viewport_y, msg_panel,
-                        msg_panel_borders, screen_borders)
+                draw_ui(msg_panel, msg_panel_borders, screen_borders)
             else:
                 variables.tilesize = str(16)
                 blt.close()
                 blt_init()
                 viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(viewport_x, viewport_y, msg_panel,
-                        msg_panel_borders, screen_borders)
+                draw_ui(msg_panel, msg_panel_borders, screen_borders)
 
         if key == blt.TK_ENTER and r is "New game":
             key = None
@@ -217,7 +216,7 @@ def main_menu(viewport_x, viewport_y, msg_panel):
                         current_range += 1
                 elif key == blt.TK_ENTER:
                     player = Entity(
-                        1, 1, 50, animals[choice], None, choice, blocks=True, player=True, fighter=True)
+                        1, 1, 12, animals[choice], None, choice, blocks=True, player=True, fighter=True)
                     return player, viewport_x, viewport_y, msg_panel
 
         elif key == blt.TK_ENTER and r is "Exit":
@@ -232,8 +231,7 @@ def main_menu(viewport_x, viewport_y, msg_panel):
                 center_y = int(viewport_y / 2)
                 h = blt.state(blt.TK_HEIGHT)
                 w = blt.state(blt.TK_WIDTH)
-                draw_ui(viewport_x, viewport_y, msg_panel,
-                        msg_panel_borders, screen_borders)
+                draw_ui(msg_panel, msg_panel_borders, screen_borders)
                 clear_camera(viewport_x, viewport_y)
                 blt.puts(center_x + 2, center_y,
                          "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
@@ -272,8 +270,7 @@ def main():
 
     fov_recompute = True
     viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
-    draw_ui(viewport_x, viewport_y, msg_panel,
-            msg_panel_borders, screen_borders)
+    draw_ui(msg_panel, msg_panel_borders, screen_borders)
     message_log = MessageLog(5)
     player, viewport_x, viewport_y, msg_panel = main_menu(
         viewport_x, viewport_y, msg_panel)
@@ -282,13 +279,13 @@ def main():
         "dream", levels, player)
     power_msg = "Spirit power left: " + str(player.spirit_power)
     time_counter = variables.TimeCounter()
-    insights = 60
+    insights = 600
     game_state = GameStates.PLAYER_TURN
     key = None
     while True:
         print(str(time_counter.turn))
         if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, player.fov)
+            recompute_fov(fov_map, player.x, player.y, player.fov, True, 0)
 
         draw_all(game_map, game_camera, entities, player, player.x, player.y,
                  fov_map, fov_recompute, message_log, msg_panel, power_msg,
@@ -318,16 +315,17 @@ def main():
                     message_log.send(combat_msg)
                     player.spirit_power -= 0.5
                     time_counter.take_turn(1)
-                    draw_stats(player, viewport_x, viewport_y, power_msg, target)
+                    draw_stats(player, viewport_x,
+                               viewport_y, power_msg, target)
 
                 else:
                     player.move(dx, dy)
-                    
+
                     time_counter.take_turn(1 / player.fighter_c.mv_spd)
-                    
+
                     if (game_map.name is not "hub" and
                             game_map.name is not "debug"):
-                        player.spirit_power -= 0.5
+                        #player.spirit_power -= 0.5
                         power_msg = "Spirit power left: " + \
                             str(player.spirit_power)
                         draw_stats(player, viewport_x, viewport_y, power_msg)
@@ -336,14 +334,25 @@ def main():
                         message_log.send(
                             "Meditate and go to dream world with '<' or '>'")
 
+                    # If there are entities under the player, print them
+                    stack = []
                     for entity in entities:
                         if not entity.fighter_c:
                             if player.x == entity.x and player.y == entity.y:
-                                message_log.send(
-                                    "You see " + entity.name + ".")
+                                stack.append(entity.name)
+                    
+                    if len(stack) > 0:
+                        d = dict(Counter(stack))
+                        formatted_stack = []
+                        for i in d:
+                            if d[i] > 1:
+                                formatted_stack.append(i + " x" + str(d[i]))
+                            else:
+                                formatted_stack.append(i)
+                        message_log.send("You see " + ", ".join(formatted_stack) + ".")
 
                     fov_recompute = True
-                 
+
                 game_state = GameStates.ENEMY_TURN
 
             if game_map.tiles[destination_x][destination_y].char == \
@@ -354,7 +363,7 @@ def main():
 
         if key == blt.TK_PERIOD or key == blt.TK_KP_5:
             time_counter.take_turn(1)
-            player.spirit_power -= 1
+            #player.spirit_power -= 1
             power_msg = "Spirit power left: " + \
                 str(player.spirit_power)
             game_state = GameStates.ENEMY_TURN
@@ -405,8 +414,7 @@ def main():
         if key == blt.TK_M:
             show_msg_history(
                 message_log.history, viewport_x, viewport_y)
-            draw_ui(viewport_x, viewport_y, msg_panel,
-                    msg_panel_borders, screen_borders)
+            draw_ui(msg_panel, msg_panel_borders, screen_borders)
             fov_recompute = True
 
         if game_state == GameStates.ENEMY_TURN:

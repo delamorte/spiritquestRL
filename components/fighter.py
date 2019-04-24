@@ -26,24 +26,23 @@ class Fighter:
         if target.fighter_c.ev * 5 >= hit_chance:
             if self.owner.player:
                 results.append(
-                    "You attack {0}, but miss.".format(target.name))
+                    "You attack the {0}, but miss.".format(target.name))
             else:
-                results.append("{0} attacks you, but misses.".format(
-                    self.owner.name.capitalize()))
+                results.append("The {0} attacks you, but misses.".format(self.owner.name))
 
         elif damage > 0:
             if self.owner.player:
-                results.append("You attack {0} for {1} hit points.".format(
+                results.append("You attack the {0} for {1} hit points.".format(
                     target.name, str(damage)))
             else:
-                results.append("{0} attacks you for {1} hit points.".format(
-                    self.owner.name.capitalize(), str(damage)))
+                results.append("The {0} attacks you for {1} hit points.".format(
+                    self.owner.name, str(damage)))
             results.extend(target.fighter_c.take_damage(damage))
         else:
             if self.owner.player:
                 results.append(
-                    "You attack {0} but do no damage.".format(target.name))
+                    "You attack the {0} but do no damage.".format(target.name))
             else:
-                results.append("{0} attacks you but does no damage.".format(
-                    self.owner.name.capitalize()))
+                results.append("The {0} attacks you but does no damage.".format(self.owner.name))
         return results
+
