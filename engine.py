@@ -341,7 +341,7 @@ def main():
                             str(player.spirit_power)
                         draw_stats(player, viewport_x, viewport_y, power_msg)
 
-                    if game_map.tiles[player.x][player.y].char == tilemap()["campfire"]:
+                    if game_map.tiles[player.x][player.y].char[1] == tilemap()["campfire"]:
                         message_log.send(
                             "Meditate and go to dream world with '<' or '>'")
 
@@ -367,7 +367,7 @@ def main():
 
                 game_state = GameStates.ENEMY_TURN
 
-            if game_map.tiles[destination_x][destination_y].char == \
+            if game_map.tiles[destination_x][destination_y].char[1] == \
                     tilemap()["door_closed"]:
                 message_log.send("The door is locked...")
                 time_counter.take_turn(1)
@@ -409,12 +409,12 @@ def main():
             # Currently opens the door in hub
             for y in range(game_map.height):
                 for x in range(game_map.width):
-                    if game_map.tiles[x][y].char == tilemap()["door_closed"]:
-                        game_map.tiles[x][y].char = tilemap()["door_open"]
+                    if game_map.tiles[x][y].char[1] == tilemap()["door_closed"]:
+                        game_map.tiles[x][y].char[1] = tilemap()["door_open"]
                         game_map.tiles[x][y].blocked = False
 
         if stairs:
-            if game_map.tiles[player.x][player.y].char == tilemap()["campfire"]:
+            if game_map.tiles[player.x][player.y].char[1] == tilemap()["campfire"]:
                 game_map, game_camera, entities, player, fov_map = level_change(
                     "dream", levels, player)
                 message_log.clear()

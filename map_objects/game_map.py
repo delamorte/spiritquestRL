@@ -13,7 +13,7 @@ class GameMap:
 
     def initialize_tiles(self):
 
-        tiles = [[Tile(False, False, randint(0, 100), " ", tilemap()["floor"])
+        tiles = [[Tile(False, False)
                   for y in range(self.height)]
                  for x in range(self.width)]
 
@@ -49,26 +49,22 @@ class GameMap:
             for x in range(x1, x2):
                 if (x == x1 or x == x2 - 1 or
                         y == y1 or y == y2 - 1):
-                    self.tiles[x][y].color = "orange"
-                    self.tiles[x][y].char = tilemap()["wall_brick"]
+                    self.tiles[x][y].color[1] = "orange"
+                    self.tiles[x][y].char[1] = tilemap()["wall_brick"]
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = True
                     wall_x.append(x)
                     wall_y.append(y)
                 else:
-                    self.tiles[x][y].color = "darkest amber"
-                    self.tiles[x][y].char_ground = tilemap()["floor"]
-                    self.tiles[x][y].char = tilemap()["floor"]
-                    self.tiles[x][y].blocked = False
-                    self.tiles[x][y].block_sight = False
-                    self.tiles[x][y].spawnable = True
-        self.tiles[center_x][center_y].color = "lightest orange"
-        self.tiles[center_x][center_y].char = tilemap()["campfire"]
+                    self.tiles[x][y].color[0] = "darkest amber"
+
+        self.tiles[center_x][center_y].color[1] = "lightest orange"
+        self.tiles[center_x][center_y].char[1] = tilemap()["campfire"]
 
         # Generate one door at a random position in the room.
         door_seed = randint(0, len(wall_x) - 1)
-        self.tiles[wall_x[door_seed]][wall_y[door_seed]].color = None
-        self.tiles[wall_x[door_seed]][wall_y[door_seed]].char = tilemap()["door_closed"]
+        self.tiles[wall_x[door_seed]][wall_y[door_seed]].char[1] = tilemap()[
+            "door_closed"]
         self.tiles[wall_x[door_seed]][wall_y[door_seed]].blocked = True
         self.tiles[wall_x[door_seed]][wall_y[door_seed]].block_sight = False
 
@@ -87,6 +83,15 @@ class GameMap:
             block_sight = True
             self.generate_trees(dx, dy, width, height, freq, block_sight)
 
+        # Generate rocks & rubble on floor tiles
+        #for y in range(self.height - 1):
+        #    for x in range(self.width - 1):
+        #        if not self.is_blocked(x, y):
+        #            if randint(1, 10) >= self.tiles[x][y].seed:
+        #                #self.tiles[x][y].color = "dark gray"
+        #                self.tiles[x][y].char = tilemap()["rubble"][randint(
+        #                    0, (len(tilemap()["rubble"]) - 1))]
+
     def generate_trees(self, dx, dy, width, height, freq, block_sight):
         """Generate a forest to a rectangular area."""
 
@@ -98,11 +103,13 @@ class GameMap:
 
         for y in range(dy, height):
             for x in range(dx, width):
-                self.tiles[x][y].char_ground = tilemap()["ground_soil"]
+                self.tiles[x][y].color[0] = "darkest amber"
+                self.tiles[x][y].char[0] = tilemap()["ground_soil"]
                 # Generate forest tiles
                 if randint(0, 100) < freq:
-                    self.tiles[x][y].char = tilemap()["tree"][randint(0,(len(tilemap()["tree"])-1))]
-                    self.tiles[x][y].color = forest_colors[randint(0, 4)]
+                    self.tiles[x][y].char[1] = tilemap()["tree"][randint(
+                        0, (len(tilemap()["tree"]) - 1))]
+                    self.tiles[x][y].color[1] = forest_colors[randint(0, 4)]
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = block_sight
 
@@ -140,7 +147,7 @@ class GameMap:
 
             number_of_monsters = randint(self.width / 2 - 20, self.width / 2)
             monsters = []
-            for x,y in tilemap()["monsters"].items():
+            for x, y in tilemap()["monsters"].items():
                 monsters.append((x, y))
 
             for i in range(number_of_monsters):

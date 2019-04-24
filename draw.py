@@ -58,39 +58,41 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute, viewport_x, viewport
 
                 # Draw tiles within fov
                 if visible:
-                    # Draw layer 0 + 1 first
-                    if not game_map.tiles[map_x][map_y].char == " ":
+                    # Draw layers in order
+                    if not game_map.tiles[map_x][map_y].char[1] == " ":
                         blt.layer(0)
-                        blt.color("darkest amber")
+                        blt.color(game_map.tiles[map_x][map_y].color[0])
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
-                                game_map.tiles[map_x][map_y].char_ground)
+                                game_map.tiles[map_x][map_y].char[0])
+                        
                         blt.layer(1)
-                        blt.color(game_map.tiles[map_x][map_y].color)
+                        blt.color(game_map.tiles[map_x][map_y].color[1])
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
-                                game_map.tiles[map_x][map_y].char)
+                                game_map.tiles[map_x][map_y].char[1])
                     # Fill rest of fov with ground tiles
                     else:
-                        blt.color("darkest amber")
+                        blt.color(game_map.tiles[map_x][map_y].color[0])
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
-                                game_map.tiles[map_x][map_y].char_ground)
+                                game_map.tiles[map_x][map_y].char[0])
                     # Set everything in fov as explored
                     game_map.tiles[map_x][map_y].explored = True
 
                 # Gray out explored tiles
                 elif game_map.tiles[map_x][map_y].explored:
-                    if not game_map.tiles[map_x][map_y].char == " ":
+                    if not game_map.tiles[map_x][map_y].char[1] == " ":
                         blt.layer(0)
                         blt.color("darkest gray")
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
-                                game_map.tiles[map_x][map_y].char_ground)
+                                game_map.tiles[map_x][map_y].char[0])
+                        
                         blt.layer(1)
                         blt.color("darkest gray")
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
-                                game_map.tiles[map_x][map_y].char)
+                                game_map.tiles[map_x][map_y].char[1])
                     else:
                         blt.color("darkest gray")
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
-                                game_map.tiles[map_x][map_y].char_ground)
+                                game_map.tiles[map_x][map_y].char[0])
 
 
 def draw_messages(msg_panel, message_log, player, power_msg, viewport_x, viewport_y):
