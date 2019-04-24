@@ -20,6 +20,7 @@ import variables
 TODO:
 
 - Improve combat mechanics
+- Abilities and status effects
 - Items and inventory
 - Npcs
 - Minimap
@@ -28,7 +29,6 @@ TODO:
 
 FIX:
 
-- Make FOV variables non global and changeable (fov class?)
 - Generate levels with a seed
 
 """

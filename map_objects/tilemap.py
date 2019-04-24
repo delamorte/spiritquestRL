@@ -21,7 +21,7 @@ def tilemap():
                  "ground_soil": ".",
                  "floor": ".",
                  "player": "@",
-                 "player_remains": "@",
+                 "player_remains": "[color=light red]@",
                  "monsters": {"rat": "r", "crow": "c", "snake": "s"},
                  "monster_remains": "%",
                  "door_closed": "+",

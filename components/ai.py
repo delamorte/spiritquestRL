@@ -1,4 +1,5 @@
 from fov import recompute_fov
+from random import randint
 
 class BasicMonster:
     def __init__(self):
@@ -49,7 +50,24 @@ class BasicMonster:
             self.action_begin = False
             if not monster.x == self.target_last_seen_x and not monster.y == self.target_last_seen_y:
                 monster.move_astar(target, entities, game_map)
-                #monster.move_towards(self.target_last_seen_x, self.target_last_seen_y, game_map, entities)
+            
+        else:
+            self.idle_actions(game_map)
 
         return combat_msg
+    
+    def idle_actions(self, game_map):
+        
+        dx = randint(-1, 1)
+        dy = randint(-1, 1)
+        dest_x = dx + self.owner.x
+        dest_y = dy + self.owner.y
+        
+        if not game_map.is_blocked(dest_x, dest_y):
+            
+            self.owner.move(dx, dy)
+
+            
+
+        
     

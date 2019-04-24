@@ -3,9 +3,9 @@ from helpers import get_article
 from map_objects.tilemap import tilemap
 
 
+
 def kill_player(player):
     player.char = tilemap()["player_remains"]
-    player.color = ("light red")
     return "[color=red]You died!", GameStates.PLAYER_DEAD
 
 
