@@ -8,13 +8,13 @@ def draw(entity, game_map, x, y, fov_map):
 
     # Draw the entity to the screen
     blt.layer(entity.layer)
+    blt.color(entity.color)
     if not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.x][entity.y].explored:
         blt.color("gray")
     if game_map.name is "hub" and entity.player:
         blt.put(x * variables.tile_offset_x, y *
                 variables.tile_offset_y, entity.char_hub)
     else:
-        blt.color(entity.color)
         blt.put(x * variables.tile_offset_x, y *
                 variables.tile_offset_y, entity.char)
 
