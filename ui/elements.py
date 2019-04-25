@@ -18,7 +18,7 @@ def init_ui():
     viewport_y = h * variables.ui_offset_y - (variables.ui_offset_y + 1)
     variables.viewport_x = viewport_x
     variables.viewport_y = viewport_y
-    return viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders
+    return msg_panel, msg_panel_borders, screen_borders
 
 class Panel:
 

@@ -105,11 +105,10 @@ def level_change(level_name, levels, player):
 def main():
 
     fov_recompute = True
-    viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
+    msg_panel, msg_panel_borders, screen_borders = init_ui()
     draw_ui(msg_panel, msg_panel_borders, screen_borders)
     message_log = MessageLog(5)
-    player, viewport_x, viewport_y, msg_panel = main_menu(
-        viewport_x, viewport_y, msg_panel)
+    player, viewport_x, viewport_y, msg_panel = main_menu(msg_panel)
     levels = []
     game_map, game_camera, entities, player, fov_map = level_change(
         "hub", levels, player)

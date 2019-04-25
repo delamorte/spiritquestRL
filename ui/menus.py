@@ -8,17 +8,17 @@ from ui.elements import init_ui
 import variables
 from fighter_stats import get_fighter_stats
 
-def main_menu(viewport_x, viewport_y, msg_panel):
+def main_menu(msg_panel):
 
     current_range = 0
-    center_x = int(viewport_x / 2)
-    center_y = int(viewport_y / 2)
+    center_x = int(variables.viewport_x / 2)
+    center_y = int(variables.viewport_y / 2)
     while True:
 
         choices = ["New game", "Resize window",
                    "Graphics: " + variables.gfx, "Tilesize: " + variables.tilesize + "x" + variables.tilesize, "Exit"]
         blt.layer(0)
-        clear_camera(viewport_x, viewport_y)
+        clear_camera(variables.viewport_x, variables.viewport_y)
         blt.puts(center_x + 2, center_y,
                  "[color=white]Spirit Quest RL", 0, 0, blt.TK_ALIGN_CENTER)
 
@@ -47,19 +47,19 @@ def main_menu(viewport_x, viewport_y, msg_panel):
                 variables.tilesize = str(int(variables.tilesize) + 16)
                 #blt.close()
                 init_tiles()
-                viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
+                msg_panel, msg_panel_borders, screen_borders = init_ui()
                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
             else:
                 variables.tilesize = str(16)
                 #blt.close()
                 init_tiles()
-                viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
+                msg_panel, msg_panel_borders, screen_borders = init_ui()
                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
 
         if key == blt.TK_ENTER and r is "New game":
             key = None
             while True:
-                clear_camera(viewport_x, viewport_y)
+                clear_camera(variables.viewport_x, variables.viewport_y)
                 animals = tilemap()["monsters"]
                 blt.layer(0)
                 blt.puts(center_x, center_y - 5,
@@ -108,7 +108,7 @@ def main_menu(viewport_x, viewport_y, msg_panel):
                     if variables.gfx is "ascii":
                         player.char = tilemap()["player"]
                         player.color = "lightest green"
-                    return player, viewport_x, viewport_y, msg_panel
+                    return player, variables.viewport_x, variables.viewport_y, msg_panel
 
         elif key == blt.TK_ENTER and r is "Exit":
             exit()
@@ -117,13 +117,13 @@ def main_menu(viewport_x, viewport_y, msg_panel):
             blt.set("window: resizeable=true, minimum-size=60x20")
             key = None
             while key not in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_ENTER):
-                viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
-                center_x = int(viewport_x / 2)
-                center_y = int(viewport_y / 2)
+                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                center_x = int(variables.viewport_x / 2)
+                center_y = int(variables.viewport_y / 2)
                 h = blt.state(blt.TK_HEIGHT)
                 w = blt.state(blt.TK_WIDTH)
                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
-                clear_camera(viewport_x, viewport_y)
+                clear_camera(variables.viewport_x, variables.viewport_y)
                 blt.puts(center_x + 2, center_y,
                          "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
                 blt.refresh()
