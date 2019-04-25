@@ -47,6 +47,7 @@ def level_change(level_name, levels, player, game_map=None, entities=None, fov_m
         # game_map.generate_trees(0, 0, game_map.width,
         #                        game_map.height, 20, block_sight=True)
         # game_map.generate_forest()
+        cv= game_map.generate_cavern()
         game_map, entities, player, fov_map = level_init(
             game_map, player)
 

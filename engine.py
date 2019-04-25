@@ -101,7 +101,6 @@ def game_loop(main_menu_show=True, choice=None):
 
     key = None
     while True:
-        print(str(time_counter.turn))
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, player.fighter.fov, True, 0)
 

@@ -13,10 +13,13 @@ class Tile:
 
     def __init__(self,
                  blocked,
-                 block_sight):
+                 block_sight,x,y):
         self.blocked = blocked
         self.block_sight = block_sight
+        self.x = x
+        self.y = y
         self.explored = False
+        self.visited = False
         self.seed = randint(1,100)
         self.char = {0: tilemap()["floor"], 1: " "}
         self.color = {0: "darkest amber", 1: None}

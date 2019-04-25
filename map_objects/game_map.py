@@ -44,7 +44,7 @@ class GameMap:
 
     def initialize_tiles(self):
 
-        tiles = [[Tile(False, False)
+        tiles = [[Tile(False, False, x, y)
                   for y in range(self.height)]
                  for x in range(self.width)]
 
@@ -76,6 +76,18 @@ class GameMap:
                     self.tiles[x][y].blocked = False
                     self.tiles[x][y].block_sight = False
                     self.tiles[x][y].spawnable = True
+
+    def count_walls(self, n, x, y):
+        wall_count = 0
+        
+        for r in range(-n, n+1):
+            for c in range (-n, n+1):
+                if x+r >= self.width or x+r <= 0 or y+c >= self.height or y+c <= 0:
+                    wall_count += 1
+                elif self.tiles[x+r][y+c].blocked and self.tiles[x+r][y+c].block_sight:
+                    wall_count += 1
+                    
+        return wall_count
 
     def generate_hub(self):
 
@@ -163,6 +175,129 @@ class GameMap:
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = block_sight
 
+    def generate_cavern(self):
+        
+        cavern_colors = ["lightest amber",
+                         "lighter amber",
+                         "light amber",
+                         "dark amber",
+                         "darker amber",
+                         "darkest amber"]
+
+        for y in range(self.height):
+            for x in range(self.width):
+
+                self.tiles[x][y].color[0] = cavern_colors[4]
+                self.tiles[x][y].char[0] = tilemap()["ground_moss"][randint(
+                        0, (len(tilemap()["ground_moss"]) - 1))]
+                self.tiles[x][y].visited = False
+                self.tiles[x][y].blocked = False
+                self.tiles[x][y].block_sight = False
+                freq = randint(1,100)
+                if freq < 50:
+                    self.tiles[x][y].color[1] = cavern_colors[4]
+                    self.tiles[x][y].char[1] = tilemap()["wall_moss"][randint(
+                        0, (len(tilemap()["wall_moss"]) - 1))]
+                    self.tiles[x][y].blocked = True
+                    self.tiles[x][y].block_sight = True
+
+        for i in range(5):
+            for x in range(self.width):
+                for y in range(self.height-1):
+                    wall_one_away = self.count_walls(1, x, y)
+                    wall_two_away = self.count_walls(2, x, y)
+                    
+                    if wall_one_away >= 5 or wall_two_away <= 2:
+                        self.tiles[x][y].color[1] = cavern_colors[4]
+                        self.tiles[x][y].char[1] = tilemap()["wall_moss"][randint(
+                            0, (len(tilemap()["wall_moss"]) - 1))]
+                        self.tiles[x][y].blocked = True
+                        self.tiles[x][y].block_sight = True
+                    else:  
+                        self.tiles[x][y].blocked = False
+                        self.tiles[x][y].block_sight = False                    
+                        self.tiles[x][y].char[1] = " "
+
+        #=======================================================================
+        # for i in range (5):
+        #     for x in range (self.width):
+        #         for y in range (self.height):
+        #             wall_one_away = self.count_walls(1, x, y)
+        #             
+        #             if wall_one_away >= 5:
+        #                 self.tiles[x][y].color[1] = cavern_colors[4]
+        #                 self.tiles[x][y].char[1] = tilemap()["wall_moss"][randint(
+        #                     0, (len(tilemap()["wall_moss"]) - 1))]
+        #                 self.tiles[x][y].blocked = True
+        #                 self.tiles[x][y].block_sight = True
+        #             else:  
+        #                 self.tiles[x][y].blocked = False
+        #                 self.tiles[x][y].block_sight = False                    
+        #                 self.tiles[x][y].char[1] = " "
+        #=======================================================================
+        
+        for y in range(self.height):
+            for x in range(self.width):
+                if (x == 1 or x == self.width - 2 or
+                        y == 1 or y == self.height - 2):
+                    self.tiles[x][y].color[1] = cavern_colors[4]
+                    self.tiles[x][y].char[1] = tilemap()["wall_moss"][randint(
+                        0, (len(tilemap()["wall_moss"]) - 1))]
+                    self.tiles[x][y].blocked = True
+                    self.tiles[x][y].block_sight = True
+        
+    
+        cavern = []
+        total_cavern_area = []
+        caverns = []
+        
+        for x in range(0,self.width-1):
+            for y in range(0, self.height-1):
+                tile = self.tiles[x][y]
+
+                if not tile.visited and not tile.blocked:
+                    cavern.append(self.tiles[x][y])
+                    
+                    while len(cavern) > 0:
+                        
+                        node = cavern[len(cavern)-1]
+                        cavern = cavern[:len(cavern)-1]
+                        
+                        if not node.visited and not node.blocked:
+                            node.visited = True
+                            total_cavern_area.append(node)
+                            
+                            if node.x - 1  > 0 and not self.tiles[node.x - 1][node.y].blocked:
+                                cavern.append(self.tiles[node.x -1][node.y])
+                            
+                            if node.x + 1 < self.width and not self.tiles[node.x + 1][node.y].blocked:
+                                cavern.append(self.tiles[node.x + 1][node.y])
+        
+                            if node.y - 1  > 0 and not self.tiles[node.x][node.y-1].blocked:
+                                cavern.append(self.tiles[node.x][node.y-1])
+        
+                            if node.y +1  < self.height and not self.tiles[node.x][node.y+1].blocked:
+                                cavern.append(self.tiles[node.x][node.y+1])
+                            
+                            
+                    caverns.append(total_cavern_area)
+                    total_cavern_area = []
+                
+                else:
+                    tile.visited = True
+
+        caverns.sort(key=len)
+        caverns = caverns[:len(caverns)-1]
+        
+        for i in range(0, len(caverns)):
+            for j in range (0, len(caverns[i])):
+                caverns[i][j].color[1] = cavern_colors[4]
+                caverns[i][j].char[1] = tilemap()["wall_moss"][randint(
+                    0, (len(tilemap()["wall_moss"]) - 1))]
+                caverns[i][j].blocked = True
+                caverns[i][j].block_sight = True
+                
+        
     def is_blocked(self, x, y):
         if self.tiles[x][y].blocked:
             return True

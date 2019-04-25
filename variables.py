@@ -17,8 +17,6 @@ class TimeCounter:
     def take_turn(self, action_cost):
         self.last_turn = self.turn
         self.turn += action_cost
-        print("current turn: " + str(self.turn))
-        print("last turn: " + str(self.last_turn))
         
     def get_turn(self):
         return self.turn

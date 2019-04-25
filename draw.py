@@ -55,7 +55,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
             for x in range(ceil(variables.camera_offset), game_camera.width - ceil(variables.camera_offset)):
                 map_x, map_y = game_camera.x + x, game_camera.y + y
                 visible = fov_map.fov[map_y, map_x]
-
+                
                 # Draw tiles within fov
                 if visible:
                     # Draw layers in order

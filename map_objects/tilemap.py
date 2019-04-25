@@ -27,6 +27,7 @@ def tilemap():
     if variables.gfx is "tiles":
         tiles = {"tree": (0xE100 + 87, 0xE100 + 88, 0xE100 + 89, 0xE100 + 93, 0xE100 + 94, 0xE100 + 95),
                  "ground_soil": 0xE100 + 21,
+                 "ground_moss": (0xE100 + 1751, 0xE100 + 1752, 0xE100 + 1753),
                  "floor": 0xE100 + 21,
                  "rubble": (0xE100 + 388, 0xE100 + 119),
                  "player": 0xE100 + 704,
@@ -37,11 +38,13 @@ def tilemap():
                  "door_open": 0xE100 + 68,
                  "campfire": 0xE100 + 427,
                  "wall_brick": 0xE100 + 83,
+                 "wall_moss":(0xE100 + 90, 0xE100 + 91, 0xE100 + 92),
                  "weapons":{"club": 0xE100 + 242}}
 
     elif variables.gfx is "ascii":
         tiles = {"tree": ("T", "t"),
                  "ground_soil": ".",
+                 "ground_moss": ".",
                  "floor": ".",
                  "rubble": ".",
                  "player": "@",
@@ -52,6 +55,7 @@ def tilemap():
                  "door_open": "-",
                  "campfire": "¤",
                  "wall_brick": "#",
+                 "wall_moss": "#",
                  "weapons":{"club": "\\"}}
 
     return tiles
