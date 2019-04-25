@@ -1,3 +1,4 @@
+from components.item import Item
 from entity import Entity
 from map_objects.tile import Tile
 from map_objects.tilemap import tilemap
@@ -9,20 +10,29 @@ class Room:
         self.y = y
         self.w = w
         self.h = h
+        self.x2 = self.x + self.w
+        self.y2 = self.y + self.h
         self.wall = wall
         self.wall_color = wall_color
         
     def get_walls(self):
 
-        walls = [()]
+        walls = []
 
-        for y in range(self.y, self.y+self.h):
-            for x in range(self.x, self.x+self.w):
-                if (x == self.x or x == self.w - 1 or
-                        y == self.y or y == self.h - 1):
+        for y in range(self.y, self.y2):
+            for x in range(self.x, self.x2):
+                if (x == self.x or x == self.x2 - 1 or
+                        y == self.y or y == self.y2 - 1):
                     walls.append((x, y))
                     
         return walls
+    
+    def get_center(self):
+        
+        center_x = int((self.x + self.x + self.w) / 2)
+        center_y = int((self.y + self.y + self.h) / 2)
+        
+        return center_x, center_y
 
 class GameMap:
     def __init__(self, width, height, name):
@@ -49,13 +59,11 @@ class GameMap:
  
     def create_room(self, room):
 
-        x2 = room.x + room.w
-        y2 = room.y + room.h
         
-        for y in range(room.y, y2):
-            for x in range(room.x, x2):
-                if (x == room.x or x == x2 - 1 or
-                        y == room.y or y == y2 - 1):
+        for y in range(room.y, room.y2):
+            for x in range(room.x, room.x2):
+                if (x == room.x or x == room.x2 - 1 or
+                        y == room.y or y == room.y2 - 1):
                     self.tiles[x][y].color[1] = room.wall_color
                     self.tiles[x][y].char[1] = room.wall
                     self.tiles[x][y].blocked = True
@@ -79,12 +87,11 @@ class GameMap:
         x1 = randint(1, self.width - w - 1)
         y1 = randint(1, self.height - h - 1)
         
-        home = Room(x1, y1, w, h, tilemap()["wall_brick"], "orange")
+        home = Room(x1, y1, 10, 10, tilemap()["wall_brick"], "orange")
         
         self.create_room(home)
         
-        center_x = int((home.x + home.x + home.w) / 2)
-        center_y = int((home.y + home.x + home.h) / 2)
+        center_x, center_y = home.get_center()
 
         self.tiles[center_x][center_y].color[1] = "lightest orange"
         self.tiles[center_x][center_y].char[1] = tilemap()["campfire"]
@@ -98,9 +105,11 @@ class GameMap:
             "door_closed"]
         self.tiles[walls[door_seed][0]][walls[door_seed][1]].blocked = True
         self.tiles[walls[door_seed][0]][walls[door_seed][1]].block_sight = False
+
+        self.set_home(home)
         
-        # Create starting weapon in hub
-        #weapon = Entity(center_x)
+    def set_home(self, home):
+        self.home = home
 
     def generate_forest(self):
 
@@ -153,7 +162,7 @@ class GameMap:
 
         return False
 
-    def place_entities(self, player):
+    def place_entities(self, player, entities):
 
         # Initialize player, starting position and other entities
         px, py = randint(1, self.width - 1), \
@@ -166,17 +175,21 @@ class GameMap:
         player.y = py
 
         if self.name == "hub":
-            for x in range(self.width - 1):
-                for y in range(self.height - 1):
-                    if self.tiles[x][y].spawnable:
-                        player.x = x - 1
-                        player.y = y - 1
-                        
+            px, py = self.home.get_center()
+            player.x = px - 1
+            player.y = py - 1
+
+            # Create starting weapon in hub
+            x, y = self.home.get_center()
+            item_component = Item()
+            weapon = Entity(x+2, y+2, 11, tilemap()["weapons"]["club"], None, "club", item=item_component)
+            
+            entities.append(weapon)
             
         # if self.name == "debug":
         #    player.x, player.y = 2, 2
 
-        entities = [player]
+        entities.append(player)
 
         if self.name is "dream":
 

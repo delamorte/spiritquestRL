@@ -21,6 +21,8 @@ def handle_keys(key):
     elif key == blt.TK_KP_3 or key == blt.TK_N:
         return {'move': (1, 1)}
 
+    if key == blt.TK_G or key == blt.TK_COMMA:
+        return {'pickup': True}
 
     # '<' and '> keys for stairs
     if key == 41 or key == 49:

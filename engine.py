@@ -2,18 +2,19 @@ from bearlibterminal import terminal as blt
 from camera import Camera
 from collections import Counter
 from death_functions import kill_monster, kill_player
-from draw import draw_all, draw_stats, draw_ui, clear_entities, clear_camera
-from entity import Entity, blocking_entity
+from draw import draw_all, draw_stats, draw_ui, clear_entities
+from entity import blocking_entity
 from game_states import GameStates
 from fov import initialize_fov, recompute_fov
+from helpers import get_article
 from input_handlers import handle_keys
 from map_objects.game_map import GameMap
 from math import floor
-from map_objects.tilemap import tilemap, bestiary
-from ui.elements import Panel
+from map_objects.tilemap import init_tiles, tilemap
+from ui.elements import init_ui
 from ui.game_messages import MessageLog
 from ui.message_history import show_msg_history
-from sys import exit
+from ui.menus import main_menu
 import variables
 
 """
@@ -43,34 +44,19 @@ def blt_init():
     size = 'size=128x50'
     title = 'title=' + window_title
     cellsize = 'cellsize=auto'
-    tilesize = variables.tilesize + 'x' + variables.tilesize
-    ui_size = variables.ui_size + 'x' + variables.ui_size
     resizable = 'resizeable=false'
     window = "window: " + size + "," + title + "," + cellsize + "," + resizable
 
     blt.set(window)
     blt.set("font: default")
-    # Load tilesets
-    blt.set("U+E100: ./tilesets/adam_bolt_angband16x16_fix.png, \
-        size=16x16, resize=" + tilesize + ", resize-filter=nearest, align=top-left")
-    blt.set("U+E900: ./tilesets/adam_bolt_angband16x16_fix.png, \
-        size=16x16, resize=" + ui_size + ", resize-filter=nearest, align=top-left")
-    variables.tile_offset_x = int(
-        int(variables.tilesize) / blt.state(blt.TK_CELL_WIDTH))
-    variables.tile_offset_y = int(
-        int(variables.tilesize) / blt.state(blt.TK_CELL_HEIGHT))
-    variables.ui_offset_x = int(
-        int(variables.ui_size) / blt.state(blt.TK_CELL_WIDTH))
-    variables.ui_offset_y = int(
-        int(variables.ui_size) / blt.state(blt.TK_CELL_HEIGHT))
-    variables.camera_offset = int(variables.ui_size) / int(variables.tilesize)
-    blt.clear()
+    init_tiles()
 
 
 def level_init(game_map, player):
 
     # Initialize entities
-    player, entities = game_map.place_entities(player)
+    entities = []
+    player, entities = game_map.place_entities(player, entities)
 
     # Initialize game camera
     game_camera = Camera(1, 1, int(floor(blt.state(blt.TK_WIDTH) / variables.ui_offset_x) * variables.camera_offset),
@@ -113,167 +99,6 @@ def level_change(level_name, levels, player):
     return game_map, game_camera, entities, player, fov_map
 
 
-def init_ui():
-
-    screen_w = blt.state(floor(blt.TK_WIDTH))
-    screen_h = blt.state(floor(blt.TK_HEIGHT))
-
-    w = floor(screen_w / variables.ui_offset_x)
-    h = floor(screen_h / variables.ui_offset_y - 5)
-
-    msg_panel = Panel(1, h + 1, w - 1, h + 4)
-    msg_panel_borders = Panel(0, h, w, h + 5)
-    screen_borders = Panel(0, 0, w, h)
-
-    viewport_x = w * variables.ui_offset_x - (variables.ui_offset_x + 1)
-    viewport_y = h * variables.ui_offset_y - (variables.ui_offset_y + 1)
-    return viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders
-
-
-def main_menu(viewport_x, viewport_y, msg_panel):
-
-    current_range = 0
-    center_x = int(viewport_x / 2)
-    center_y = int(viewport_y / 2)
-    while True:
-
-        choices = ["New game", "Resize window",
-                   "Graphics: " + variables.gfx, "Tilesize: " + variables.tilesize + "x" + variables.tilesize, "Exit"]
-        blt.layer(0)
-        clear_camera(viewport_x, viewport_y)
-        blt.puts(center_x + 2, center_y,
-                 "[color=white]Spirit Quest RL", 0, 0, blt.TK_ALIGN_CENTER)
-
-        for i, r in enumerate(choices):
-            selected = i == current_range
-            blt.color("orange" if selected else "light_gray")
-            blt.puts(center_x + 2, center_y + 2 + i, "%s%s" %
-                     ("[U+203A]" if selected else " ", r), 0, 0, blt.TK_ALIGN_CENTER)
-
-        blt.refresh()
-
-        r = choices[current_range]
-
-        key = blt.read()
-        if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
-            exit()
-
-        if key == blt.TK_ENTER and current_range == 2:
-            if variables.gfx is "tiles":
-                variables.gfx = "ascii"
-            elif variables.gfx is "ascii":
-                variables.gfx = "tiles"
-
-        if key == blt.TK_ENTER and current_range == 3:
-            if int(variables.tilesize) < 48:
-                variables.tilesize = str(int(variables.tilesize) + 16)
-                blt.close()
-                blt_init()
-                viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
-            else:
-                variables.tilesize = str(16)
-                blt.close()
-                blt_init()
-                viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
-
-        if key == blt.TK_ENTER and r is "New game":
-            key = None
-            while True:
-                clear_camera(viewport_x, viewport_y)
-                animals = tilemap()["monsters"]
-                blt.layer(0)
-                blt.puts(center_x, center_y - 5,
-                         "[color=white]Choose your spirit animal...", 0, 0, blt.TK_ALIGN_CENTER)
-                for i, (r, c) in enumerate(animals.items()):
-                    selected = i == current_range
-
-                    # Draw select symbol, monster name and description
-                    blt.color("orange" if selected else "default")
-                    blt.puts(center_x - 14, center_y - 2 + i * 3, "%s%s" %
-                             ("[U+203A]" if selected else " ", r.capitalize() + ":"+"\n "+bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
-                    
-                    # Draw a bg tile
-                    blt.layer(0)
-                    blt.puts(center_x - 20 + 1, center_y - 2 + i * 3, "[U+"+hex(0xE900+3)+"]", 0, 0)
-
-                    # Draw monster tile
-                    blt.layer(1)
-                    if variables.gfx is "ascii":
-                        blt.puts(center_x - 20 + 1, center_y - 2 + i * 3, c, 0, 0)
-                    else:
-                        blt.puts(center_x - 20 + 1, center_y - 2 + i * 3, "[U+"+hex(c+2048)+"]", 0, 0)
-
-                    if selected:
-                        choice = r
-
-                blt.refresh()
-                key = blt.read()
-
-                if key == blt.TK_ESCAPE:
-                    break
-                elif key == blt.TK_UP:
-                    if current_range > 0:
-                        current_range -= 1
-                elif key == blt.TK_DOWN:
-                    if current_range < len(animals) - 1:
-                        current_range += 1
-                elif key == blt.TK_ENTER:
-                    player = Entity(
-                        1, 1, 12, animals[choice], None, choice, blocks=True, player=True, fighter=True)
-                    if variables.gfx is "ascii":
-                        player.char = tilemap()["player"]
-                        player.color = "lightest green"
-                    return player, viewport_x, viewport_y, msg_panel
-
-        elif key == blt.TK_ENTER and r is "Exit":
-            exit()
-
-        elif key == blt.TK_ENTER and r is "Resize window":
-            blt.set("window: resizeable=true, minimum-size=60x20")
-            key = None
-            while key not in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_ENTER):
-                viewport_x, viewport_y, msg_panel, msg_panel_borders, screen_borders = init_ui()
-                center_x = int(viewport_x / 2)
-                center_y = int(viewport_y / 2)
-                h = blt.state(blt.TK_HEIGHT)
-                w = blt.state(blt.TK_WIDTH)
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
-                clear_camera(viewport_x, viewport_y)
-                blt.puts(center_x + 2, center_y,
-                         "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
-                blt.refresh()
-
-                key = blt.read()
-                if key == blt.TK_FULLSCREEN:
-                    blt.set("window.fullscreen=true")
-                if key == blt.TK_UP:
-                    blt.set("window: size=" + str(w) + "x" +
-                            (str(h + variables.tile_offset_y)))
-                if key == blt.TK_DOWN:
-                    blt.set("window: size=" + str(w) + "x" +
-                            (str(h - variables.tile_offset_y)))
-                    if h <= 30:
-                        blt.set("window: size=" + str(w) + "x" + "30")
-                if key == blt.TK_RIGHT:
-                    blt.set("window: size=" +
-                            (str(w + variables.tile_offset_x)) + "x" + str(h))
-                if key == blt.TK_LEFT:
-                    blt.set("window: size=" +
-                            (str(w - variables.tile_offset_x)) + "x" + str(h))
-                    if w <= 60:
-                        blt.set("window: size=60" + "x" + str(h))
-
-            blt.set("window: resizeable=false")
-        elif key == blt.TK_UP:
-            if current_range > 0:
-                current_range -= 1
-        elif key == blt.TK_DOWN:
-            if current_range < len(choices) - 1:
-                current_range += 1
-
-
 def main():
 
     fov_recompute = True
@@ -307,6 +132,7 @@ def main():
         action = handle_keys(key)
 
         move = action.get('move')
+        pickup = action.get('pickup')
         stairs = action.get('stairs')
         fullscreen = action.get('fullscreen')
 
@@ -347,7 +173,10 @@ def main():
                     for entity in entities:
                         if not entity.fighter_c:
                             if player.x == entity.x and player.y == entity.y:
-                                stack.append(entity.name)
+                                if entity.item:
+                                    stack.append(get_article(entity.name) + " " + entity.name)
+                                else:
+                                    stack.append(entity.name)
 
                     if len(stack) > 0:
                         d = dict(Counter(stack))
@@ -370,6 +199,19 @@ def main():
                 time_counter.take_turn(1)
                 game_state = GameStates.ENEMY_TURN
 
+        elif pickup and game_state == GameStates.PLAYER_TURN:
+            for entity in entities:
+                if entity.item and entity.x == player.x and entity.y == player.y:
+                    pickup_msg = player.inventory.add_item(entity)
+                    message_log.send(pickup_msg)
+                    entities.remove(entity)
+                    time_counter.take_turn(1)
+                    game_state = GameStates.ENEMY_TURN
+                    break
+            else:
+                message_log.send("There is nothing here to pick up.")
+
+        
         if key == blt.TK_PERIOD or key == blt.TK_KP_5:
             time_counter.take_turn(1)
             #player.spirit_power -= 1
@@ -422,7 +264,16 @@ def main():
 
         if key == blt.TK_M:
             show_msg_history(
-                message_log.history, viewport_x, viewport_y)
+                message_log.history, viewport_x, viewport_y, "Message history")
+            draw_ui(msg_panel, msg_panel_borders, screen_borders)
+            fov_recompute = True
+            
+        if key == blt.TK_I:
+            show_items = []
+            for item in player.inventory.items:
+                show_items.append(get_article(item.name) + " " + item.name)
+            show_msg_history(
+                show_items, viewport_x, viewport_y, "Inventory")
             draw_ui(msg_panel, msg_panel_borders, screen_borders)
             fov_recompute = True
 

@@ -97,7 +97,7 @@ class FrameWithScrollbar(object):
                         self.scrollbar_offset, 0x2588)
 
 
-def show_msg_history(message_log, viewport_x, viewport_y):
+def show_msg_history(message_log, viewport_x, viewport_y, name):
     messages = MessageList()
     frame = FrameWithScrollbar(messages)
 
@@ -111,9 +111,13 @@ def show_msg_history(message_log, viewport_x, viewport_y):
         viewport_x +5- (padding_left + padding_right),
         viewport_y - (padding_top + padding_bottom))
 
-    prompt = \
-        "Use arrow keys to scroll the list up and down. " \
-        "\n\n--- --- ---"
+    if name == "Message history":
+        prompt = \
+            "Message history: \n"
+
+    elif name == "Inventory":
+        prompt = \
+            "Inventory: \n"
 
     while True:
         clear_camera(viewport_x, viewport_y)
@@ -141,7 +145,11 @@ def show_msg_history(message_log, viewport_x, viewport_y):
         key = blt.read()
 
         if key in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_M):
-            clear_camera(viewport_x, viewport_y)
+            blt.clear()
+            break
+
+        elif key == blt.TK_I and name is "Inventory":
+            blt.clear()
             break
 
         elif key == blt.TK_UP:

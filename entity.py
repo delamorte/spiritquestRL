@@ -3,6 +3,8 @@ from components.fighter import Fighter
 from map_objects.tilemap import tilemap
 from math import sqrt
 import tcod
+from components import item
+from numpy.distutils.from_template import item_re
 
 
 class Entity:
@@ -10,7 +12,7 @@ class Entity:
     A generic object to represent players, enemies, items, etc.
     """
 
-    def __init__(self, x, y, layer, char, color, name, blocks=False, fov=6, player=None, fighter=None, ai=None):
+    def __init__(self, x, y, layer, char, color, name, blocks=False, fov=6, player=None, fighter=None, ai=None, item=None, inventory=None):
         self.x = x
         self.y = y
         self.layer = layer
@@ -24,6 +26,8 @@ class Entity:
         self.fighter_c = None
         self.ai = ai
         self.ai_c = None
+        self.item = item
+        self.inventory = inventory
         self.last_seen_x = x
         self.last_seen_y = y
 
@@ -62,6 +66,12 @@ class Entity:
                 ai_component = BasicMonster()
             self.ai_c = ai_component
             self.ai_c.owner = self
+            
+        if self.item:
+            self.item.owner = self
+
+        if self.inventory:
+            self.inventory.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount
