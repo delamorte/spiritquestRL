@@ -33,9 +33,12 @@ def main_menu(resume=False):
 
         key = blt.read()
         if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
-            exit()
+            if not resume:
+                exit()
+            else:
+                return
 
-        if key == blt.TK_ENTER and r == "Graphics: " + variables.gfx:
+        if key == blt.TK_ENTER and not resume and r == "Graphics: " + variables.gfx:
             if variables.gfx is "tiles":
                 variables.gfx = "ascii"
             elif variables.gfx is "ascii":
