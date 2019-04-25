@@ -81,12 +81,11 @@ def new_game(choice):
     game_camera = Camera(1, 1, int(floor(blt.state(blt.TK_WIDTH) / variables.ui_offset_x) * variables.camera_offset),
                          int(floor(blt.state(blt.TK_HEIGHT) / variables.ui_offset_y - 5) * variables.camera_offset))
     levels = []
-    power_msg = "Spirit power left: " + str(player.player.spirit_power)
     time_counter = variables.TimeCounter()
-    insights = 600
+    insights = 100
     game_state = GameStates.PLAYER_TURN
     
-    return game_camera, game_state, player, levels, message_log, time_counter, insights, power_msg, fov_recompute
+    return game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute
     
 def game_loop(main_menu_show=True, choice=None):
     
@@ -95,7 +94,7 @@ def game_loop(main_menu_show=True, choice=None):
     
     if main_menu_show:
         choice = main_menu()
-    game_camera, game_state, player, levels, message_log, time_counter, insights, power_msg, fov_recompute = new_game(choice)
+    game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute = new_game(choice)
 
     game_map, entities, player, fov_map = level_change(
     "hub", levels, player)
@@ -107,7 +106,7 @@ def game_loop(main_menu_show=True, choice=None):
             recompute_fov(fov_map, player.x, player.y, player.fighter.fov, True, 0)
 
         draw_all(game_map, game_camera, entities, player, player.x, player.y,
-                 fov_map, fov_recompute, message_log, msg_panel, power_msg)
+                 fov_map, fov_recompute, message_log, msg_panel)
 
         fov_recompute = False
         blt.refresh()
@@ -134,7 +133,7 @@ def game_loop(main_menu_show=True, choice=None):
                     message_log.send(combat_msg)
                     player.player.spirit_power -= 0.5
                     time_counter.take_turn(1)
-                    draw_stats(player, power_msg, target)
+                    draw_stats(player, target)
 
                 else:
                     player.move(dx, dy)
@@ -144,9 +143,7 @@ def game_loop(main_menu_show=True, choice=None):
                     if (game_map.name is not "hub" and
                             game_map.name is not "debug"):
                         #player.player.spirit_power -= 0.5
-                        power_msg = "Spirit power left: " + \
-                            str(player.player.spirit_power)
-                        draw_stats(player, power_msg)
+                        draw_stats(player)
 
                     if game_map.tiles[player.x][player.y].char[1] == tilemap()["campfire"]:
                         message_log.send(
@@ -199,8 +196,6 @@ def game_loop(main_menu_show=True, choice=None):
         if key == blt.TK_PERIOD or key == blt.TK_KP_5:
             time_counter.take_turn(1)
             #player.player.spirit_power -= 1
-            power_msg = "Spirit power left: " + \
-                str(player.player.spirit_power)
             game_state = GameStates.ENEMY_TURN
 
         if key == blt.TK_CLOSE:
@@ -225,8 +220,6 @@ def game_loop(main_menu_show=True, choice=None):
             message_log.send("I have no power to meditate longer..")
             player.player.spirit_power = 50
             player.fighter.hp = player.fighter.max_hp
-            power_msg = "Spirit power left: " + \
-                str(player.player.spirit_power)
 
         if player.player.spirit_power >= insights:
             insights += 10
@@ -275,19 +268,18 @@ def game_loop(main_menu_show=True, choice=None):
                     fov_recompute = True
                     if combat_msg:
                         message_log.send(combat_msg)
-                        draw_stats(player, power_msg)
+                        draw_stats(player)
                     if player.fighter.dead:
                         kill_msg, game_state = kill_player(player)
                         message_log.send(kill_msg)
-                        draw_stats(player, power_msg)
+                        draw_stats(player)
                         break
                 if entity.fighter and entity.fighter.dead:
                     player.player.spirit_power += 11
                     player.fighter.hp += entity.fighter.power
                     message_log.send(kill_monster(entity))
                     message_log.send("I feel my power returning!")
-                    power_msg = "Spirit power left: " + \
-                        str(player.player.spirit_power)
+
             if not game_state == GameStates.PLAYER_DEAD:
                 game_state = GameStates.PLAYER_TURN
 

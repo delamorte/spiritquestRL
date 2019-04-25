@@ -9,14 +9,15 @@ def draw(entity, game_map, x, y, fov_map):
     # Draw the entity to the screen
     blt.layer(entity.layer)
     blt.color(entity.color)
-    if not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.x][entity.y].explored:
+    if not (fov_map.fov[entity.y, entity.x] and
+    game_map.tiles[entity.x][entity.y].explored):
         blt.color("gray")
-    else:
-        blt.put(x * variables.tile_offset_x, y *
-                variables.tile_offset_y, entity.char)
+
+    blt.put(x * variables.tile_offset_x, y *
+            variables.tile_offset_y, entity.char)
 
     # Draw player indicator
-    # 
+    #
     # if entity.player:
     #     blt.layer(9)
     #     blt.color("#FF3E6643")
@@ -37,7 +38,9 @@ def draw_entities(entities, game_map, game_camera, fov_map):
         elif not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.x][entity.y].explored:
             x, y = game_camera.get_coordinates(
                 entity.last_seen_x, entity.last_seen_y)
-            if x > ceil(variables.camera_offset) and y > ceil(variables.camera_offset) and x < game_camera.width - ceil(variables.camera_offset) and y < game_camera.height - ceil(variables.camera_offset):
+            if (x > ceil(variables.camera_offset) and y > ceil(variables.camera_offset) and
+                x < game_camera.width - ceil(variables.camera_offset) and
+                    y < game_camera.height - ceil(variables.camera_offset)):
                 draw(entity, game_map, x, y, fov_map)
 
 
@@ -61,7 +64,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
                         blt.color(game_map.tiles[map_x][map_y].color[0])
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[0])
-                        
+
                         blt.layer(1)
                         blt.color(game_map.tiles[map_x][map_y].color[1])
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
@@ -81,7 +84,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
                         blt.color("darkest gray")
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[0])
-                        
+
                         blt.layer(1)
                         blt.color("darkest gray")
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
@@ -113,8 +116,9 @@ def draw_messages(msg_panel, message_log):
         message_log.update(message_log.buffer)
 
 
-def draw_stats(player, power_msg, target=None):
+def draw_stats(player, target=None):
 
+    power_msg = "Spirit power left: " + str(player.player.spirit_power)
     blt.layer(8)
     blt.clear_area(2, variables.viewport_y + variables.ui_offset_y + 1,
                    int(variables.viewport_x / 2) + int(len(power_msg) / 2 + 5) - 5, 1)
@@ -246,7 +250,7 @@ def draw_ui(msg_panel, msg_panel_borders, screen_borders):
 
 
 def draw_all(game_map, game_camera, entities, player, px, py, fov_map,
-             fov_recompute, message_log, msg_panel, power_msg):
+             fov_recompute, message_log, msg_panel):
 
     game_camera.move_camera(
         px, py, game_map.width, game_map.height)
@@ -254,7 +258,7 @@ def draw_all(game_map, game_camera, entities, player, px, py, fov_map,
              fov_recompute)
     draw_entities(entities, game_map, game_camera, fov_map)
     draw_messages(msg_panel, message_log)
-    draw_stats(player, power_msg)
+    draw_stats(player)
 
 
 def clear(entity, x, y):

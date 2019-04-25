@@ -33,10 +33,8 @@ def main_menu(resume=False):
 
         key = blt.read()
         if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
-            if not resume:
-                exit()
-            else:
-                return
+            exit()
+
 
         if key == blt.TK_ENTER and not resume and r == "Graphics: " + variables.gfx:
             if variables.gfx is "tiles":
