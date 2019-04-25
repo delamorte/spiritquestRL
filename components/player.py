@@ -5,7 +5,4 @@ class Player:
         self.spirit_power = spirit_power
         self.char = {"player": tilemap()["player"]}
         self.avatar = {"player": None}
-        
-        #self.owner.fighter.max_hp += 10
-        #self.owner.fighter.hp += 10
-        #self.owner.fighter.power += 1
+    

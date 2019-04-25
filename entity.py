@@ -1,10 +1,5 @@
-from components.ai import BasicMonster
-from components.fighter import Fighter
-from map_objects.tilemap import tilemap
 from math import sqrt
 import tcod
-from components import item
-
 
 class Entity:
     """

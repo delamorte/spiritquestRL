@@ -52,7 +52,7 @@ def tilemap():
                  "door_open": "-",
                  "campfire": "¤",
                  "wall_brick": "#",
-                 "weapons":{"club": "'\'"}}
+                 "weapons":{"club": "\\"}}
 
     return tiles
 
