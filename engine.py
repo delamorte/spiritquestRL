@@ -14,7 +14,7 @@ from map_objects.tilemap import init_tiles, tilemap
 from ui.elements import init_ui
 from ui.game_messages import MessageLog
 from ui.message_history import show_msg_history
-from ui.menus import main_menu
+from ui.menus import main_menu, choose_avatar
 import variables
 
 """
@@ -30,8 +30,6 @@ TODO:
 - Generate levels with a seed
 
 """
-MAP_WIDTH = 100
-MAP_HEIGHT = 100
 
 
 def blt_init():
@@ -80,12 +78,17 @@ def level_change(level_name, levels, player):
                 game_map = level
         game_map, game_camera, entities, player, fov_map = level_init(
             game_map, player)
+        player.fighter = player.player.avatar["player"]
+        player.char = player.player.char["player"]
 
     if level_name is "dream":
-        game_map = GameMap(MAP_WIDTH, MAP_HEIGHT, "dream")
+        choice = choose_avatar(player)
+        game_map = GameMap(100, 100, "dream")
         game_map.generate_forest()
         game_map, game_camera, entities, player, fov_map = level_init(
             game_map, player)
+        player.fighter = player.player.avatar[choice]
+        player.char = player.player.char[choice]
 
     # Set debug level
     if level_name is "debug":
@@ -110,7 +113,7 @@ def main():
     levels = []
     game_map, game_camera, entities, player, fov_map = level_change(
         "hub", levels, player)
-    power_msg = "Spirit power left: " + str(player.spirit_power)
+    power_msg = "Spirit power left: " + str(player.player.spirit_power)
     time_counter = variables.TimeCounter()
     insights = 600
     game_state = GameStates.PLAYER_TURN
@@ -118,7 +121,7 @@ def main():
     while True:
         print(str(time_counter.turn))
         if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, player.fov, True, 0)
+            recompute_fov(fov_map, player.x, player.y, player.fighter.fov, True, 0)
 
         draw_all(game_map, game_camera, entities, player, player.x, player.y,
                  fov_map, fov_recompute, message_log, msg_panel, power_msg,
@@ -145,9 +148,9 @@ def main():
                 target = blocking_entity(
                     entities, destination_x, destination_y)
                 if target:
-                    combat_msg = player.fighter_c.attack(target)
+                    combat_msg = player.fighter.attack(target)
                     message_log.send(combat_msg)
-                    player.spirit_power -= 0.5
+                    player.player.spirit_power -= 0.5
                     time_counter.take_turn(1)
                     draw_stats(player, viewport_x,
                                viewport_y, power_msg, target)
@@ -155,13 +158,13 @@ def main():
                 else:
                     player.move(dx, dy)
 
-                    time_counter.take_turn(1 / player.fighter_c.mv_spd)
+                    time_counter.take_turn(1 / player.fighter.mv_spd)
 
                     if (game_map.name is not "hub" and
                             game_map.name is not "debug"):
-                        #player.spirit_power -= 0.5
+                        #player.player.spirit_power -= 0.5
                         power_msg = "Spirit power left: " + \
-                            str(player.spirit_power)
+                            str(player.player.spirit_power)
                         draw_stats(player, viewport_x, viewport_y, power_msg)
 
                     if game_map.tiles[player.x][player.y].char[1] == tilemap()["campfire"]:
@@ -171,10 +174,11 @@ def main():
                     # If there are entities under the player, print them
                     stack = []
                     for entity in entities:
-                        if not entity.fighter_c:
+                        if not entity.fighter:
                             if player.x == entity.x and player.y == entity.y:
                                 if entity.item:
-                                    stack.append(get_article(entity.name) + " " + entity.name)
+                                    stack.append(get_article(
+                                        entity.name) + " " + entity.name)
                                 else:
                                     stack.append(entity.name)
 
@@ -211,12 +215,11 @@ def main():
             else:
                 message_log.send("There is nothing here to pick up.")
 
-        
         if key == blt.TK_PERIOD or key == blt.TK_KP_5:
             time_counter.take_turn(1)
-            #player.spirit_power -= 1
+            #player.player.spirit_power -= 1
             power_msg = "Spirit power left: " + \
-                str(player.spirit_power)
+                str(player.player.spirit_power)
             game_state = GameStates.ENEMY_TURN
 
         if key == blt.TK_CLOSE:
@@ -229,17 +232,17 @@ def main():
         if fullscreen:
             blt.set("window.fullscreen=true")
 
-        if player.spirit_power <= 0:
+        if player.player.spirit_power <= 0:
             game_map, game_camera, entities, player, fov_map = level_change(
                 "hub", levels, player)
             message_log.clear()
             message_log.send("I have no power to meditate longer..")
-            player.spirit_power = 50
-            player.fighter_c.hp = player.fighter_c.max_hp
+            player.player.spirit_power = 50
+            player.fighter.hp = player.fighter.max_hp
             power_msg = "Spirit power left: " + \
-                str(player.spirit_power)
+                str(player.player.spirit_power)
 
-        if player.spirit_power >= insights:
+        if player.player.spirit_power >= insights:
             insights += 10
             message_log.send("My spirit has granted me new insights!")
             game_map, game_camera, entities, player, fov_map = level_change(
@@ -267,7 +270,7 @@ def main():
                 message_log.history, viewport_x, viewport_y, "Message history")
             draw_ui(msg_panel, msg_panel_borders, screen_borders)
             fov_recompute = True
-            
+
         if key == blt.TK_I:
             show_items = []
             for item in player.inventory.items:
@@ -281,24 +284,24 @@ def main():
 
             for entity in entities:
                 if entity.ai:
-                    combat_msg = entity.ai_c.take_turn(
+                    combat_msg = entity.ai.take_turn(
                         player, fov_map, game_map, entities, time_counter)
                     fov_recompute = True
                     if combat_msg:
                         message_log.send(combat_msg)
                         draw_stats(player, viewport_x, viewport_y, power_msg)
-                    if player.fighter_c.dead:
+                    if player.fighter.dead:
                         kill_msg, game_state = kill_player(player)
                         message_log.send(kill_msg)
                         draw_stats(player, viewport_x, viewport_y, power_msg)
                         break
-                if entity.fighter_c and entity.fighter_c.dead:
-                    player.spirit_power += 11
-                    player.fighter_c.hp += entity.fighter_c.power
+                if entity.fighter and entity.fighter.dead:
+                    player.player.spirit_power += 11
+                    player.fighter.hp += entity.fighter.power
                     message_log.send(kill_monster(entity))
                     message_log.send("I feel my power returning!")
                     power_msg = "Spirit power left: " + \
-                        str(player.spirit_power)
+                        str(player.player.spirit_power)
             if not game_state == GameStates.PLAYER_DEAD:
                 game_state = GameStates.PLAYER_TURN
 

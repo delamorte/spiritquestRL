@@ -6,6 +6,8 @@ tile_offset_y = 0
 ui_offset_x = 0
 ui_offset_y = 0
 camera_offset = int(ui_size) / int(tilesize)
+viewport_x = 0
+viewport_y = 0
 
 class TimeCounter:
     def __init__(self, turn=0):

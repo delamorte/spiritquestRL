@@ -1,5 +1,6 @@
 from components.item import Item
 from entity import Entity
+from fighter_stats import get_fighter_stats, get_fighter_ai
 from map_objects.tile import Tile
 from map_objects.tilemap import tilemap
 from random import randint
@@ -97,9 +98,15 @@ class GameMap:
         self.tiles[center_x][center_y].char[1] = tilemap()["campfire"]
 
         # Generate one door at a random position in the room.
+        # If any of the room walls are against the map border,
+        # make sure that door cannot be placed there.
+
         door_seed = randint(0, len(home.get_walls())-1)
         walls = home.get_walls()
 
+        while walls[door_seed][0] == 1 or walls[door_seed][0] == self.width - 1 or walls[door_seed][1] == 1 or walls[door_seed][1] == self.height - 1:
+            door_seed = randint(0, len(home.get_walls())-1)
+        
         self.tiles[walls[door_seed][0]][walls[door_seed][1]].color[1] = None        
         self.tiles[walls[door_seed][0]][walls[door_seed][1]].char[1] = tilemap()[
             "door_closed"]
@@ -208,8 +215,10 @@ class GameMap:
                 if not any([entity for entity in entities if entity.x == x and entity.y == y]):
                     r = randint(0, 2)
                     name, char = monsters[r]
+                    fighter_component = get_fighter_stats(name)
+                    ai_component = get_fighter_ai(name)
                     monster = Entity(x, y, 12, char,
-                                     None, name, blocks=True, fighter=True, ai=True)
+                                     None, name, blocks=True, fighter=fighter_component, ai=ai_component)
                     entities.append(monster)
 
         return player, entities

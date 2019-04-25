@@ -4,7 +4,6 @@ from map_objects.tilemap import tilemap
 from math import sqrt
 import tcod
 from components import item
-from numpy.distutils.from_template import item_re
 
 
 class Entity:
@@ -12,7 +11,7 @@ class Entity:
     A generic object to represent players, enemies, items, etc.
     """
 
-    def __init__(self, x, y, layer, char, color, name, blocks=False, fov=6, player=None, fighter=None, ai=None, item=None, inventory=None):
+    def __init__(self, x, y, layer, char, color, name, blocks=False, player=None, fighter=None, ai=None, item=None, inventory=None):
         self.x = x
         self.y = y
         self.layer = layer
@@ -20,52 +19,22 @@ class Entity:
         self.color = color
         self.name = name
         self.blocks = blocks
-        self.fov = fov
         self.fighter = fighter
         self.player = player
-        self.fighter_c = None
         self.ai = ai
-        self.ai_c = None
         self.item = item
         self.inventory = inventory
         self.last_seen_x = x
         self.last_seen_y = y
 
         if self.player:
-            self.spirit_power = 50
-            self.char_hub = tilemap()["player"]
+            self.player.owner = self
 
         if self.fighter:
-            if name is 'player':
-                fighter_component = Fighter(
-                    hp=20, ac=3, ev=3, power=3, mv_spd=1)
-            elif name is 'rat':
-                fighter_component = Fighter(
-                    hp=10, ac=1, ev=4, power=4, mv_spd=2, atk_spd=1)
-                self.fov = 4
-            elif name is 'crow':
-                fighter_component = Fighter(
-                    hp=8, ac=1, ev=6, power=3, mv_spd=1.2, atk_spd=1)
-                self.fov = 8
-            elif name is 'snake':
-                fighter_component = Fighter(
-                    hp=12, ac=1, ev=2, power=5, mv_spd=1, atk_spd=1)
-            self.fighter_c = fighter_component
-            if self.player:
-                self.fighter_c.hp += 10
-                self.fighter_c.power += 1
-            self.fighter_c.max_hp = self.fighter_c.hp
-            self.fighter_c.owner = self
+            self.fighter.owner = self
 
         if self.ai:
-            if name is 'rat':
-                ai_component = BasicMonster()
-            elif name is 'crow':
-                ai_component = BasicMonster()
-            elif name is 'snake':
-                ai_component = BasicMonster()
-            self.ai_c = ai_component
-            self.ai_c.owner = self
+            self.ai.owner = self
             
         if self.item:
             self.item.owner = self
