@@ -14,7 +14,7 @@ def level_init(game_map, player):
     return game_map, entities, player, fov_map
 
 
-def level_change(level_name, levels, player, depth=None, game_map=None, entities=None, fov_map=None):
+def level_change(level_name, levels, player, game_map=None, entities=None, fov_map=None, depth=None,):
 
     if not levels:
         game_map = GameMap(40, 40, "hub")
@@ -53,11 +53,11 @@ def level_change(level_name, levels, player, depth=None, game_map=None, entities
 
     # Set debug level
     if level_name is "debug":
-        game_map = GameMap(100, 100, "debug")
+        game_map = GameMap(40, 40, "debug")
         # game_map.generate_trees(0, 0, game_map.width,
         #                        game_map.height, 20, block_sight=True)
         # game_map.generate_forest()
-        game_map.generate_cavern()
+        # game_map.generate_cavern()
         game_map, entities, player, fov_map = level_init(
             game_map, player)
 

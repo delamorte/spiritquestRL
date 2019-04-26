@@ -1,6 +1,7 @@
 from bearlibterminal import terminal as blt
 import variables
 
+
 def init_tiles():
 
     tilesize = variables.tilesize + 'x' + variables.tilesize
@@ -21,7 +22,8 @@ def init_tiles():
         int(variables.ui_size) / blt.state(blt.TK_CELL_HEIGHT))
     variables.camera_offset = int(variables.ui_size) / int(variables.tilesize)
     blt.clear()
-    
+
+
 def tilemap():
     tiles = {}
     if variables.gfx is "tiles":
@@ -39,8 +41,8 @@ def tilemap():
                  "stairs_up": 0xE100 + 22,
                  "stairs_down": 0xE100 + 27,
                  "wall_brick": 0xE100 + 83,
-                 "wall_moss":(0xE100 + 90, 0xE100 + 91, 0xE100 + 92),
-                 "weapons":{"club": 0xE100 + 242}}
+                 "wall_moss": (0xE100 + 90, 0xE100 + 91, 0xE100 + 92),
+                 "weapons": {"club": 0xE100 + 242}}
 
     elif variables.gfx is "ascii":
         tiles = {"tree": ("T", "t"),
@@ -58,24 +60,30 @@ def tilemap():
                  "stairs_down": ">",
                  "wall_brick": "#",
                  "wall_moss": "#",
-                 "weapons":{"club": "\\"}}
+                 "weapons": {"club": "\\"}}
 
     return tiles
 
+
 def bestiary():
-    
+
     animals = {"crow": "quick, very agile, very weak, excellent vision",
                "rat": "very quick, agile, weak, small, poor vision",
                "snake": "strong, slow, average vision"}
     return animals
 
+
 def abilities():
-    
-    abilities = {"poison bite": "1d6, may poison",
-                 "paralyzing bite": "2d2, may paralyze",
-                 "reveal": "reveal an area of radius 8 around you, may reveal secrets.",
-                 "stealth": "",
-                 "swoop": "2d3, extra dmg on small targets"}
+    # Abilities are organized in separate categories.
+    # attack: ability name: [description, dmg, effect]
+    abilities = {"attack":
+                 {"poison bite": ["1d6, may poison", "1d6", "poison"],
+                     "paralyzing bite": ["1d4, may paralyze", "1d5", "paralyze"],
+                     "swoop": ["2d3, extra dmg on small targets", "2d3", ""]},
+
+                 "move":
+                 {"leap": "leap to a tile in a radius 4"},
+
+                 "utility":
+                 {"reveal": "reveal an area of radius 8 around you, may reveal secrets."}}
     return abilities
-    
-    

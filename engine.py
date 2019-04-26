@@ -25,7 +25,7 @@ import variables
 """
 TODO:
 
-- Move stairs in entities
+- Move stairs to entities
 - Move color lists in game_map to a palette
   module
 - Improve combat mechanics
@@ -70,8 +70,8 @@ def new_game(choice):
     player.player.avatar[choice].owner = player
     player.player.char[choice] = tilemap()["monsters"][choice]
     
-    player.player.avatar[choice].max_hp += 10
-    player.player.avatar[choice].hp += 10
+    player.player.avatar[choice].max_hp += 20
+    player.player.avatar[choice].hp += 20
     player.player.avatar[choice].power += 1
     
     if variables.gfx is "ascii":
@@ -85,7 +85,7 @@ def new_game(choice):
                          int(floor(blt.state(blt.TK_HEIGHT) / variables.ui_offset_y - 5) * variables.camera_offset))
     levels = []
     time_counter = variables.TimeCounter()
-    insights = 100
+    insights = 80
     game_state = GameStates.PLAYER_TURN
     
     return game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute
@@ -122,7 +122,13 @@ def game_loop(main_menu_show=True, choice=None):
         stairs = action.get('stairs')
         fullscreen = action.get('fullscreen')
 
+        if player.fighter.paralysis:
+            message_log.send("You are paralyzed!")
+            time_counter.take_turn(1)
+            game_state = GameStates.ENEMY_TURN
+
         if move and game_state == GameStates.PLAYER_TURN:
+
             dx, dy = move
             destination_x = player.x + dx
             destination_y = player.y + dy
@@ -229,7 +235,9 @@ def game_loop(main_menu_show=True, choice=None):
 
         if player.player.spirit_power >= insights:
             insights += 10
+            message_log.clear()
             message_log.send("My spirit has granted me new insights!")
+            message_log.send("I should explore around my home..")
             game_map, entities, player, fov_map = level_change(
                 "hub", levels, player, game_map, entities, fov_map)
 
@@ -241,6 +249,15 @@ def game_loop(main_menu_show=True, choice=None):
                         game_map.tiles[x][y].blocked = False
 
         if stairs:
+            if game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs_down"] and game_map.name == "hub":
+                game_map, entities, player, fov_map = level_change(
+                    "cavern", levels, player, game_map, entities, fov_map, 1)
+                message_log.clear()
+                blt.refresh()
+                message_log.send(
+                    "A sense of impending doom fills you as you delve into the cavern.")
+                message_log.send("RIBBIT!")
+
             if game_map.tiles[player.x][player.y].char[1] == tilemap()["campfire"]:
                 game_map, entities, player, fov_map = level_change(
                     "dream", levels, player, game_map, entities, fov_map)
@@ -249,14 +266,7 @@ def game_loop(main_menu_show=True, choice=None):
                     "I'm dreaming... I feel my spirit power draining.")
                 message_log.send("I'm hungry..")
                 fov_recompute = True
-            if game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs_down"] and game_map.name == "hub":
-                game_map, entities, player, fov_map = level_change(
-                    "cavern", levels, player, 1, game_map, entities, fov_map)
-                message_log.clear()
-                blt.refresh()
-                message_log.send(
-                    "A sense of impending doom fills you as you delve into the cavern.")
-                message_log.send("RIBBIT!")
+
             elif game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs_up"] and game_map.name == "cavern1":
                 game_map, entities, player, fov_map = level_change(
                     "hub", levels, player, 1, game_map, entities, fov_map)
@@ -280,6 +290,13 @@ def game_loop(main_menu_show=True, choice=None):
         if game_state == GameStates.ENEMY_TURN:
 
             for entity in entities:
+                if entity.fighter:
+                    entity.fighter.process_effects()
+                    if player.fighter.dead:
+                        kill_msg, game_state = kill_player(player)
+                        message_log.send(kill_msg)
+                        draw_stats(player)
+                        break
                 if entity.ai:
                     combat_msg = entity.ai.take_turn(
                         player, fov_map, game_map, entities, time_counter)
@@ -292,11 +309,11 @@ def game_loop(main_menu_show=True, choice=None):
                         message_log.send(kill_msg)
                         draw_stats(player)
                         break
-                if entity.fighter and entity.fighter.dead:
-                    player.player.spirit_power += 11
-                    player.fighter.hp += entity.fighter.power
-                    message_log.send(kill_monster(entity))
-                    message_log.send("I feel my power returning!")
+                    if entity.fighter and entity.fighter.dead:
+                        player.player.spirit_power += 11
+                        player.fighter.hp += entity.fighter.power
+                        message_log.send(kill_monster(entity))
+                        message_log.send("I feel my power returning!")
 
             if not game_state == GameStates.PLAYER_DEAD:
                 game_state = GameStates.PLAYER_TURN

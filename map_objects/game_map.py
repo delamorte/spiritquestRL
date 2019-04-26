@@ -85,7 +85,7 @@ class GameMap:
                     "wall_brick"], "orange", "dark gray")
 
         self.create_room(home)
-        home.create_door(self)
+        home.create_door(self, "open")
 
         center_x, center_y = home.get_center()
 
@@ -115,7 +115,7 @@ class GameMap:
         d_entrance = Room(x1, y1, 10, 10, tilemap()["wall_brick"], "dark amber", "darkest amber")
 
         self.create_room(d_entrance)
-        d_entrance.create_door(self)
+        d_entrance.create_door(self, "closed")
 
         walls = d_entrance.get_walls()
         for i in walls:
@@ -357,8 +357,29 @@ class GameMap:
 
             entities.append(weapon)
 
-        # if self.name == "debug":
+        if self.name == "debug":
         #    player.x, player.y = 2, 2
+            number_of_monsters = 5
+            monsters = []
+            for x, y in tilemap()["monsters"].items():
+                if x == "rat":
+                    monsters.append((x, y))
+            
+            for i in range(number_of_monsters):
+                x = randint(1, self.width - 1)
+                y = randint(1, self.height - 1)
+                while self.is_blocked(x, y):
+                    x, y = randint(1, self.width -
+                                   1), randint(1, self.height - 1)
+            
+                if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                    #r = randint(0, 2)
+                    name, char = monsters[0]
+                    fighter_component = get_fighter_stats(name)
+                    ai_component = get_fighter_ai(name)
+                    monster = Entity(x, y, 12, char,
+                                     None, name, blocks=True, fighter=fighter_component, ai=ai_component)
+                    entities.append(monster)     
 
         if self.name == "cavern1":
             self.tiles[px][py].color[1] = "dark amber"
@@ -456,7 +477,7 @@ class Room ():
 
         return center_x, center_y
     
-    def create_door(self, parent):
+    def create_door(self, parent, status):
         
         """
         Generate one door at a random position in the room.
@@ -473,8 +494,11 @@ class Room ():
 
         parent.tiles[walls[door_seed][0]][walls[door_seed][1]].color[1] = None
         parent.tiles[walls[door_seed][0]][walls[door_seed][1]].char[1] = tilemap()[
-            "door"]["open"]
-        parent.tiles[walls[door_seed][0]][walls[door_seed][1]].blocked = False
-        parent.tiles[walls[door_seed][0]][walls[door_seed][1]].block_sight = False
-
+            "door"][status]
+        if status == "open":
+            parent.tiles[walls[door_seed][0]][walls[door_seed][1]].blocked = False
+            parent.tiles[walls[door_seed][0]][walls[door_seed][1]].block_sight = False
+        else:
+            parent.tiles[walls[door_seed][0]][walls[door_seed][1]].blocked = True
+            parent.tiles[walls[door_seed][0]][walls[door_seed][1]].block_sight = True
 

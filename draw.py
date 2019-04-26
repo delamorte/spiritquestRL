@@ -147,8 +147,14 @@ def draw_stats(player, target=None):
         hp_player = "[color=light red]HP:" + \
             str(player.fighter.hp) + "/" + \
             str(player.fighter.max_hp) + "  "
+            
     else:
         hp_player = "[color=default]HP:" + \
+            str(player.fighter.hp) + "/" + \
+            str(player.fighter.max_hp) + "  "
+    for x in range (len(player.fighter.effects)):
+        if player.fighter.effects[x][0] == "poison":
+            hp_player = "[color=green]HP:" + \
             str(player.fighter.hp) + "/" + \
             str(player.fighter.max_hp) + "  "
 

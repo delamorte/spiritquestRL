@@ -36,7 +36,10 @@ class BasicMonster:
 
                 elif self.owner.fighter.atk_spd <= time_to_act - action_cost: 
                     if target.fighter.hp > 0:
-                        combat_msg = monster.fighter.attack(target)
+                        if randint(1,100) < 20:
+                            combat_msg = monster.fighter.attack(target, monster.fighter.abilities[0])
+                        else:
+                            combat_msg = monster.fighter.attack(target)
                         action_cost += 1
                         #self.last_action += action_cost
                         self.action_begin = False

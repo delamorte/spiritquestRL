@@ -75,15 +75,15 @@ def main_menu(resume=False):
                              ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
                     
                     if r == "crow":
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "reveal: " + abilities()["reveal"], 0, 0, blt.TK_ALIGN_LEFT)
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "swoop: " + abilities()["swoop"], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "reveal: " + abilities()["utility"]["reveal"], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "swoop: " + abilities()["attack"]["swoop"][0], 0, 0, blt.TK_ALIGN_LEFT)
                     
                     if r == "rat":
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "paralyzing bite: " + abilities()["paralyzing bite"], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "paralyzing bite: " + abilities()["attack"]["paralyzing bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
                         blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "stealth", 0, 0, blt.TK_ALIGN_LEFT)
                         
                     if r == "snake":
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "poison bite: " + abilities()["poison bite"], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "poison bite: " + abilities()["attack"]["poison bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
 
                     # Draw a bg tile
                     blt.layer(0)
