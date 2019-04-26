@@ -17,6 +17,9 @@ def get_fighter_stats(name):
     elif name is 'snake':
         fighter_component = Fighter(
             hp=12, ac=1, ev=2, power=5, mv_spd=1, atk_spd=1)
+    elif name is 'frog':
+        fighter_component = Fighter(
+            hp=20, ac=1, ev=5, power=5, mv_spd=1, atk_spd=1)
     
     return fighter_component
 
@@ -29,6 +32,8 @@ def get_fighter_ai(name):
     elif name is 'crow':
         ai_component = BasicMonster()
     elif name is 'snake':
+        ai_component = BasicMonster()
+    elif name is 'frog':
         ai_component = BasicMonster()
     
     return ai_component

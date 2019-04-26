@@ -25,6 +25,9 @@ import variables
 """
 TODO:
 
+- Move stairs in entities
+- Move color lists in game_map to a palette
+  module
 - Improve combat mechanics
 - Abilities and status effects
 - Items and inventory
@@ -147,6 +150,10 @@ def game_loop(main_menu_show=True, choice=None):
                     if game_map.tiles[player.x][player.y].char[1] == tilemap()["campfire"]:
                         message_log.send(
                             "Meditate and go to dream world with '<' or '>'")
+                        
+                    if game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs_down"]:
+                        message_log.send(
+                            "You feel an ominous presence. Go down with '<' or '>'")
 
                     # If there are entities under the player, print them
                     stack = []
@@ -175,7 +182,7 @@ def game_loop(main_menu_show=True, choice=None):
                 game_state = GameStates.ENEMY_TURN
 
             if game_map.tiles[destination_x][destination_y].char[1] == \
-                    tilemap()["door_closed"]:
+                    tilemap()["door"]["closed"]:
                 message_log.send("The door is locked...")
                 time_counter.take_turn(1)
                 game_state = GameStates.ENEMY_TURN
@@ -229,8 +236,8 @@ def game_loop(main_menu_show=True, choice=None):
             # Currently opens the door in hub
             for y in range(game_map.height):
                 for x in range(game_map.width):
-                    if game_map.tiles[x][y].char[1] == tilemap()["door_closed"]:
-                        game_map.tiles[x][y].char[1] = tilemap()["door_open"]
+                    if game_map.tiles[x][y].char[1] == tilemap()["door"]["closed"]:
+                        game_map.tiles[x][y].char[1] = tilemap()["door"]["open"]
                         game_map.tiles[x][y].blocked = False
 
         if stairs:
@@ -242,6 +249,18 @@ def game_loop(main_menu_show=True, choice=None):
                     "I'm dreaming... I feel my spirit power draining.")
                 message_log.send("I'm hungry..")
                 fov_recompute = True
+            if game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs_down"] and game_map.name == "hub":
+                game_map, entities, player, fov_map = level_change(
+                    "cavern", levels, player, 1, game_map, entities, fov_map)
+                message_log.clear()
+                blt.refresh()
+                message_log.send(
+                    "A sense of impending doom fills you as you delve into the cavern.")
+                message_log.send("RIBBIT!")
+            elif game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs_up"] and game_map.name == "cavern1":
+                game_map, entities, player, fov_map = level_change(
+                    "hub", levels, player, 1, game_map, entities, fov_map)
+            fov_recompute = True
 
         if key == blt.TK_M:
             show_msg_history(

@@ -26,17 +26,18 @@ def tilemap():
     tiles = {}
     if variables.gfx is "tiles":
         tiles = {"tree": (0xE100 + 87, 0xE100 + 88, 0xE100 + 89, 0xE100 + 93, 0xE100 + 94, 0xE100 + 95),
-                 "ground_soil": 0xE100 + 21,
+                 "ground_soil": (0xE100 + 1748, 0xE100 + 1750),
                  "ground_moss": (0xE100 + 1751, 0xE100 + 1752, 0xE100 + 1753),
-                 "floor": 0xE100 + 21,
+                 "floor": (0xE100 + 21, 0xE100 + 20, 0xE100 + 19),
                  "rubble": (0xE100 + 388, 0xE100 + 119),
                  "player": 0xE100 + 704,
                  "player_remains": 0xE100 + 468,
-                 "monsters": {"rat": 0xE100 + 1416, "crow": 0xE100 + 1587, "snake": 0xE100 + 1097},
+                 "monsters": {"rat": 0xE100 + 1416, "crow": 0xE100 + 1587, "snake": 0xE100 + 1097, "frog": 0xE100 + 1095},
                  "monster_remains": 0xE100 + 513,
-                 "door_closed": 0xE100 + 67,
-                 "door_open": 0xE100 + 68,
+                 "door": {"open": 0xE100 + 68, "closed": 0xE100 + 67},
                  "campfire": 0xE100 + 427,
+                 "stairs_up": 0xE100 + 22,
+                 "stairs_down": 0xE100 + 27,
                  "wall_brick": 0xE100 + 83,
                  "wall_moss":(0xE100 + 90, 0xE100 + 91, 0xE100 + 92),
                  "weapons":{"club": 0xE100 + 242}}
@@ -48,12 +49,13 @@ def tilemap():
                  "floor": ".",
                  "rubble": ".",
                  "player": "@",
-                 "player_remains": "[color=light red]@",
-                 "monsters": {"rat": "r", "crow": "c", "snake": "s"},
+                 "player_remains": "@",
+                 "monsters": {"rat": "r", "crow": "c", "snake": "s", "frog": "f"},
                  "monster_remains": "%",
-                 "door_closed": "+",
-                 "door_open": "-",
+                 "door": {"open": "-", "closed": "+"},
                  "campfire": "¤",
+                 "stairs_up": "<",
+                 "stairs_down": ">",
                  "wall_brick": "#",
                  "wall_moss": "#",
                  "weapons":{"club": "\\"}}
@@ -61,7 +63,19 @@ def tilemap():
     return tiles
 
 def bestiary():
+    
     animals = {"crow": "quick, very agile, very weak, excellent vision",
-               "rat": "very quick, agile, weak, poor vision",
+               "rat": "very quick, agile, weak, small, poor vision",
                "snake": "strong, slow, average vision"}
     return animals
+
+def abilities():
+    
+    abilities = {"poison bite": "1d6, may poison",
+                 "paralyzing bite": "2d2, may paralyze",
+                 "reveal": "reveal an area of radius 8 around you, may reveal secrets.",
+                 "stealth": "",
+                 "swoop": "2d3, extra dmg on small targets"}
+    return abilities
+    
+    

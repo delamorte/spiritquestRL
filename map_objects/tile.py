@@ -21,6 +21,7 @@ class Tile:
         self.explored = False
         self.visited = False
         self.seed = randint(1,100)
-        self.char = {0: tilemap()["floor"], 1: " "}
-        self.color = {0: "darkest amber", 1: None}
+        self.char = {0: tilemap()["floor"][0], 1: " "}
+        self.color = {0: None, 1: None}
         self.spawnable = False
+        self.occupied = False

@@ -1,6 +1,6 @@
 from bearlibterminal import terminal as blt
 from draw import clear_camera, draw_ui
-from map_objects.tilemap import init_tiles, tilemap, bestiary
+from map_objects.tilemap import init_tiles, tilemap, bestiary, abilities
 from ui.elements import init_ui
 import variables
 
@@ -61,6 +61,8 @@ def main_menu(resume=False):
             while True:
                 clear_camera()
                 animals = tilemap()["monsters"]
+                exclude = {"frog"}
+                animals = {x: animals[x] for x in animals if x not in exclude}
                 blt.layer(0)
                 blt.puts(center_x, center_y - 5,
                          "[color=white]Choose your spirit animal...", 0, 0, blt.TK_ALIGN_CENTER)
@@ -69,22 +71,33 @@ def main_menu(resume=False):
 
                     # Draw select symbol, monster name and description
                     blt.color("orange" if selected else "default")
-                    blt.puts(center_x - 14, center_y - 2 + i * 3, "%s%s" %
+                    blt.puts(center_x - 14, center_y - 2 + i * 5, "%s%s" %
                              ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
+                    
+                    if r == "crow":
+                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "reveal: " + abilities()["reveal"], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "swoop: " + abilities()["swoop"], 0, 0, blt.TK_ALIGN_LEFT)
+                    
+                    if r == "rat":
+                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "paralyzing bite: " + abilities()["paralyzing bite"], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "stealth", 0, 0, blt.TK_ALIGN_LEFT)
+                        
+                    if r == "snake":
+                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "poison bite: " + abilities()["poison bite"], 0, 0, blt.TK_ALIGN_LEFT)
 
                     # Draw a bg tile
                     blt.layer(0)
                     blt.puts(center_x - 20 + 1, center_y - 2 + i *
-                             3, "[U+" + hex(0xE900 + 3) + "]", 0, 0)
+                             5, "[U+" + hex(0xE900 + 3) + "]", 0, 0)
 
                     # Draw monster tile
                     blt.layer(1)
                     if variables.gfx is "ascii":
                         blt.puts(center_x - 20 + 1,
-                                 center_y - 2 + i * 3, c, 0, 0)
+                                 center_y - 2 + i * 5, c, 0, 0)
                     else:
                         blt.puts(center_x - 20 + 1, center_y - 2 +
-                                 i * 3, "[U+" + hex(c + 2048) + "]", 0, 0)
+                                 i * 5, "[U+" + hex(c + 2048) + "]", 0, 0)
 
                     if selected:
                         choice = r
