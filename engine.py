@@ -16,6 +16,7 @@ from helpers import get_article
 from input_handlers import handle_keys
 from map_objects.levels import level_change
 from map_objects.tilemap import init_tiles, tilemap
+from random import randint
 from ui.elements import init_ui
 from ui.game_messages import MessageLog
 from ui.menus import main_menu
@@ -28,8 +29,8 @@ TODO:
 - Move stairs to entities
 - Move color lists in game_map to a palette
   module
-- Improve combat mechanics
-- Abilities and status effects
+- Add abilities on player and give them action cost
+- Add stealth
 - Items and inventory
 - Npcs
 - Minimap
@@ -37,6 +38,11 @@ TODO:
 - Examine/view mode
 - Generate levels with a seed
 
+FIX:
+
+- Some entities on explored, not visible tiles get drawn
+  when they shouldn't
+  
 """
 
 def blt_init():
@@ -121,11 +127,8 @@ def game_loop(main_menu_show=True, choice=None):
         pickup = action.get('pickup')
         stairs = action.get('stairs')
         fullscreen = action.get('fullscreen')
-
-        if player.fighter.paralysis:
-            message_log.send("You are paralyzed!")
-            time_counter.take_turn(1)
-            game_state = GameStates.ENEMY_TURN
+        effect_msg, game_state = player.fighter.process_effects(time_counter, game_state)
+        message_log.send(effect_msg)
 
         if move and game_state == GameStates.PLAYER_TURN:
 
@@ -137,7 +140,10 @@ def game_loop(main_menu_show=True, choice=None):
                 target = blocking_entity(
                     entities, destination_x, destination_y)
                 if target:
-                    combat_msg = player.fighter.attack(target)
+                    if randint(1,100) < 20:
+                        combat_msg = player.fighter.attack(target, player.fighter.abilities[0])
+                    else:
+                        combat_msg = player.fighter.attack(target)
                     message_log.send(combat_msg)
                     player.player.spirit_power -= 0.5
                     time_counter.take_turn(1)
@@ -290,8 +296,11 @@ def game_loop(main_menu_show=True, choice=None):
         if game_state == GameStates.ENEMY_TURN:
 
             for entity in entities:
-                if entity.fighter:
-                    entity.fighter.process_effects()
+                if entity.fighter and not entity == player:
+                    
+                    effect_msg, game_state = entity.fighter.process_effects(time_counter, game_state)
+                    message_log.send(effect_msg)
+                    
                     if player.fighter.dead:
                         kill_msg, game_state = kill_player(player)
                         message_log.send(kill_msg)

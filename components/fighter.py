@@ -1,5 +1,6 @@
 from random import randint
 from map_objects.tilemap import tilemap, abilities as abilities_db
+from game_states import GameStates
 
 
 class Fighter:
@@ -28,56 +29,71 @@ class Fighter:
         results = []
         d = None
         hit_chance = randint(1, 100)
-        damage = randint(1,self.power) - target.fighter.ac
+        damage = randint(1, self.power) - target.fighter.ac
         if ability:
             damage, effect = self.use_ability(ability)
-            
-            if len(effect)>0:
+
+            if len(effect) > 0:
                 d = [effect, damage]
-            results.append("The {0} uses {1} on you!".format(
+            if self.owner.player:
+                results.append("You use {0} on {1}!".format(
+                    ability, target.name))
+            else:
+                results.append("The {0} uses {1} on you!".format(
                     self.owner.name, ability))
+
             if ability == "swoop" and target.char == tilemap()["monsters"]["rat"]:
                 damage += 2
+
         if target.fighter.ev * 5 >= hit_chance:
             if self.owner.player:
                 results.append(
                     "You attack the {0}, but miss.".format(target.name))
             else:
-                results.append("The {0} attacks you, but misses.".format(self.owner.name))
+                results.append(
+                    "The {0} attacks you, but misses.".format(self.owner.name))
 
         elif damage > 0:
             if self.owner.player:
                 results.append("You attack the {0} for {1} hit points.".format(
                     target.name, str(damage)))
-                
+                if d:
+                    target.fighter.effects.append(d)
+                    results.append("The {0} is inflicted with {1}!".format(target.name, d[0]))
+
             else:
                 results.append("The {0} attacks you for {1} hit points.".format(
                     self.owner.name, str(damage)))
+                
                 if d:
                     target.fighter.effects.append(d)
-                    results.append("You are inflicted with " + d[0] + "!") 
+                    results.append("You are inflicted with " + d[0] + "!")
+                    
             results.extend(target.fighter.take_damage(damage))
+
         else:
             if self.owner.player:
                 results.append(
                     "You attack the {0} but do no damage.".format(target.name))
             else:
-                results.append("The {0} attacks you but does no damage.".format(self.owner.name))
+                results.append(
+                    "The {0} attacks you but does no damage.".format(self.owner.name))
         return results
 
     def use_ability(self, ability):
-        
+
         for ability in self.abilities:
             if ability in abilities_db()["attack"]:
                 effects = abilities_db()["attack"][ability]
-                damage = randint(int(effects[1][0]),int(effects[1][2]))
+                damage = randint(int(effects[1][0]), int(effects[1][2]))
                 effect = effects[2]
-                        
+
         return damage, effect
-        
-    def process_effects(self):
+
+    def process_effects(self, time_counter, game_state):
+        results = []
         if len(self.effects) == 0:
-            return
+            return results, game_state
         else:
             for x in self.effects:
                 effect = x[0]
@@ -91,7 +107,18 @@ class Fighter:
                     x[1] -= 1
                 if effect == "paralyze":
                     self.paralysis = True
+
+                    time_counter.take_turn(1)
                     x[1] -= 2
+                    
                     if x[1] <= 0:
                         self.paralysis = False
                     
+                    if self.owner.player and self.paralysis:
+                        results.append("You are paralyzed!")
+                        game_state = GameStates.ENEMY_TURN
+                    elif self.paralysis:
+                        results.append("The {0} is paralyzed!".format(self.owner.name))
+                        game_state = GameStates.PLAYER_TURN
+                        
+        return results, game_state

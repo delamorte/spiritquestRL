@@ -18,6 +18,8 @@ class BasicMonster:
         combat_msg = []
         recompute_fov(fov_map, monster.x, monster.y, monster.fighter.fov, True, 8)
         
+        if monster.fighter.paralysis:
+            return combat_msg
         if fov_map.fov[target.y, target.x]:
             
             self.target_seen = True
