@@ -1,6 +1,7 @@
 from draw import clear_camera
 from bearlibterminal import terminal as blt
 from math import ceil
+import variables
 
 padding_left = 10
 padding_right = 10
@@ -97,7 +98,7 @@ class FrameWithScrollbar(object):
                         self.scrollbar_offset, 0x2588)
 
 
-def show_msg_history(message_log, viewport_x, viewport_y):
+def show_msg_history(message_log, name):
     messages = MessageList()
     frame = FrameWithScrollbar(messages)
 
@@ -108,15 +109,19 @@ def show_msg_history(message_log, viewport_x, viewport_y):
     frame.update_geometry(
         padding_left+1,
         padding_top,
-        viewport_x +5- (padding_left + padding_right),
-        viewport_y - (padding_top + padding_bottom))
+        variables.viewport_x +5- (padding_left + padding_right),
+        variables.viewport_y - (padding_top + padding_bottom))
 
-    prompt = \
-        "Use arrow keys to scroll the list up and down. " \
-        "\n\n--- --- ---"
+    if name == "Message history":
+        prompt = \
+            "Message history: \n"
+
+    elif name == "Inventory":
+        prompt = \
+            "Inventory: \n"
 
     while True:
-        clear_camera(viewport_x, viewport_y)
+        clear_camera(2)
         frame.draw()
         blt.color("white")
 
@@ -141,6 +146,10 @@ def show_msg_history(message_log, viewport_x, viewport_y):
         key = blt.read()
 
         if key in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_M):
+            blt.clear()
+            break
+
+        elif key == blt.TK_I and name is "Inventory":
             blt.clear()
             break
 
