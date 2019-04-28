@@ -359,7 +359,7 @@ class GameMap:
 
         if self.name == "debug":
         #    player.x, player.y = 2, 2
-            number_of_monsters = 5
+            number_of_monsters = 0
             monsters = []
             for x, y in tilemap()["monsters"].items():
                 if x == "rat":

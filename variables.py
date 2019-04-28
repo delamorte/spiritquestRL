@@ -6,6 +6,8 @@ tile_offset_y = 0
 ui_offset_x = 0
 ui_offset_y = 0
 camera_offset = int(ui_size) / int(tilesize)
+camera_width = 0
+camera_height = 0
 viewport_x = 0
 viewport_y = 0
 

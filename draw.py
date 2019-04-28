@@ -46,14 +46,28 @@ def draw_entities(entities, game_map, game_camera, fov_map):
 
 def draw_map(game_map, game_camera, fov_map, fov_recompute):
 
+    # Set boundaries where to draw map
+    bound_x = ceil(variables.camera_offset)
+    bound_y = ceil(variables.camera_offset)
+    bound_x2 = game_camera.width - ceil(variables.camera_offset)
+    bound_y2 = game_camera.height - ceil(variables.camera_offset)
     # Only draw map if player has moved
     if fov_recompute:
         # Clear what's drawn in camera
-        clear_camera()
-        # Draw all the tiles in the game map
-        for y in range(ceil(variables.camera_offset), game_camera.height - ceil(variables.camera_offset)):
-            for x in range(ceil(variables.camera_offset), game_camera.width - ceil(variables.camera_offset)):
+        clear_camera(2)
+        # Set boundaries if map is smaller than viewport
+        if game_map.width < game_camera.width:
+            bound_x2 = game_map.width
+        if game_map.height < game_camera.height:
+            bound_y2 = game_map.height
+        # Draw all the tiles within the boundaries of the game camera
+        for y in range(bound_y, bound_y2):
+            for x in range(bound_x, bound_x2):
                 map_x, map_y = game_camera.x + x, game_camera.y + y
+                if game_map.width < game_camera.width:
+                    map_x = x
+                if game_map.height < game_camera.height:
+                    map_y = y
                 visible = fov_map.fov[map_y, map_x]
                 
                 # Draw tiles within fov
@@ -284,9 +298,9 @@ def clear_entities(entities, game_camera):
         clear(entity, dx, dy)
 
 
-def clear_camera():
+def clear_camera(n):
     i = 0
-    while i < 10:
+    while i < n:
         blt.layer(i)
         blt.clear_area(1, 1, variables.viewport_x, variables.viewport_y)
         i += 1

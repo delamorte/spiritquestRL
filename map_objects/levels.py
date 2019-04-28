@@ -53,7 +53,7 @@ def level_change(level_name, levels, player, game_map=None, entities=None, fov_m
 
     # Set debug level
     if level_name is "debug":
-        game_map = GameMap(40, 40, "debug")
+        game_map = GameMap(30, 30, "debug")
         # game_map.generate_trees(0, 0, game_map.width,
         #                        game_map.height, 20, block_sight=True)
         # game_map.generate_forest()

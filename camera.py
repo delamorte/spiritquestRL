@@ -1,6 +1,5 @@
 import variables
 
-
 class Camera:
 
     def __init__(self, x, y, width, height):
@@ -10,8 +9,19 @@ class Camera:
         self.height = height
 
     def move_camera(self, target_x, target_y, map_width, map_height):
+        
+        if map_width <= self.width:
+            self.width = map_width
+        else:
+            self.width = variables.camera_width
+        if map_height <= self.height:
+            self.height = map_height
+        else:
+            self.height = variables.camera_height
+        
         x = target_x - int(self.width / 2)
         y = target_y - int(self.height / 2)
+
 
         if x < 0:
             x = -int(variables.camera_offset/2)

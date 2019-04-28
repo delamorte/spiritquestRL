@@ -86,9 +86,12 @@ def new_game(choice):
     
     fov_recompute = True
     message_log = MessageLog(5)
+    
     # Initialize game camera
-    game_camera = Camera(1, 1, int(floor(blt.state(blt.TK_WIDTH) / variables.ui_offset_x) * variables.camera_offset),
-                         int(floor(blt.state(blt.TK_HEIGHT) / variables.ui_offset_y - 5) * variables.camera_offset))
+    variables.camera_width = int(floor(blt.state(blt.TK_WIDTH) / variables.ui_offset_x) * variables.camera_offset)
+    variables.camera_height = int(floor(blt.state(blt.TK_HEIGHT) / variables.ui_offset_y - 5) * variables.camera_offset)
+    game_camera = Camera(1, 1, variables.camera_width, variables.camera_height)
+
     levels = []
     time_counter = variables.TimeCounter()
     insights = 80

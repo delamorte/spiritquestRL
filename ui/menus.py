@@ -17,7 +17,7 @@ def main_menu(resume=False):
         if resume:
             choices.insert(0, "Resume game")
         blt.layer(0)
-        clear_camera()
+        clear_camera(2)
         blt.puts(center_x + 2, center_y,
                  "[color=white]Spirit Quest RL", 0, 0, blt.TK_ALIGN_CENTER)
 
@@ -58,8 +58,9 @@ def main_menu(resume=False):
 
         if key == blt.TK_ENTER and r is "New game":
             key = None
+            current_range = 0
             while True:
-                clear_camera()
+                clear_camera(2)
                 animals = tilemap()["monsters"]
                 exclude = {"frog"}
                 animals = {x: animals[x] for x in animals if x not in exclude}
@@ -174,7 +175,7 @@ def choose_avatar(player):
     center_y = int(variables.viewport_y / 2)
 
     while True:
-        clear_camera()
+        clear_camera(2)
         animals = player.player.char
         exclude = {"player"}
         avatars = {x: animals[x] for x in animals if x not in exclude}
