@@ -70,7 +70,7 @@ class GameMap:
 
         return wall_count
 
-    def generate_hub(self, entities):
+    def generate_hub(self):
 
         # Set ground tiles
         for y in range(1, self.height-1):
@@ -135,16 +135,16 @@ class GameMap:
         center_x, center_y = self.rooms["home"].get_center()
         stairs_component = Stairs("dream")
         campfire = Entity(center_x, center_y, 1, tilemap()["campfire"], "lightest orange", "a campfire", stairs=stairs_component)
-        #self.tiles[campfire.x][campfire.y].color[1] = "lightest orange"
 
         center_x, center_y = self.rooms["d_entrance"].get_center()
         stairs_component = Stairs("cavern", self.dungeon_level + 1)
         stairs_down = Entity(center_x, center_y, 1, tilemap()["stairs"]["down"], "dark amber", "stairs down", stairs=stairs_component)
         
+        entities=[]
         entities.extend((weapon, stairs_down, campfire))
         return entities
 
-    def generate_forest(self, entities):
+    def generate_forest(self):
         entities=[]
         cavern_colors = ["lightest amber",
                          "lighter amber",
@@ -341,7 +341,7 @@ class GameMap:
         if self.dungeon_level == 1:
             stairs_component = Stairs("hub")
         else:
-            stairs_component = Stairs("cavern", self.dungeon_level - 1)
+            stairs_component = Stairs("cavern"+str(self.dungeon_level - 1), self.dungeon_level - 1)
         
         stairs_up = Entity(px, py, 1, tilemap()["stairs"]["up"], "dark amber","stairs up", stairs=stairs_component)
         
@@ -352,7 +352,7 @@ class GameMap:
             px, py = randint(1, self.width - 1), \
                 randint(1, self.height - 1)
                 
-        stairs_component = Stairs("cavern", self.dungeon_level + 1)
+        stairs_component = Stairs("cavern"+str(self.dungeon_level + 1), self.dungeon_level + 1)
         stairs_down = Entity(px, py, 1, tilemap()["stairs"]["down"], "dark amber","stairs down", stairs=stairs_component)
         
         entities.extend((stairs_up, stairs_down))

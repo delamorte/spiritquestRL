@@ -94,7 +94,7 @@ def new_game(choice):
     variables.camera_height = int(floor(blt.state(blt.TK_HEIGHT) / variables.ui_offset_y - 5) * variables.camera_offset)
     game_camera = Camera(1, 1, variables.camera_width, variables.camera_height)
 
-    levels = []
+    levels = {}
     time_counter = variables.TimeCounter()
     insights = 80
     game_state = GameStates.PLAYER_TURN
