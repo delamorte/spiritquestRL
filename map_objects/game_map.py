@@ -134,18 +134,19 @@ class GameMap:
 
         center_x, center_y = self.rooms["home"].get_center()
         stairs_component = Stairs("dream")
-        campfire = Entity(center_x, center_y, 1, tilemap()["campfire"], "lightest orange", "a campfire", stairs=stairs_component)
+        campfire = Entity(center_x, center_y, 1, tilemap()["campfire"], "lightest orange", "campfire", stairs=stairs_component)
 
         center_x, center_y = self.rooms["d_entrance"].get_center()
         stairs_component = Stairs("cavern", self.dungeon_level + 1)
-        stairs_down = Entity(center_x, center_y, 1, tilemap()["stairs"]["down"], "dark amber", "stairs down", stairs=stairs_component)
+        stairs_down = Entity(center_x, center_y, 1, tilemap()["stairs"]["down"], "dark amber", "stairs to a mysterious cavern", stairs=stairs_component)
         
-        entities=[]
-        entities.extend((weapon, stairs_down, campfire))
+        entities={}
+        entities["items"] = [weapon]
+        entities["stairs"] = [campfire, stairs_down]
         return entities
 
     def generate_forest(self):
-        entities=[]
+        entities={}
         cavern_colors = ["lightest amber",
                          "lighter amber",
                          "light amber",
@@ -355,7 +356,7 @@ class GameMap:
         stairs_component = Stairs("cavern"+str(self.dungeon_level + 1), self.dungeon_level + 1)
         stairs_down = Entity(px, py, 1, tilemap()["stairs"]["down"], "dark amber","stairs down", stairs=stairs_component)
         
-        entities.extend((stairs_up, stairs_down))
+        entities["stairs"] = [stairs_up, stairs_down]
         
         return entities
     
@@ -370,11 +371,12 @@ class GameMap:
 
     def place_entities(self, player, entities):
 
-        for entity in entities:
-            if entity.stairs and entity.stairs.floor and entity.stairs.floor < self.dungeon_level:
-                player.x, player.y = entity.x, entity.y
-            elif entity.stairs and entity.stairs.name == "hub":
-                player.x, player.y = entity.x, entity.y
+        if "stairs" in entities:
+            for entity in entities["stairs"]:
+                if entity.stairs.floor and entity.stairs.floor < self.dungeon_level:
+                    player.x, player.y = entity.x, entity.y
+                elif entity.stairs.name == "hub":
+                    player.x, player.y = entity.x, entity.y
         
         if self.name == "hub":
             center_x, center_y = self.rooms["home"].get_center()
@@ -389,6 +391,10 @@ class GameMap:
                     randint(1, self.height - 1)
             player.x, player.y = px, py
 
+        # Player spawning point has been set in all scenarios, now place rest of the entities
+        entities["player"] = [player]
+        entities["monsters"] = []
+        
         if self.name == "debug":
             player.x, player.y = 2, 2
             number_of_monsters = 0
@@ -404,17 +410,15 @@ class GameMap:
                     x, y = randint(1, self.width -
                                    1), randint(1, self.height - 1)
             
-                if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                if not any([entity for entity in entities["monsters"] if entity.x == x and entity.y == y]):
                     #r = randint(0, 2)
                     name, char = monsters[0]
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
                     monster = Entity(x, y, 12, char,
                                      None, name, blocks=True, fighter=fighter_component, ai=ai_component)
-                    entities.append(monster)     
-
-        # Player spawning point has been set in all scenarios, now place rest of the entities
-        entities.append(player)
+                    entities["monsters"].append(monster)
+   
         
         if self.name == "cavern":
         
@@ -431,14 +435,14 @@ class GameMap:
                     x, y = randint(1, self.width -
                                    1), randint(1, self.height - 1)
             
-                if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                if not any([entity for entity in entities["monsters"] if entity.x == x and entity.y == y]):
                     #r = randint(0, 2)
                     name, char = monsters[0]
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
                     monster = Entity(x, y, 12, char,
                                      None, name, blocks=True, fighter=fighter_component, ai=ai_component)
-                    entities.append(monster)        
+                    entities["monsters"].append(monster)     
 
         if self.name is "dream":
             
@@ -454,14 +458,14 @@ class GameMap:
                     x, y = randint(1, self.width -
                                    1), randint(1, self.height - 1)
 
-                if not any([entity for entity in entities if entity.x == x and entity.y == y]):
+                if not any([entity for entity in entities["monsters"] if entity.x == x and entity.y == y]):
                     r = randint(0, 2)
                     name, char = monsters[r]
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
                     monster = Entity(x, y, 12, char,
                                      None, name, blocks=True, fighter=fighter_component, ai=ai_component)
-                    entities.append(monster)
+                    entities["monsters"].append(monster)
 
         return player, entities
     

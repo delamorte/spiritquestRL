@@ -24,24 +24,24 @@ def draw(entity, game_map, x, y, fov_map):
     #     blt.put_ext(x * variables.tile_offset_x, y *
     #             variables.tile_offset_y, 12, -12, 0xE100 + 1743)
 
-
 def draw_entities(entities, game_map, game_camera, fov_map):
-
-    for entity in entities:
-        x, y = game_camera.get_coordinates(entity.x, entity.y)
-        if fov_map.fov[entity.y, entity.x]:
-            clear(entity, entity.last_seen_x, entity.last_seen_y)
-            entity.last_seen_x = entity.x
-            entity.last_seen_y = entity.y
-            draw(entity, game_map, x, y, fov_map)
-
-        elif not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.x][entity.y].explored:
-            x, y = game_camera.get_coordinates(
-                entity.last_seen_x, entity.last_seen_y)
-            if (x > ceil(variables.camera_offset) and y > ceil(variables.camera_offset) and
-                x < game_camera.width - ceil(variables.camera_offset) and
-                    y < game_camera.height - ceil(variables.camera_offset)):
+    
+    for category in entities.values():
+        for entity in category:
+            x, y = game_camera.get_coordinates(entity.x, entity.y)
+            if fov_map.fov[entity.y, entity.x]:
+                clear(entity, entity.last_seen_x, entity.last_seen_y)
+                entity.last_seen_x = entity.x
+                entity.last_seen_y = entity.y
                 draw(entity, game_map, x, y, fov_map)
+
+            elif not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.x][entity.y].explored:
+                x, y = game_camera.get_coordinates(
+                    entity.last_seen_x, entity.last_seen_y)
+                if (x > ceil(variables.camera_offset) and y > ceil(variables.camera_offset) and
+                    x < game_camera.width - ceil(variables.camera_offset) and
+                        y < game_camera.height - ceil(variables.camera_offset)):
+                    draw(entity, game_map, x, y, fov_map)
 
 
 def draw_map(game_map, game_camera, fov_map, fov_recompute):
@@ -271,11 +271,11 @@ def draw_ui(msg_panel, msg_panel_borders, screen_borders):
                         variables.ui_offset_y, 0xE900 + 468)
 
 
-def draw_all(game_map, game_camera, entities, player, px, py, fov_map,
+def draw_all(game_map, game_camera, entities, player, fov_map,
              fov_recompute, message_log, msg_panel):
 
     game_camera.move_camera(
-        px, py, game_map.width, game_map.height)
+        player.x, player.y, game_map.width, game_map.height)
     draw_map(game_map, game_camera, fov_map,
              fov_recompute)
     draw_entities(entities, game_map, game_camera, fov_map)
@@ -292,12 +292,13 @@ def clear(entity, x, y):
 
 def clear_entities(entities, game_camera):
 
-    for entity in entities:
-        x, y = game_camera.get_coordinates(entity.x, entity.y)
-        dx, dy = game_camera.get_coordinates(
-            entity.last_seen_x, entity.last_seen_y)
-        clear(entity, x, y)
-        clear(entity, dx, dy)
+    for category in entities.values():
+        for entity in category:
+            x, y = game_camera.get_coordinates(entity.x, entity.y)
+            dx, dy = game_camera.get_coordinates(
+                entity.last_seen_x, entity.last_seen_y)
+            clear(entity, x, y)
+            clear(entity, dx, dy)
 
 
 def clear_camera(n):

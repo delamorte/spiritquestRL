@@ -67,7 +67,7 @@ def bestiary():
 
     animals = {"crow": "quick, very agile, very weak, excellent vision",
                "rat": "very quick, agile, weak, small, poor vision",
-               "snake": "strong, slow, average vision"}
+               "snake": "strong, slow, small, average vision"}
     return animals
 
 

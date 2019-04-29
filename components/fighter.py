@@ -1,10 +1,10 @@
 from random import randint
-from map_objects.tilemap import tilemap, abilities as abilities_db
+from map_objects.tilemap import abilities as abilities_db
 from game_states import GameStates
 
 
 class Fighter:
-    def __init__(self, hp, ac, ev, power, mv_spd, atk_spd, fov=6, abilities=None):
+    def __init__(self, hp, ac, ev, power, mv_spd, atk_spd, size, fov=6, abilities=None):
         self.max_hp = hp
         self.hp = hp
         self.ac = ac
@@ -13,6 +13,7 @@ class Fighter:
         self.mv_spd = mv_spd
         self.atk_spd = atk_spd
         self.fov = fov
+        self.size = size
         self.abilities = abilities
         self.effects = []
         self.dead = False
@@ -30,8 +31,9 @@ class Fighter:
         d = None
         hit_chance = randint(1, 100)
         damage = randint(1, self.power) - target.fighter.ac
+        
         if ability in abilities_db()["attack"]:
-            damage, effect = self.use_ability(ability)
+            damage, effect = self.use_ability(ability, target)
 
             if len(effect) > 0:
                 d = [effect, damage]
@@ -41,9 +43,6 @@ class Fighter:
             else:
                 results.append("The {0} uses {1} on you!".format(
                     self.owner.name, ability))
-
-            if ability == "swoop" and target.char == tilemap()["monsters"]["rat"]:
-                damage += 2
 
         if target.fighter.ev * 5 >= hit_chance:
             if self.owner.player:
@@ -80,13 +79,13 @@ class Fighter:
                     "The {0} attacks you but does no damage.".format(self.owner.name))
         return results
 
-    def use_ability(self, ability):
+    def use_ability(self, ability, target):
 
-        for ability in self.abilities:
-            if ability in abilities_db()["attack"]:
-                effects = abilities_db()["attack"][ability]
-                damage = randint(int(effects[1][0]), int(effects[1][2]))
-                effect = effects[2]
+        effects = abilities_db()["attack"][ability]
+        damage = randint(int(effects[1][0]), int(effects[1][2]))
+        if ability == "swoop" and target.fighter.size == "small":
+            damage += 2
+        effect = effects[2]
 
         return damage, effect
 

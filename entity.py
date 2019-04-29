@@ -72,7 +72,7 @@ class Entity:
                 if game_map.tiles[x1][y1].block_sight:
                     fov_map.transparent[y1, x1] = False
 
-        for entity in entities:
+        for entity in entities["monsters"]:
             if entity.blocks and entity != self and entity != target:
                 fov_map.walkable[entity.y, entity.x] = False
                 fov_map.transparent[entity.y, entity.x] = True
@@ -113,7 +113,8 @@ class Entity:
 
 
 def blocking_entity(entities, x, y):
-    for entity in entities:
-        if entity.blocks and entity.x == x and entity.y == y:
-            return entity
+    for category in entities.values():
+        for entity in category:
+            if entity.blocks and entity.x == x and entity.y == y:
+                return entity
     return None

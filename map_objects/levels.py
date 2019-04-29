@@ -4,7 +4,7 @@ from ui.menus import choose_avatar
 
 def make_map(destination, levels, player, depth, game_map=None, fov_map=None):
     
-    entities=[]
+    entities={}
 
     if destination is "dream":
         choice = choose_avatar(player)
@@ -49,7 +49,8 @@ def level_change(destination, levels, player, game_map=None, fov_map=None, depth
     if destination in levels:
         game_map = levels[destination][0]
         entities = levels[destination][1]
-        
+        entities["player"] = player
+
         if destination == "hub":
             # Initialize entities
             player, entities = game_map.place_entities(player, entities)

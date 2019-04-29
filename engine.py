@@ -118,7 +118,7 @@ def game_loop(main_menu_show=True, choice=None):
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, player.fighter.fov, True, 0)
 
-        draw_all(game_map, game_camera, entities, player, player.x, player.y,
+        draw_all(game_map, game_camera, entities, player,
                  fov_map, fov_recompute, message_log, msg_panel)
 
         fov_recompute = False
@@ -157,32 +157,25 @@ def game_loop(main_menu_show=True, choice=None):
 
                 else:
                     player.move(dx, dy)
-
                     time_counter.take_turn(1 / player.fighter.mv_spd)
-
-                    if (game_map.name is not "hub" and
-                            game_map.name is not "debug"):
-                        #player.player.spirit_power -= 0.5
-                        draw_stats(player)
-
-                    if game_map.tiles[player.x][player.y].char[1] == tilemap()["campfire"]:
-                        message_log.send(
-                            "Meditate and go to dream world with '<' or '>'")
-                        
-                    if game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs"]["down"]:
-                        message_log.send(
-                            "You feel an ominous presence. Go down with '<' or '>'")
 
                     # If there are entities under the player, print them
                     stack = []
-                    for entity in entities:
-                        if not entity.fighter:
-                            if player.x == entity.x and player.y == entity.y:
-                                if entity.item:
-                                    stack.append(get_article(
-                                        entity.name) + " " + entity.name)
-                                else:
-                                    stack.append(entity.name)
+                    for category in entities.values():
+                        for entity in category:
+                            if not entity.fighter:
+                                if player.x == entity.x and player.y == entity.y:
+                                    if entity.item:
+                                        stack.append(get_article(
+                                            entity.name) + " " + entity.name)
+                                    elif entity.name == "campfire":
+                                        message_log.send(
+                                            "Meditate and go to dream world with '<' or '>'")
+                                    elif entity.name == "stairs to a mysterious cavern":
+                                        message_log.send(
+                                            "You feel an ominous presence. Go down with '<' or '>'")
+                                    else:
+                                        stack.append(entity.name)
 
                     if len(stack) > 0:
                         d = dict(Counter(stack))
@@ -206,11 +199,11 @@ def game_loop(main_menu_show=True, choice=None):
                 game_state = GameStates.ENEMY_TURN
 
         elif pickup and game_state == GameStates.PLAYER_TURN:
-            for entity in entities:
-                if entity.item and entity.x == player.x and entity.y == player.y:
+            for entity in entities["items"]:
+                if entity.x == player.x and entity.y == player.y:
                     pickup_msg = player.inventory.add_item(entity)
                     message_log.send(pickup_msg)
-                    entities.remove(entity)
+                    entities["items"].remove(entity)
                     time_counter.take_turn(1)
                     game_state = GameStates.ENEMY_TURN
                     break
@@ -262,30 +255,23 @@ def game_loop(main_menu_show=True, choice=None):
 
         if stairs:
             
-            for entity in entities:
-                if entity.stairs and player.x == entity.x and player.y == entity.y:
+            for entity in entities["stairs"]:
+                if player.x == entity.x and player.y == entity.y:
                     game_map, entities, player, fov_map = level_change(
                         entity.stairs.name, levels, player, game_map, fov_map, entity.stairs.floor)
 
-            """
-            if game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs_down"] and game_map.name == "hub":
-                game_map, entities, player, fov_map = level_change(
-                    "cavern", levels, player, game_map, fov_map, 1)
+            if game_map.name == "cavern" and game_map.dungeon_level == 1:
                 message_log.clear()
-                blt.refresh()
                 message_log.send(
                     "A sense of impending doom fills you as you delve into the cavern.")
                 message_log.send("RIBBIT!")
-
-            if game_map.tiles[player.x][player.y].char[1] == tilemap()["campfire"]:
-                game_map, entities, player, fov_map = level_change(
-                    "dream", levels, player, game_map, fov_map)
+                
+            elif game_map.name == "dream":
                 message_log.clear()
                 message_log.send(
                     "I'm dreaming... I feel my spirit power draining.")
                 message_log.send("I'm hungry..")
-                fov_recompute = True
-            """
+            
             fov_recompute = True
 
         if key == blt.TK_M:
@@ -305,17 +291,16 @@ def game_loop(main_menu_show=True, choice=None):
 
         if game_state == GameStates.ENEMY_TURN:
 
-            for entity in entities:
-                if entity.fighter and not entity == player:
-                    
+            for entity in entities["monsters"]:
+                if entity.fighter:
                     effect_msg, game_state = entity.fighter.process_effects(time_counter, game_state)
                     message_log.send(effect_msg)
-                    
-                    if player.fighter.dead:
-                        kill_msg, game_state = kill_player(player)
-                        message_log.send(kill_msg)
-                        draw_stats(player)
-                        break
+                
+                if player.fighter.dead:
+                    kill_msg, game_state = kill_player(player)
+                    message_log.send(kill_msg)
+                    draw_stats(player)
+                    break
                 if entity.ai:
                     combat_msg = entity.ai.take_turn(
                         player, fov_map, game_map, entities, time_counter)
