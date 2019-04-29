@@ -2,9 +2,7 @@ from fov import initialize_fov
 from map_objects.game_map import GameMap
 from ui.menus import choose_avatar
 
-def make_map(destination, levels, player, game_map, fov_map, depth):
-    
-    entities={}
+def make_map(destination, levels, player, entities, game_map, fov_map, depth):
 
     if destination is "dream":
         choice = choose_avatar(player)
@@ -39,7 +37,7 @@ def make_map(destination, levels, player, game_map, fov_map, depth):
 
     return game_map, entities, player, fov_map
 
-def level_change(destination, levels, player, game_map=None, fov_map=None, depth=None):
+def level_change(destination, levels, player, entities={}, game_map=None, fov_map=None, depth=None):
 
     if not levels:
         game_map = GameMap(40, 40, "hub")
@@ -60,7 +58,7 @@ def level_change(destination, levels, player, game_map=None, fov_map=None, depth
             player.char = player.player.char["player"]
     
     else:
-        game_map, entities, player, fov_map = make_map(destination, levels, player, game_map, fov_map, depth)
+        game_map, entities, player, fov_map = make_map(destination, levels, player, entities, game_map, fov_map, depth)
     
     return game_map, entities, player, fov_map
         

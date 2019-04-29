@@ -209,7 +209,7 @@ def game_loop(main_menu_show=True, choice=None):
 
         if player.player.spirit_power <= 0:
             game_map, entities, player, fov_map = level_change(
-                "hub", levels, player, game_map, fov_map)
+                "hub", levels, player, entities, game_map, fov_map)
             message_log.clear()
             message_log.send("I have no power to meditate longer..")
             player.player.spirit_power = 50
@@ -221,7 +221,7 @@ def game_loop(main_menu_show=True, choice=None):
             message_log.send("My spirit has granted me new insights!")
             message_log.send("I should explore around my home..")
             game_map, entities, player, fov_map = level_change(
-                "hub", levels, player, game_map, fov_map)
+                "hub", levels, player, entities, game_map, fov_map)
 
             # Currently opens the door in hub
             for y in range(game_map.height):
@@ -235,8 +235,10 @@ def game_loop(main_menu_show=True, choice=None):
             for entity in entities["stairs"]:
                 if player.x == entity.x and player.y == entity.y:
                     game_map, entities, player, fov_map = level_change(
-                        entity.stairs.name, levels, player, game_map, fov_map, entity.stairs.floor)
-
+                        entity.stairs.name, levels, player, entities, game_map, fov_map, entity.stairs.floor)
+            
+            variables.old_stack = variables.stack
+            
             if game_map.name == "cavern" and game_map.dungeon_level == 1:
                 message_log.clear()
                 message_log.send(
