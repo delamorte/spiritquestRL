@@ -362,7 +362,7 @@ class GameMap:
     
     def is_blocked(self, x, y):
 
-        if x >= self.width or x <= 0 or y >= self.height or y <= 0:
+        if x >= self.width-1 or x <= 0 or y >= self.height-1 or y <= 0:
             return True
         if self.tiles[x][y].blocked:
             return True

@@ -1,4 +1,6 @@
 from bearlibterminal import terminal as blt
+from collections import Counter
+from helpers import get_article
 from math import ceil
 from textwrap import shorten
 import variables
@@ -24,11 +26,16 @@ def draw(entity, game_map, x, y, fov_map):
     #     blt.put_ext(x * variables.tile_offset_x, y *
     #             variables.tile_offset_y, 12, -12, 0xE100 + 1743)
 
-def draw_entities(entities, game_map, game_camera, fov_map):
+def draw_entities(entities, player, game_map, game_camera, fov_map):
     
     for category in entities.values():
         for entity in category:
             x, y = game_camera.get_coordinates(entity.x, entity.y)
+            
+            if entity.x == player.x and entity.y == player.y and not entity == player:
+                variables.stack.append(get_article(
+                    entity.name) + " " + entity.name)
+
             if fov_map.fov[entity.y, entity.x]:
                 clear(entity, entity.last_seen_x, entity.last_seen_y)
                 entity.last_seen_x = entity.x
@@ -113,7 +120,25 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
 
 def draw_messages(msg_panel, message_log):
 
-    if message_log.update:
+    if len(variables.stack) > 0 and not variables.stack == variables.old_stack:
+        variables.old_stack = variables.stack
+        d = dict(Counter(variables.stack))
+        formatted_stack = []
+        for i in d:
+            if d[i] > 1:
+                formatted_stack.append(i + " x" + str(d[i]))
+            elif d[i] == "campfire":
+                message_log.send(
+                    "Meditate and go to dream world with '<' or '>'")
+            elif d[i] == "stairs to a mysterious cavern":
+                message_log.send(
+                    "You feel an ominous presence. Go down with '<' or '>'")
+            else:
+                formatted_stack.append(i)
+        message_log.send(
+            "You see " + ", ".join(formatted_stack) + ".")
+        
+    if message_log.new_msgs:
         blt.layer(1)
         blt.clear_area(msg_panel.x * variables.ui_offset_x, msg_panel.y * variables.ui_offset_y, msg_panel.w *
                        variables.ui_offset_x, msg_panel.h * variables.ui_offset_y)
@@ -129,8 +154,9 @@ def draw_messages(msg_panel, message_log):
             blt.puts(msg_panel.x * variables.ui_offset_x + 1, msg_panel.y *
                      variables.ui_offset_y + i, "[offset=0,-9]" + msg, msg_panel.w * variables.ui_offset_x - 2, 1, align=blt.TK_ALIGN_LEFT)
             i -= 1
-        message_log.update(message_log.buffer)
-
+        message_log.new_msgs = False
+    
+    variables.stack = []
 
 def draw_stats(player, target=None):
 
@@ -278,7 +304,7 @@ def draw_all(game_map, game_camera, entities, player, fov_map,
         player.x, player.y, game_map.width, game_map.height)
     draw_map(game_map, game_camera, fov_map,
              fov_recompute)
-    draw_entities(entities, game_map, game_camera, fov_map)
+    draw_entities(entities, player, game_map, game_camera, fov_map)
     draw_messages(msg_panel, message_log)
     draw_stats(player)
 

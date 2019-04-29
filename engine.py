@@ -1,4 +1,3 @@
-from collections import Counter
 from math import floor
 
 from bearlibterminal import terminal as blt
@@ -140,16 +139,17 @@ def game_loop(main_menu_show=True, choice=None):
             dx, dy = move
             destination_x = player.x + dx
             destination_y = player.y + dy
-
+            
+            # Handle player attack
             if not game_map.is_blocked(destination_x, destination_y):
                 target = blocking_entity(
                     entities, destination_x, destination_y)
                 if target:
                     if randint(1,100) < 20 and len(player.fighter.abilities)>0:
                         combat_msg = player.fighter.attack(target, player.fighter.abilities[0])
-                    else:
-                        
+                    else:                        
                         combat_msg = player.fighter.attack(target)
+                    
                     message_log.send(combat_msg)
                     player.player.spirit_power -= 0.5
                     time_counter.take_turn(1)
@@ -158,36 +158,6 @@ def game_loop(main_menu_show=True, choice=None):
                 else:
                     player.move(dx, dy)
                     time_counter.take_turn(1 / player.fighter.mv_spd)
-
-                    # If there are entities under the player, print them
-                    stack = []
-                    for category in entities.values():
-                        for entity in category:
-                            if not entity.fighter:
-                                if player.x == entity.x and player.y == entity.y:
-                                    if entity.item:
-                                        stack.append(get_article(
-                                            entity.name) + " " + entity.name)
-                                    elif entity.name == "campfire":
-                                        message_log.send(
-                                            "Meditate and go to dream world with '<' or '>'")
-                                    elif entity.name == "stairs to a mysterious cavern":
-                                        message_log.send(
-                                            "You feel an ominous presence. Go down with '<' or '>'")
-                                    else:
-                                        stack.append(entity.name)
-
-                    if len(stack) > 0:
-                        d = dict(Counter(stack))
-                        formatted_stack = []
-                        for i in d:
-                            if d[i] > 1:
-                                formatted_stack.append(i + " x" + str(d[i]))
-                            else:
-                                formatted_stack.append(i)
-                        message_log.send(
-                            "You see " + ", ".join(formatted_stack) + ".")
-
                     fov_recompute = True
 
                 game_state = GameStates.ENEMY_TURN
