@@ -26,14 +26,16 @@ import variables
 """
 TODO:
 
-- Move stairs to entities
 - Move color lists in game_map to a palette
   module
 - Add abilities on player and give them action cost
 - Add stealth
 - Items and inventory
 - Npcs
-- Minimap
+- Minimap 
+- UI elements for displaying current game map name
+  and status effects
+- Level up system
 - Saving and loading
 - Examine/view mode
 - Generate levels with a seed
@@ -41,7 +43,7 @@ TODO:
 FIX:
 
 - Some entities on explored, not visible tiles get drawn
-  when they shouldn't
+  when they shouldn't (may be fixed?)
   
 """
 
