@@ -418,8 +418,7 @@ class GameMap:
         
         if self.name == "cavern":
         
-            #number_of_monsters = randint(self.width / 2 - 40, self.width / 2 - 20)
-            number_of_monsters = 0
+            number_of_monsters = randint(self.width / 2 - 40, self.width / 2 - 20)
             monsters = []
             for x, y in tilemap()["monsters"].items():
                 if x == "frog":
