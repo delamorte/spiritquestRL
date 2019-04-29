@@ -6,7 +6,7 @@ from camera import Camera
 from components.inventory import Inventory
 from components.player import Player
 from death_functions import kill_monster, kill_player
-from draw import draw_all, draw_stats, draw_ui, clear_entities
+from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities
 from entity import Entity, blocking_entity
 from fighter_stats import get_fighter_stats
 from fov import recompute_fov
@@ -118,8 +118,8 @@ def game_loop(main_menu_show=True, choice=None):
             recompute_fov(fov_map, player.x, player.y, player.fighter.fov, True, 0)
 
         draw_all(game_map, game_camera, entities, player,
-                 fov_map, fov_recompute, message_log, msg_panel)
-
+                 fov_map, fov_recompute)
+        draw_messages(msg_panel, message_log)
         fov_recompute = False
         blt.refresh()
 
@@ -145,8 +145,8 @@ def game_loop(main_menu_show=True, choice=None):
                 target = blocking_entity(
                     entities, destination_x, destination_y)
                 if target:
-                    if randint(1,100) < 20 and len(player.fighter.abilities)>0:
-                        combat_msg = player.fighter.attack(target, player.fighter.abilities[0])
+                    if randint(1,100) < player.fighter.abilities[0][1] and len(player.fighter.abilities)>0:
+                        combat_msg = player.fighter.attack(target, player.fighter.abilities[0][0])
                     else:                        
                         combat_msg = player.fighter.attack(target)
                     
@@ -167,6 +167,9 @@ def game_loop(main_menu_show=True, choice=None):
                 message_log.send("The door is locked...")
                 time_counter.take_turn(1)
                 game_state = GameStates.ENEMY_TURN
+            variables.old_stack = variables.stack    
+            variables.stack = []
+            
 
         elif pickup and game_state == GameStates.PLAYER_TURN:
             for entity in entities["items"]:
@@ -180,9 +183,13 @@ def game_loop(main_menu_show=True, choice=None):
             else:
                 message_log.send("There is nothing here to pick up.")
 
+
+
         if key == blt.TK_PERIOD or key == blt.TK_KP_5:
             time_counter.take_turn(1)
             #player.player.spirit_power -= 1
+            message_log.send("You wait a turn.")
+            variables.old_stack = variables.stack
             game_state = GameStates.ENEMY_TURN
 
         if key == blt.TK_CLOSE:
@@ -260,7 +267,7 @@ def game_loop(main_menu_show=True, choice=None):
             fov_recompute = True
 
         if game_state == GameStates.ENEMY_TURN:
-
+            draw_messages(msg_panel, message_log)
             for entity in entities["monsters"]:
                 if entity.fighter:
                     effect_msg, game_state = entity.fighter.process_effects(time_counter, game_state)

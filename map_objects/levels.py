@@ -2,7 +2,7 @@ from fov import initialize_fov
 from map_objects.game_map import GameMap
 from ui.menus import choose_avatar
 
-def make_map(destination, levels, player, depth, game_map=None, fov_map=None):
+def make_map(destination, levels, player, game_map, fov_map, depth):
     
     entities={}
 
@@ -60,7 +60,7 @@ def level_change(destination, levels, player, game_map=None, fov_map=None, depth
             player.char = player.player.char["player"]
     
     else:
-        game_map, entities, player, fov_map = make_map(destination, levels, player, depth, game_map=None, fov_map=None)
+        game_map, entities, player, fov_map = make_map(destination, levels, player, game_map, fov_map, depth)
     
     return game_map, entities, player, fov_map
         

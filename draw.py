@@ -121,7 +121,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
 def draw_messages(msg_panel, message_log):
 
     if len(variables.stack) > 0 and not variables.stack == variables.old_stack:
-        variables.old_stack = variables.stack
+        #variables.old_stack = variables.stack
         d = dict(Counter(variables.stack))
         formatted_stack = []
         for i in d:
@@ -155,8 +155,6 @@ def draw_messages(msg_panel, message_log):
                      variables.ui_offset_y + i, "[offset=0,-9]" + msg, msg_panel.w * variables.ui_offset_x - 2, 1, align=blt.TK_ALIGN_LEFT)
             i -= 1
         message_log.new_msgs = False
-    
-    variables.stack = []
 
 def draw_stats(player, target=None):
 
@@ -298,16 +296,14 @@ def draw_ui(msg_panel, msg_panel_borders, screen_borders):
 
 
 def draw_all(game_map, game_camera, entities, player, fov_map,
-             fov_recompute, message_log, msg_panel):
+             fov_recompute):
 
     game_camera.move_camera(
         player.x, player.y, game_map.width, game_map.height)
     draw_map(game_map, game_camera, fov_map,
              fov_recompute)
     draw_entities(entities, player, game_map, game_camera, fov_map)
-    draw_messages(msg_panel, message_log)
     draw_stats(player)
-
 
 def clear(entity, x, y):
     # Clear the entity from the screen

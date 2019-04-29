@@ -123,8 +123,8 @@ class GameMap:
                 self.tiles[x][y].char[1] = tilemap()["wall_moss"][randint(
                     0, (len(tilemap()["wall_moss"]) - 1))]
         
-        self.generate_trees(0, 0, self.width, self.height,
-                    20, block_sight=None)
+        self.generate_trees(1, 1, self.width-1, self.height-1,
+                    20, block_sight=True)
 
         # Create starting weapon in hub
         x, y = self.rooms["home"].get_center()
@@ -134,11 +134,11 @@ class GameMap:
 
         center_x, center_y = self.rooms["home"].get_center()
         stairs_component = Stairs("dream")
-        campfire = Entity(center_x, center_y, 1, tilemap()["campfire"], "lightest orange", "campfire", stairs=stairs_component)
+        campfire = Entity(center_x, center_y, 2, tilemap()["campfire"], "lightest orange", "campfire", stairs=stairs_component)
 
         center_x, center_y = self.rooms["d_entrance"].get_center()
         stairs_component = Stairs("cavern", self.dungeon_level + 1)
-        stairs_down = Entity(center_x, center_y, 1, tilemap()["stairs"]["down"], "dark amber", "stairs to a mysterious cavern", stairs=stairs_component)
+        stairs_down = Entity(center_x, center_y, 2, tilemap()["stairs"]["down"], "dark amber", "stairs to a mysterious cavern", stairs=stairs_component)
         
         entities={}
         entities["items"] = [weapon]
@@ -354,7 +354,7 @@ class GameMap:
                 randint(1, self.height - 1)
                 
         stairs_component = Stairs("cavern"+str(self.dungeon_level + 1), self.dungeon_level + 1)
-        stairs_down = Entity(px, py, 1, tilemap()["stairs"]["down"], "dark amber","stairs down", stairs=stairs_component)
+        stairs_down = Entity(px, py, 2, tilemap()["stairs"]["down"], "dark amber","stairs down", stairs=stairs_component)
         
         entities["stairs"] = [stairs_up, stairs_down]
         
