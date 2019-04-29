@@ -6,7 +6,7 @@ class Entity:
     A generic object to represent players, enemies, items, etc.
     """
 
-    def __init__(self, x, y, layer, char, color, name, blocks=False, player=None, fighter=None, ai=None, item=None, inventory=None):
+    def __init__(self, x, y, layer, char, color, name, blocks=False, player=None, fighter=None, ai=None, item=None, inventory=None, stairs=None):
         self.x = x
         self.y = y
         self.layer = layer
@@ -19,9 +19,11 @@ class Entity:
         self.ai = ai
         self.item = item
         self.inventory = inventory
+        self.stairs = stairs
         self.last_seen_x = x
         self.last_seen_y = y
 
+        # Set entity as component owner, so components can call their owner
         if self.player:
             self.player.owner = self
 
@@ -36,6 +38,9 @@ class Entity:
 
         if self.inventory:
             self.inventory.owner = self
+            
+        if self.stairs:
+            self.stairs.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount

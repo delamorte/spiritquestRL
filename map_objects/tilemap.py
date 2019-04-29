@@ -38,8 +38,7 @@ def tilemap():
                  "monster_remains": 0xE100 + 513,
                  "door": {"open": 0xE100 + 68, "closed": 0xE100 + 67},
                  "campfire": 0xE100 + 427,
-                 "stairs_up": 0xE100 + 22,
-                 "stairs_down": 0xE100 + 27,
+                 "stairs": {"up": 0xE100 + 22, "down": 0xE100 + 27},
                  "wall_brick": 0xE100 + 83,
                  "wall_moss": (0xE100 + 90, 0xE100 + 91, 0xE100 + 92),
                  "weapons": {"club": 0xE100 + 242}}
@@ -56,8 +55,7 @@ def tilemap():
                  "monster_remains": "%",
                  "door": {"open": "-", "closed": "+"},
                  "campfire": "¤",
-                 "stairs_up": "<",
-                 "stairs_down": ">",
+                 "stairs": {"up": "<", "down": ">"},
                  "wall_brick": "#",
                  "wall_moss": "#",
                  "weapons": {"club": "\\"}}

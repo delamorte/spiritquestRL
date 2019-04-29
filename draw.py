@@ -85,6 +85,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
                                 game_map.tiles[map_x][map_y].char[1])
                     # Fill rest of fov with ground tiles
                     else:
+                        blt.layer(0)
                         blt.color(game_map.tiles[map_x][map_y].color[0])
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[0])
@@ -104,6 +105,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[1])
                     else:
+                        blt.layer(0)
                         blt.color("darkest gray")
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[0])

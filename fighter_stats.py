@@ -7,7 +7,7 @@ def get_fighter_stats(name):
     
     if name is 'player':
         fighter_component = Fighter(
-            hp=20, ac=3, ev=3, power=3, mv_spd=1, atk_spd=1)
+            hp=20, ac=3, ev=3, power=3, mv_spd=1, atk_spd=1, abilities=[])
     elif name is 'rat':
         fighter_component = Fighter(
             hp=10, ac=1, ev=4, power=4, mv_spd=2, atk_spd=1, fov=4, abilities=["paralyzing bite"])

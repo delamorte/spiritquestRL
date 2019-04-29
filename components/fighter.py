@@ -30,7 +30,7 @@ class Fighter:
         d = None
         hit_chance = randint(1, 100)
         damage = randint(1, self.power) - target.fighter.ac
-        if ability:
+        if ability in abilities_db()["attack"]:
             damage, effect = self.use_ability(ability)
 
             if len(effect) > 0:

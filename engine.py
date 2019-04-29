@@ -143,9 +143,10 @@ def game_loop(main_menu_show=True, choice=None):
                 target = blocking_entity(
                     entities, destination_x, destination_y)
                 if target:
-                    if randint(1,100) < 20:
+                    if randint(1,100) < 20 and len(player.fighter.abilities)>0:
                         combat_msg = player.fighter.attack(target, player.fighter.abilities[0])
                     else:
+                        
                         combat_msg = player.fighter.attack(target)
                     message_log.send(combat_msg)
                     player.player.spirit_power -= 0.5
@@ -166,7 +167,7 @@ def game_loop(main_menu_show=True, choice=None):
                         message_log.send(
                             "Meditate and go to dream world with '<' or '>'")
                         
-                    if game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs_down"]:
+                    if game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs"]["down"]:
                         message_log.send(
                             "You feel an ominous presence. Go down with '<' or '>'")
 
@@ -236,7 +237,7 @@ def game_loop(main_menu_show=True, choice=None):
 
         if player.player.spirit_power <= 0:
             game_map, entities, player, fov_map = level_change(
-                "hub", levels, player, game_map, entities, fov_map)
+                "hub", levels, player, game_map, fov_map)
             message_log.clear()
             message_log.send("I have no power to meditate longer..")
             player.player.spirit_power = 50
@@ -248,7 +249,7 @@ def game_loop(main_menu_show=True, choice=None):
             message_log.send("My spirit has granted me new insights!")
             message_log.send("I should explore around my home..")
             game_map, entities, player, fov_map = level_change(
-                "hub", levels, player, game_map, entities, fov_map)
+                "hub", levels, player, game_map, fov_map)
 
             # Currently opens the door in hub
             for y in range(game_map.height):
@@ -258,9 +259,16 @@ def game_loop(main_menu_show=True, choice=None):
                         game_map.tiles[x][y].blocked = False
 
         if stairs:
+            
+            for entity in entities:
+                if entity.stairs and player.x == entity.x and player.y == entity.y:
+                    game_map, entities, player, fov_map = level_change(
+                        entity.stairs.name, levels, player, game_map, fov_map, entity.stairs.floor)
+
+            """
             if game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs_down"] and game_map.name == "hub":
                 game_map, entities, player, fov_map = level_change(
-                    "cavern", levels, player, game_map, entities, fov_map, 1)
+                    "cavern", levels, player, game_map, fov_map, 1)
                 message_log.clear()
                 blt.refresh()
                 message_log.send(
@@ -269,16 +277,13 @@ def game_loop(main_menu_show=True, choice=None):
 
             if game_map.tiles[player.x][player.y].char[1] == tilemap()["campfire"]:
                 game_map, entities, player, fov_map = level_change(
-                    "dream", levels, player, game_map, entities, fov_map)
+                    "dream", levels, player, game_map, fov_map)
                 message_log.clear()
                 message_log.send(
                     "I'm dreaming... I feel my spirit power draining.")
                 message_log.send("I'm hungry..")
                 fov_recompute = True
-
-            elif game_map.tiles[player.x][player.y].char[1] == tilemap()["stairs_up"] and game_map.name == "cavern1":
-                game_map, entities, player, fov_map = level_change(
-                    "hub", levels, player, 1, game_map, entities, fov_map)
+            """
             fov_recompute = True
 
         if key == blt.TK_M:
