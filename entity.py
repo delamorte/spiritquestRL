@@ -6,7 +6,7 @@ class Entity:
     A generic object to represent players, enemies, items, etc.
     """
 
-    def __init__(self, x, y, layer, char, color, name, blocks=False, player=None, fighter=None, ai=None, item=None, inventory=None):
+    def __init__(self, x, y, layer, char, color, name, blocks=False, player=None, fighter=None, ai=None, item=None, inventory=None, stairs=None, door=None):
         self.x = x
         self.y = y
         self.layer = layer
@@ -19,9 +19,13 @@ class Entity:
         self.ai = ai
         self.item = item
         self.inventory = inventory
+        self.stairs = stairs
+        self.xtra_info = None
+        self.door = door
         self.last_seen_x = x
         self.last_seen_y = y
 
+        # Set entity as component owner, so components can call their owner
         if self.player:
             self.player.owner = self
 
@@ -36,6 +40,12 @@ class Entity:
 
         if self.inventory:
             self.inventory.owner = self
+            
+        if self.stairs:
+            self.stairs.owner = self
+            
+        if self.door:
+            self.door.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount
@@ -67,7 +77,7 @@ class Entity:
                 if game_map.tiles[x1][y1].block_sight:
                     fov_map.transparent[y1, x1] = False
 
-        for entity in entities:
+        for entity in entities["monsters"]:
             if entity.blocks and entity != self and entity != target:
                 fov_map.walkable[entity.y, entity.x] = False
                 fov_map.transparent[entity.y, entity.x] = True
@@ -108,7 +118,8 @@ class Entity:
 
 
 def blocking_entity(entities, x, y):
-    for entity in entities:
-        if entity.blocks and entity.x == x and entity.y == y:
-            return entity
+    for category in entities.values():
+        for entity in category:
+            if entity.blocks and entity.x == x and entity.y == y:
+                return entity
     return None

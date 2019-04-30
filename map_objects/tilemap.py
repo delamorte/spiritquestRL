@@ -36,10 +36,9 @@ def tilemap():
                  "player_remains": 0xE100 + 468,
                  "monsters": {"rat": 0xE100 + 1416, "crow": 0xE100 + 1587, "snake": 0xE100 + 1097, "frog": 0xE100 + 1095},
                  "monster_remains": 0xE100 + 513,
-                 "door": {"open": 0xE100 + 68, "closed": 0xE100 + 67},
+                 "door": {"open": 0xE100 + 68, "closed": 0xE100 + 67, "locked": 0xE100 + 78},
                  "campfire": 0xE100 + 427,
-                 "stairs_up": 0xE100 + 22,
-                 "stairs_down": 0xE100 + 27,
+                 "stairs": {"up": 0xE100 + 22, "down": 0xE100 + 27},
                  "wall_brick": 0xE100 + 83,
                  "wall_moss": (0xE100 + 90, 0xE100 + 91, 0xE100 + 92),
                  "weapons": {"club": 0xE100 + 242}}
@@ -54,10 +53,9 @@ def tilemap():
                  "player_remains": "@",
                  "monsters": {"rat": "r", "crow": "c", "snake": "s", "frog": "f"},
                  "monster_remains": "%",
-                 "door": {"open": "-", "closed": "+"},
+                 "door": {"open": "-", "closed": "+", "locked": "*"},
                  "campfire": "¤",
-                 "stairs_up": "<",
-                 "stairs_down": ">",
+                 "stairs": {"up": "<", "down": ">"},
                  "wall_brick": "#",
                  "wall_moss": "#",
                  "weapons": {"club": "\\"}}
@@ -69,7 +67,7 @@ def bestiary():
 
     animals = {"crow": "quick, very agile, very weak, excellent vision",
                "rat": "very quick, agile, weak, small, poor vision",
-               "snake": "strong, slow, average vision"}
+               "snake": "strong, slow, small, average vision"}
     return animals
 
 

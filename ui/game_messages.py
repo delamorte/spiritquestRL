@@ -4,6 +4,7 @@ class MessageLog:
         self.buffer = []
         self.history = []
         self.max_length = max_length
+        self.new_msgs = False
 
     def send(self, msg):
 
@@ -13,6 +14,7 @@ class MessageLog:
                 if len(self.buffer) >= self.max_length:
                     self.buffer = self.buffer[:len(self.buffer) - 1]
                 self.buffer.insert(0, n)
+                self.new_msgs = True
         else:
 
             self.history.append(str(msg))
@@ -20,11 +22,7 @@ class MessageLog:
                 self.buffer = self.buffer[:len(self.buffer) - 1]
 
             self.buffer.insert(0, msg)
-
-    def update(self, buffer):
-        buffer_state = buffer
-        if len(self.buffer) != len(buffer_state):
-            return True
+            self.new_msgs = True
 
     def clear(self):
 

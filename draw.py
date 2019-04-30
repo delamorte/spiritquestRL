@@ -1,4 +1,6 @@
 from bearlibterminal import terminal as blt
+from collections import Counter
+from helpers import get_article
 from math import ceil
 from textwrap import shorten
 import variables
@@ -24,24 +26,32 @@ def draw(entity, game_map, x, y, fov_map):
     #     blt.put_ext(x * variables.tile_offset_x, y *
     #             variables.tile_offset_y, 12, -12, 0xE100 + 1743)
 
+def draw_entities(entities, player, game_map, game_camera, fov_map):
+    
+    for category in entities.values():
+        for entity in category:
+            x, y = game_camera.get_coordinates(entity.x, entity.y)
+            
+            if entity.x == player.x and entity.y == player.y and not entity.player and not entity.door:
+                variables.stack.append(get_article(
+                    entity.name).capitalize() + " " + entity.name)
+                if entity.xtra_info:
+                    variables.stack.append(entity.xtra_info)
 
-def draw_entities(entities, game_map, game_camera, fov_map):
-
-    for entity in entities:
-        x, y = game_camera.get_coordinates(entity.x, entity.y)
-        if fov_map.fov[entity.y, entity.x]:
-            clear(entity, entity.last_seen_x, entity.last_seen_y)
-            entity.last_seen_x = entity.x
-            entity.last_seen_y = entity.y
-            draw(entity, game_map, x, y, fov_map)
-
-        elif not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.x][entity.y].explored:
-            x, y = game_camera.get_coordinates(
-                entity.last_seen_x, entity.last_seen_y)
-            if (x > ceil(variables.camera_offset) and y > ceil(variables.camera_offset) and
-                x < game_camera.width - ceil(variables.camera_offset) and
-                    y < game_camera.height - ceil(variables.camera_offset)):
+            if fov_map.fov[entity.y, entity.x]:
+                clear(entity, entity.last_seen_x, entity.last_seen_y)
+                if not entity.player:
+                    entity.last_seen_x = entity.x
+                    entity.last_seen_y = entity.y
                 draw(entity, game_map, x, y, fov_map)
+
+            elif not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.last_seen_x][entity.last_seen_y].explored and not fov_map.fov[entity.last_seen_y, entity.last_seen_x]:
+                x, y = game_camera.get_coordinates(
+                    entity.last_seen_x, entity.last_seen_y)
+                if (x > ceil(variables.camera_offset) and y > ceil(variables.camera_offset) and
+                    x < game_camera.width - ceil(variables.camera_offset) and
+                        y < game_camera.height - ceil(variables.camera_offset)):
+                    draw(entity, game_map, x, y, fov_map)
 
 
 def draw_map(game_map, game_camera, fov_map, fov_recompute):
@@ -85,6 +95,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
                                 game_map.tiles[map_x][map_y].char[1])
                     # Fill rest of fov with ground tiles
                     else:
+                        blt.layer(0)
                         blt.color(game_map.tiles[map_x][map_y].color[0])
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[0])
@@ -104,6 +115,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[1])
                     else:
+                        blt.layer(0)
                         blt.color("darkest gray")
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[0])
@@ -111,7 +123,19 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
 
 def draw_messages(msg_panel, message_log):
 
-    if message_log.update:
+    if len(variables.stack) > 0 and not variables.stack == variables.old_stack:
+
+        d = dict(Counter(variables.stack))
+        formatted_stack = []
+        for i in d:
+            if d[i] > 1:
+                formatted_stack.append(i + " x" + str(d[i]))
+            else:
+                formatted_stack.append(i)
+        message_log.send(
+            ". ".join(formatted_stack) + ".")
+        
+    if message_log.new_msgs:
         blt.layer(1)
         blt.clear_area(msg_panel.x * variables.ui_offset_x, msg_panel.y * variables.ui_offset_y, msg_panel.w *
                        variables.ui_offset_x, msg_panel.h * variables.ui_offset_y)
@@ -127,8 +151,7 @@ def draw_messages(msg_panel, message_log):
             blt.puts(msg_panel.x * variables.ui_offset_x + 1, msg_panel.y *
                      variables.ui_offset_y + i, "[offset=0,-9]" + msg, msg_panel.w * variables.ui_offset_x - 2, 1, align=blt.TK_ALIGN_LEFT)
             i -= 1
-        message_log.update(message_log.buffer)
-
+        message_log.new_msgs = False
 
 def draw_stats(player, target=None):
 
@@ -269,17 +292,15 @@ def draw_ui(msg_panel, msg_panel_borders, screen_borders):
                         variables.ui_offset_y, 0xE900 + 468)
 
 
-def draw_all(game_map, game_camera, entities, player, px, py, fov_map,
-             fov_recompute, message_log, msg_panel):
+def draw_all(game_map, game_camera, entities, player, fov_map,
+             fov_recompute):
 
     game_camera.move_camera(
-        px, py, game_map.width, game_map.height)
+        player.x, player.y, game_map.width, game_map.height)
     draw_map(game_map, game_camera, fov_map,
              fov_recompute)
-    draw_entities(entities, game_map, game_camera, fov_map)
-    draw_messages(msg_panel, message_log)
+    draw_entities(entities, player, game_map, game_camera, fov_map)
     draw_stats(player)
-
 
 def clear(entity, x, y):
     # Clear the entity from the screen
@@ -290,12 +311,13 @@ def clear(entity, x, y):
 
 def clear_entities(entities, game_camera):
 
-    for entity in entities:
-        x, y = game_camera.get_coordinates(entity.x, entity.y)
-        dx, dy = game_camera.get_coordinates(
-            entity.last_seen_x, entity.last_seen_y)
-        clear(entity, x, y)
-        clear(entity, dx, dy)
+    for category in entities.values():
+        for entity in category:
+            x, y = game_camera.get_coordinates(entity.x, entity.y)
+            dx, dy = game_camera.get_coordinates(
+                entity.last_seen_x, entity.last_seen_y)
+            clear(entity, x, y)
+            clear(entity, dx, dy)
 
 
 def clear_camera(n):

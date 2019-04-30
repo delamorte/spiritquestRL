@@ -10,6 +10,8 @@ camera_width = 0
 camera_height = 0
 viewport_x = 0
 viewport_y = 0
+stack = []
+old_stack = []
 
 class TimeCounter:
     def __init__(self, turn=0):
