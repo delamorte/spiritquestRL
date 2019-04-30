@@ -5,6 +5,7 @@ from map_objects.tile import Tile
 from map_objects.tilemap import tilemap
 from random import randint
 from components.stairs import Stairs
+from components.door import Door
 
 class GameMap:
     def __init__(self, width, height, name, dungeon_level=0):
@@ -31,7 +32,7 @@ class GameMap:
 
         return tiles
 
-    def place_room(self, room):
+    def create_room(self, room):
 
         for y in range(room.y1, room.y2):
             for x in range(room.x1, room.x2):
@@ -65,7 +66,7 @@ class GameMap:
             for c in range(-n, n + 1):
                 if x + r >= self.width or x + r <= 0 or y + c >= self.height or y + c <= 0:
                     wall_count += 1
-                elif self.tiles[x + r][y + c].blocked and self.tiles[x + r][y + c].block_sight:
+                elif self.tiles[x + r][y + c].blocked:
                     wall_count += 1
 
         return wall_count
@@ -82,20 +83,20 @@ class GameMap:
         # Generate a house
         w = 10
         h = 10
-        x1 = randint(1, self.width - w - 1)
-        y1 = randint(1, self.height - h - 1)
+        x1 = randint(2, self.width - w - 2)
+        y1 = randint(2, self.height - h - 2)
 
         home = Room(x1, y1, 10, 10, tilemap()[
                     "wall_brick"], "orange", "dark gray", "home")
 
-        self.place_room(home)
-        home.create_door(self, "open")
+        self.create_room(home)
+        door_home = home.create_door(self, "open")
 
         # Generate dungeon entrance
         w = 10
         h = 10
-        x1 = randint(1, self.width - w - 1)
-        y1 = randint(1, self.height - h - 1)
+        x1 = randint(2, self.width - w - 2)
+        y1 = randint(2, self.height - h - 2)
         x2 = x1 + w
         y2 = y1 + h
 
@@ -111,8 +112,8 @@ class GameMap:
 
         d_entrance = Room(x1, y1, 10, 10, tilemap()["wall_brick"], "dark amber", "darkest amber", "d_entrance")
 
-        self.place_room(d_entrance)
-        d_entrance.create_door(self, "open")
+        self.create_room(d_entrance)
+        door_d_entrance = d_entrance.create_door(self, "locked")
 
         walls = d_entrance.get_walls()
         for i in walls:
@@ -133,16 +134,20 @@ class GameMap:
                         ["weapons"]["club"], None, "club", item=item_component)
 
         center_x, center_y = self.rooms["home"].get_center()
-        stairs_component = Stairs("dream")
+        stairs_component = Stairs(("hub", center_x, center_y), ["dream"])
         campfire = Entity(center_x, center_y, 2, tilemap()["campfire"], "lightest orange", "campfire", stairs=stairs_component)
-
+        campfire.xtra_info = "Meditate and go to dream world with '<' or '>'"
+        
         center_x, center_y = self.rooms["d_entrance"].get_center()
-        stairs_component = Stairs("cavern", self.dungeon_level + 1)
+        
+        stairs_component = Stairs(("hub", center_x, center_y), ["cavern1"], "stairs down", 0)
         stairs_down = Entity(center_x, center_y, 2, tilemap()["stairs"]["down"], "dark amber", "stairs to a mysterious cavern", stairs=stairs_component)
+        stairs_down.xtra_info = "You feel an ominous presence. Go down with '<' or '>'"
         
         entities={}
         entities["items"] = [weapon]
         entities["stairs"] = [campfire, stairs_down]
+        entities["doors"] = [door_home, door_d_entrance]
         return entities
 
     def generate_forest(self):
@@ -154,8 +159,8 @@ class GameMap:
                          "darker amber",
                          "darkest amber"]
 
-        for y in range(self.height):
-            for x in range(self.width):
+        for y in range(1, self.height-1):
+            for x in range(1, self.width-1):
 
                 self.tiles[x][y].color[0] = cavern_colors[3]
                 self.tiles[x][y].char[0] = tilemap()["ground_soil"][randint(
@@ -237,7 +242,7 @@ class GameMap:
 
         for i in range(5):
             for x in range(self.width):
-                for y in range(self.height - 1):
+                for y in range(self.height):
                     wall_one_away = self.count_walls(1, x, y)
                     wall_two_away = self.count_walls(2, x, y)
 
@@ -247,32 +252,37 @@ class GameMap:
                             0, (len(tilemap()["wall_moss"]) - 1))]
                         self.tiles[x][y].blocked = True
                         self.tiles[x][y].block_sight = True
+
                     else:
                         self.tiles[x][y].blocked = False
                         self.tiles[x][y].block_sight = False
                         self.tiles[x][y].char[1] = " "
 
         # Smooth out singular walls in empty spaces
-        #======================================================================
+
+        #=======================================================================
         # for i in range (5):
         #     for x in range (self.width):
         #         for y in range (self.height):
         #             wall_one_away = self.count_walls(1, x, y)
-        #
+        # 
         #             if wall_one_away >= 5:
         #                 self.tiles[x][y].color[1] = cavern_colors[4]
         #                 self.tiles[x][y].char[1] = tilemap()["wall_moss"][randint(
         #                     0, (len(tilemap()["wall_moss"]) - 1))]
         #                 self.tiles[x][y].blocked = True
-        #                 self.tiles[x][y].block_sight = True
+        #                 self.tiles[x][y].block_sight = False
         #             else:
         #                 self.tiles[x][y].blocked = False
         #                 self.tiles[x][y].block_sight = False
         #                 self.tiles[x][y].char[1] = " "
-        #======================================================================
+        #=======================================================================
+
 
         for y in range(self.height):
             for x in range(self.width):
+                wall_one_away = self.count_walls(1, x, y)
+                    
                 if (x == 1 or x == self.width - 2 or
                         y == 1 or y == self.height - 2):
                     self.tiles[x][y].color[1] = cavern_colors[4]
@@ -280,6 +290,7 @@ class GameMap:
                         0, (len(tilemap()["wall_moss"]) - 1))]
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = True
+                
 
         cavern = []
         total_cavern_area = []
@@ -318,7 +329,8 @@ class GameMap:
 
                 else:
                     tile.visited = True
-        """
+        
+        # Set the largest cavern as main cave and fill out the rest
         caverns.sort(key=len)
         main_cave = caverns[len(caverns) - 1]
         caverns = caverns[:len(caverns)-1]
@@ -330,33 +342,43 @@ class GameMap:
                     0, (len(tilemap()["wall_moss"]) - 1))]
                 caverns[i][j].blocked = True
                 caverns[i][j].block_sight = True
-        """
 
-        px, py = randint(1, self.width - 1), \
-            randint(1, self.height - 1)
+        # Get random position in the main cave
+        pos = randint(0, len(main_cave)-1)
+        px, py = main_cave[pos].x, main_cave[pos].y
 
-        while self.is_blocked(px, py):
-            px, py = randint(1, self.width - 1), \
-                randint(1, self.height - 1)
-                
+        stairs_current_floor = []
+        # On the first floor there is only one set of stairs up which leads back to hub        
         if self.dungeon_level == 1:
-            stairs_component = Stairs("hub")
+            stairs_component = Stairs(("cavern1", px, py),["hub", entities["stairs"][1].stairs.source[1], entities["stairs"][1].stairs.source[2]], "hub", self.dungeon_level)
+            entities["stairs"][1].stairs.destination.extend((px, py))
+            stairs_up = Entity(px, py, 1, tilemap()["stairs"]["up"], "dark amber","stairs up", stairs=stairs_component)
+            stairs_current_floor.append(stairs_up)
+        # Make as many stairs upstairs as previous floor had stairs down
         else:
-            stairs_component = Stairs("cavern"+str(self.dungeon_level - 1), self.dungeon_level - 1)
+            for i, entity in enumerate(entities["stairs"]):
+                if entity.stairs.name == "stairs down":
+                    pos = randint(0, len(main_cave)-1)
+                    px, py = main_cave[pos].x, main_cave[pos].y
+                    stairs_component = Stairs(("cavern"+str(self.dungeon_level), px, py), ["cavern"+str(self.dungeon_level-1), entity.stairs.source[1], entity.stairs.source[2]], "stairs up", self.dungeon_level)
+                    stairs_up = Entity(px, py, 1, tilemap()["stairs"]["up"], "dark amber","stairs up", stairs=stairs_component)
+                    # Connect the stairs with previous level's down going stairs
+                    entity.stairs.destination.extend((px, py))
+                    stairs_current_floor.append(stairs_up)
         
-        stairs_up = Entity(px, py, 1, tilemap()["stairs"]["up"], "dark amber","stairs up", stairs=stairs_component)
+        entities = {}
         
-        px, py = randint(1, self.width - 1), \
-            randint(1, self.height - 1)
-
-        while self.is_blocked(px, py):
-            px, py = randint(1, self.width - 1), \
-                randint(1, self.height - 1)
-                
-        stairs_component = Stairs("cavern"+str(self.dungeon_level + 1), self.dungeon_level + 1)
-        stairs_down = Entity(px, py, 2, tilemap()["stairs"]["down"], "dark amber","stairs down", stairs=stairs_component)
+        # Create 3 sets of stairs down
+        for i in range (1,4):        
+            pos = randint(0, len(main_cave)-1)
+            px, py = main_cave[pos].x, main_cave[pos].y
+            stairs_component = Stairs(("cavern"+str(self.dungeon_level), px, py),["cavern"+str(self.dungeon_level + 1)], "stairs down", self.dungeon_level)
+            stairs_down = Entity(px, py, 2, tilemap()["stairs"]["down"], "dark amber","stairs down", stairs=stairs_component)
+            stairs_current_floor.append(stairs_down)
         
-        entities["stairs"] = [stairs_up, stairs_down]
+        entities["stairs"] = []    
+        for entity in stairs_current_floor:
+            entities["stairs"].append(entity)
         
         return entities
     
@@ -369,14 +391,7 @@ class GameMap:
 
         return False
 
-    def place_entities(self, player, entities):
-
-        if "stairs" in entities:
-            for entity in entities["stairs"]:
-                if entity.stairs.floor and entity.stairs.floor < self.dungeon_level:
-                    player.x, player.y = entity.x, entity.y
-                elif entity.stairs.name == "hub":
-                    player.x, player.y = entity.x, entity.y
+    def place_entities(self, player, entities, stairs=None):
         
         if self.name == "hub":
             center_x, center_y = self.rooms["home"].get_center()
@@ -390,6 +405,9 @@ class GameMap:
                 px, py = randint(1, self.width - 1), \
                     randint(1, self.height - 1)
             player.x, player.y = px, py
+            
+        if stairs:
+            player.x, player.y = stairs.destination[1], stairs.destination[2]
 
         # Player spawning point has been set in all scenarios, now place rest of the entities
         entities["player"] = [player]
@@ -422,7 +440,8 @@ class GameMap:
         
         if self.name == "cavern":
         
-            number_of_monsters = randint(self.width / 2 - 40, self.width / 2 - 20)
+            #number_of_monsters = randint(self.width / 2 - 40, self.width / 2 - 20)
+            number_of_monsters = 0
             monsters = []
             for x, y in tilemap()["monsters"].items():
                 if x == "frog":
@@ -525,14 +544,16 @@ class Room ():
 
         while walls[door_seed][0] == 1 or walls[door_seed][0] == self.w - 1 or walls[door_seed][1] == 1 or walls[door_seed][1] == self.h - 1:
             door_seed = randint(0, len(self.get_walls()) - 1)
-
-        parent.tiles[walls[door_seed][0]][walls[door_seed][1]].color[1] = None
-        parent.tiles[walls[door_seed][0]][walls[door_seed][1]].char[1] = tilemap()[
-            "door"][status]
+        
+        door_component = Door(self.name, status)
+        door = Entity(walls[door_seed][0], walls[door_seed][1], 2, tilemap()["door"][status], None, "door", door=door_component)
+        
         if status == "open":
             parent.tiles[walls[door_seed][0]][walls[door_seed][1]].blocked = False
             parent.tiles[walls[door_seed][0]][walls[door_seed][1]].block_sight = False
         else:
             parent.tiles[walls[door_seed][0]][walls[door_seed][1]].blocked = True
             parent.tiles[walls[door_seed][0]][walls[door_seed][1]].block_sight = True
+            
+        return door
 

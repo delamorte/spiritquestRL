@@ -41,8 +41,7 @@ TODO:
 
 FIX:
 
-- Some entities on explored, not visible tiles get drawn
-  when they shouldn't (may be fixed?)
+- None
   
 """
 
@@ -161,12 +160,20 @@ def game_loop(main_menu_show=True, choice=None):
                     fov_recompute = True
 
                 game_state = GameStates.ENEMY_TURN
+            
+            else:
+                if "doors" in entities:
+                    for entity in entities["doors"]:
+                        if destination_x == entity.x and destination_y == entity.y and entity.door.status == "locked":
+                            message_log.send("The door is locked...")
+                            time_counter.take_turn(1)
+                            game_state = GameStates.ENEMY_TURN
+                        elif destination_x == entity.x and destination_y == entity.y and entity.door.status == "closed":
+                            entity.door.set_status("open", game_map)
+                            message_log.send("You open the door.")
+                            time_counter.take_turn(1)
+                            game_state = GameStates.ENEMY_TURN
 
-            if game_map.tiles[destination_x][destination_y].char[1] == \
-                    tilemap()["door"]["closed"]:
-                message_log.send("The door is locked...")
-                time_counter.take_turn(1)
-                game_state = GameStates.ENEMY_TURN
             variables.old_stack = variables.stack    
             variables.stack = []
             
@@ -176,6 +183,9 @@ def game_loop(main_menu_show=True, choice=None):
                 if entity.x == player.x and entity.y == player.y:
                     pickup_msg = player.inventory.add_item(entity)
                     message_log.send(pickup_msg)
+                    for item in variables.stack:
+                        if entity.name == item.split(" ", 1)[1]:
+                            variables.stack.remove(item)
                     entities["items"].remove(entity)
                     time_counter.take_turn(1)
                     game_state = GameStates.ENEMY_TURN
@@ -224,18 +234,16 @@ def game_loop(main_menu_show=True, choice=None):
                 "hub", levels, player, entities, game_map, fov_map)
 
             # Currently opens the door in hub
-            for y in range(game_map.height):
-                for x in range(game_map.width):
-                    if game_map.tiles[x][y].char[1] == tilemap()["door"]["closed"]:
-                        game_map.tiles[x][y].char[1] = tilemap()["door"]["open"]
-                        game_map.tiles[x][y].blocked = False
+            for entity in entities["doors"]:
+                if entity.door.name == "d_entrance":
+                    entity.door.set_status("open", game_map)
 
         if stairs:
             
             for entity in entities["stairs"]:
                 if player.x == entity.x and player.y == entity.y:
                     game_map, entities, player, fov_map = level_change(
-                        entity.stairs.name, levels, player, entities, game_map, fov_map, entity.stairs.floor)
+                        entity.stairs.destination[0], levels, player, entities, game_map, fov_map, entity.stairs)
             
             variables.old_stack = variables.stack
             
@@ -250,7 +258,7 @@ def game_loop(main_menu_show=True, choice=None):
                 message_log.send(
                     "I'm dreaming... I feel my spirit power draining.")
                 message_log.send("I'm hungry..")
-            
+            draw_messages(msg_panel, message_log)
             fov_recompute = True
 
         if key == blt.TK_M:

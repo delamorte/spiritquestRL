@@ -32,17 +32,20 @@ def draw_entities(entities, player, game_map, game_camera, fov_map):
         for entity in category:
             x, y = game_camera.get_coordinates(entity.x, entity.y)
             
-            if entity.x == player.x and entity.y == player.y and not entity == player:
+            if entity.x == player.x and entity.y == player.y and not entity.player and not entity.door:
                 variables.stack.append(get_article(
-                    entity.name) + " " + entity.name)
+                    entity.name).capitalize() + " " + entity.name)
+                if entity.xtra_info:
+                    variables.stack.append(entity.xtra_info)
 
             if fov_map.fov[entity.y, entity.x]:
                 clear(entity, entity.last_seen_x, entity.last_seen_y)
-                entity.last_seen_x = entity.x
-                entity.last_seen_y = entity.y
+                if not entity.player:
+                    entity.last_seen_x = entity.x
+                    entity.last_seen_y = entity.y
                 draw(entity, game_map, x, y, fov_map)
 
-            elif not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.x][entity.y].explored:
+            elif not fov_map.fov[entity.y, entity.x] and game_map.tiles[entity.last_seen_x][entity.last_seen_y].explored and not fov_map.fov[entity.last_seen_y, entity.last_seen_x]:
                 x, y = game_camera.get_coordinates(
                     entity.last_seen_x, entity.last_seen_y)
                 if (x > ceil(variables.camera_offset) and y > ceil(variables.camera_offset) and
@@ -121,22 +124,16 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
 def draw_messages(msg_panel, message_log):
 
     if len(variables.stack) > 0 and not variables.stack == variables.old_stack:
-        #variables.old_stack = variables.stack
+
         d = dict(Counter(variables.stack))
         formatted_stack = []
         for i in d:
             if d[i] > 1:
                 formatted_stack.append(i + " x" + str(d[i]))
-            elif d[i] == "campfire":
-                message_log.send(
-                    "Meditate and go to dream world with '<' or '>'")
-            elif d[i] == "stairs to a mysterious cavern":
-                message_log.send(
-                    "You feel an ominous presence. Go down with '<' or '>'")
             else:
                 formatted_stack.append(i)
         message_log.send(
-            "You see " + ", ".join(formatted_stack) + ".")
+            ". ".join(formatted_stack) + ".")
         
     if message_log.new_msgs:
         blt.layer(1)
