@@ -106,17 +106,17 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
                 elif game_map.tiles[map_x][map_y].explored:
                     if not game_map.tiles[map_x][map_y].char[1] == " ":
                         blt.layer(0)
-                        blt.color("darkest gray")
+                        blt.color("darker gray")
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[0])
 
                         blt.layer(1)
-                        blt.color("darkest gray")
+                        blt.color("darker gray")
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[1])
                     else:
                         blt.layer(0)
-                        blt.color("darkest gray")
+                        blt.color("darker gray")
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 game_map.tiles[map_x][map_y].char[0])
 
