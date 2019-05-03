@@ -437,8 +437,7 @@ class GameMap:
                                      None, name, blocks=True, fighter=fighter_component, ai=ai_component)
                     entities["monsters"].append(monster)
    
-        
-        if self.name == "cavern":
+        if stairs and self.name == "cavern"+str(stairs.floor+1):
         
             number_of_monsters = randint(self.width / 2 - 40, self.width / 2 - 20)
             #number_of_monsters = 0

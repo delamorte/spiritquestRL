@@ -80,6 +80,9 @@ def new_game(choice):
     player.player.avatar[choice].hp += 20
     player.player.avatar[choice].power += 1
     
+    blt.clear_area(2, variables.viewport_y +
+               variables.ui_offset_y + 1, variables.viewport_x, 1)
+    
     if variables.gfx is "ascii":
         player.char = tilemap()["player"]
         player.color = "lightest green"
@@ -130,7 +133,9 @@ def game_loop(main_menu_show=True, choice=None):
         pickup = action.get('pickup')
         stairs = action.get('stairs')
         fullscreen = action.get('fullscreen')
-        effect_msg, game_state = player.fighter.process_effects(time_counter, game_state)
+        if not player.fighter.dead:
+            effect_msg, game_state = player.fighter.process_effects(time_counter, game_state)
+
         message_log.send(effect_msg)
 
         if move and game_state == GameStates.PLAYER_TURN:
@@ -144,7 +149,7 @@ def game_loop(main_menu_show=True, choice=None):
                 target = blocking_entity(
                     entities, destination_x, destination_y)
                 if target:
-                    if randint(1,100) < player.fighter.abilities[0][1] and len(player.fighter.abilities)>0:
+                    if len(player.fighter.abilities)>0 and randint(1,100) < player.fighter.abilities[0][1]:
                         combat_msg = player.fighter.attack(target, player.fighter.abilities[0][0])
                     else:                        
                         combat_msg = player.fighter.attack(target)
