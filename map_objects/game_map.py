@@ -151,6 +151,7 @@ class GameMap:
         return entities
 
     def generate_forest(self):
+        
         entities={}
         cavern_colors = ["lightest amber",
                          "lighter amber",
@@ -167,6 +168,7 @@ class GameMap:
                     0, (len(tilemap()["ground_soil"]) - 1))]
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
+                self.tiles[x][y].spawnable = True
 
         for i in range(self.width):
             dx = randint(1, self.width - 1)
@@ -190,6 +192,7 @@ class GameMap:
                         self.tiles[x][y].char[1] = tilemap()["rubble"][randint(
                             0, (len(tilemap()["rubble"]) - 1))]
         return entities
+
     def generate_trees(self, dx, dy, width, height, freq, block_sight):
         """Generate a forest to a rectangular area."""
 
@@ -205,6 +208,7 @@ class GameMap:
                     self.tiles[x][y].color[0] = "dark amber"
                     self.tiles[x][y].char[0] = tilemap()["ground_soil"][randint(
                         0, (len(tilemap()["ground_soil"]) - 1))]
+                    self.tiles[x][y].spawnable = False
     
                     # Generate forest tiles
                     if randint(0, 100) < freq:
@@ -401,7 +405,9 @@ class GameMap:
             px, py = randint(1, self.width - 1), \
                 randint(1, self.height - 1)
     
-            while self.is_blocked(px, py):
+            while not self.tiles[px][py].spawnable:
+                
+        #    while self.is_blocked(px, py):
                 px, py = randint(1, self.width - 1), \
                     randint(1, self.height - 1)
             player.x, player.y = px, py
@@ -437,8 +443,7 @@ class GameMap:
                                      None, name, blocks=True, fighter=fighter_component, ai=ai_component)
                     entities["monsters"].append(monster)
    
-        
-        if self.name == "cavern":
+        if stairs and self.name == "cavern"+str(stairs.floor+1):
         
             number_of_monsters = randint(self.width / 2 - 40, self.width / 2 - 20)
             #number_of_monsters = 0
