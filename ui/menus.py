@@ -1,6 +1,7 @@
 from bearlibterminal import terminal as blt
+from descriptions import abilities, bestiary
 from draw import clear_camera, draw_ui
-from map_objects.tilemap import init_tiles, tilemap, bestiary, abilities
+from map_objects.tilemap import init_tiles, tilemap
 from ui.elements import init_ui
 import variables
 
