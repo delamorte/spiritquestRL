@@ -5,8 +5,9 @@ from bearlibterminal import terminal as blt
 from camera import Camera
 from components.inventory import Inventory
 from components.player import Player
+from components.cursor import Cursor
 from death_functions import kill_monster, kill_player
-from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities
+from draw import draw, draw_all, draw_messages, draw_stats, draw_ui, clear_entities, clear
 from entity import Entity, blocking_entity
 from fighter_stats import get_fighter_stats
 from fov import recompute_fov
@@ -41,7 +42,7 @@ TODO:
 
 FIX:
 
-- None
+- Text alignment when resizing window
   
 """
 
@@ -133,153 +134,198 @@ def game_loop(main_menu_show=True, choice=None):
         pickup = action.get('pickup')
         stairs = action.get('stairs')
         fullscreen = action.get('fullscreen')
+
         if not player.fighter.dead:
             effect_msg, game_state = player.fighter.process_effects(time_counter, game_state)
 
         message_log.send(effect_msg)
 
-        if move and game_state == GameStates.PLAYER_TURN:
-
-            dx, dy = move
-            destination_x = player.x + dx
-            destination_y = player.y + dy
+        if fullscreen:
+                blt.set("window.fullscreen=true")
+                
+        if game_state == GameStates.PLAYER_DEAD:
             
-            # Handle player attack
-            if not game_map.is_blocked(destination_x, destination_y):
-                target = blocking_entity(
-                    entities, destination_x, destination_y)
-                if target:
-                    if len(player.fighter.abilities)>0 and randint(1,100) < player.fighter.abilities[0][1]:
-                        combat_msg = player.fighter.attack(target, player.fighter.abilities[0][0])
-                    else:                        
-                        combat_msg = player.fighter.attack(target)
-                    
-                    message_log.send(combat_msg)
-                    player.player.spirit_power -= 0.5
-                    time_counter.take_turn(1)
-                    draw_stats(player, target)
+            if key == blt.TK_CLOSE:
+                break
 
-                else:
-                    player.move(dx, dy)
-                    time_counter.take_turn(1 / player.fighter.mv_spd)
+            if key == blt.TK_ESCAPE:
+
+                new_choice = main_menu(resume=True)
+                if not new_choice:
+                    draw_ui(msg_panel, msg_panel_borders, screen_borders)
                     fov_recompute = True
+                else:
+                    game_loop(False, new_choice)
 
-                game_state = GameStates.ENEMY_TURN
+        if game_state == GameStates.PLAYER_TURN:
             
-            else:
-                if "doors" in entities:
-                    for entity in entities["doors"]:
-                        if destination_x == entity.x and destination_y == entity.y and entity.door.status == "locked":
-                            message_log.send("The door is locked...")
-                            time_counter.take_turn(1)
-                            game_state = GameStates.ENEMY_TURN
-                        elif destination_x == entity.x and destination_y == entity.y and entity.door.status == "closed":
-                            entity.door.set_status("open", game_map)
-                            message_log.send("You open the door.")
-                            time_counter.take_turn(1)
-                            game_state = GameStates.ENEMY_TURN
+            if key == blt.TK_CLOSE:
+                break
 
-            variables.old_stack = variables.stack    
-            variables.stack = []
+            if key == blt.TK_ESCAPE:
+
+                new_choice = main_menu(resume=True)
+                if not new_choice:
+                    draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                    fov_recompute = True
+                else:
+                    game_loop(False, new_choice)
             
-
-        elif pickup and game_state == GameStates.PLAYER_TURN:
-            for entity in entities["items"]:
-                if entity.x == player.x and entity.y == player.y:
-                    pickup_msg = player.inventory.add_item(entity)
-                    message_log.send(pickup_msg)
-                    for item in variables.stack:
-                        if entity.name == item.split(" ", 1)[1]:
-                            variables.stack.remove(item)
-                    entities["items"].remove(entity)
-                    time_counter.take_turn(1)
+            if move:
+    
+                dx, dy = move
+                destination_x = player.x + dx
+                destination_y = player.y + dy
+                
+                # Handle player attack
+                if not game_map.is_blocked(destination_x, destination_y):
+                    target = blocking_entity(
+                        entities, destination_x, destination_y)
+                    if target:
+                        if len(player.fighter.abilities)>0 and randint(1,100) < player.fighter.abilities[0][1]:
+                            combat_msg = player.fighter.attack(target, player.fighter.abilities[0][0])
+                        else:                        
+                            combat_msg = player.fighter.attack(target)
+                        
+                        message_log.send(combat_msg)
+                        player.player.spirit_power -= 0.5
+                        time_counter.take_turn(1)
+                        draw_stats(player, target)
+    
+                    else:
+                        player.move(dx, dy)
+                        time_counter.take_turn(1 / player.fighter.mv_spd)
+                        fov_recompute = True
+    
                     game_state = GameStates.ENEMY_TURN
-                    break
-            else:
-                message_log.send("There is nothing here to pick up.")
+                
+                else:
+                    if "doors" in entities:
+                        for entity in entities["doors"]:
+                            if destination_x == entity.x and destination_y == entity.y and entity.door.status == "locked":
+                                message_log.send("The door is locked...")
+                                time_counter.take_turn(1)
+                                game_state = GameStates.ENEMY_TURN
+                            elif destination_x == entity.x and destination_y == entity.y and entity.door.status == "closed":
+                                entity.door.set_status("open", game_map)
+                                message_log.send("You open the door.")
+                                time_counter.take_turn(1)
+                                game_state = GameStates.ENEMY_TURN
+    
+                variables.old_stack = variables.stack    
+                variables.stack = []
+                
+    
+            elif pickup:
+                for entity in entities["items"]:
+                    if entity.x == player.x and entity.y == player.y:
+                        pickup_msg = player.inventory.add_item(entity)
+                        message_log.send(pickup_msg)
+                        for item in variables.stack:
+                            if entity.name == item.split(" ", 1)[1]:
+                                variables.stack.remove(item)
+                        entities["items"].remove(entity)
+                        time_counter.take_turn(1)
+                        game_state = GameStates.ENEMY_TURN
+                        break
+                else:
+                    message_log.send("There is nothing here to pick up.")
+    
+    
+    
+            elif key == blt.TK_PERIOD or key == blt.TK_KP_5:
+                time_counter.take_turn(1)
+                #player.player.spirit_power -= 1
+                message_log.send("You wait a turn.")
+                variables.old_stack = variables.stack
+                game_state = GameStates.ENEMY_TURN
+    
+            elif key == blt.TK_X:
+                game_state = GameStates.TARGETING
+                cursor_component = Cursor()
+                cursor = Entity(player.x, player.y, 255, 0xE100 + 1746, "yellow", "cursor", cursor=cursor_component)
+                entities["cursor"] = [cursor]
+                
+            elif player.player.spirit_power <= 0:
+                game_map, entities, player, fov_map = level_change(
+                    "hub", levels, player, entities, game_map, fov_map)
+                message_log.clear()
+                message_log.send("I have no power to meditate longer..")
+                player.player.spirit_power = 50
+                player.fighter.hp = player.fighter.max_hp
 
+            elif player.player.spirit_power >= insights:
+                insights += 10
+                message_log.clear()
+                message_log.send("My spirit has granted me new insights!")
+                message_log.send("I should explore around my home..")
+                game_map, entities, player, fov_map = level_change(
+                    "hub", levels, player, entities, game_map, fov_map)
 
+                # Currently opens the door in hub
+                for entity in entities["doors"]:
+                    if entity.door.name == "d_entrance":
+                        entity.door.set_status("open", game_map)
 
-        if key == blt.TK_PERIOD or key == blt.TK_KP_5:
-            time_counter.take_turn(1)
-            #player.player.spirit_power -= 1
-            message_log.send("You wait a turn.")
-            variables.old_stack = variables.stack
-            game_state = GameStates.ENEMY_TURN
+            elif stairs:
+                
+                for entity in entities["stairs"]:
+                    if player.x == entity.x and player.y == entity.y:
+                        game_map, entities, player, fov_map = level_change(
+                            entity.stairs.destination[0], levels, player, entities, game_map, fov_map, entity.stairs)
+                
+                variables.old_stack = variables.stack
+                
+                if game_map.name == "cavern" and game_map.dungeon_level == 1:
+                    message_log.clear()
+                    message_log.send(
+                        "A sense of impending doom fills you as you delve into the cavern.")
+                    message_log.send("RIBBIT!")
+                    
+                elif game_map.name == "dream":
+                    message_log.clear()
+                    message_log.send(
+                        "I'm dreaming... I feel my spirit power draining.")
+                    message_log.send("I'm hungry..")
+                draw_messages(msg_panel, message_log)
+                fov_recompute = True
 
-        if key == blt.TK_CLOSE:
-            break
-
-        if key == blt.TK_ESCAPE:
-
-            new_choice = main_menu(resume=True)
-            if not new_choice:
+            elif key == blt.TK_M:
+                show_msg_history(
+                    message_log.history, "Message history")
                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
                 fov_recompute = True
-            else:
-                game_loop(False, new_choice)
+    
+            elif key == blt.TK_I:
+                show_items = []
+                for item in player.inventory.items:
+                    show_items.append(get_article(item.name) + " " + item.name)
+                show_msg_history(
+                    show_items, "Inventory")
+                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                fov_recompute = True
+        
+        elif game_state == GameStates.TARGETING:
 
-        if fullscreen:
-            blt.set("window.fullscreen=true")
-
-        if player.player.spirit_power <= 0:
-            game_map, entities, player, fov_map = level_change(
-                "hub", levels, player, entities, game_map, fov_map)
-            message_log.clear()
-            message_log.send("I have no power to meditate longer..")
-            player.player.spirit_power = 50
-            player.fighter.hp = player.fighter.max_hp
-
-        if player.player.spirit_power >= insights:
-            insights += 10
-            message_log.clear()
-            message_log.send("My spirit has granted me new insights!")
-            message_log.send("I should explore around my home..")
-            game_map, entities, player, fov_map = level_change(
-                "hub", levels, player, entities, game_map, fov_map)
-
-            # Currently opens the door in hub
-            for entity in entities["doors"]:
-                if entity.door.name == "d_entrance":
-                    entity.door.set_status("open", game_map)
-
-        if stairs:
-            
-            for entity in entities["stairs"]:
-                if player.x == entity.x and player.y == entity.y:
-                    game_map, entities, player, fov_map = level_change(
-                        entity.stairs.destination[0], levels, player, entities, game_map, fov_map, entity.stairs)
-            
-            variables.old_stack = variables.stack
-            
-            if game_map.name == "cavern" and game_map.dungeon_level == 1:
-                message_log.clear()
-                message_log.send(
-                    "A sense of impending doom fills you as you delve into the cavern.")
-                message_log.send("RIBBIT!")
+            if move:
+                dx, dy = move
+                destination_x = cursor.x + dx
+                destination_y = cursor.y + dy
+                x, y = game_camera.get_coordinates(destination_x, destination_y)
                 
-            elif game_map.name == "dream":
-                message_log.clear()
-                message_log.send(
-                    "I'm dreaming... I feel my spirit power draining.")
-                message_log.send("I'm hungry..")
-            draw_messages(msg_panel, message_log)
-            fov_recompute = True
+                if x > 0 and x < game_camera.width-1 and y > 0 and y < game_camera.height-1:
+                    cursor.move(dx, dy)
+                    fov_recompute = True
+                    variables.old_stack = variables.stack    
+                    variables.stack = []
+    
+            
+            elif key == blt.TK_ESCAPE or key == blt.TK_X:
+                game_state = GameStates.PLAYER_TURN
+                variables.old_stack = variables.stack    
+                variables.stack = []
+                del entities["cursor"]
 
-        if key == blt.TK_M:
-            show_msg_history(
-                message_log.history, "Message history")
-            draw_ui(msg_panel, msg_panel_borders, screen_borders)
-            fov_recompute = True
-
-        if key == blt.TK_I:
-            show_items = []
-            for item in player.inventory.items:
-                show_items.append(get_article(item.name) + " " + item.name)
-            show_msg_history(
-                show_items, "Inventory")
-            draw_ui(msg_panel, msg_panel_borders, screen_borders)
-            fov_recompute = True
 
         if game_state == GameStates.ENEMY_TURN:
             draw_messages(msg_panel, message_log)

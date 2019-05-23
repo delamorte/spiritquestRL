@@ -25,7 +25,7 @@ def handle_keys(key):
         return {'pickup': True}
 
     # '<' and '> keys for stairs
-    if key == 41 or key == 49:
+    if key == 49:
         return {'stairs': True}
 
     # Toggle full screen

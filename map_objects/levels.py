@@ -5,12 +5,15 @@ from ui.menus import choose_avatar
 def make_map(destination, levels, player, entities, game_map, fov_map, stairs):
 
     if destination == "dream":
-        choice = choose_avatar(player)
+        choice, params = choose_avatar(player)
         if not choice:
             return game_map, entities, player, fov_map
+        if not params:
+            return game_map, entities, player, fov_map
+        world_tendency = sum(params.values())
         game_map = GameMap(100, 100, "dream")
-        entities = game_map.generate_forest()
-        player, entities = game_map.place_entities(player, entities)
+        entities = game_map.generate_forest(world_tendency)
+        player, entities = game_map.place_entities(player, entities, world_tendency)
         # Initialize field of view
         fov_map = initialize_fov(game_map)
         player.fighter = player.player.avatar[choice]
