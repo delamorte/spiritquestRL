@@ -5,6 +5,20 @@ See [design docs](https://github.com/delamorte/spiritquestRL/blob/master/docs/de
 
 Based on [Roguelike Tutorial Revised](http://rogueliketutorials.com/) and [jcerise's roguelike tutorial for Go](https://jeremyceri.se/roguelikes/).
 
+#### Keys:
+move: numpad or vim keys
+
+stairs: '<' or '>'
+
+examine: 'x'
+
+message log: 'm'
+
+pick up: ',' or 'g'
+
+inventory: 'i'
+
+
 ## Installation
 Install [Python 3](https://www.python.org/downloads/).
 
