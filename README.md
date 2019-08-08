@@ -1,6 +1,8 @@
 # spiritquestRL
 A roguelike/adventure game using Python 3.7.3, tcod 9.3.0 and BearLibTerminal 0.15.7.
 
+See [design docs](https://github.com/delamorte/spiritquestRL/blob/master/docs/design.md) for my ambitious development plans and goals.
+
 Based on [Roguelike Tutorial Revised](http://rogueliketutorials.com/) and [jcerise's roguelike tutorial for Go](https://jeremyceri.se/roguelikes/).
 
 ## Installation
