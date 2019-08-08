@@ -20,12 +20,12 @@ def draw(entity, game_map, x, y, fov_map):
             variables.tile_offset_y, entity.char)
 
     # Draw player indicator
-    
-    if entity.player:
-        blt.layer(2)
-        blt.color("#FF3E6643")
-        blt.put_ext(x * variables.tile_offset_x, y *
-                variables.tile_offset_y, 12, -12, 0xE100 + 1743)
+    #
+    # if entity.player:
+    #     blt.layer(9)
+    #     blt.color("#FF3E6643")
+    #     blt.put_ext(x * variables.tile_offset_x, y *
+    #             variables.tile_offset_y, 12, -12, 0xE100 + 1743)
 
 def draw_entities(entities, player, game_map, game_camera, fov_map):
     

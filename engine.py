@@ -7,7 +7,7 @@ from components.inventory import Inventory
 from components.player import Player
 from components.cursor import Cursor
 from death_functions import kill_monster, kill_player
-from draw import draw, draw_all, draw_messages, draw_stats, draw_ui, clear_entities, clear
+from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities
 from entity import Entity, blocking_entity
 from fighter_stats import get_fighter_stats
 from fov import recompute_fov
@@ -243,7 +243,7 @@ def game_loop(main_menu_show=True, choice=None):
             elif key == blt.TK_X:
                 game_state = GameStates.TARGETING
                 cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 255, 0xE100 + 1746, "yellow", "cursor", cursor=cursor_component)
+                cursor = Entity(player.x, player.y, 255, 0xE100 + 1746, "lighter yellow", "cursor", cursor=cursor_component)
                 entities["cursor"] = [cursor]
                 
             elif player.player.spirit_power <= 0:
