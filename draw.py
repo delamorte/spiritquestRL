@@ -11,6 +11,7 @@ def draw(entity, game_map, x, y, fov_map):
     # Draw the entity to the screen
     blt.layer(entity.layer)
     blt.color(entity.color)
+
     if not (fov_map.fov[entity.y, entity.x] and
     game_map.tiles[entity.x][entity.y].explored):
         blt.color("gray")
@@ -32,15 +33,27 @@ def draw_entities(entities, player, game_map, game_camera, fov_map):
         for entity in category:
             x, y = game_camera.get_coordinates(entity.x, entity.y)
             
-            if entity.x == player.x and entity.y == player.y and not entity.player and not entity.door:
+            if entity.x == player.x and entity.y == player.y and not entity.player and not entity.door and not entity.cursor:
                 variables.stack.append(get_article(
                     entity.name).capitalize() + " " + entity.name)
                 if entity.xtra_info:
                     variables.stack.append(entity.xtra_info)
+            
+            if "cursor" in entities.keys():
+                if entity.x == entities["cursor"][0].x and entity.y == entities["cursor"][0].y and not entity.cursor and game_map.tiles[entity.x][entity.y].explored:
+                    variables.stack.append(get_article(
+                        entity.name).capitalize() + " " + entity.name)
+                    if entity.xtra_info:
+                        variables.stack.append(entity.xtra_info)
+                    if entity.fighter:
+                        draw_stats(player, entity)
+                if entity == entities["cursor"][0]:
+                    clear(entity, entity.last_seen_x, entity.last_seen_y)
+                    draw(entity, game_map, x, y, fov_map)
 
-            if fov_map.fov[entity.y, entity.x]:
+            if not entity.cursor and fov_map.fov[entity.y, entity.x]:
                 clear(entity, entity.last_seen_x, entity.last_seen_y)
-                if not entity.player:
+                if not entity.player and not entity.cursor:
                     entity.last_seen_x = entity.x
                     entity.last_seen_y = entity.y
                 draw(entity, game_map, x, y, fov_map)
@@ -219,7 +232,7 @@ def draw_stats(player, target=None):
         power_target = "ATK:" + str(target.fighter.power) + " "
 
         blt.puts(variables.viewport_x, variables.viewport_y + variables.ui_offset_y + 1,
-                 "[offset=0,-2]" + "[color=lightest red]Enemy:  " + hp_target + ac_target + ev_target + power_target, 0, 0, blt.TK_ALIGN_RIGHT)
+                 "[offset=0,-2]" + "[color=lightest red]"+target.name.capitalize()+":  " + hp_target + ac_target + ev_target + power_target, 0, 0, blt.TK_ALIGN_RIGHT)
 
         if target.fighter.hp <= 0:
             blt.clear_area(2, variables.viewport_y +

@@ -28,13 +28,45 @@ def tilemap():
     tiles = {}
     if variables.gfx is "tiles":
         tiles = {"tree": (0xE100 + 87, 0xE100 + 88, 0xE100 + 89, 0xE100 + 93, 0xE100 + 94, 0xE100 + 95),
+                 "dead_tree": (0xE100 + 112, 0xE100 + 144),
+                 "rocks": (0xE100 + 1726, 0xE100 + 1727),
                  "ground_soil": (0xE100 + 1748, 0xE100 + 1750),
                  "ground_moss": (0xE100 + 1751, 0xE100 + 1752, 0xE100 + 1753),
                  "floor": (0xE100 + 21, 0xE100 + 20, 0xE100 + 19),
                  "rubble": (0xE100 + 388, 0xE100 + 119),
+                 "bones": (0xE100 + 468, 0xE100 + 469, 0xE100 + 470, 0xE100 + 471, 0xE100 + 475),
                  "player": 0xE100 + 704,
                  "player_remains": 0xE100 + 468,
-                 "monsters": {"rat": 0xE100 + 1416, "crow": 0xE100 + 1587, "snake": 0xE100 + 1097, "frog": 0xE100 + 1095},
+                 "monsters": {"rat": 0xE100 + 1416,
+                              "bear": 0xE100 + 1780,
+                              "crow": 0xE100 + 1587,
+                              "felid": 0xE100 + 1252,
+                              "snake": 0xE100 + 1097,
+                              "frog": 0xE100 + 1095,
+                              "mosquito": 0xE100 + 1554},
+                 "monsters_chaos": {"rat": 0xE100 + 1416,
+                                    "crow": 0xE100 + 1587,
+                                    "chaos cat": 0xE100 + 1255,
+                                    "chaos bear": 0xE100 + 1553,
+                                    "chaos spirit": 0xE100 + 1029,
+                                    "cockroach": 0xE100 + 1473,
+                                    "bone snake": 0xE100 + 1093,
+                                    "chaos dog": 0xE100 + 960,
+                                    "bat": 0xE100 + 1200,
+                                    "imp": 0xE100 + 1047,
+                                    "leech": 0xE100 + 1204},
+                 "monsters_light": {"bear": 0xE100 + 1780,
+                                    "crow": 0xE100 + 1587,
+                                    "spirit": 0xE100 + 1017,
+                                    "ghost dog": 0xE100 + 959,
+                                    "snake": 0xE100 + 1100,
+                                    "gecko": 0xE100 + 1104,
+                                    "serpent": 0xE100 + 1323,
+                                    "frog": 0xE100 + 1095,
+                                    "mosquito": 0xE100 + 1554,
+                                    "fairy": 0xE100 + 1032},
+
+                 "unique_monsters": {"king kobra": 0xE100 + 1105, "albino rat": 0xE100 + 1414},
                  "monster_remains": 0xE100 + 513,
                  "door": {"open": 0xE100 + 68, "closed": 0xE100 + 67, "locked": 0xE100 + 78},
                  "campfire": 0xE100 + 427,
@@ -45,13 +77,45 @@ def tilemap():
 
     elif variables.gfx is "ascii":
         tiles = {"tree": ("T", "t"),
+                 "dead_tree": ("T", "t"),
+                 "rocks": ("^"),
                  "ground_soil": ".",
                  "ground_moss": ".",
                  "floor": ".",
                  "rubble": ".",
+                 "bones": ",",
                  "player": "@",
                  "player_remains": "@",
-                 "monsters": {"rat": "r", "crow": "c", "snake": "s", "frog": "f"},
+                 "monsters": {"rat": "r",
+                              "bear": "B",
+                              "crow": "c",
+                              "felid": "f",
+                              "snake": "s",
+                              "frog": "f",
+                              "mosquito": "m"},
+                 "monsters_chaos": {"rat": "R",
+                                    "crow": "C",
+                                    "chaos cat": "C",
+                                    "chaos bear": "B",
+                                    "chaos spirit": "S",
+                                    "cockroach": "r",
+                                    "bone snake": "S",
+                                    "chaos dog": "D",
+                                    "bat": "b",
+                                    "imp": "I",
+                                    "leech": "l"},
+                 "monsters_light": {"bear": "B",
+                                    "crow": "c",
+                                    "spirit": "S",
+                                    "ghost dog": "D",
+                                    "snake": "s",
+                                    "gecko": "g",
+                                    "serpent": "§",
+                                    "frog": "f",
+                                    "mosquito": "m",
+                                    "fairy": "F"},
+
+                 "unique_monsters": {"king kobra": "K", "albino rat": "R"},
                  "monster_remains": "%",
                  "door": {"open": "-", "closed": "+", "locked": "*"},
                  "campfire": "¤",
@@ -61,27 +125,3 @@ def tilemap():
                  "weapons": {"club": "\\"}}
 
     return tiles
-
-
-def bestiary():
-
-    animals = {"crow": "quick, very agile, very weak, excellent vision",
-               "rat": "very quick, agile, weak, small, poor vision",
-               "snake": "strong, slow, small, average vision"}
-    return animals
-
-
-def abilities():
-    # Abilities are organized in separate categories.
-    # attack: ability name: [description, dmg, effect]
-    abilities = {"attack":
-                 {"poison bite": ["1d6, may poison", "1d6", "poison"],
-                     "paralyzing bite": ["1d4, may paralyze", "1d5", "paralyze"],
-                     "swoop": ["2d3, extra dmg on small targets", "2d3", ""]},
-
-                 "move":
-                 {"leap": "leap to a tile in a radius 4"},
-
-                 "utility":
-                 {"reveal": "reveal an area of radius 8 around you, may reveal secrets."}}
-    return abilities

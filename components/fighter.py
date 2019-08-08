@@ -1,5 +1,5 @@
 from random import randint
-from map_objects.tilemap import abilities as abilities_db
+from descriptions import abilities as abilities_db
 from game_states import GameStates
 
 

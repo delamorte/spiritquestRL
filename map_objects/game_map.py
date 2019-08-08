@@ -1,9 +1,10 @@
 from components.item import Item
 from entity import Entity
-from fighter_stats import get_fighter_stats, get_fighter_ai
+from fighter_stats import get_fighter_stats, get_fighter_ai, get_spawn_rates
 from map_objects.tile import Tile
 from map_objects.tilemap import tilemap
-from random import randint
+from palettes import get_dngn_colors, get_forest_colors
+from random import choices, randint
 from components.stairs import Stairs
 from components.door import Door
 
@@ -150,15 +151,10 @@ class GameMap:
         entities["doors"] = [door_home, door_d_entrance]
         return entities
 
-    def generate_forest(self):
+    def generate_forest(self, world_tendency):
         
         entities={}
-        cavern_colors = ["lightest amber",
-                         "lighter amber",
-                         "light amber",
-                         "dark amber",
-                         "darker amber",
-                         "darkest amber"]
+        cavern_colors = get_dngn_colors(world_tendency)
 
         for y in range(1, self.height-1):
             for x in range(1, self.width-1):
@@ -181,7 +177,7 @@ class GameMap:
                 height = self.height
             freq = randint(10, 40)
             block_sight = True
-            self.generate_trees(dx, dy, width, height, freq, block_sight)
+            self.generate_trees(dx, dy, width, height, freq, block_sight, cavern_colors, world_tendency)
 
         # Generate rocks & rubble on floor tiles
         for y in range(1, self.height - 1):
@@ -191,29 +187,38 @@ class GameMap:
                         self.tiles[x][y].color[1] = "dark gray"
                         self.tiles[x][y].char[1] = tilemap()["rubble"][randint(
                             0, (len(tilemap()["rubble"]) - 1))]
+                        
+                        if abs(world_tendency)*33 > randint(1,100):
+                            self.tiles[x][y].color[1] ="gray"
+                            self.tiles[x][y].char[1] = tilemap()["bones"][randint(
+                                0, (len(tilemap()["bones"]) - 1))]
         return entities
 
-    def generate_trees(self, dx, dy, width, height, freq, block_sight):
+    def generate_trees(self, dx, dy, width, height, freq, block_sight, cavern_colors=[], world_tendency=0):
         """Generate a forest to a rectangular area."""
 
-        forest_colors = ["lightest orange",
-                         "lighter orange",
-                         "light orange",
-                         "dark orange",
-                         "darker orange"]
+        if not len(cavern_colors) > 0:
+            cavern_colors = get_dngn_colors(0)
+        forest_colors = get_forest_colors(world_tendency)
 
         for y in range(dy, height):
             for x in range(dx, width):
                 if not self.tiles[x][y].occupied:
-                    self.tiles[x][y].color[0] = "dark amber"
+                    self.tiles[x][y].color[0] = cavern_colors[3]
                     self.tiles[x][y].char[0] = tilemap()["ground_soil"][randint(
                         0, (len(tilemap()["ground_soil"]) - 1))]
                     self.tiles[x][y].spawnable = False
     
                     # Generate forest tiles
-                    if randint(0, 100) < freq:
+                    if randint(1, 100) < freq:
+                            
                         self.tiles[x][y].char[1] = tilemap()["tree"][randint(
                             0, (len(tilemap()["tree"]) - 1))]
+                        
+                        if abs(world_tendency)*33 > randint(1,100):
+                            self.tiles[x][y].char[1] = tilemap()["dead_tree"][randint(
+                                0, (len(tilemap()["dead_tree"]) - 1))]
+                        
                         self.tiles[x][y].color[1] = forest_colors[randint(0, 4)]
                         self.tiles[x][y].blocked = True
                         self.tiles[x][y].block_sight = block_sight
@@ -395,7 +400,7 @@ class GameMap:
 
         return False
 
-    def place_entities(self, player, entities, stairs=None):
+    def place_entities(self, player, entities, world_tendency, stairs=None):
         
         if self.name == "hub":
             center_x, center_y = self.rooms["home"].get_center()
@@ -472,19 +477,32 @@ class GameMap:
             
             number_of_monsters = randint(self.width / 2 - 20, self.width / 2)
             monsters = []
-            for x, y in tilemap()["monsters"].items():
-                monsters.append((x, y))
+            
+            if world_tendency < 0:
+                for x, y in tilemap()["monsters_chaos"].items():
+                    monsters.append((x, y))
+            elif world_tendency > 0:
+                for x, y in tilemap()["monsters_light"].items():
+                    monsters.append((x, y))
+            else:
+                for x, y in tilemap()["monsters"].items():
+                    monsters.append((x, y))
+            monsters.sort()        
+            spawn_rates = get_spawn_rates(monsters)
 
-            for i in range(number_of_monsters):
+            monster_pool = choices(monsters, spawn_rates, k=number_of_monsters)
+
+            for mon in monster_pool:
                 x = randint(1, self.width - 1)
                 y = randint(1, self.height - 1)
-                while self.is_blocked(x, y):
+                while self.is_blocked(x, y) or x == player.x and y == player.y:
                     x, y = randint(1, self.width -
                                    1), randint(1, self.height - 1)
 
                 if not any([entity for entity in entities["monsters"] if entity.x == x and entity.y == y]):
-                    r = randint(0, 2)
-                    name, char = monsters[r]
+                    
+                    name = mon[0]
+                    char = mon[1]
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
                     monster = Entity(x, y, 12, char,

@@ -1,8 +1,10 @@
 from bearlibterminal import terminal as blt
+from descriptions import abilities, bestiary, meditate_params
 from draw import clear_camera, draw_ui
-from map_objects.tilemap import init_tiles, tilemap, bestiary, abilities
+from map_objects.tilemap import init_tiles, tilemap
 from ui.elements import init_ui
 import variables
+from random import sample
 
 
 def main_menu(resume=False):
@@ -62,8 +64,8 @@ def main_menu(resume=False):
             while True:
                 clear_camera(2)
                 animals = tilemap()["monsters"]
-                exclude = {"frog"}
-                animals = {x: animals[x] for x in animals if x not in exclude}
+                #exclude = {"frog"}
+                animals = {x: animals[x] for x in ("crow", "rat", "snake")}
                 blt.layer(0)
                 blt.puts(center_x, center_y - 5,
                          "[color=white]Choose your spirit animal...", 0, 0, blt.TK_ALIGN_CENTER)
@@ -130,7 +132,7 @@ def main_menu(resume=False):
                 h = blt.state(blt.TK_HEIGHT)
                 w = blt.state(blt.TK_WIDTH)
                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
-                clear_camera(variables.viewport_x, variables.viewport_y)
+                clear_camera(2)
                 blt.puts(center_x + 2, center_y,
                          "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
                 blt.refresh()
@@ -220,4 +222,64 @@ def choose_avatar(player):
         elif key == blt.TK_ENTER:
             player.fighter = player.player.avatar[choice]
             player.char = player.player.char[choice]
+            choice_params = {}
+            for i in range (3):
+                
+                choice_param = set_up_level_params(i, choice_params)
+                choice_params.update(choice_param)
+            
+            return choice, choice_params
+
+def set_up_level_params(question_number, prev_choices):
+    
+    key = None
+    current_range = 0
+    center_x = int(variables.viewport_x / 2)
+    center_y = int(variables.viewport_y / 2)
+    choice_params = dict(sample(meditate_params().items(), 3))
+    choice_params = {x: choice_params[x] for x in choice_params if x not in prev_choices}
+
+    while True:
+        clear_camera(2)
+        blt.layer(0)
+        if question_number == 0:
+            blt.puts(center_x, center_y - 5,
+                     "[color=white]You sit by the campfire to meditate. The world begins to drift away... ", 0, 0, blt.TK_ALIGN_CENTER)
+            blt.puts(center_x, center_y - 4,
+             "[color=white]Your mind gets visions of..", 0, 0, blt.TK_ALIGN_CENTER)
+        if question_number == 1:
+            blt.puts(center_x, center_y - 5,
+                     "[color=white]Pictures of " + list(prev_choices)[0] + " begin to form in your mind.", 0, 0, blt.TK_ALIGN_CENTER)
+            blt.puts(center_x, center_y - 4,
+             "[color=white]Then, a new image appears..", 0, 0, blt.TK_ALIGN_CENTER)
+            
+        if question_number == 2:
+            blt.puts(center_x, center_y - 5,
+                     "[color=white]You have dreamt about " + list(prev_choices)[0] + ", which shall bring about " + list(prev_choices)[1] + ".", 0, 0, blt.TK_ALIGN_CENTER)
+            blt.puts(center_x, center_y - 4,
+             "[color=white]The last thing that enters your mind is...", 0, 0, blt.TK_ALIGN_CENTER)
+
+        for i, r in enumerate(choice_params):
+            selected = i == current_range
+            blt.color("orange" if selected else "light_gray")
+            blt.puts(center_x + 2, center_y + 2 + i, "%s%s" %
+                     ("[U+203A]" if selected else " ", ".."+r+"."), 0, 0, blt.TK_ALIGN_CENTER)
+
+            if selected:
+                choice = {r: choice_params[r]}
+
+        blt.refresh()
+        key = blt.read()
+
+        if key == blt.TK_ESCAPE:
+            break
+        elif key == blt.TK_UP:
+            if current_range > 0:
+                current_range -= 1
+        elif key == blt.TK_DOWN:
+            if current_range < len(choice_params) - 1:
+                current_range += 1
+        elif key == blt.TK_ENTER:
             return choice
+    
+    
