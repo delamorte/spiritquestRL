@@ -18,6 +18,8 @@ class Wall:
             self.blocked = True
             game_map.tiles[self.owner.x][self.owner.y].blocked = True
             game_map.tiles[self.owner.x][self.owner.y].block_sight = True
+            if self.name != "tree" and self.name != "dead tree":
+                game_map.tiles[self.owner.x][self.owner.y].char = " "
 
         else:
             self.block_sight = False

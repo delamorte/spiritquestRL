@@ -6,11 +6,20 @@ from textwrap import shorten
 from map_objects.tilemap import tilemap
 import variables
 
-
 def draw(entity, game_map, x, y, fov_map):
+
+    if variables.gfx == "tiles" and entity.fighter:
+        blt.layer(0)
+        blt.color("lighter amber")
+        blt.put(x * variables.tile_offset_x, y *
+                variables.tile_offset_y, 0xE700 + 3)
+
     # Draw the entity to the screen
     blt.layer(entity.layer)
     blt.color(entity.color)
+
+    if variables.gfx == "tiles":
+        blt.color(None)
 
     if not (fov_map.fov[entity.y, entity.x] and
             game_map.tiles[entity.x][entity.y].explored):
@@ -69,8 +78,8 @@ def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor
             #        variables.camera_offset) < y < game_camera.height - ceil(variables.camera_offset)):
             draw(entity, game_map, x, y, fov_map)
 
-        if fov_map.fov[entity.y, entity.x] and entity.ai:
-            draw_indicator(player.x, player.y, game_camera)
+        #if fov_map.fov[entity.y, entity.x] and entity.ai:
+        #    draw_indicator(player.x, player.y, game_camera)
 
 
 def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
@@ -80,7 +89,7 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
     bound_x2 = game_camera.width - ceil(variables.camera_offset)
     bound_y2 = game_camera.height - ceil(variables.camera_offset)
     # Clear what's drawn in camera
-    clear_camera(2)
+    clear_camera(3)
     # Set boundaries if map is smaller than viewport
     if game_map.width < game_camera.width:
         bound_x2 = game_map.width
@@ -100,6 +109,8 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
             if visible:
                 blt.layer(0)
                 blt.color(game_map.tiles[map_x][map_y].color)
+                if variables.gfx == "tiles":
+                    blt.color("dark gray")
                 blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                         game_map.tiles[map_x][map_y].char)
                 # Set everything in fov as explored
@@ -292,7 +303,7 @@ def draw_ui(msg_panel, msg_panel_borders, screen_borders):
 def draw_indicator(entity_x, entity_y, game_camera):
     # Draw player indicator
     x, y = game_camera.get_coordinates(entity_x, entity_y)
-    blt.layer(1)
+    blt.layer(3)
     blt.color(None)
     blt.put_ext(x * variables.tile_offset_x, y *
                 variables.tile_offset_y, 0, 0, tilemap()["indicator"])

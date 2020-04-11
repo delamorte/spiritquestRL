@@ -104,7 +104,9 @@ def main_menu(resume=False):
                     # Draw monster tile
                     blt.layer(1)
                     blt.color(get_monster_color(r))
-                    if variables.gfx is "ascii":
+                    if variables.gfx == "tiles":
+                        blt.color(None)
+                    if variables.gfx == "ascii":
                         blt.puts(center_x - 20 + 1,
                                  center_y - 2 + i * 5, c, 0, 0)
                     else:
@@ -201,11 +203,18 @@ def choose_avatar(player):
             blt.puts(center_x - 14, center_y - 2 + i * 3, "%s%s" %
                      ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
 
+            if variables.gfx == "tiles":
+                # Draw a bg tile
+                blt.layer(0)
+                blt.puts(center_x - 20 + 1, center_y - 2 + i *
+                         5, "[U+" + hex(0xE700 + 3) + "]", 0, 0)
 
             # Draw monster tile
             blt.layer(1)
             blt.color(get_monster_color(r))
-            if variables.gfx is "ascii":
+            if variables.gfx == "tiles":
+                blt.color(None)
+            if variables.gfx == "ascii":
                 blt.puts(center_x - 20 + 1, center_y - 2 + i * 3, c, 0, 0)
             else:
                 blt.puts(center_x - 20 + 1, center_y - 2 + i *

@@ -240,7 +240,7 @@ class GameMap:
 
                         if abs(world_tendency) * 33 > randint(1, 100):
                             name = "dead tree"
-                            char = tilemap()["tree"][randint(0, (len(tilemap()["dead_tree"]) - 1))]
+                            char = tilemap()["dead_tree"][randint(0, (len(tilemap()["dead_tree"]) - 1))]
                             wall_component = Wall(name)
                             wall = Entity(x, y, 1, char, forest_colors[randint(0, 4)], name, wall=wall_component)
                             self.tiles[x][y].entities_on_tile.append(wall)
@@ -281,7 +281,7 @@ class GameMap:
 
                     if abs(world_tendency) * 33 > randint(1, 100):
                         name = "dead tree"
-                        char = tilemap()["tree"][randint(0, (len(tilemap()["dead_tree"]) - 1))]
+                        char = tilemap()["dead_tree"][randint(0, (len(tilemap()["dead_tree"]) - 1))]
                         wall_component = Wall(name)
                         wall = Entity(x, y, 1, char, forest_colors[randint(0, 4)], name, wall=wall_component)
                         self.tiles[x][y].entities_on_tile.append(wall)
@@ -351,7 +351,7 @@ class GameMap:
 
                         if abs(world_tendency) * 33 > randint(1, 100):
                             name = "dead tree"
-                            char = tilemap()["tree"][randint(0, (len(tilemap()["dead_tree"]) - 1))]
+                            char = tilemap()["dead_tree"][randint(0, (len(tilemap()["dead_tree"]) - 1))]
                             wall_component = Wall(name)
                             wall = Entity(x, y, 1, char, forest_colors[randint(0, 4)], name, wall=wall_component)
                             self.tiles[x][y].entities_on_tile.append(wall)
