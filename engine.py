@@ -268,6 +268,7 @@ def game_loop(main_menu_show=True, choice=None):
 
                 for entity in entities["stairs"]:
                     if player.x == entity.x and player.y == entity.y:
+                        game_map.tiles[player.x][player.y].entities_on_tile.remove(player)
                         game_map, entities, player, fov_map = level_change(
                             entity.stairs.destination[0], levels, player, entities, game_map, fov_map, entity.stairs)
 
@@ -373,7 +374,7 @@ def game_loop(main_menu_show=True, choice=None):
                         draw_stats(player)
                         break
                     if entity.fighter and entity.fighter.dead:
-                        player.player.spirit_power += 11
+                        player.player.spirit_power += entity.fighter.max_hp
                         player.fighter.hp += entity.fighter.power
                         message_log.send(kill_monster(entity))
                         message_log.send("I feel my power returning!")
@@ -382,14 +383,6 @@ def game_loop(main_menu_show=True, choice=None):
                 game_state = GameStates.PLAYER_TURN
 
     blt.close()
-
-def entity_at_coordinates(entities, x, y):
-    result = []
-    for category in entities:
-        for entity in entities[category]:
-            if entity.x == x and entity.y == y:
-                result.append(entity)
-    return result
 
 
 if __name__ == '__main__':

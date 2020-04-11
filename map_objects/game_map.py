@@ -767,6 +767,15 @@ class GameMap:
                             entities.append(obj)
         return entities
 
+    @staticmethod
+    def entity_at_coordinates(entities, x, y):
+        result = []
+        for category in entities:
+            for entity in entities[category]:
+                if entity.x == x and entity.y == y:
+                    result.append(entity)
+        return result
+
 
 class Room:
     def __init__(self, x1=0, y1=0, w=5, h=5, wall_color="dark gray", floor_color="darkest amber",
