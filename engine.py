@@ -250,7 +250,7 @@ def game_loop(main_menu_show=True, choice=None):
             elif key == blt.TK_X:
                 game_state = GameStates.TARGETING
                 cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 2, 0xE100 + 1746, "light yellow", "cursor",
+                cursor = Entity(player.x, player.y, 2, 0xE700 + 1746, "light yellow", "cursor",
                                 cursor=cursor_component, stand_on_messages=False)
                 entities["cursor"] = [cursor]
 

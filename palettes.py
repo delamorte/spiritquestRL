@@ -1,5 +1,5 @@
 from random import randint, random
-
+import variables
 
 def get_dngn_colors(mod):
     colors = []
@@ -69,18 +69,24 @@ def get_forest_colors(mod=-1):
     return colors
 
 
-def name_color_from_value(value, tileset=0xF100):
+def name_color_from_value(value, tileset=0xE500):
+    if isinstance(value, str):
+        return value, None
+    elif value < 1000:
+        tileset = 0
     name = None
     color = None
-    value -= tileset
+    if variables.gfx != "tiles":
+        value -= tileset
+
 
     # Coffins
-    if value == 50 or value == 51:
+    if value == 50 or value == 51 or value == 0xE700 + 158:
         name = "coffin"
         color = "darker amber"
 
     # Shrines
-    elif value in range(54, 58 + 1):
+    elif value in range(54, 58 + 1) or value == 0xE700+107:
         name = "shrine"
         if random() < 0.2:
             color = "bright yellow"
@@ -93,22 +99,25 @@ def name_color_from_value(value, tileset=0xF100):
         color = "darker amber"
 
     # Gates
-    elif value in range(102, 103 + 1):
-        name = "gate"
+    elif value in range(102, 103 + 1) or value in range (0xE700+67, 0xE700+68+1):
+        if value == 103 or value == 0xE700+68:
+            name = "gate (open)"
+        else:
+            name = "gate (closed)"
         color = "gray"
 
     # Fences
-    elif value in range(100, 111 + 1):
+    elif value in range(100, 111 + 1) or value == 0xE700 + 83:
         name = "fence"
         color = "dark gray"
 
     # Statues
-    elif value in range(60, 64 + 1):
+    elif value in range(60, 64 + 1) or value == 0xE700+945:
         name = "statue"
         color = "gray"
 
     # Candles
-    elif value == 70:
+    elif value == 70 or value == 0xE700+458:
         name = "candle"
         color = "amber"
 
@@ -121,6 +130,14 @@ def name_color_from_value(value, tileset=0xF100):
     elif value in range(362, 366+1):
         name = "bones"
         color = "gray"
+
+    elif value in range(450, 452+1) or value in range(410, 412+1) or value == 430 or value == 432\
+            or value == 0xE700+93:
+        name = "shrubs"
+        if random() < 0.2:
+            color = "darker green"
+        else:
+            color = "darkest amber"
 
     return name, color
 

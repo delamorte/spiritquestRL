@@ -3,6 +3,7 @@ from collections import Counter
 from helpers import get_article
 from math import ceil
 from textwrap import shorten
+from map_objects.tilemap import tilemap
 import variables
 
 
@@ -87,7 +88,7 @@ def draw_map(game_map, game_camera, fov_map, fov_recompute):
     # Only draw map if player has moved
     if fov_recompute:
         # Clear what's drawn in camera
-        clear_camera(3)
+        clear_camera(2)
         # Set boundaries if map is smaller than viewport
         if game_map.width < game_camera.width:
             bound_x2 = game_map.width
@@ -235,61 +236,61 @@ def draw_ui(msg_panel, msg_panel_borders, screen_borders):
     #     for y in range(msg_panel.y, msg_panel.h):
     #         for x in range(msg_panel.x, msg_panel.w):
     #             blt.put_ext(x * variables.tile_offset_x, y *
-    #                         variables.tile_offset_y, 0, 0, 0xE200 + 692)
+    #                         variables.tile_offset_y, 0, 0, 0xE100 + 692)
 
     for y in range(msg_panel_borders.y, msg_panel_borders.h):
         for x in range(msg_panel_borders.x, msg_panel_borders.w):
             if (y == msg_panel_borders.y):
                 blt.put_ext(x * variables.tile_offset_x, y *
-                            variables.tile_offset_y, 0, 10, 0xE200 + 688)
+                            variables.tile_offset_y, 0, 10, tilemap()["ui_block_horizontal"])
             elif (y == msg_panel_borders.h - 1):
                 blt.put_ext(x * variables.tile_offset_x, y *
-                            variables.tile_offset_y, 0, -10, 0xE200 + 688)
+                            variables.tile_offset_y, 0, -10, tilemap()["ui_block_horizontal"])
             elif (x == msg_panel_borders.x):
                 blt.put_ext(x * variables.tile_offset_x, y *
-                            variables.tile_offset_y, 10, 0, 0xE200 + 689)
+                            variables.tile_offset_y, 10, 0, tilemap()["ui_block_vertical"])
             elif (x == msg_panel_borders.w - 1):
                 blt.put_ext(x * variables.tile_offset_x, y *
-                            variables.tile_offset_y, -10, 0, 0xE200 + 689)
+                            variables.tile_offset_y, -10, 0, tilemap()["ui_block_vertical"])
             if (x == msg_panel_borders.x and y == msg_panel_borders.y):
                 blt.put_ext(x * variables.tile_offset_x, y *
-                            variables.tile_offset_y, 10, 10, 0xE200 + 684)
+                            variables.tile_offset_y, 10, 10, tilemap()["ui_block_nw"])
             if (x == msg_panel_borders.w - 1 and y == msg_panel_borders.y):
                 blt.put_ext(x * variables.tile_offset_x, y *
-                            variables.tile_offset_y, -10, 10, 0xE200 + 685)
+                            variables.tile_offset_y, -10, 10, tilemap()["ui_block_ne"])
             if (x == msg_panel_borders.x and y == msg_panel_borders.h - 1):
                 blt.put_ext(x * variables.tile_offset_x, y *
-                            variables.tile_offset_y, 10, -10, 0xE200 + 686)
+                            variables.tile_offset_y, 10, -10, tilemap()["ui_block_sw"])
             if (x == msg_panel_borders.w - 1 and y == msg_panel_borders.h - 1):
                 blt.put_ext(x * variables.tile_offset_x, y *
-                            variables.tile_offset_y, -10, -10, 0xE200 + 687)
+                            variables.tile_offset_y, -10, -10, tilemap()["ui_block_se"])
 
     for y in range(screen_borders.y, screen_borders.h):
         for x in range(screen_borders.x, screen_borders.w):
             if (y == screen_borders.y):
                 blt.put_ext(x * variables.tile_offset_x, y *
-                            variables.tile_offset_y, 0, 0, 0xE200 + 688)
+                            variables.tile_offset_y, 0, 0, tilemap()["ui_block_horizontal"])
             elif (y == screen_borders.h - 1):
                 blt.put(x * variables.tile_offset_x, y *
-                        variables.tile_offset_y, 0xE200 + 688)
+                        variables.tile_offset_y, tilemap()["ui_block_horizontal"])
             elif (x == screen_borders.x):
                 blt.put(x * variables.tile_offset_x, y *
-                        variables.tile_offset_y, 0xE200 + 689)
+                        variables.tile_offset_y, tilemap()["ui_block_vertical"])
             elif (x == screen_borders.w - 1):
                 blt.put(x * variables.tile_offset_x, y *
-                        variables.tile_offset_y, 0xE200 + 689)
+                        variables.tile_offset_y, tilemap()["ui_block_vertical"])
             if (x == screen_borders.x and y == screen_borders.y):
                 blt.put(x * variables.tile_offset_x, y *
-                        variables.tile_offset_y, 0xE200 + 684)
+                        variables.tile_offset_y, tilemap()["ui_block_nw"])
             if (x == screen_borders.w - 1 and y == screen_borders.y):
                 blt.put(x * variables.tile_offset_x, y *
-                        variables.tile_offset_y, 0xE200 + 685)
+                        variables.tile_offset_y, tilemap()["ui_block_ne"])
             if (x == screen_borders.x and y == screen_borders.h - 1):
                 blt.put(x * variables.tile_offset_x, y *
-                        variables.tile_offset_y, 0xE200 + 686)
+                        variables.tile_offset_y, tilemap()["ui_block_sw"])
             if (x == screen_borders.w - 1 and y == screen_borders.h - 1):
                 blt.put(x * variables.tile_offset_x, y *
-                        variables.tile_offset_y, 0xE200 + 687)
+                        variables.tile_offset_y, tilemap()["ui_block_se"])
 
 
 def draw_indicator(entity_x, entity_y, game_camera):
@@ -298,7 +299,7 @@ def draw_indicator(entity_x, entity_y, game_camera):
     blt.layer(1)
     blt.color(None)
     blt.put_ext(x * variables.tile_offset_x, y *
-                variables.tile_offset_y, 0, 0, 0xE200 + 671)
+                variables.tile_offset_y, 0, 0, tilemap()["indicator"])
 
 
 def draw_all(game_map, game_camera, entities, player, fov_map,

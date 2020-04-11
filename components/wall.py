@@ -2,6 +2,7 @@
 
 solids = ["solid", "brick", "rock", "stone", "moss", "tree", "dead tree"]
 
+
 class Wall:
     def __init__(self, name=None, status=None, blocked=True, block_sight=True):
         self.owner = None

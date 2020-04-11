@@ -6,7 +6,11 @@ class Door:
         self.owner = None
         self.name = name
         self.status = status
-        
+        if "open" in name:
+            self.status = "open"
+        elif "locked" in name:
+            self.status = "locked"
+
     def set_status(self, status, game_map):
         if status == "open":
             self.status = "open"
