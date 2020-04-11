@@ -1,6 +1,7 @@
 from map_objects.tilemap import tilemap
 from random import randint
 
+
 class Tile:
     """
     A tile on a map. It may or may not be blocked,
@@ -13,15 +14,15 @@ class Tile:
 
     def __init__(self,
                  blocked,
-                 block_sight,x,y):
+                 block_sight, x, y):
         self.blocked = blocked
         self.block_sight = block_sight
         self.x = x
         self.y = y
         self.explored = False
         self.visited = False
-        self.seed = randint(1,100)
-        self.char = {0: tilemap()["floor"][0], 1: " "}
-        self.color = {0: None, 1: None}
+        self.seed = randint(1, 100)
+        self.char = tilemap()["ground_dot"]
+        self.color = None
         self.spawnable = False
         self.occupied = False

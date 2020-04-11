@@ -3,6 +3,7 @@ from random import randint
 
 class BasicMonster:
     def __init__(self):
+        self.owner = None
         self.action_begin = False
         self.last_action = 0
         self.target_seen = False
@@ -16,7 +17,7 @@ class BasicMonster:
         time_to_act = time.get_turn() - self.last_action
         action_cost = 0
         combat_msg = []
-        recompute_fov(fov_map, monster.x, monster.y, monster.fighter.fov, True, 8)
+        recompute_fov(fov_map, monster.x, monster.y, monster.fighter.fov, True, 0)
         
         if monster.fighter.paralysis:
             return combat_msg
@@ -29,14 +30,7 @@ class BasicMonster:
             
             while action_cost < time_to_act: 
 
-                if 1 / self.owner.fighter.mv_spd <= time_to_act - action_cost and monster.distance_to(target) >= 2:
-
-                    monster.move_astar(target, entities, game_map)
-                    action_cost += 1 / monster.fighter.mv_spd
-                    #self.last_action += action_cost
-                    self.action_begin = False
-
-                elif self.owner.fighter.atk_spd <= time_to_act - action_cost: 
+                if monster.distance_to(target) == 1 and self.owner.fighter.atk_spd <= time_to_act - action_cost: 
                     if target.fighter.hp > 0:
                         if randint(1,100) < monster.fighter.abilities[0][1]:
                             combat_msg = monster.fighter.attack(target, monster.fighter.abilities[0][0])
@@ -44,12 +38,20 @@ class BasicMonster:
                             combat_msg = monster.fighter.attack(target)
                         action_cost += 1
                         #self.last_action += action_cost
-                        self.action_begin = False
+
                     else:
                         break
+                    
+                elif 1 / self.owner.fighter.mv_spd <= time_to_act - action_cost and monster.distance_to(target) >= 2:
+
+                    monster.move_astar(target, entities, game_map)
+                    action_cost += 1 / monster.fighter.mv_spd
+                    #self.last_action += action_cost
                         
                 else:
                     break
+
+            self.last_action += action_cost
 
         elif self.target_seen:
             self.action_begin = False
@@ -58,6 +60,7 @@ class BasicMonster:
             
         else:
             self.idle_actions(game_map)
+            self.action_begin = False
 
         return combat_msg
     

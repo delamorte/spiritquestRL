@@ -1,32 +1,34 @@
 from bearlibterminal import terminal as blt
 import variables
+import xml.etree.ElementTree as ET
 
 
 def init_tiles():
 
-    tilesize = variables.tilesize + 'x' + variables.tilesize
-    ui_size = variables.ui_size + 'x' + variables.ui_size
+    tilesize = variables.tile_width + 'x' + variables.tile_height
 
     # Load tilesets
     blt.set("U+E100: ./tilesets/adam_bolt_angband16x16_fix.png, \
         size=16x16, resize=" + tilesize + ", resize-filter=nearest, align=top-left")
-    blt.set("U+E900: ./tilesets/adam_bolt_angband16x16_fix.png, \
-        size=16x16, resize=" + ui_size + ", resize-filter=nearest, align=top-left")
-    variables.tile_offset_x = int(
-        int(variables.tilesize) / blt.state(blt.TK_CELL_WIDTH))
-    variables.tile_offset_y = int(
-        int(variables.tilesize) / blt.state(blt.TK_CELL_HEIGHT))
-    variables.ui_offset_x = int(
-        int(variables.ui_size) / blt.state(blt.TK_CELL_WIDTH))
-    variables.ui_offset_y = int(
-        int(variables.ui_size) / blt.state(blt.TK_CELL_HEIGHT))
-    variables.camera_offset = int(variables.ui_size) / int(variables.tilesize)
-    blt.clear()
 
+    # Oryx set
+    blt.set("U+E200: ./tilesets/oryx_roguelike_2.0/V1/oryx_roguelike_16x24_trans.png, \
+        size=16x24, resize=" + "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+    # Oryx terrain+objects
+    blt.set("U+F100: ./tilesets/oryx_roguelike_2.0/terrain_objects_comb.png, \
+        size=16x24, resize=" + "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+    variables.tile_offset_x = int(
+        int(variables.tile_width) / blt.state(blt.TK_CELL_WIDTH))
+    variables.tile_offset_y = int(
+        int(variables.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
+
+    blt.clear()
 
 def tilemap():
     tiles = {}
-    if variables.gfx is "tiles":
+    if variables.gfx == "tiles":
         tiles = {"tree": (0xE100 + 87, 0xE100 + 88, 0xE100 + 89, 0xE100 + 93, 0xE100 + 94, 0xE100 + 95),
                  "dead_tree": (0xE100 + 112, 0xE100 + 144),
                  "rocks": (0xE100 + 1726, 0xE100 + 1727),
@@ -71,16 +73,68 @@ def tilemap():
                  "door": {"open": 0xE100 + 68, "closed": 0xE100 + 67, "locked": 0xE100 + 78},
                  "campfire": 0xE100 + 427,
                  "stairs": {"up": 0xE100 + 22, "down": 0xE100 + 27},
-                 "wall_brick": 0xE100 + 83,
-                 "wall_moss": (0xE100 + 90, 0xE100 + 91, 0xE100 + 92),
+                 "brick": {"horizontal": 0xE100 + 247, "vertical": 0xE100 + 235},
+                 "moss": (0xE100 + 90, 0xE100 + 91, 0xE100 + 92),
                  "weapons": {"club": 0xE100 + 242}}
 
-    elif variables.gfx is "ascii":
+    elif variables.gfx == "oryx":
+        tiles = {"tree": (0xE200 + 399, 0xE200 + 400, 0xE200 + 401, 0xE200 + 402, 0xE200 + 405),
+                 "dead_tree": (0xE200 + 403, 0xE200 + 404),
+                 "rocks": (0xE200 + 412,),
+                 "ground_soil": (0xE200 + 186,),
+                 "ground_moss": (0xE200 + 186,),
+                 "ground_dot": (0xE200 + 293),
+                 "floor": (0xE200 + 237,),
+                 "rubble": (0xE200 + 411,),
+                 "bones": (0xE200 + 362, 0xE200 + 363, 0xE200 + 364, 0xE200 + 365, 0xE200 + 366),
+                 "player": 0xE200 + 460,
+                 "player_remains": 0xE200 + 379,
+                 "monsters": {"rat": 0xE200 + 495,
+                              "bear": 0xE200 + 526,
+                              "crow": 0xE200 + 509,
+                              "felid": 0xE200 + 505,
+                              "snake": 0xE200 + 502,
+                              "frog": 0xE200 + 504,
+                              "mosquito": 0xE200 + 524},
+                 "monsters_chaos": {"rat": 0xE200 + 498,
+                                    "crow": 0xE200 + 509,
+                                    "chaos cat": 0xE200 + 506,
+                                    "chaos bear": 0xE200 + 529,
+                                    "chaos spirit": 0xE200 + 638,
+                                    "cockroach": 0xE200 + 517,
+                                    "bone snake": 0xE200 + 511,
+                                    "chaos dog": 0xE200 + 499,
+                                    "bat": 0xE200 + 500,
+                                    "imp": 0xE200 + 555,
+                                    "leech": 0xE200 + 614},
+                 "monsters_light": {"bear": 0xE200 + 528,
+                                    "crow": 0xE200 + 509,
+                                    "spirit": 0xE200 + 636,
+                                    "ghost dog": 0xE200 + 605,
+                                    "snake": 0xE200 + 502,
+                                    "gecko": 0xE200 + 503,
+                                    "serpent": 0xE200 + 512,
+                                    "frog": 0xE200 + 504,
+                                    "mosquito": 0xE200 + 524,
+                                    "fairy": 0xE200 + 579},
+
+                 "unique_monsters": {"king kobra": 0xE200 + 602, "albino rat": 0xE200 + 498},
+                 "monster_remains": 0xE200 + 373,
+                 "door": {"open": 0xE200 + 307, "closed": 0xE200 + 306, "locked": 0xE200 + 308},
+                 "campfire": 0xE200 + 303,
+                 "stairs": {"up": 0xE200 + 324, "down": 0xE200 + 323},
+                 # Walls
+                 "brick": {"horizontal": 0xE200 + 247, "vertical": 0xE200 + 235},
+                 "moss": (0xE200 + 256, 0xE200 + 236),
+                 "weapons": {"club": 0xE200 + 67}}
+
+    elif variables.gfx == "ascii":
         tiles = {"tree": ("T", "t"),
                  "dead_tree": ("T", "t"),
                  "rocks": ("^"),
                  "ground_soil": ".",
                  "ground_moss": ".",
+                 "ground_dot": ".",
                  "floor": ".",
                  "rubble": ".",
                  "bones": ",",
@@ -120,8 +174,8 @@ def tilemap():
                  "door": {"open": "-", "closed": "+", "locked": "*"},
                  "campfire": "¤",
                  "stairs": {"up": "<", "down": ">"},
-                 "wall_brick": "#",
-                 "wall_moss": "#",
+                 "brick": {"horizontal": "#", "vertical": "#"},
+                 "moss": "#",
                  "weapons": {"club": "\\"}}
 
     return tiles
