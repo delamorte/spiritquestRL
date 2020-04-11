@@ -75,7 +75,7 @@ def new_game(choice):
     fighter_component = get_fighter_stats("player")
     player_component = Player(50)
     player = Entity(
-        1, 1, 12, player_component.char["player"], None, "player", blocks=True, player=player_component,
+        1, 1, 2, player_component.char["player"], None, "player", blocks=True, player=player_component,
         fighter=fighter_component, inventory=inventory_component, stand_on_messages=False)
     player.player.avatar["player"] = fighter_component
     player.player.avatar[choice] = get_fighter_stats(choice)
@@ -127,11 +127,9 @@ def game_loop(main_menu_show=True, choice=None):
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, player.fighter.fov, True, 0)
 
-        draw_all(game_map, game_camera, entities, player,
-                 fov_map, fov_recompute, msg_panel, msg_panel_borders, screen_borders)
+        draw_all(game_map, game_camera, player, entities, fov_map)
         draw_messages(msg_panel, message_log)
-        # if combat:
-        #    draw_indicator(player.x, player.y, game_camera)
+
         fov_recompute = False
         blt.refresh()
 
@@ -179,7 +177,6 @@ def game_loop(main_menu_show=True, choice=None):
                     fov_recompute = True
                 else:
                     return True, False, new_choice
-                    #game_loop(False, new_choice)
 
             if move:
 
@@ -203,9 +200,12 @@ def game_loop(main_menu_show=True, choice=None):
                         draw_stats(player, target)
 
                     else:
+                        prev_pos_x, prev_pos_y = player.x, player.y
                         player.move(dx, dy)
                         time_counter.take_turn(1 / player.fighter.mv_spd)
                         fov_recompute = True
+                        game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(player)
+                        game_map.tiles[player.x][player.y].entities_on_tile.append(player)
 
                     game_state = GameStates.ENEMY_TURN
 
@@ -233,6 +233,7 @@ def game_loop(main_menu_show=True, choice=None):
                         for item in variables.stack:
                             if entity.name == item.split(" ", 1)[1]:
                                 variables.stack.remove(item)
+                        game_map.tiles[entity.x][entity.y].entities_on_tile.remove(entity)
                         entities["items"].remove(entity)
                         time_counter.take_turn(1)
                         game_state = GameStates.ENEMY_TURN
@@ -250,8 +251,9 @@ def game_loop(main_menu_show=True, choice=None):
             elif key == blt.TK_X:
                 game_state = GameStates.TARGETING
                 cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 2, 0xE700 + 1746, "light yellow", "cursor",
+                cursor = Entity(player.x, player.y, 3, 0xE700 + 1746, "light yellow", "cursor",
                                 cursor=cursor_component, stand_on_messages=False)
+                game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
                 entities["cursor"] = [cursor]
 
             elif player.player.spirit_power <= 0:
@@ -314,7 +316,10 @@ def game_loop(main_menu_show=True, choice=None):
                 x, y = game_camera.get_coordinates(destination_x, destination_y)
 
                 if 0 < x < game_camera.width - 1 and 0 < y < game_camera.height - 1:
+                    prev_pos_x, prev_pos_y = cursor.x, cursor.y
                     cursor.move(dx, dy)
+                    game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(cursor)
+                    game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
                     fov_recompute = True
                     variables.old_stack = variables.stack
                     variables.stack = []
@@ -323,6 +328,7 @@ def game_loop(main_menu_show=True, choice=None):
                 game_state = GameStates.PLAYER_TURN
                 variables.old_stack = variables.stack
                 variables.stack = []
+                game_map.tiles[cursor.x][cursor.y].entities_on_tile.remove(cursor)
                 del entities["cursor"]
 
         if game_state == GameStates.ENEMY_TURN:
@@ -352,8 +358,11 @@ def game_loop(main_menu_show=True, choice=None):
                     draw_stats(player)
                     break
                 if entity.ai:
+                    prev_pos_x, prev_pos_y = entity.x, entity.y
                     combat_msg = entity.ai.take_turn(
                         player, fov_map, game_map, entities, time_counter)
+                    game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(entity)
+                    game_map.tiles[entity.x][entity.y].entities_on_tile.append(entity)
                     fov_recompute = True
                     if combat_msg:
                         message_log.send(combat_msg)

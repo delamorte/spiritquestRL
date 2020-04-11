@@ -20,105 +20,101 @@ def draw(entity, game_map, x, y, fov_map):
             variables.tile_offset_y, entity.char)
 
 
-def draw_entities(entities, player, game_map, game_camera, fov_map):
+def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor_x, cursor_y):
+    for entity in entities:
+        # x, y = game_camera.get_coordinates(entity.x, entity.y)
 
-    for category in entities.values():
-        for entity in category:
-            x, y = game_camera.get_coordinates(entity.x, entity.y)
+        if entity.x == player.x and entity.y == player.y and entity.stand_on_messages:
 
-            if (0 < x < game_camera.width - ceil(
-                    variables.camera_offset) and 0 < y < game_camera.height - ceil(variables.camera_offset)):
+            variables.stack.append(get_article(
+                entity.name).capitalize() + " " + entity.name)
+            if entity.xtra_info:
+                variables.stack.append(entity.xtra_info)
 
-                if entity.x == player.x and entity.y == player.y and entity.stand_on_messages:
+        if cursor_x is not None:
+            if (entity.x == cursor_x and entity.y == cursor_y and not
+                    entity.cursor and game_map.tiles[entity.x][entity.y].explored):
 
-                    variables.stack.append(get_article(
-                        entity.name).capitalize() + " " + entity.name)
-                    if entity.xtra_info:
-                        variables.stack.append(entity.xtra_info)
+                variables.stack.append(get_article(entity.name).capitalize() + " " + entity.name)
+                variables.stack.append(str("x: "+(str(cursor_x) + ", y: " + str(cursor_y))))
 
-                if "cursor" in entities.keys():
-                    if (entity.x == entities["cursor"][0].x and
-                            entity.y == entities["cursor"][0].y and not
-                            entity.cursor and game_map.tiles[entity.x][entity.y].explored):
+                if entity.xtra_info:
+                    variables.stack.append(entity.xtra_info)
 
-                        variables.stack.append(get_article(entity.name).capitalize() + " " + entity.name)
-                        variables.stack.append(str("x: "+(str(entities["cursor"][0].x) +", y: " + str(entities["cursor"][0].y))))
+                if entity.fighter:
+                    draw_stats(player, entity)
 
-                        if entity.xtra_info:
-                            variables.stack.append(entity.xtra_info)
+            if entity.name == "cursor":
+                clear(entity, entity.last_seen_x, entity.last_seen_y)
+                draw(entity, game_map, x, y, fov_map)
 
-                        if entity.fighter:
-                            draw_stats(player, entity)
+        if not entity.cursor and fov_map.fov[entity.y, entity.x]:
+            # why is this here? causes rendering bugs!!!
+            # clear(entity, entity.last_seen_x, entity.last_seen_y)
 
-                    if entity == entities["cursor"][0]:
-                        clear(entity, entity.last_seen_x, entity.last_seen_y)
-                        draw(entity, game_map, x, y, fov_map)
+            if not entity.player and not entity.cursor:
+                entity.last_seen_x = entity.x
+                entity.last_seen_y = entity.y
 
-                if not entity.cursor and fov_map.fov[entity.y, entity.x]:
-                    # why is this here? causes rendering bugs!!!
-                    # clear(entity, entity.last_seen_x, entity.last_seen_y)
+            draw(entity, game_map, x, y, fov_map)
 
-                    if not entity.player and not entity.cursor:
-                        entity.last_seen_x = entity.x
-                        entity.last_seen_y = entity.y
+        elif (not fov_map.fov[entity.y, entity.x] and
+              game_map.tiles[entity.last_seen_x][entity.last_seen_y].explored and not
+              fov_map.fov[entity.last_seen_y, entity.last_seen_x]):
 
-                    draw(entity, game_map, x, y, fov_map)
+            x, y = game_camera.get_coordinates(entity.last_seen_x, entity.last_seen_y)
 
-                elif (not fov_map.fov[entity.y, entity.x] and
-                      game_map.tiles[entity.last_seen_x][entity.last_seen_y].explored and not
-                      fov_map.fov[entity.last_seen_y, entity.last_seen_x]):
+            # what is this if???????
+            # if (ceil(variables.camera_offset) < x < game_camera.width - ceil(variables.camera_offset) and ceil(
+            #        variables.camera_offset) < y < game_camera.height - ceil(variables.camera_offset)):
+            draw(entity, game_map, x, y, fov_map)
 
-                    x, y = game_camera.get_coordinates(entity.last_seen_x, entity.last_seen_y)
-
-                    # what is this if???????
-                    #if (ceil(variables.camera_offset) < x < game_camera.width - ceil(variables.camera_offset) and ceil(
-                    #        variables.camera_offset) < y < game_camera.height - ceil(variables.camera_offset)):
-                    draw(entity, game_map, x, y, fov_map)
-
-                if fov_map.fov[entity.y, entity.x] and entity.ai:
-                    draw_indicator(player.x, player.y, game_camera)
+        if fov_map.fov[entity.y, entity.x] and entity.ai:
+            draw_indicator(player.x, player.y, game_camera)
 
 
-def draw_map(game_map, game_camera, fov_map, fov_recompute):
+def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
     # Set boundaries where to draw map
     bound_x = ceil(variables.camera_offset)
     bound_y = ceil(variables.camera_offset)
     bound_x2 = game_camera.width - ceil(variables.camera_offset)
     bound_y2 = game_camera.height - ceil(variables.camera_offset)
-    # Only draw map if player has moved
-    if fov_recompute:
-        # Clear what's drawn in camera
-        clear_camera(2)
-        # Set boundaries if map is smaller than viewport
-        if game_map.width < game_camera.width:
-            bound_x2 = game_map.width
-        if game_map.height < game_camera.height:
-            bound_y2 = game_map.height
-        # Draw all the tiles within the boundaries of the game camera
-        for y in range(bound_y, bound_y2):
-            for x in range(bound_x, bound_x2):
-                map_x, map_y = game_camera.x + x, game_camera.y + y
-                if game_map.width < game_camera.width:
-                    map_x = x
-                if game_map.height < game_camera.height:
-                    map_y = y
-                visible = fov_map.fov[map_y, map_x]
+    # Clear what's drawn in camera
+    clear_camera(2)
+    # Set boundaries if map is smaller than viewport
+    if game_map.width < game_camera.width:
+        bound_x2 = game_map.width
+    if game_map.height < game_camera.height:
+        bound_y2 = game_map.height
+    # Draw all the tiles within the boundaries of the game camera
+    for y in range(bound_y, bound_y2):
+        for x in range(bound_x, bound_x2):
+            map_x, map_y = game_camera.x + x, game_camera.y + y
+            if game_map.width < game_camera.width:
+                map_x = x
+            if game_map.height < game_camera.height:
+                map_y = y
+            visible = fov_map.fov[map_y, map_x]
 
-                # Draw tiles within fov
-                if visible:
-                    blt.layer(0)
-                    blt.color(game_map.tiles[map_x][map_y].color)
-                    blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
-                            game_map.tiles[map_x][map_y].char)
-                    # Set everything in fov as explored
-                    game_map.tiles[map_x][map_y].explored = True
+            # Draw tiles within fov
+            if visible:
+                blt.layer(0)
+                blt.color(game_map.tiles[map_x][map_y].color)
+                blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
+                        game_map.tiles[map_x][map_y].char)
+                # Set everything in fov as explored
+                game_map.tiles[map_x][map_y].explored = True
 
-                # Gray out explored tiles
-                elif game_map.tiles[map_x][map_y].explored:
-                    blt.layer(0)
-                    blt.color("darker gray")
-                    blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
-                            game_map.tiles[map_x][map_y].char)
+            # Gray out explored tiles
+            elif game_map.tiles[map_x][map_y].explored:
+                blt.layer(0)
+                blt.color("darker gray")
+                blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
+                        game_map.tiles[map_x][map_y].char)
+
+            if len(game_map.tiles[map_x][map_y].entities_on_tile) > 0:
+                draw_entities(game_map.tiles[map_x][map_y].entities_on_tile, player,
+                              game_map, game_camera, fov_map, x, y, cursor_x, cursor_y)
 
 
 def draw_messages(msg_panel, message_log):
@@ -302,16 +298,18 @@ def draw_indicator(entity_x, entity_y, game_camera):
                 variables.tile_offset_y, 0, 0, tilemap()["indicator"])
 
 
-def draw_all(game_map, game_camera, entities, player, fov_map,
-             fov_recompute, msg_panel, msg_panel_borders, screen_borders):
+def draw_all(game_map, game_camera, player, entities, fov_map):
     game_camera.move_camera(
         player.x, player.y, game_map.width, game_map.height)
-    draw_map(game_map, game_camera, fov_map,
-             fov_recompute)
-    draw_entities(entities, player, game_map, game_camera, fov_map)
-    #draw_ui(msg_panel, msg_panel_borders, screen_borders)
-    draw_stats(player)
+    cursor_x, cursor_y = None, None
+    if "cursor" in entities.keys():
+        cursor_x = entities["cursor"][0].x
+        cursor_y = entities["cursor"][0].y
 
+    draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y)
+    # draw_entities(entities, player, game_map, game_camera, fov_map)
+    # draw_ui(msg_panel, msg_panel_borders, screen_borders)
+    draw_stats(player)
 
 
 def clear(entity, x, y):

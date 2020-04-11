@@ -122,12 +122,12 @@ def name_color_from_value(value, tileset=0xE500):
         color = "amber"
 
     # Rocks & Rubble
-    elif value == 412 or value == 411:
+    elif value == 412 or value == 411 or value == 0xE700 + 388 or value == 0xE700 + 119:
         name = "rubble"
         color = "dark gray"
 
     # Bones
-    elif value in range(362, 366+1):
+    elif value in range(362, 366+1) or value in range(0xE700 + 468, 0xE700 + 471+1) or value == 0xE700 + 475:
         name = "bones"
         color = "gray"
 
