@@ -79,24 +79,25 @@ def main_menu(resume=False):
 
                     # Draw select symbol, monster name and description
                     blt.color("orange" if selected else "default")
-                    blt.puts(center_x - 14, center_y - 2 + i * 5, "%s%s" %
+                    blt.puts(center_x - 24, center_y - 2 + i * 5+1, "%s%s" %
                              ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
 
+
                     if r == "crow":
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "reveal: " + abilities()["utility"]["reveal"], 0, 0, blt.TK_ALIGN_LEFT)
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "swoop: " + abilities()["attack"]["swoop"][0], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 24+1, center_y - 2 + i * 5 +2, "reveal: " + abilities()["utility"]["reveal"], 50, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 24+1, center_y - 2 + i * 5 +4, "swoop: " + abilities()["attack"]["swoop"][0], 0, 0, blt.TK_ALIGN_LEFT)
 
                     if r == "rat":
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "paralyzing bite: " + abilities()["attack"]["paralyzing bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "stealth", 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 24+1, center_y - 2 + i * 5 +2, "paralyzing bite: " + abilities()["attack"]["paralyzing bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 24+1, center_y - 2 + i * 5 +3, "stealth", 0, 0, blt.TK_ALIGN_LEFT)
 
                     if r == "snake":
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "poison bite: " + abilities()["attack"]["poison bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 24+1, center_y - 2 + i * 5 +2, "poison bite: " + abilities()["attack"]["poison bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
 
                     if variables.gfx == "tiles":
                     # Draw a bg tile
                         blt.layer(0)
-                        blt.puts(center_x - 20 + 1, center_y - 2 + i *
+                        blt.puts(center_x - 30 + 1, center_y - 2 + i *
                                  5, "[U+" + hex(0xE700 + 3) + "]", 0, 0)
 
                     # Draw monster tile
@@ -105,10 +106,10 @@ def main_menu(resume=False):
                     if variables.gfx == "tiles":
                         blt.color(None)
                     if variables.gfx == "ascii":
-                        blt.puts(center_x - 20 + 1,
+                        blt.puts(center_x - 30 + 1,
                                  center_y - 2 + i * 5, c, 0, 0)
                     else:
-                        blt.puts(center_x - 20 + 1, center_y - 2 +
+                        blt.puts(center_x - 30 + 1, center_y - 2 +
                                  i * 5, "[U+" + hex(c) + "]", 0, 0)
 
                     if selected:
@@ -131,7 +132,7 @@ def main_menu(resume=False):
         elif key == blt.TK_ENTER and r is "Exit":
             exit()
 
-        elif key == blt.TK_ENTER and r is "Resize window":
+        elif key == blt.TK_ENTER and not resume and r is "Resize window":
             blt.set("window: resizeable=true, minimum-size=60x20")
             key = None
             while key not in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_ENTER):
@@ -166,10 +167,6 @@ def main_menu(resume=False):
                     if w <= 60:
                         blt.set("window: size=60" + "x" + str(h))
 
-            # msg_panel, msg_panel_borders, screen_borders = init_ui()
-            # draw_ui(msg_panel, msg_panel_borders, screen_borders)
-            # init_tiles()
-            # blt.set("window: resizeable=false")
             clear_camera(5)
             blt.refresh()
         elif key == blt.TK_UP:
@@ -203,13 +200,13 @@ def choose_avatar(player):
 
             # Draw select symbol, monster name and description
             blt.color("orange" if selected else "default")
-            blt.puts(center_x - 14, center_y - 2 + i * 3, "%s%s" %
+            blt.puts(center_x - 24, center_y - 2 + i * 3, "%s%s" %
                      ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
 
             if variables.gfx == "tiles":
                 # Draw a bg tile
                 blt.layer(0)
-                blt.puts(center_x - 20 + 1, center_y - 2 + i *
+                blt.puts(center_x - 30 + 1, center_y - 2 + i *
                          5, "[U+" + hex(0xE700 + 3) + "]", 0, 0)
 
             # Draw monster tile
@@ -218,9 +215,9 @@ def choose_avatar(player):
             if variables.gfx == "tiles":
                 blt.color(None)
             if variables.gfx == "ascii":
-                blt.puts(center_x - 20 + 1, center_y - 2 + i * 3, c, 0, 0)
+                blt.puts(center_x - 30 + 1, center_y - 2 + i * 3, c, 0, 0)
             else:
-                blt.puts(center_x - 20 + 1, center_y - 2 + i *
+                blt.puts(center_x - 30 + 1, center_y - 2 + i *
                          3, "[U+" + hex(c) + "]", 0, 0)
 
             if selected:
@@ -243,14 +240,14 @@ def choose_avatar(player):
             player.color = get_monster_color(choice)
             choice_params = {}
             for i in range (3):
-                
+
                 choice_param = set_up_level_params(i, choice_params)
                 choice_params.update(choice_param)
-            
+
             return choice, choice_params
 
 def set_up_level_params(question_number, prev_choices):
-    
+
     key = None
     current_range = 0
     center_x = int(variables.viewport_x / 2)
@@ -271,7 +268,7 @@ def set_up_level_params(question_number, prev_choices):
                      "[color=white]Pictures of " + list(prev_choices)[0] + " begin to form in your mind.", 0, 0, blt.TK_ALIGN_CENTER)
             blt.puts(center_x, center_y - 4,
              "[color=white]Then, a new image appears..", 0, 0, blt.TK_ALIGN_CENTER)
-            
+
         if question_number == 2:
             blt.puts(center_x, center_y - 5,
                      "[color=white]You have dreamt about " + list(prev_choices)[0] + ", which shall bring about " + list(prev_choices)[1] + ".", 0, 0, blt.TK_ALIGN_CENTER)
