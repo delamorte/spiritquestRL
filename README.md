@@ -38,5 +38,7 @@ Run `py engine.py` or `python engine.py`.
 
 ## Licenses
 Tilesets by Adam Bolt and Oryx Design Lab.
+
 Oryx tileset is NOT covered under the MIT license. 
+
 Adam Bolt's graphics may be redistributed and used for any purpose, with or without modification.
