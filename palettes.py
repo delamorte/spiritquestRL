@@ -122,7 +122,7 @@ def name_color_from_value(value, tileset=0xE500):
         color = "amber"
 
     # Rocks & Rubble
-    elif value == 412 or value == 411 or value == 0xE700 + 388 or value == 0xE700 + 119:
+    elif value == 132 or value == 133 or value == 0xE700 + 388 or value == 0xE700 + 119:
         name = "rubble"
         color = "dark gray"
 
@@ -131,13 +131,18 @@ def name_color_from_value(value, tileset=0xE500):
         name = "bones"
         color = "gray"
 
+    # Shrubs
     elif value in range(450, 452+1) or value in range(410, 412+1) or value == 430 or value == 432\
             or value == 0xE700+93:
         name = "shrubs"
         if random() < 0.2:
-            color = "darker green"
+            color = "darker amber"
         else:
-            color = "darkest amber"
+            color = "darker green"
+
+    elif value == 2 or value == 4:
+        name = "pavement"
+        color = "darker gray"
 
     return name, color
 

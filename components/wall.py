@@ -1,7 +1,7 @@
 
 
 solids = ["solid", "brick", "rock", "stone", "moss", "tree", "dead tree"]
-
+draw_floor_under = ["tree", "dead tree", "fence", "gate", "shrubs"]
 
 class Wall:
     def __init__(self, name=None, status=None, blocked=True, block_sight=True):
@@ -18,8 +18,14 @@ class Wall:
             self.blocked = True
             game_map.tiles[self.owner.x][self.owner.y].blocked = True
             game_map.tiles[self.owner.x][self.owner.y].block_sight = True
-            if self.name != "tree" and self.name != "dead tree":
+            if self.name not in draw_floor_under:
                 game_map.tiles[self.owner.x][self.owner.y].char = " "
+
+        elif self.name == "fence":
+            self.block_sight = False
+            self.blocked = False
+            game_map.tiles[self.owner.x][self.owner.y].blocked = False
+            game_map.tiles[self.owner.x][self.owner.y].block_sight = False
 
         else:
             self.block_sight = False

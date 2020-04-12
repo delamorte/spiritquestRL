@@ -22,7 +22,8 @@ class Tile:
         self.explored = False
         self.visited = False
         self.seed = randint(1, 100)
-        self.char = " "
+        self.char = tilemap()["floor"]
+        self.layers = []
         self.color = None
         self.spawnable = False
         self.occupied = False

@@ -113,6 +113,15 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
                     blt.color("dark gray")
                 blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                         game_map.tiles[map_x][map_y].char)
+                if len(game_map.tiles[map_x][map_y].layers) > 0:
+                    i = 1
+                    for tile in game_map.tiles[map_x][map_y].layers:
+                        blt.layer(i)
+                        blt.color(tile[1])
+                        blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
+                                tile[0])
+                        i+=1
+
                 # Set everything in fov as explored
                 game_map.tiles[map_x][map_y].explored = True
 
@@ -122,6 +131,13 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
                 blt.color("darker gray")
                 blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                         game_map.tiles[map_x][map_y].char)
+                if len(game_map.tiles[map_x][map_y].layers) > 0:
+                    i = 1
+                    for tile in game_map.tiles[map_x][map_y].layers:
+                        blt.layer(i)
+                        blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
+                                tile[0])
+                        i+=1
 
             if len(game_map.tiles[map_x][map_y].entities_on_tile) > 0:
                 draw_entities(game_map.tiles[map_x][map_y].entities_on_tile, player,

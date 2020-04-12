@@ -75,7 +75,7 @@ def new_game(choice):
     fighter_component = get_fighter_stats("player")
     player_component = Player(50)
     player = Entity(
-        1, 1, 2, player_component.char["player"], None, "player", blocks=True, player=player_component,
+        1, 1, 3, player_component.char["player"], None, "player", blocks=True, player=player_component,
         fighter=fighter_component, inventory=inventory_component, stand_on_messages=False)
     player.player.avatar["player"] = fighter_component
     player.player.avatar[choice] = get_fighter_stats(choice)
