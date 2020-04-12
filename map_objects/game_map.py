@@ -58,7 +58,10 @@ class GameMap:
                     elif room.layers["ground"][y - room.y1][x - room.x1] > 0:
                         self.tiles[x][y].char = room.layers["ground"][y - room.y1][x - room.x1]
 
-                    if room.layers["ground_1"][y - room.y1][x - room.x1] > 0:
+                    if isinstance(room.layers["ground_1"][y - room.y1][x - room.x1], str):
+                        self.tiles[x][y].char = room.layers["ground_1"][y - room.y1][x - room.x1]
+
+                    elif room.layers["ground_1"][y - room.y1][x - room.x1] > 0:
                         _, color = name_color_from_value(room.layers["ground_1"][y - room.y1][x - room.x1])
                         self.tiles[x][y].layers.append((room.layers["ground_1"][y - room.y1][x - room.x1],
                                                         color))

@@ -42,13 +42,29 @@ def init_tiles():
         size=16x16, raw-size=%dx%d, resize=" % (addressof(gfx3), 512, 960) +
             tilesize + ", resize-filter=nearest, align=top-left")
 
+    blt.set("U+F100: %d, \
+        size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx1), 304, 1184) +
+            "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
     variables.tile_offset_x = int(
         int(variables.tile_width) / blt.state(blt.TK_CELL_WIDTH))
     variables.tile_offset_y = int(
         int(variables.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
+    variables.camera_offset = int(variables.ui_size) / int(variables.tile_height)
 
     blt.clear()
 
+
+def tilemap_ui():
+    tiles = {
+        "ui_block_horizontal": 0xF100 + 707,
+        "ui_block_vertical": 0xF100 + 708,
+        "ui_block_nw": 0xF100 + 703,
+        "ui_block_ne": 0xF100 + 704,
+        "ui_block_sw": 0xF100 + 705,
+        "ui_block_se": 0xF100 + 706,
+    }
+    return tiles
 
 def tilemap():
     tiles = {}
@@ -247,12 +263,12 @@ def tilemap():
                  "brick": {"horizontal": "#", "vertical": "#"},
                  "moss": "#",
                  "weapons": {"club": "\\"},
-                 "ui_block_horizontal": "#",
-                 "ui_block_vertical": "#",
-                 "ui_block_nw": "#",
-                 "ui_block_ne": "#",
-                 "ui_block_sw": "#",
-                 "ui_block_se": "#",
+                 "ui_block_horizontal": 0xE700 + 472,
+                 "ui_block_vertical": 0xE700 + 440,
+                 "ui_block_nw": 0xE700 + 468,
+                 "ui_block_ne": 0xE700 + 468,
+                 "ui_block_sw": 0xE700 + 468,
+                 "ui_block_se": 0xE700 + 468,
                  "indicator": 0xE700 + 1746
                  }
 

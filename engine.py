@@ -87,7 +87,7 @@ def new_game(choice):
     player.player.avatar[choice].power += 1
 
     blt.clear_area(2, variables.viewport_y +
-                   variables.tile_offset_y + 1, variables.viewport_x, 1)
+                   variables.ui_offset_y + 1, variables.viewport_x, 1)
 
     if variables.gfx == "ascii":
         player.char = tilemap()["player"]
@@ -97,9 +97,9 @@ def new_game(choice):
     message_log = MessageLog(5)
 
     # Initialize game camera
-    variables.camera_width = int(floor(blt.state(blt.TK_WIDTH) / variables.tile_offset_x) * variables.camera_offset)
+    variables.camera_width = int(floor(blt.state(blt.TK_WIDTH) / variables.ui_offset_x) * variables.camera_offset)
     variables.camera_height = int(
-        floor(blt.state(blt.TK_HEIGHT) / variables.tile_offset_y - 5) * variables.camera_offset)
+        floor(blt.state(blt.TK_HEIGHT) / variables.ui_offset_y - 5) * variables.camera_offset)
     game_camera = Camera(1, 1, variables.camera_width, variables.camera_height)
 
     levels = {}

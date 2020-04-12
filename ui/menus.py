@@ -11,7 +11,6 @@ from textwrap import wrap
 
 
 def main_menu(resume=False):
-
     current_range = 0
     center_x = int(variables.viewport_x / 2)
     center_y = int(variables.viewport_y / 2)
@@ -19,8 +18,13 @@ def main_menu(resume=False):
     while True:
 
         choices = ["New game", "Resize window",
-                   "Graphics: " + variables.gfx, "Exit"]
+                   "Graphics: " + variables.gfx, "Tilesize: " + variables.tile_width + "x" + variables.tile_height,
+                   "Exit"]
         if resume:
+            choices = ["New game", "Resize window",
+                       "Graphics: " + variables.gfx + " (restart game to change)",
+                       "Tilesize: " + variables.tile_width + "x" + variables.tile_height + " (restart game to change)",
+                       "Exit"]
             choices.insert(0, "Resume game")
         blt.layer(0)
         clear_camera(2)
@@ -49,19 +53,22 @@ def main_menu(resume=False):
             elif variables.gfx == "oryx":
                 variables.gfx = "tiles"
 
-#         if key == blt.TK_ENTER and r == "Tilesize: " + variables.tilesize_width + "x" + variables.tilesize_height:
-#             if int(variables.tilesize) < 48:
-#                 variables.tilesize = str(int(variables.tilesize) + 16)
-#                 # blt.close()
-#                 init_tiles()
-#                 msg_panel, msg_panel_borders, screen_borders = init_ui()
-#                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
-#             else:
-#                 variables.tilesize = str(16)
-#                 # blt.close()
-#                 init_tiles()
-#                 msg_panel, msg_panel_borders, screen_borders = init_ui()
-#                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
+        if key == blt.TK_ENTER and not resume and r == "Tilesize: " + \
+                variables.tile_width + "x" + variables.tile_height:
+            if int(variables.tile_height) == 48:
+                variables.tile_height = str(24)
+                variables.tile_width = str(16)
+                # blt.close()
+                init_tiles()
+                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+            else:
+                variables.tile_height = str(48)
+                variables.tile_width = str(32)
+                # blt.close()
+                init_tiles()
+                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                draw_ui(msg_panel, msg_panel_borders, screen_borders)
 
         if key == blt.TK_ENTER and r is "New game":
 
@@ -69,7 +76,7 @@ def main_menu(resume=False):
             while True:
                 clear_camera(2)
                 animals = tilemap()["monsters"]
-                #exclude = {"frog"}
+                # exclude = {"frog"}
                 animals = {x: animals[x] for x in ("crow", "rat", "snake")}
                 blt.layer(0)
                 blt.puts(center_x, center_y - 5,
@@ -79,23 +86,28 @@ def main_menu(resume=False):
 
                     # Draw select symbol, monster name and description
                     blt.color("orange" if selected else "default")
-                    blt.puts(center_x - 24, center_y - 2 + i * 5+1, "%s%s" %
-                             ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
-
+                    blt.puts(center_x - 24, center_y - 2 + i * 5 + 1, "%s%s" %
+                             ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0,
+                             blt.TK_ALIGN_LEFT)
 
                     if r == "crow":
-                        blt.puts(center_x - 24+1, center_y - 2 + i * 5 +2, "reveal: " + abilities()["utility"]["reveal"], 50, 0, blt.TK_ALIGN_LEFT)
-                        blt.puts(center_x - 24+1, center_y - 2 + i * 5 +4, "swoop: " + abilities()["attack"]["swoop"][0], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 24 + 1, center_y - 2 + i * 5 + 2,
+                                 "reveal: " + abilities()["utility"]["reveal"], 50, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 24 + 1, center_y - 2 + i * 5 + 4,
+                                 "swoop: " + abilities()["attack"]["swoop"][0], 0, 0, blt.TK_ALIGN_LEFT)
 
                     if r == "rat":
-                        blt.puts(center_x - 24+1, center_y - 2 + i * 5 +2, "paralyzing bite: " + abilities()["attack"]["paralyzing bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
-                        blt.puts(center_x - 24+1, center_y - 2 + i * 5 +3, "stealth", 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 24 + 1, center_y - 2 + i * 5 + 2,
+                                 "paralyzing bite: " + abilities()["attack"]["paralyzing bite"][0], 0, 0,
+                                 blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 24 + 1, center_y - 2 + i * 5 + 3, "stealth", 0, 0, blt.TK_ALIGN_LEFT)
 
                     if r == "snake":
-                        blt.puts(center_x - 24+1, center_y - 2 + i * 5 +2, "poison bite: " + abilities()["attack"]["poison bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(center_x - 24 + 1, center_y - 2 + i * 5 + 2,
+                                 "poison bite: " + abilities()["attack"]["poison bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
 
                     if variables.gfx == "tiles":
-                    # Draw a bg tile
+                        # Draw a bg tile
                         blt.layer(0)
                         blt.puts(center_x - 30 + 1, center_y - 2 + i *
                                  5, "[U+" + hex(0xE700 + 3) + "]", 0, 0)
@@ -144,7 +156,8 @@ def main_menu(resume=False):
                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
                 clear_camera(5)
                 blt.puts(center_x + 2, center_y,
-                         "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
+                         "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.",
+                         0, 0, blt.TK_ALIGN_CENTER)
                 blt.refresh()
 
                 key = blt.read()
@@ -181,7 +194,6 @@ def main_menu(resume=False):
 
 
 def choose_avatar(player):
-
     key = None
     current_range = 0
     center_x = int(variables.viewport_x / 2)
@@ -201,7 +213,8 @@ def choose_avatar(player):
             # Draw select symbol, monster name and description
             blt.color("orange" if selected else "default")
             blt.puts(center_x - 24, center_y - 2 + i * 3, "%s%s" %
-                     ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
+                     ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0,
+                     blt.TK_ALIGN_LEFT)
 
             if variables.gfx == "tiles":
                 # Draw a bg tile
@@ -239,15 +252,14 @@ def choose_avatar(player):
             player.char = player.player.char[choice]
             player.color = get_monster_color(choice)
             choice_params = {}
-            for i in range (3):
-
+            for i in range(3):
                 choice_param = set_up_level_params(i, choice_params)
                 choice_params.update(choice_param)
 
             return choice, choice_params
 
-def set_up_level_params(question_number, prev_choices):
 
+def set_up_level_params(question_number, prev_choices):
     key = None
     current_range = 0
     center_x = int(variables.viewport_x / 2)
@@ -260,26 +272,29 @@ def set_up_level_params(question_number, prev_choices):
         blt.layer(0)
         if question_number == 0:
             blt.puts(center_x, center_y - 5,
-                     "[color=white]You sit by the campfire to meditate. The world begins to drift away... ", 0, 0, blt.TK_ALIGN_CENTER)
+                     "[color=white]You sit by the campfire to meditate. The world begins to drift away... ", 0, 0,
+                     blt.TK_ALIGN_CENTER)
             blt.puts(center_x, center_y - 4,
-             "[color=white]Your mind gets visions of..", 0, 0, blt.TK_ALIGN_CENTER)
+                     "[color=white]Your mind gets visions of..", 0, 0, blt.TK_ALIGN_CENTER)
         if question_number == 1:
             blt.puts(center_x, center_y - 5,
-                     "[color=white]Pictures of " + list(prev_choices)[0] + " begin to form in your mind.", 0, 0, blt.TK_ALIGN_CENTER)
+                     "[color=white]Pictures of " + list(prev_choices)[0] + " begin to form in your mind.", 0, 0,
+                     blt.TK_ALIGN_CENTER)
             blt.puts(center_x, center_y - 4,
-             "[color=white]Then, a new image appears..", 0, 0, blt.TK_ALIGN_CENTER)
+                     "[color=white]Then, a new image appears..", 0, 0, blt.TK_ALIGN_CENTER)
 
         if question_number == 2:
             blt.puts(center_x, center_y - 5,
-                     "[color=white]You have dreamt about " + list(prev_choices)[0] + ", which shall bring about " + list(prev_choices)[1] + ".", 0, 0, blt.TK_ALIGN_CENTER)
+                     "[color=white]You have dreamt about " + list(prev_choices)[0] + ", which shall bring about " +
+                     list(prev_choices)[1] + ".", 0, 0, blt.TK_ALIGN_CENTER)
             blt.puts(center_x, center_y - 4,
-             "[color=white]The last thing that enters your mind is...", 0, 0, blt.TK_ALIGN_CENTER)
+                     "[color=white]The last thing that enters your mind is...", 0, 0, blt.TK_ALIGN_CENTER)
 
         for i, r in enumerate(choice_params):
             selected = i == current_range
             blt.color("orange" if selected else "light_gray")
             blt.puts(center_x + 2, center_y + 2 + i, "%s%s" %
-                     ("[U+203A]" if selected else " ", ".."+r+"."), 0, 0, blt.TK_ALIGN_CENTER)
+                     ("[U+203A]" if selected else " ", ".." + r + "."), 0, 0, blt.TK_ALIGN_CENTER)
 
             if selected:
                 choice = {r: choice_params[r]}
@@ -297,5 +312,3 @@ def set_up_level_params(question_number, prev_choices):
                 current_range += 1
         elif key == blt.TK_ENTER:
             return choice
-    
-    
