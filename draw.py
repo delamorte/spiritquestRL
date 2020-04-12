@@ -309,7 +309,7 @@ def draw_indicator(entity_x, entity_y, game_camera):
                 variables.tile_offset_y, 0, 0, tilemap()["indicator"])
 
 
-def draw_all(game_map, game_camera, player, entities, fov_map):
+def draw_all(game_map, game_camera, player, entities, fov_map, msg_panel, msg_panel_borders, screen_borders):
     game_camera.move_camera(
         player.x, player.y, game_map.width, game_map.height)
     cursor_x, cursor_y = None, None
@@ -318,8 +318,7 @@ def draw_all(game_map, game_camera, player, entities, fov_map):
         cursor_y = entities["cursor"][0].y
 
     draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y)
-    # draw_entities(entities, player, game_map, game_camera, fov_map)
-    # draw_ui(msg_panel, msg_panel_borders, screen_borders)
+    draw_ui(msg_panel, msg_panel_borders, screen_borders)
     draw_stats(player)
 
 

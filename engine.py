@@ -116,6 +116,8 @@ def game_loop(main_menu_show=True, choice=None):
 
     if main_menu_show:
         choice = main_menu()
+        msg_panel, msg_panel_borders, screen_borders = init_ui()
+        draw_ui(msg_panel, msg_panel_borders, screen_borders)
     game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute = new_game(choice)
 
     game_map, entities, player, fov_map = level_change(
@@ -127,7 +129,7 @@ def game_loop(main_menu_show=True, choice=None):
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, player.fighter.fov, True, 0)
 
-        draw_all(game_map, game_camera, player, entities, fov_map)
+        draw_all(game_map, game_camera, player, entities, fov_map, msg_panel, msg_panel_borders, screen_borders)
         draw_messages(msg_panel, message_log)
 
         fov_recompute = False

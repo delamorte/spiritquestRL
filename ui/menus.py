@@ -7,13 +7,14 @@ import variables
 from random import sample
 from palettes import get_monster_color
 from os import path
+from textwrap import wrap
+
 
 def main_menu(resume=False):
 
     current_range = 0
     center_x = int(variables.viewport_x / 2)
     center_y = int(variables.viewport_y / 2)
-    oryx = path.exists("./tilesets/oryx_roguelike_2.0/V1/oryx_roguelike_16x24_trans.png")
 
     while True:
 
@@ -44,10 +45,7 @@ def main_menu(resume=False):
             if variables.gfx == "tiles":
                 variables.gfx = "ascii"
             elif variables.gfx == "ascii":
-                if oryx:
-                    variables.gfx = "oryx"
-                else:
-                    variables.gfx = "tiles"
+                variables.gfx = "oryx"
             elif variables.gfx == "oryx":
                 variables.gfx = "tiles"
 
@@ -143,7 +141,7 @@ def main_menu(resume=False):
                 h = blt.state(blt.TK_HEIGHT)
                 w = blt.state(blt.TK_WIDTH)
                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
-                clear_camera(2)
+                clear_camera(5)
                 blt.puts(center_x + 2, center_y,
                          "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
                 blt.refresh()
@@ -168,7 +166,12 @@ def main_menu(resume=False):
                     if w <= 60:
                         blt.set("window: size=60" + "x" + str(h))
 
-            blt.set("window: resizeable=false")
+            # msg_panel, msg_panel_borders, screen_borders = init_ui()
+            # draw_ui(msg_panel, msg_panel_borders, screen_borders)
+            # init_tiles()
+            # blt.set("window: resizeable=false")
+            clear_camera(5)
+            blt.refresh()
         elif key == blt.TK_UP:
             if current_range > 0:
                 current_range -= 1
