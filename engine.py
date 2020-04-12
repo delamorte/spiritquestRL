@@ -153,18 +153,19 @@ def game_loop(main_menu_show=True, choice=None):
             blt.set("window.fullscreen=true")
 
         if game_state == GameStates.PLAYER_DEAD:
+            while True:
+                key = blt.read()
+                if key == blt.TK_CLOSE:
+                    break
 
-            if key == blt.TK_CLOSE:
-                break
+                if key == blt.TK_ESCAPE:
 
-            if key == blt.TK_ESCAPE:
-
-                new_choice = main_menu(resume=True)
-                if not new_choice:
-                    draw_ui(msg_panel, msg_panel_borders, screen_borders)
-                    fov_recompute = True
-                else:
-                    game_loop(False, new_choice)
+                    new_choice = main_menu(resume=False)
+                    if not new_choice:
+                        draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                        fov_recompute = True
+                    else:
+                        game_loop(False, new_choice)
 
         if game_state == GameStates.PLAYER_TURN:
 

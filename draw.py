@@ -83,7 +83,7 @@ def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor
             #        variables.camera_offset) < y < game_camera.height - ceil(variables.camera_offset)):
             draw(entity, game_map, x, y, fov_map)
 
-        if fov_map.fov[entity.y, entity.x] and entity.ai:
+        if fov_map.fov[entity.y, entity.x] and entity.ai and variables.gfx != "ascii":
             draw_indicator(player.x, player.y, game_camera)
 
 

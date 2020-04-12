@@ -230,11 +230,11 @@ class GameMap:
             entities = {}
         self.roomAddition.generateLevel(self.width, self.height)
         forest_colors = get_forest_colors(world_tendency)
+        dngn_color = get_dngn_colors(world_tendency)
         objects = []
-
         for y in range(0, self.height):
             for x in range(0, self.width):
-                self.tiles[x][y].color = "darkest gray"
+                self.tiles[x][y].color = dngn_color
                 self.tiles[x][y].char = tilemap()["ground_soil"][randint(
                     0, (len(tilemap()["ground_soil"]) - 1))]
                 if self.roomAddition.level[x][y] == 1:
