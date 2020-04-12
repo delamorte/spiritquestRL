@@ -8,4 +8,12 @@ def get_article(s):
         return "the"
     else:
         return "a"
-    
+
+
+def flatten(objects):
+    flat_list = []
+    for i in objects:
+        for item in i:
+            flat_list.append(item)
+
+    return flat_list

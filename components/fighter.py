@@ -5,6 +5,7 @@ from game_states import GameStates
 
 class Fighter:
     def __init__(self, hp, ac, ev, power, mv_spd, atk_spd, size, fov=6, abilities=None):
+        self.owner = None
         self.max_hp = hp
         self.hp = hp
         self.ac = ac

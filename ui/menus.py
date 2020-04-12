@@ -5,17 +5,20 @@ from map_objects.tilemap import init_tiles, tilemap
 from ui.elements import init_ui
 import variables
 from random import sample
-
+from palettes import get_monster_color
+from os import path
 
 def main_menu(resume=False):
 
     current_range = 0
     center_x = int(variables.viewport_x / 2)
     center_y = int(variables.viewport_y / 2)
+    oryx = path.exists("./tilesets/oryx_roguelike_2.0/V1/oryx_roguelike_16x24_trans.png")
+
     while True:
 
         choices = ["New game", "Resize window",
-                   "Graphics: " + variables.gfx, "Tilesize: " + variables.tilesize + "x" + variables.tilesize, "Exit"]
+                   "Graphics: " + variables.gfx, "Exit"]
         if resume:
             choices.insert(0, "Resume game")
         blt.layer(0)
@@ -37,29 +40,33 @@ def main_menu(resume=False):
         if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
             exit()
 
-
         if key == blt.TK_ENTER and not resume and r == "Graphics: " + variables.gfx:
-            if variables.gfx is "tiles":
+            if variables.gfx == "tiles":
                 variables.gfx = "ascii"
-            elif variables.gfx is "ascii":
+            elif variables.gfx == "ascii":
+                if oryx:
+                    variables.gfx = "oryx"
+                else:
+                    variables.gfx = "tiles"
+            elif variables.gfx == "oryx":
                 variables.gfx = "tiles"
 
-        if key == blt.TK_ENTER and r == "Tilesize: " + variables.tilesize + "x" + variables.tilesize:
-            if int(variables.tilesize) < 48:
-                variables.tilesize = str(int(variables.tilesize) + 16)
-                # blt.close()
-                init_tiles()
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
-            else:
-                variables.tilesize = str(16)
-                # blt.close()
-                init_tiles()
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+#         if key == blt.TK_ENTER and r == "Tilesize: " + variables.tilesize_width + "x" + variables.tilesize_height:
+#             if int(variables.tilesize) < 48:
+#                 variables.tilesize = str(int(variables.tilesize) + 16)
+#                 # blt.close()
+#                 init_tiles()
+#                 msg_panel, msg_panel_borders, screen_borders = init_ui()
+#                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
+#             else:
+#                 variables.tilesize = str(16)
+#                 # blt.close()
+#                 init_tiles()
+#                 msg_panel, msg_panel_borders, screen_borders = init_ui()
+#                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
 
         if key == blt.TK_ENTER and r is "New game":
-            key = None
+
             current_range = 0
             while True:
                 clear_camera(2)
@@ -76,31 +83,35 @@ def main_menu(resume=False):
                     blt.color("orange" if selected else "default")
                     blt.puts(center_x - 14, center_y - 2 + i * 5, "%s%s" %
                              ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
-                    
+
                     if r == "crow":
                         blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "reveal: " + abilities()["utility"]["reveal"], 0, 0, blt.TK_ALIGN_LEFT)
                         blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "swoop: " + abilities()["attack"]["swoop"][0], 0, 0, blt.TK_ALIGN_LEFT)
-                    
+
                     if r == "rat":
                         blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "paralyzing bite: " + abilities()["attack"]["paralyzing bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
                         blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "stealth", 0, 0, blt.TK_ALIGN_LEFT)
-                        
+
                     if r == "snake":
                         blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "poison bite: " + abilities()["attack"]["poison bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
 
+                    if variables.gfx == "tiles":
                     # Draw a bg tile
-                    blt.layer(0)
-                    blt.puts(center_x - 20 + 1, center_y - 2 + i *
-                             5, "[U+" + hex(0xE900 + 3) + "]", 0, 0)
+                        blt.layer(0)
+                        blt.puts(center_x - 20 + 1, center_y - 2 + i *
+                                 5, "[U+" + hex(0xE700 + 3) + "]", 0, 0)
 
                     # Draw monster tile
                     blt.layer(1)
-                    if variables.gfx is "ascii":
+                    blt.color(get_monster_color(r))
+                    if variables.gfx == "tiles":
+                        blt.color(None)
+                    if variables.gfx == "ascii":
                         blt.puts(center_x - 20 + 1,
                                  center_y - 2 + i * 5, c, 0, 0)
                     else:
                         blt.puts(center_x - 20 + 1, center_y - 2 +
-                                 i * 5, "[U+" + hex(c + 2048) + "]", 0, 0)
+                                 i * 5, "[U+" + hex(c) + "]", 0, 0)
 
                     if selected:
                         choice = r
@@ -192,18 +203,22 @@ def choose_avatar(player):
             blt.puts(center_x - 14, center_y - 2 + i * 3, "%s%s" %
                      ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
 
-            # Draw a bg tile
-            blt.layer(0)
-            blt.puts(center_x - 20 + 1, center_y - 2 + i *
-                     3, "[U+" + hex(0xE900 + 3) + "]", 0, 0)
+            if variables.gfx == "tiles":
+                # Draw a bg tile
+                blt.layer(0)
+                blt.puts(center_x - 20 + 1, center_y - 2 + i *
+                         5, "[U+" + hex(0xE700 + 3) + "]", 0, 0)
 
             # Draw monster tile
             blt.layer(1)
-            if variables.gfx is "ascii":
+            blt.color(get_monster_color(r))
+            if variables.gfx == "tiles":
+                blt.color(None)
+            if variables.gfx == "ascii":
                 blt.puts(center_x - 20 + 1, center_y - 2 + i * 3, c, 0, 0)
             else:
                 blt.puts(center_x - 20 + 1, center_y - 2 + i *
-                         3, "[U+" + hex(c + 2048) + "]", 0, 0)
+                         3, "[U+" + hex(c) + "]", 0, 0)
 
             if selected:
                 choice = r
@@ -222,6 +237,7 @@ def choose_avatar(player):
         elif key == blt.TK_ENTER:
             player.fighter = player.player.avatar[choice]
             player.char = player.player.char[choice]
+            player.color = get_monster_color(choice)
             choice_params = {}
             for i in range (3):
                 

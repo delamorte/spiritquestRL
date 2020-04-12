@@ -13,12 +13,13 @@ def kill_monster(monster):
     death_message = "The {0} is dead!".format(monster.name)
 
     monster.char = tilemap()["monster_remains"]
+    monster.color = "dark grey"
     monster.blocks = False
     monster.fighter = False
     monster.fighter_c = None
     monster.ai = False
     monster.ai_c = None
     monster.name = "remains of " + get_article(monster.name)+ " " + monster.name
-    monster.layer = 11
+    monster.layer = 1
 
     return death_message

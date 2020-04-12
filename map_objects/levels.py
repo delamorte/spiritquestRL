@@ -4,7 +4,19 @@ from ui.menus import choose_avatar
 
 def make_map(destination, levels, player, entities, game_map, fov_map, stairs):
 
-    if destination == "dream":
+    # Set debug level
+    if destination == "debug":
+        entities = {}
+        game_map = GameMap(100, 100, "debug")
+        # game_map.generate_trees(0, 0, game_map.width,
+        #                        game_map.height, 20, block_sight=True)
+        # game_map.generate_forest()
+        # game_map.generate_cavern()
+        player, entities = game_map.place_entities(player, entities)
+        # Initialize field of view
+        fov_map = initialize_fov(game_map)
+
+    elif destination == "dream":
         choice, params = choose_avatar(player)
         if not choice:
             return game_map, entities, player, fov_map
@@ -12,7 +24,8 @@ def make_map(destination, levels, player, entities, game_map, fov_map, stairs):
             return game_map, entities, player, fov_map
         world_tendency = sum(params.values())
         game_map = GameMap(100, 100, "dream")
-        entities = game_map.generate_forest(world_tendency)
+        # entities = game_map.generate_forest(world_tendency)
+        entities = game_map.room_addition(world_tendency=world_tendency)
         player, entities = game_map.place_entities(player, entities, world_tendency)
         # Initialize field of view
         fov_map = initialize_fov(game_map)
@@ -26,18 +39,6 @@ def make_map(destination, levels, player, entities, game_map, fov_map, stairs):
         # Initialize field of view
         fov_map = initialize_fov(game_map)
         levels[game_map.name] = [game_map, entities]
-
-    # Set debug level
-    elif destination == "debug":
-        entities = {}
-        game_map = GameMap(30, 30, "debug")
-        # game_map.generate_trees(0, 0, game_map.width,
-        #                        game_map.height, 20, block_sight=True)
-        # game_map.generate_forest()
-        # game_map.generate_cavern()
-        player, entities = game_map.place_entities(player, entities)
-        # Initialize field of view
-        fov_map = initialize_fov(game_map)
 
     return game_map, entities, player, fov_map
 
@@ -60,6 +61,7 @@ def level_change(destination, levels, player, entities={}, game_map=None, fov_ma
 
             player.fighter = player.player.avatar["player"]
             player.char = player.player.char["player"]
+            #player.color = None
 
     else:
         game_map, entities, player, fov_map = make_map(destination, levels, player, entities, game_map, fov_map, stairs)

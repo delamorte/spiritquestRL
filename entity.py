@@ -6,7 +6,9 @@ class Entity:
     A generic object to represent players, enemies, items, etc.
     """
 
-    def __init__(self, x, y, layer, char, color, name, blocks=False, player=None, fighter=None, ai=None, item=None, inventory=None, stairs=None, door=None, cursor=None):
+    def __init__(self, x, y, layer, char, color, name, blocks=False, player=None,
+                 fighter=None, ai=None, item=None, inventory=None, stairs=None,
+                 wall=None, door=None, cursor=None, stand_on_messages=True):
         self.x = x
         self.y = y
         self.layer = layer
@@ -21,10 +23,12 @@ class Entity:
         self.inventory = inventory
         self.stairs = stairs
         self.xtra_info = None
+        self.wall = wall
         self.door = door
         self.cursor = cursor
         self.last_seen_x = x
         self.last_seen_y = y
+        self.stand_on_messages = stand_on_messages
 
         # Set entity as component owner, so components can call their owner
         if self.player:
@@ -44,7 +48,10 @@ class Entity:
             
         if self.stairs:
             self.stairs.owner = self
-            
+
+        if self.wall:
+            self.wall.owner = self
+
         if self.door:
             self.door.owner = self
 
@@ -116,9 +123,8 @@ class Entity:
 
 
     def distance_to(self, other):
-        dx = other.x - self.x
-        dy = other.y - self.y
-        return sqrt(dx ** 2 + dy ** 2)
+        # Use Chebysev distance
+        return max(abs(other.x - self.x), abs(other.y - self.y))
 
 
 def blocking_entity(entities, x, y):

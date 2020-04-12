@@ -23,7 +23,7 @@ def get_fighter_stats(name):
                 "chaos dog": {"hp": 14, "ac": 2, "ev": 4, "power": 5, "mv_spd": 1.4, "atk_spd": 1, "size": "normal", "fov": 6, "abilities": [("claw", 40)]},
                 "bat": {"hp": 10, "ac": 1, "ev": 7, "power": 3, "mv_spd": 1.4, "atk_spd": 1, "size": "small", "fov": 4, "abilities": [("leeching bite", 20)]},
                 "imp": {"hp": 12, "ac": 2, "ev": 4, "power": 4, "mv_spd": 1.2, "atk_spd": 1, "size": "normal", "fov": 6, "abilities": [("claw", 20), ("call allies", 20)]},
-                "leech": {"hp": 13, "ac": 3, "ev": 3, "power": 4, "mv_spd": 0.9, "atk_spd": 1, "size": "normal", "fov": 6, "abilities": [("leeching bite", 30)]},
+                "leech": {"hp": 13, "ac": 3, "ev": 3, "power": 4, "mv_spd": 0.5, "atk_spd": 1, "size": "normal", "fov": 6, "abilities": [("leeching bite", 30)]},
                 "spirit": {"hp": 10, "ac": 1, "ev": 6, "power": 3, "mv_spd": 1, "atk_spd": 1, "size": "normal", "fov": 6, "abilities": [("give power", 5), ("heal", 5), ("call allies", 20)]},
                 "chaos spirit": {"hp": 10, "ac": 1, "ev": 6, "power": 3, "mv_spd": 1, "atk_spd": 1, "size": "normal", "fov": 6, "abilities": [("drain power", 5), ("harm", 5)]},
                 "ghost dog": {"hp": 12, "ac": 2, "ev": 4, "power": 5, "mv_spd": 1.5, "atk_spd": 1, "size": "normal", "fov": 6, "abilities": [("claw", 30), ("invisibility", 5)]},
