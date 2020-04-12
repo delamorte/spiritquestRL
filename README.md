@@ -1,4 +1,5 @@
 # spiritquestRL
+
 A roguelike/adventure game using Python, BearLibTerminal and tcod.
 
 See [design docs](https://github.com/delamorte/spiritquestRL/blob/master/docs/design.md) for my ambitious development plans and goals.
