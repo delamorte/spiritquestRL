@@ -6,8 +6,8 @@ from textwrap import shorten
 from map_objects.tilemap import tilemap, tilemap_ui
 import variables
 
-def draw(entity, game_map, x, y, fov_map):
 
+def draw(entity, game_map, x, y, fov_map):
     if variables.gfx == "tiles" and entity.fighter:
         blt.layer(0)
         blt.color("lighter amber")
@@ -25,8 +25,13 @@ def draw(entity, game_map, x, y, fov_map):
             game_map.tiles[entity.x][entity.y].explored):
         blt.color("gray")
 
-    blt.put(x * variables.tile_offset_x, y *
-            variables.tile_offset_y, entity.char)
+    # Cursor needs some offset in ascii
+    if variables.gfx == "ascii" and entity.name == "cursor":
+        blt.put_ext(x * variables.tile_offset_x, y *
+                    variables.tile_offset_y, -3 * variables.tile_offset_x, -5 * variables.tile_offset_y, entity.char)
+    else:
+        blt.put(x * variables.tile_offset_x, y *
+                variables.tile_offset_y, entity.char)
 
 
 def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor_x, cursor_y):
@@ -45,7 +50,7 @@ def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor
                     entity.cursor and game_map.tiles[entity.x][entity.y].explored):
 
                 variables.stack.append(get_article(entity.name).capitalize() + " " + entity.name)
-                variables.stack.append(str("x: "+(str(cursor_x) + ", y: " + str(cursor_y))))
+                variables.stack.append(str("x: " + (str(cursor_x) + ", y: " + str(cursor_y))))
 
                 if entity.xtra_info:
                     variables.stack.append(entity.xtra_info)
@@ -78,8 +83,8 @@ def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor
             #        variables.camera_offset) < y < game_camera.height - ceil(variables.camera_offset)):
             draw(entity, game_map, x, y, fov_map)
 
-        #if fov_map.fov[entity.y, entity.x] and entity.ai:
-        #    draw_indicator(player.x, player.y, game_camera)
+        if fov_map.fov[entity.y, entity.x] and entity.ai:
+            draw_indicator(player.x, player.y, game_camera)
 
 
 def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
@@ -89,7 +94,7 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
     bound_x2 = game_camera.width - ceil(variables.camera_offset)
     bound_y2 = game_camera.height - ceil(variables.camera_offset)
     # Clear what's drawn in camera
-    clear_camera(3)
+    clear_camera(2)
     # Set boundaries if map is smaller than viewport
     if game_map.width < game_camera.width:
         bound_x2 = game_map.width
@@ -122,7 +127,7 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
                         blt.color(tile[1])
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 tile[0])
-                        i+=1
+                        i += 1
 
                 # Set everything in fov as explored
                 game_map.tiles[map_x][map_y].explored = True
@@ -139,7 +144,7 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
                         blt.layer(i)
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 tile[0])
-                        i+=1
+                        i += 1
 
             if len(game_map.tiles[map_x][map_y].entities_on_tile) > 0:
                 draw_entities(game_map.tiles[map_x][map_y].entities_on_tile, player,
@@ -173,7 +178,8 @@ def draw_messages(msg_panel, message_log):
             msg = shorten(msg, msg_panel.w * variables.ui_offset_x - 2,
                           placeholder="..(Press 'M' for log)")
             blt.puts(msg_panel.x * variables.ui_offset_x + 1, msg_panel.y *
-                     variables.ui_offset_y-1 + i*2, "[offset=0,0]" + msg, msg_panel.w * variables.ui_offset_x - 2, 1,
+                     variables.ui_offset_y - 1 + i * 2, "[offset=0,0]" + msg, msg_panel.w * variables.ui_offset_x - 2,
+                     1,
                      align=blt.TK_ALIGN_LEFT)
             i -= 1
         message_log.new_msgs = False
@@ -321,7 +327,7 @@ def draw_ui(msg_panel, msg_panel_borders, screen_borders):
 def draw_indicator(entity_x, entity_y, game_camera):
     # Draw player indicator
     x, y = game_camera.get_coordinates(entity_x, entity_y)
-    blt.layer(3)
+    blt.layer(1)
     blt.color(None)
     blt.put_ext(x * variables.tile_offset_x, y *
                 variables.tile_offset_y, 0, 0, tilemap()["indicator"])

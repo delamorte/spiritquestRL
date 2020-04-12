@@ -26,6 +26,7 @@ def main_menu(resume=False):
                        "Tilesize: " + variables.tile_width + "x" + variables.tile_height + " (restart game to change)",
                        "Exit"]
             choices.insert(0, "Resume game")
+
         blt.layer(0)
         clear_camera(2)
         blt.puts(center_x + 2, center_y,
@@ -48,24 +49,37 @@ def main_menu(resume=False):
         if key == blt.TK_ENTER and not resume and r == "Graphics: " + variables.gfx:
             if variables.gfx == "tiles":
                 variables.gfx = "ascii"
+                variables.tile_height = str(24)
+                variables.tile_width = str(16)
+                init_tiles()
+                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                draw_ui(msg_panel, msg_panel_borders, screen_borders)
             elif variables.gfx == "ascii":
                 variables.gfx = "oryx"
+                variables.tile_height = str(48)
+                variables.tile_width = str(32)
+                init_tiles()
+                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                draw_ui(msg_panel, msg_panel_borders, screen_borders)
             elif variables.gfx == "oryx":
                 variables.gfx = "tiles"
+                variables.tile_height = str(48)
+                variables.tile_width = str(32)
+                init_tiles()
+                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                draw_ui(msg_panel, msg_panel_borders, screen_borders)
 
         if key == blt.TK_ENTER and not resume and r == "Tilesize: " + \
                 variables.tile_width + "x" + variables.tile_height:
             if int(variables.tile_height) == 48:
                 variables.tile_height = str(24)
                 variables.tile_width = str(16)
-                # blt.close()
                 init_tiles()
                 msg_panel, msg_panel_borders, screen_borders = init_ui()
                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
             else:
                 variables.tile_height = str(48)
                 variables.tile_width = str(32)
-                # blt.close()
                 init_tiles()
                 msg_panel, msg_panel_borders, screen_borders = init_ui()
                 draw_ui(msg_panel, msg_panel_borders, screen_borders)

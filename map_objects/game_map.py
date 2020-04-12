@@ -52,23 +52,19 @@ class GameMap:
                     if isinstance(room.layers["ground"][y - room.y1][x - room.x1], tuple):
                         room.layers["ground"][y - room.y1][x - room.x1] = \
                             room.layers["ground"][y - room.y1][x - room.x1][0]
-                    elif isinstance(room.layers["ground"][y - room.y1][x - room.x1], str):
-                        self.tiles[x][y].char = room.layers["ground"][y - room.y1][x - room.x1]
-                        self.tiles[x][y].color = get_terrain_colors()
-                    elif room.layers["ground"][y - room.y1][x - room.x1] > 0:
+
+                    elif room.layers["ground"][y - room.y1][x - room.x1] != 0:
                         self.tiles[x][y].char = room.layers["ground"][y - room.y1][x - room.x1]
 
-                    if isinstance(room.layers["ground_1"][y - room.y1][x - room.x1], str):
-                        self.tiles[x][y].char = room.layers["ground_1"][y - room.y1][x - room.x1]
-
-                    elif room.layers["ground_1"][y - room.y1][x - room.x1] > 0:
+                    if isinstance(room.layers["ground_1"][y - room.y1][x - room.x1], tuple):
+                        room.layers["ground_1"][y - room.y1][x - room.x1] = \
+                            room.layers["ground_1"][y - room.y1][x - room.x1][0]
+                    elif room.layers["ground_1"][y - room.y1][x - room.x1] != 0:
                         _, color = name_color_from_value(room.layers["ground_1"][y - room.y1][x - room.x1])
                         self.tiles[x][y].layers.append((room.layers["ground_1"][y - room.y1][x - room.x1],
                                                         color))
-                    if isinstance(room.layers["terrain_objects"][y - room.y1][x - room.x1], str):
-                        self.tiles[x][y].char = room.layers["terrain_objects"][y - room.y1][x - room.x1]
-                        self.tiles[x][y].color = get_terrain_colors()
-                    elif room.layers["terrain_objects"][y - room.y1][x - room.x1] > 0:
+
+                    if room.layers["terrain_objects"][y - room.y1][x - room.x1] != 0:
                         name, color = name_color_from_value(room.layers["terrain_objects"][y - room.y1][x - room.x1])
                         if name in openables:
                             door_component = Door(name)
@@ -84,6 +80,7 @@ class GameMap:
                             self.tiles[x][y].entities_on_tile.append(wall)
                             wall_component.set_attributes(self)
                             entities.append(wall)
+
                 else:
                     # Vertical walls
                     if (x == room.x1 or x == room.x2 - 1) and 0 <= y < room.y2 - 1:
@@ -123,7 +120,7 @@ class GameMap:
                         #                     self.tiles[x][y].block_sight = False
                         self.tiles[x][y].spawnable = True
 
-        # Make sure nothing can block room wall immediate neighbours            
+        # Make sure nothing can block room wall immediate neighbours
         for y in range(room.y1 - 1, room.y2 + 1):
             for x in range(room.x1 - 1, room.x2 + 1):
                 self.tiles[x][y].occupied = True
@@ -427,7 +424,7 @@ class GameMap:
         #     for x in range (self.width):
         #         for y in range (self.height):
         #             wall_one_away = self.count_walls(1, x, y)
-        # 
+        #
         #             if wall_one_away >= 5:
         #                 self.tiles[x][y].color[1] = cavern_colors[4]
         #                 self.tiles[x][y].char = tilemap()["moss"][randint(
@@ -511,7 +508,7 @@ class GameMap:
         px, py = main_cave[pos].x, main_cave[pos].y
 
         stairs_current_floor = []
-        # On the first floor there is only one set of stairs up which leads back to hub        
+        # On the first floor there is only one set of stairs up which leads back to hub
         if self.dungeon_level == 1:
             stairs_component = Stairs(("cavern1", px, py), ["hub", entities["stairs"][1].stairs.source[1],
                                                             entities["stairs"][1].stairs.source[2]], "hub",

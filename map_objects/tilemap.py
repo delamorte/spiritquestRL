@@ -206,15 +206,15 @@ def tilemap():
     elif variables.gfx == "ascii":
         tiles = {"tree": ("T", "t"),
                  "dead_tree": ("T", "t"),
-                 "rocks": ("^"),
+                 "rocks": "^",
                  "coffin": "¤",
                  "shrine": "£",
                  "candle": "!",
                  "gate": {"open": "-", "closed": "+", "locked": "*"},
                  "gate (open)": "-",
                  "gate (closed)": "+",
-                 "fence": "#",
-                 "statue": "/",
+                 "fence": "|",
+                 "statue": "&",
                  "ground_soil": ".",
                  "ground_moss": ".",
                  "ground_dot": ".",
@@ -222,7 +222,7 @@ def tilemap():
                  "floor_wood": ".",
                  "pavement": ".",
                  "rubble": ".",
-                 "shrubs": ".",
+                 "shrubs": ("`", "´"),
                  "bones": ",",
                  "player": "@",
                  "player_remains": "@",
@@ -278,5 +278,7 @@ def tilemap():
 def convert_tileset(value):
     name, _ = name_color_from_value(value)
     converted_value = tilemap()[name]
+    # if variables.gfx == "ascii":
+    #     converted_value = ord(converted_value)
 
     return converted_value

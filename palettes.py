@@ -71,7 +71,8 @@ def get_forest_colors(mod=-1):
 
 def name_color_from_value(value, tileset=0xE500):
     if isinstance(value, str):
-        return value, None
+        name, color = name_color_from_ascii(value)
+        return name, color
     elif value < 1000:
         tileset = 0
     name = None
@@ -171,3 +172,70 @@ def get_monster_color(name):
               "fairy": "light violet"}
 
     return colors[name]
+
+
+def name_color_from_ascii(value):
+
+    name, color = None, None
+
+    # Coffins
+    if value == "¤":
+        name = "coffin"
+        color = "darker amber"
+
+    # Shrines
+    elif value == "£":
+        name = "shrine"
+        if random() < 0.2:
+            color = "bright yellow"
+        else:
+            color = None
+
+    # Doors
+    elif value == "-" or value == "+" or value == "*":
+        if value == "-":
+            name = "door (open)"
+        elif value == "+":
+            name = "door (closed)"
+        else:
+            name = "door (locked)"
+        color = "darker amber"
+
+    # Fences
+    elif value == "|":
+        name = "fence"
+        color = "dark gray"
+
+    # Statues
+    elif value == "&":
+        name = "statue"
+        color = "gray"
+
+    # Candles
+    elif value == "!":
+        name = "candle"
+        color = "amber"
+
+    # Rocks & Rubble
+    elif value == "^":
+        name = "rubble"
+        color = "dark gray"
+
+    # Bones
+    elif value == ",":
+        name = "bones"
+        color = "gray"
+
+    # Shrubs
+    elif value == "`" or value == "´":
+        name = "shrubs"
+        if random() < 0.2:
+            color = "darker amber"
+        else:
+            color = "darker green"
+
+    elif value == ".":
+        name = "floor"
+        color = "darker gray"
+
+    return name, color

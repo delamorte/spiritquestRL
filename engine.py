@@ -94,7 +94,7 @@ def new_game(choice):
         player.color = "lightest green"
 
     fov_recompute = True
-    message_log = MessageLog(5)
+    message_log = MessageLog(4)
 
     # Initialize game camera
     variables.camera_width = int(floor(blt.state(blt.TK_WIDTH) / variables.ui_offset_x) * variables.camera_offset)
