@@ -1,36 +1,46 @@
+from ctypes import c_uint32, addressof
 from bearlibterminal import terminal as blt
 from palettes import name_color_from_value
 import variables
 from os import path
-import xml.etree.ElementTree as ET
+import pickle
 
 openables = ["gate",
-         "gate (open)",
-         "gate (closed)",
-         "gate (locked)",
-         "door",
-         "door (open)",
-         "door (closed)",
-         "door (locked)"]
+             "gate (open)",
+             "gate (closed)",
+             "gate (locked)",
+             "door",
+             "door (open)",
+             "door (closed)",
+             "door (locked)"]
+
+
+def init_gfx(f):
+    with open(f, 'rb') as gfx:
+        tileset = pickle.load(gfx)
+
+    arr = (c_uint32 * len(tileset))(*tileset)
+    return arr
+
 
 def init_tiles():
-
     tilesize = variables.tile_width + 'x' + variables.tile_height
 
-    # Load tilesets
-    blt.set("U+E700: ./tilesets/adam_bolt_angband16x16_fix.png, \
-        size=16x16, resize=" + tilesize + ", resize-filter=nearest, align=top-left")
+    gfx1 = init_gfx('./gfx/gfx1')
+    gfx2 = init_gfx('./gfx/gfx2')
+    gfx3 = init_gfx('./gfx/gfx3')
 
-    if path.exists("./tilesets/oryx_roguelike_2.0/V1/oryx_roguelike_16x24_trans.png"):
-        # Oryx set
-        blt.set("U+E100: ./tilesets/oryx_roguelike_2.0/V1/oryx_roguelike_16x24_trans.png, \
-            size=16x24, resize=" + "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+    blt.set("U+E100: %d, \
+        size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx1), 304, 1184) +
+            tilesize + ", resize-filter=nearest, spacing=4x4, align=top-left")
 
-        # Oryx terrain+objects
-        blt.set("U+E500: ./tilesets/oryx_roguelike_2.0/terrain_objects_comb.png, \
-            size=16x24, resize=" + "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
-    else:
-        variables.gfx = "tiles"
+    blt.set("U+E500: %d, \
+        size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx2), 320, 600) +
+            tilesize + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+    blt.set("U+E700: %d, \
+        size=16x16, raw-size=%dx%d, resize=" % (addressof(gfx3), 512, 960) +
+            tilesize + ", resize-filter=nearest, align=top-left")
 
     variables.tile_offset_x = int(
         int(variables.tile_width) / blt.state(blt.TK_CELL_WIDTH))
@@ -38,6 +48,7 @@ def init_tiles():
         int(variables.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
 
     blt.clear()
+
 
 def tilemap():
     tiles = {}
@@ -244,7 +255,6 @@ def tilemap():
 
 
 def convert_tileset(value):
-
     name, _ = name_color_from_value(value)
     converted_value = tilemap()[name]
 
