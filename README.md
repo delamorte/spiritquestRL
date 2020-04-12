@@ -1,5 +1,5 @@
 # spiritquestRL
-A roguelike/adventure game using Python 3.7.3, tcod 9.3.0 and BearLibTerminal 0.15.7.
+A roguelike/adventure game using Python, BearLibTerminal and tcod.
 
 See [design docs](https://github.com/delamorte/spiritquestRL/blob/master/docs/design.md) for my ambitious development plans and goals.
 
@@ -35,4 +35,8 @@ Run `py engine.py` or `python engine.py`.
 - [jcerise's roguelike tutorial for Go](https://jeremyceri.se/roguelikes/)
 - [BearLibTerminal](http://foo.wyrd.name/en:bearlibterminal)
 - [tcod](https://python-tcod.readthedocs.io/en/latest/installation.html)
-- Original tileset by Adam Bolt
+
+## Licenses
+Tilesets by Adam Bolt and Oryx Design Lab.
+Oryx tileset is NOT covered under the MIT license. 
+Adam Bolt's graphics may be redistributed and used for any purpose, with or without modification.
