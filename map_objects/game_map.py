@@ -184,7 +184,7 @@ class GameMap:
         objects.extend(self.create_room(d_entrance))
         door_d_entrance = self.create_door(d_entrance, "locked", random=True)
 
-        test_map = TiledRoom(name="graveyard", floor_color="darkest gray")
+        test_map = TiledRoom(name="graveyard")
         x1, y1 = self.get_rand_unoccupied_space(w, h)
         test_map.update_coordinates(x1, y1)
 

@@ -107,7 +107,7 @@ def name_color_from_value(value, tileset=0xE500):
         color = "gray"
 
     # Fences
-    elif value in range(100, 111 + 1) or value == 0xE700 + 83:
+    elif value in range(100, 111 + 1) or value == 0xE700+469:
         name = "fence"
         color = "dark gray"
 
@@ -140,7 +140,7 @@ def name_color_from_value(value, tileset=0xE500):
         else:
             color = "darker green"
 
-    elif value == 2 or value == 4:
+    elif value == 2 or value == 4 or value == 0xE700 + 20:
         name = "pavement"
         color = "darker gray"
 

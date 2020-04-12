@@ -253,7 +253,7 @@ def game_loop(main_menu_show=True, choice=None):
             elif key == blt.TK_X:
                 game_state = GameStates.TARGETING
                 cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 3, 0xE700 + 1746, "light yellow", "cursor",
+                cursor = Entity(player.x, player.y, 4, 0xE700 + 1746, "light yellow", "cursor",
                                 cursor=cursor_component, stand_on_messages=False)
                 game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
                 entities["cursor"] = [cursor]

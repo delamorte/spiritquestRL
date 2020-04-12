@@ -171,7 +171,7 @@ def draw_messages(msg_panel, message_log):
             msg = shorten(msg, msg_panel.w * variables.tile_offset_x - 2,
                           placeholder="..(Press 'M' for log)")
             blt.puts(msg_panel.x * variables.tile_offset_x + 1, msg_panel.y *
-                     variables.tile_offset_y + i, "[offset=0,-9]" + msg, msg_panel.w * variables.tile_offset_x - 2, 1,
+                     variables.tile_offset_y-2 + i*2, "[offset=0,0]" + msg, msg_panel.w * variables.tile_offset_x - 2, 1,
                      align=blt.TK_ALIGN_LEFT)
             i -= 1
         message_log.new_msgs = False
