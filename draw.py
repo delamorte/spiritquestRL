@@ -8,7 +8,7 @@ from map_objects.tilemap import tilemap, tilemap_ui
 from scipy.spatial.distance import cityblock
 import variables
 from palettes import argb_from_color
-
+import random
 
 def draw(entity, game_map, x, y, player_fov):
     # if variables.gfx == "adambolt" and entity.fighter:
@@ -19,18 +19,21 @@ def draw(entity, game_map, x, y, player_fov):
 
     # Draw the entity to the screen
     blt.layer(entity.layer)
-
+    blt.color(entity.color)
     c = blt.color_from_name(entity.color)
     if variables.gfx == "adambolt":
         c = blt.color_from_name(None)
-    argb = argb_from_color(c)
-    r = int(argb[1] * game_map.tiles[entity.x][entity.y].light_level)
-    g = int(argb[2] * game_map.tiles[entity.x][entity.y].light_level)
-    b = int(argb[3] * game_map.tiles[entity.x][entity.y].light_level)
-    blt.color(blt.color_from_argb(255, r, g, b))
+    if not entity.cursor:
 
-    # if variables.gfx == "adambolt":
-    #     blt.color(None)
+        argb = argb_from_color(c)
+        if entity.light_source and not entity.fighter:
+            game_map.tiles[entity.x][entity.y].light_level = 1 * random.uniform(0.95, 1.05)
+
+        r = min(int(argb[1] * game_map.tiles[entity.x][entity.y].light_level), 255)
+        g = min(int(argb[2] * game_map.tiles[entity.x][entity.y].light_level), 255)
+        b = min(int(argb[3] * game_map.tiles[entity.x][entity.y].light_level), 255)
+
+        blt.color(blt.color_from_argb(255, r, g, b))
 
     if not (player_fov[entity.y, entity.x] and
             game_map.tiles[entity.x][entity.y].explored):
@@ -41,6 +44,7 @@ def draw(entity, game_map, x, y, player_fov):
         blt.put_ext(x * variables.tile_offset_x, y *
                     variables.tile_offset_y, -3 * variables.tile_offset_x, -5 * variables.tile_offset_y, entity.char)
     else:
+
         blt.put(x * variables.tile_offset_x, y *
                 variables.tile_offset_y, entity.char)
 
@@ -48,6 +52,7 @@ def draw(entity, game_map, x, y, player_fov):
 def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
     light_sources=[]
     for entity in entities:
+
         x, y = game_camera.get_coordinates(entity.x, entity.y)
 
         if entity.x == player.x and entity.y == player.y and entity.stand_on_messages:
@@ -82,7 +87,13 @@ def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
                 entity.last_seen_x = entity.x
                 entity.last_seen_y = entity.y
 
-            draw(entity, game_map, x, y, player.light_source.fov_map.fov)
+            if entity.player or entity.fighter:
+                draw(entity, game_map, x, y, player.light_source.fov_map.fov)
+            elif not entity.light_source:
+                draw(entity, game_map, x, y, player.light_source.fov_map.fov)
+            else:
+                light_sources.append(entity.light_source)
+                continue
 
         elif (not player.light_source.fov_map.fov[entity.y, entity.x] and
               game_map.tiles[entity.last_seen_x][entity.last_seen_y].explored and not
@@ -98,9 +109,6 @@ def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
         if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and variables.gfx != "ascii":
             draw_indicator(player.x, player.y, game_camera, "gray")
             draw_indicator(entity.x, entity.y, game_camera, "dark red")
-
-        if not entity.fighter and entity.light_source:
-            light_sources.append(entity.light_source)
 
     return light_sources
 
@@ -140,20 +148,24 @@ def draw_map(game_map, game_camera, player, cursor_x, cursor_y):
                 if variables.gfx == "adambolt":
                     c = blt.color_from_name("gray")
                 argb = argb_from_color(c)
-                r = int(argb[1] * game_map.tiles[map_x][map_y].light_level)
-                g = int(argb[2] * game_map.tiles[map_x][map_y].light_level)
-                b = int(argb[3] * game_map.tiles[map_x][map_y].light_level)
+                r = min(int(argb[1] * game_map.tiles[map_x][map_y].light_level), 255)
+                g = min(int(argb[2] * game_map.tiles[map_x][map_y].light_level), 255)
+                b = min(int(argb[3] * game_map.tiles[map_x][map_y].light_level), 255)
                 blt.color(blt.color_from_argb(255, r, g, b))
 
-                # elif variables.gfx == "ascii":
-                #     blt.color("#CCDDDDDD")
                 blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                         game_map.tiles[map_x][map_y].char)
+
                 if len(game_map.tiles[map_x][map_y].layers) > 0:
                     i = 1
                     for tile in game_map.tiles[map_x][map_y].layers:
                         blt.layer(i)
-                        blt.color(tile[1])
+                        c = blt.color_from_name(tile[1])
+                        argb = argb_from_color(c)
+                        r = min(int(argb[1] * game_map.tiles[map_x][map_y].light_level), 255)
+                        g = min(int(argb[2] * game_map.tiles[map_x][map_y].light_level), 255)
+                        b = min(int(argb[3] * game_map.tiles[map_x][map_y].light_level), 255)
+                        blt.color(blt.color_from_argb(255, r, g, b))
                         blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                                 tile[0])
                         i += 1
@@ -184,30 +196,52 @@ def draw_map(game_map, game_camera, player, cursor_x, cursor_y):
         for light in light_sources:
             lightmap = np.where(light.fov_map.fov)
             center = np.array([light.owner.y, light.owner.x])
+            game_map.tiles[center[1]][center[0]].light_level = 1
             for i in range(lightmap[0].size):
                 y, x = int(lightmap[0][i]), int(lightmap[1][i])
                 if player.light_source.fov_map.fov[y, x]:
                     v = np.array([y, x])
                     dist = float(cityblock(center, v))
-                    game_map.tiles[x][y].light_level = 1
-                    game_map.tiles[x][y].light_level = (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
+                    light_level = (1.0 / (0.8 + 0.035 * dist + 0.025 * dist * dist))
 
-                    c = blt.color_from_name(game_map.tiles[x][y].color)
-                    if variables.gfx == "adambolt":
-                        c = blt.color_from_name("gray")
-                    argb = argb_from_color(c)
-                    r = int(argb[1] * game_map.tiles[x][y].light_level)
-                    g = int(argb[2] * game_map.tiles[x][y].light_level)
-                    b = int(argb[3] * game_map.tiles[x][y].light_level)
-                    blt.color(blt.color_from_argb(255, r, g, b))
+                    if game_map.tiles[x][y].light_level < light_level:
+                        game_map.tiles[x][y].light_level = light_level
 
+                    flicker = random.uniform(0.95, 1.05)
                     cam_x, cam_y = game_camera.get_coordinates(x, y)
-                    blt.layer(0)
-                    blt.put(cam_x * variables.tile_offset_x, cam_y * variables.tile_offset_y,
+
+                    if len(game_map.tiles[x][y].layers) > 0:
+                        blt.layer(len(game_map.tiles[x][y].layers))
+                        c = blt.color_from_name(game_map.tiles[x][y].layers[len(game_map.tiles[x][y].layers)-1][1])
+                        argb = argb_from_color(c)
+                        r = min(int(argb[1] * game_map.tiles[x][y].light_level * flicker), 255)
+                        g = min(int(argb[2] * game_map.tiles[x][y].light_level * flicker), 255)
+                        b = min(int(argb[3] * game_map.tiles[x][y].light_level * flicker), 255)
+                        blt.color(blt.color_from_argb(255, r, g, b))
+                        blt.put(cam_x * variables.tile_offset_x, cam_y * variables.tile_offset_y,
+                                game_map.tiles[x][y].layers[len(game_map.tiles[x][y].layers)-1][0])
+                    else:
+                        blt.layer(0)
+                        c = blt.color_from_name(game_map.tiles[x][y].color)
+                        if variables.gfx == "adambolt":
+                            c = blt.color_from_name("gray")
+                        argb = argb_from_color(c)
+
+                        r = min(int(argb[1] * game_map.tiles[x][y].light_level * flicker), 255)
+                        g = min(int(argb[2] * game_map.tiles[x][y].light_level * flicker), 255)
+                        b = min(int(argb[3] * game_map.tiles[x][y].light_level * flicker), 255)
+
+                        blt.color(blt.color_from_argb(255, r, g, b))
+                        blt.put(cam_x * variables.tile_offset_x, cam_y * variables.tile_offset_y,
                             game_map.tiles[x][y].char)
+
                     if len(game_map.tiles[x][y].entities_on_tile) > 0:
                         for entity in game_map.tiles[x][y].entities_on_tile:
-                            draw(entity, game_map, cam_x, cam_y, player.light_source.fov_map.fov)
+                            #blt.put(cam_x * variables.tile_offset_x, cam_y *
+                            #        variables.tile_offset_y, entity.char)
+                            if not entity.cursor:
+                                clear(entity, cam_x, cam_y)
+                                draw(entity, game_map, cam_x, cam_y, player.light_source.fov_map.fov)
 
 
 def draw_messages(msg_panel, message_log):
