@@ -28,7 +28,7 @@ def main_menu(resume=False):
             choices.insert(0, "Resume game")
 
         blt.layer(0)
-        clear_camera(2)
+        clear_camera(5)
         blt.puts(center_x + 2, center_y,
                  "[color=white]Spirit Quest RL", 0, 0, blt.TK_ALIGN_CENTER)
 
@@ -88,7 +88,7 @@ def main_menu(resume=False):
 
             current_range = 0
             while True:
-                clear_camera(2)
+                clear_camera(5)
                 animals = tilemap()["monsters"]
                 # exclude = {"frog"}
                 animals = {x: animals[x] for x in ("crow", "rat", "snake")}

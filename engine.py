@@ -159,12 +159,17 @@ def game_loop(main_menu_show=True, choice=None):
                     break
 
                 if key == blt.TK_ESCAPE:
-
                     new_choice = main_menu(resume=False)
                     if not new_choice:
                         draw_ui(msg_panel, msg_panel_borders, screen_borders)
                         fov_recompute = True
                     else:
+                        blt.layer(1)
+                        blt.clear_area(msg_panel.x * variables.ui_offset_x, msg_panel.y * variables.ui_offset_y,
+                                       msg_panel.w *
+                                       variables.ui_offset_x, msg_panel.h * variables.ui_offset_y)
+                        blt.clear_area(int(variables.viewport_x / 2) - 5,
+                                       variables.viewport_y + variables.ui_offset_y + 1, variables.viewport_x, 1)
                         game_loop(False, new_choice)
 
         if game_state == GameStates.PLAYER_TURN:

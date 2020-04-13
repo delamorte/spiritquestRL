@@ -3,23 +3,36 @@ from collections import Counter
 from helpers import get_article
 from math import ceil
 from textwrap import shorten
+import numpy as np
 from map_objects.tilemap import tilemap, tilemap_ui
+from scipy.spatial.distance import cityblock
 import variables
+from palettes import argb_from_color
 
 
-def draw(entity, game_map, x, y, fov_map):
-    if variables.gfx == "tiles" and entity.fighter:
-        blt.layer(0)
-        blt.color("lighter amber")
-        blt.put(x * variables.tile_offset_x, y *
-                variables.tile_offset_y, 0xE700 + 3)
+def draw(entity, game_map, x, y, fov_map, light_level=None):
+    # if variables.gfx == "tiles" and entity.fighter:
+    #     blt.layer(0)
+    #     blt.color("lighter amber")
+    #     blt.put(x * variables.tile_offset_x, y *
+    #             variables.tile_offset_y, 0xE700 + 3)
 
     # Draw the entity to the screen
     blt.layer(entity.layer)
-    blt.color(entity.color)
+    if light_level is not None:
+        c = blt.color_from_name(entity.color)
+        if variables.gfx == "tiles":
+            c = blt.color_from_name(None)
+        argb = argb_from_color(c)
+        r = int(argb[1] * light_level)
+        g = int(argb[2] * light_level)
+        b = int(argb[3] * light_level)
+        blt.color(blt.color_from_argb(255, r, g, b))
+    else:
+        blt.color(entity.color)
 
-    if variables.gfx == "tiles":
-        blt.color(None)
+    # if variables.gfx == "tiles":
+    #     blt.color(None)
 
     if not (fov_map.fov[entity.y, entity.x] and
             game_map.tiles[entity.x][entity.y].explored):
@@ -34,7 +47,8 @@ def draw(entity, game_map, x, y, fov_map):
                 variables.tile_offset_y, entity.char)
 
 
-def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor_x, cursor_y):
+def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor_x, cursor_y, light_level):
+
     for entity in entities:
         # x, y = game_camera.get_coordinates(entity.x, entity.y)
 
@@ -70,7 +84,7 @@ def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor
                 entity.last_seen_x = entity.x
                 entity.last_seen_y = entity.y
 
-            draw(entity, game_map, x, y, fov_map)
+            draw(entity, game_map, x, y, fov_map, light_level)
 
         elif (not fov_map.fov[entity.y, entity.x] and
               game_map.tiles[entity.last_seen_x][entity.last_seen_y].explored and not
@@ -84,7 +98,8 @@ def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor
             draw(entity, game_map, x, y, fov_map)
 
         if fov_map.fov[entity.y, entity.x] and entity.ai and variables.gfx != "ascii":
-            draw_indicator(player.x, player.y, game_camera)
+            draw_indicator(player.x, player.y, game_camera, "gray")
+            draw_indicator(entity.x, entity.y, game_camera, "dark red")
 
 
 def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
@@ -94,13 +109,15 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
     bound_x2 = game_camera.width - ceil(variables.camera_offset)
     bound_y2 = game_camera.height - ceil(variables.camera_offset)
     # Clear what's drawn in camera
-    clear_camera(2)
+    clear_camera(5)
     # Set boundaries if map is smaller than viewport
     if game_map.width < game_camera.width:
         bound_x2 = game_map.width
     if game_map.height < game_camera.height:
         bound_y2 = game_map.height
     # Draw all the tiles within the boundaries of the game camera
+    center = np.array([player.y, player.x])
+    light_level = None
     for y in range(bound_y, bound_y2):
         for x in range(bound_x, bound_x2):
             map_x, map_y = game_camera.x + x, game_camera.y + y
@@ -113,9 +130,18 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
             # Draw tiles within fov
             if visible:
                 blt.layer(0)
-                blt.color(game_map.tiles[map_x][map_y].color)
+                dist = float(cityblock(center, np.array([map_y, map_x])))
+                light_level = (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
+
+                c = blt.color_from_name(game_map.tiles[map_x][map_y].color)
                 if variables.gfx == "tiles":
-                    blt.color("dark gray")
+                    c = blt.color_from_name("gray")
+                argb = argb_from_color(c)
+                r = int(argb[1] * light_level)
+                g = int(argb[2] * light_level)
+                b = int(argb[3] * light_level)
+                blt.color(blt.color_from_argb(255, r, g, b))
+
                 # elif variables.gfx == "ascii":
                 #     blt.color("#CCDDDDDD")
                 blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
@@ -135,7 +161,7 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
             # Gray out explored tiles
             elif game_map.tiles[map_x][map_y].explored:
                 blt.layer(0)
-                blt.color("darker gray")
+                blt.color("darkest gray")
                 blt.put(x * variables.tile_offset_x, y * variables.tile_offset_y,
                         game_map.tiles[map_x][map_y].char)
                 if len(game_map.tiles[map_x][map_y].layers) > 0:
@@ -148,7 +174,7 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
 
             if len(game_map.tiles[map_x][map_y].entities_on_tile) > 0:
                 draw_entities(game_map.tiles[map_x][map_y].entities_on_tile, player,
-                              game_map, game_camera, fov_map, x, y, cursor_x, cursor_y)
+                              game_map, game_camera, fov_map, x, y, cursor_x, cursor_y, light_level)
 
 
 def draw_messages(msg_panel, message_log):
@@ -324,13 +350,14 @@ def draw_ui(msg_panel, msg_panel_borders, screen_borders):
                         variables.ui_offset_y, tilemap_ui()["ui_block_se"])
 
 
-def draw_indicator(entity_x, entity_y, game_camera):
+def draw_indicator(entity_x, entity_y, game_camera, color=None):
     # Draw player indicator
+    blt.layer(4)
     x, y = game_camera.get_coordinates(entity_x, entity_y)
-    blt.layer(1)
-    blt.color(None)
+    blt.color(color)
     blt.put_ext(x * variables.tile_offset_x, y *
                 variables.tile_offset_y, 0, 0, tilemap()["indicator"])
+
 
 
 def draw_all(game_map, game_camera, player, entities, fov_map, msg_panel, msg_panel_borders, screen_borders):
