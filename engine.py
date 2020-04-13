@@ -6,11 +6,11 @@ from camera import Camera
 from components.inventory import Inventory
 from components.player import Player
 from components.cursor import Cursor
+from components.light_source import LightSource
 from death_functions import kill_monster, kill_player
 from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities, draw_indicator
 from entity import Entity, blocking_entity
 from fighter_stats import get_fighter_stats
-from fov import recompute_fov
 from game_states import GameStates
 from helpers import get_article
 from input_handlers import handle_keys
@@ -74,9 +74,11 @@ def new_game(choice):
     inventory_component = Inventory(26)
     fighter_component = get_fighter_stats("player")
     player_component = Player(50)
+    light_component = LightSource(fighter_component.fov)
     player = Entity(
         1, 1, 3, player_component.char["player"], None, "player", blocks=True, player=player_component,
-        fighter=fighter_component, inventory=inventory_component, stand_on_messages=False)
+        fighter=fighter_component, inventory=inventory_component, light_source=light_component,
+        stand_on_messages=False)
     player.player.avatar["player"] = fighter_component
     player.player.avatar[choice] = get_fighter_stats(choice)
     player.player.avatar[choice].owner = player
@@ -120,16 +122,16 @@ def game_loop(main_menu_show=True, choice=None):
         draw_ui(msg_panel, msg_panel_borders, screen_borders)
     game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute = new_game(choice)
 
-    game_map, entities, player, fov_map = level_change(
+    game_map, entities, player = level_change(
         "hub", levels, player)
 
     draw_ui(msg_panel, msg_panel_borders, screen_borders)
 
     while True:
         if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, player.fighter.fov, True, 0)
+            player.light_source.recompute_fov(player.x, player.y)
 
-        draw_all(game_map, game_camera, player, entities, fov_map, msg_panel, msg_panel_borders, screen_borders)
+        draw_all(game_map, game_camera, player, entities, msg_panel, msg_panel_borders, screen_borders)
         draw_messages(msg_panel, message_log)
 
         fov_recompute = False
@@ -265,8 +267,8 @@ def game_loop(main_menu_show=True, choice=None):
                 entities["cursor"] = [cursor]
 
             elif player.player.spirit_power <= 0:
-                game_map, entities, player, fov_map = level_change(
-                    "hub", levels, player, entities, game_map, fov_map)
+                game_map, entities, player = level_change(
+                    "hub", levels, player, entities, game_map)
                 message_log.clear()
                 message_log.send("I have no power to meditate longer..")
                 player.player.spirit_power = 50
@@ -277,8 +279,8 @@ def game_loop(main_menu_show=True, choice=None):
                 for entity in entities["stairs"]:
                     if player.x == entity.x and player.y == entity.y:
                         game_map.tiles[player.x][player.y].entities_on_tile.remove(player)
-                        game_map, entities, player, fov_map = level_change(
-                            entity.stairs.destination[0], levels, player, entities, game_map, fov_map, entity.stairs)
+                        game_map, entities, player = level_change(
+                            entity.stairs.destination[0], levels, player, entities, game_map, entity.stairs)
 
                 variables.old_stack = variables.stack
 
@@ -346,8 +348,8 @@ def game_loop(main_menu_show=True, choice=None):
                 message_log.clear()
                 message_log.send("My spirit has granted me new insights!")
                 message_log.send("I should explore around my home..")
-                game_map, entities, player, fov_map = level_change(
-                    "hub", levels, player, entities, game_map, fov_map)
+                game_map, entities, player = level_change(
+                    "hub", levels, player, entities, game_map)
                 # Currently opens the door in hub
                 for entity in entities["doors"]:
                     if entity.door.name == "d_entrance":
@@ -369,7 +371,7 @@ def game_loop(main_menu_show=True, choice=None):
                 if entity.ai:
                     prev_pos_x, prev_pos_y = entity.x, entity.y
                     combat_msg = entity.ai.take_turn(
-                        player, fov_map, game_map, entities, time_counter)
+                        player, game_map, entities, time_counter)
                     game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(entity)
                     game_map.tiles[entity.x][entity.y].entities_on_tile.append(entity)
                     fov_recompute = True

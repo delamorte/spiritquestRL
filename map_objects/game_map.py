@@ -9,6 +9,7 @@ from random import choices, randint
 from components.stairs import Stairs
 from components.door import Door
 from components.wall import Wall
+from components.light_source import LightSource
 from resources.dungeon_generation.dungeon_generator import DrunkardsWalk
 from resources.dungeon_generation.dungeon_generator import RoomAddition
 import xml.etree.ElementTree as ET
@@ -618,8 +619,11 @@ class GameMap:
                     name, char = monsters[0]
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
+                    light_component = LightSource(fighter_component.fov)
                     monster = Entity(x, y, 3, char,
-                                     None, name, blocks=True, fighter=fighter_component, ai=ai_component)
+                                     None, name, blocks=True, fighter=fighter_component, ai=ai_component,
+                                     light_source=light_component)
+                    monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
                     entities["monsters"].append(monster)
 
@@ -644,8 +648,11 @@ class GameMap:
                     name, char = monsters[0]
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
+                    light_component = LightSource(fighter_component.fov)
                     monster = Entity(x, y, 3, char,
-                                     None, name, blocks=True, fighter=fighter_component, ai=ai_component)
+                                     None, name, blocks=True, fighter=fighter_component, ai=ai_component,
+                                     light_source=light_component)
+                    monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
                     entities["monsters"].append(monster)
 
@@ -684,8 +691,11 @@ class GameMap:
                     color = get_monster_color(name)
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
+                    light_component = LightSource(fighter_component.fov)
                     monster = Entity(x, y, 3, char,
-                                     color, name, blocks=True, fighter=fighter_component, ai=ai_component)
+                                     color, name, blocks=True, fighter=fighter_component, ai=ai_component,
+                                     light_source=light_component)
+                    monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
                     entities["monsters"].append(monster)
 

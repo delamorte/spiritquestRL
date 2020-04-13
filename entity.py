@@ -8,7 +8,7 @@ class Entity:
 
     def __init__(self, x, y, layer, char, color, name, blocks=False, player=None,
                  fighter=None, ai=None, item=None, inventory=None, stairs=None,
-                 wall=None, door=None, cursor=None, stand_on_messages=True):
+                 wall=None, door=None, cursor=None, light_source=None, stand_on_messages=True):
         self.x = x
         self.y = y
         self.layer = layer
@@ -28,6 +28,7 @@ class Entity:
         self.cursor = cursor
         self.last_seen_x = x
         self.last_seen_y = y
+        self.light_source = light_source
         self.stand_on_messages = stand_on_messages
 
         # Set entity as component owner, so components can call their owner
@@ -57,6 +58,9 @@ class Entity:
 
         if self.cursor:
             self.cursor.owner = self
+
+        if self.light_source:
+            self.light_source.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount

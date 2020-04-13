@@ -1,4 +1,3 @@
-from fov import recompute_fov
 from random import randint
 
 class BasicMonster:
@@ -10,18 +9,18 @@ class BasicMonster:
         self.target_last_seen_x = 0
         self.target_last_seen_y = 0
 
-    def take_turn(self, target, fov_map, game_map, entities, time):
+    def take_turn(self, target, game_map, entities, time):
         monster = self.owner
         if not self.action_begin:
             self.last_action = time.get_last_turn()
         time_to_act = time.get_turn() - self.last_action
         action_cost = 0
         combat_msg = []
-        recompute_fov(fov_map, monster.x, monster.y, monster.fighter.fov, True, 0)
+        self.owner.light_source.recompute_fov(monster.x, monster.y)
         
         if monster.fighter.paralysis:
             return combat_msg
-        if fov_map.fov[target.y, target.x]:
+        if self.owner.light_source.fov_map.fov[target.y, target.x]:
             
             self.target_seen = True
             self.target_last_seen_x = target.x
