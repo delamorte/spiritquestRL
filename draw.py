@@ -368,15 +368,7 @@ def draw_all(game_map, game_camera, player, entities, fov_map, msg_panel, msg_pa
         cursor_x = entities["cursor"][0].x
         cursor_y = entities["cursor"][0].y
 
-
-    import timeit
-    start = timeit.default_timer()
     draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y)
-    # All the program statements
-    stop = timeit.default_timer()
-    execution_time = stop - start
-    print("Program Executed in " + str(execution_time))  # It returns time in seconds
-
     draw_ui(msg_panel, msg_panel_borders, screen_borders)
     draw_stats(player)
 
