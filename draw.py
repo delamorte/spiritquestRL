@@ -10,8 +10,8 @@ import variables
 from palettes import argb_from_color
 
 
-def draw(entity, game_map, x, y, fov_map, light_level=None):
-    # if variables.gfx == "tiles" and entity.fighter:
+def draw(entity, game_map, x, y, fov_map):
+    # if variables.gfx == "adambolt" and entity.fighter:
     #     blt.layer(0)
     #     blt.color("lighter amber")
     #     blt.put(x * variables.tile_offset_x, y *
@@ -19,19 +19,18 @@ def draw(entity, game_map, x, y, fov_map, light_level=None):
 
     # Draw the entity to the screen
     blt.layer(entity.layer)
-    if light_level is not None:
-        c = blt.color_from_name(entity.color)
-        if variables.gfx == "tiles":
-            c = blt.color_from_name(None)
-        argb = argb_from_color(c)
-        r = int(argb[1] * light_level)
-        g = int(argb[2] * light_level)
-        b = int(argb[3] * light_level)
-        blt.color(blt.color_from_argb(255, r, g, b))
-    else:
-        blt.color(entity.color)
 
-    # if variables.gfx == "tiles":
+    c = blt.color_from_name(entity.color)
+    if variables.gfx == "adambolt":
+        c = blt.color_from_name(None)
+    argb = argb_from_color(c)
+    r = int(argb[1] * game_map.tiles[entity.x][entity.y].light_level)
+    g = int(argb[2] * game_map.tiles[entity.x][entity.y].light_level)
+    b = int(argb[3] * game_map.tiles[entity.x][entity.y].light_level)
+    blt.color(blt.color_from_argb(255, r, g, b))
+
+
+    # if variables.gfx == "adambolt":
     #     blt.color(None)
 
     if not (fov_map.fov[entity.y, entity.x] and
@@ -47,10 +46,10 @@ def draw(entity, game_map, x, y, fov_map, light_level=None):
                 variables.tile_offset_y, entity.char)
 
 
-def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor_x, cursor_y, light_level):
+def draw_entities(entities, player, game_map, game_camera, fov_map, cursor_x, cursor_y):
 
     for entity in entities:
-        # x, y = game_camera.get_coordinates(entity.x, entity.y)
+        x, y = game_camera.get_coordinates(entity.x, entity.y)
 
         if entity.x == player.x and entity.y == player.y and entity.stand_on_messages:
 
@@ -84,7 +83,7 @@ def draw_entities(entities, player, game_map, game_camera, fov_map, x, y, cursor
                 entity.last_seen_x = entity.x
                 entity.last_seen_y = entity.y
 
-            draw(entity, game_map, x, y, fov_map, light_level)
+            draw(entity, game_map, x, y, fov_map)
 
         elif (not fov_map.fov[entity.y, entity.x] and
               game_map.tiles[entity.last_seen_x][entity.last_seen_y].explored and not
@@ -117,7 +116,7 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
         bound_y2 = game_map.height
     # Draw all the tiles within the boundaries of the game camera
     center = np.array([player.y, player.x])
-    light_level = None
+    entities = []
     for y in range(bound_y, bound_y2):
         for x in range(bound_x, bound_x2):
             map_x, map_y = game_camera.x + x, game_camera.y + y
@@ -131,15 +130,15 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
             if visible:
                 blt.layer(0)
                 dist = float(cityblock(center, np.array([map_y, map_x])))
-                light_level = (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
+                game_map.tiles[map_x][map_y].light_level = (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
 
                 c = blt.color_from_name(game_map.tiles[map_x][map_y].color)
-                if variables.gfx == "tiles":
+                if variables.gfx == "adambolt":
                     c = blt.color_from_name("gray")
                 argb = argb_from_color(c)
-                r = int(argb[1] * light_level)
-                g = int(argb[2] * light_level)
-                b = int(argb[3] * light_level)
+                r = int(argb[1] * game_map.tiles[map_x][map_y].light_level)
+                g = int(argb[2] * game_map.tiles[map_x][map_y].light_level)
+                b = int(argb[3] * game_map.tiles[map_x][map_y].light_level)
                 blt.color(blt.color_from_argb(255, r, g, b))
 
                 # elif variables.gfx == "ascii":
@@ -173,9 +172,10 @@ def draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y):
                         i += 1
 
             if len(game_map.tiles[map_x][map_y].entities_on_tile) > 0:
-                draw_entities(game_map.tiles[map_x][map_y].entities_on_tile, player,
-                              game_map, game_camera, fov_map, x, y, cursor_x, cursor_y, light_level)
+                entities.extend(game_map.tiles[map_x][map_y].entities_on_tile)
 
+    draw_entities(entities, player,
+                  game_map, game_camera, fov_map, cursor_x, cursor_y)
 
 def draw_messages(msg_panel, message_log):
     if len(variables.stack) > 0 and not variables.stack == variables.old_stack:
@@ -368,7 +368,15 @@ def draw_all(game_map, game_camera, player, entities, fov_map, msg_panel, msg_pa
         cursor_x = entities["cursor"][0].x
         cursor_y = entities["cursor"][0].y
 
+
+    import timeit
+    start = timeit.default_timer()
     draw_map(game_map, game_camera, fov_map, player, cursor_x, cursor_y)
+    # All the program statements
+    stop = timeit.default_timer()
+    execution_time = stop - start
+    print("Program Executed in " + str(execution_time))  # It returns time in seconds
+
     draw_ui(msg_panel, msg_panel_borders, screen_borders)
     draw_stats(player)
 

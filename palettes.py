@@ -73,7 +73,7 @@ def name_color_from_value(value, tileset=0xE500):
         tileset = 0
     name = None
     color = None
-    if variables.gfx != "tiles":
+    if variables.gfx != "adambolt":
         value -= tileset
 
     # Coffins

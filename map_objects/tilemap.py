@@ -68,7 +68,7 @@ def tilemap_ui():
 
 def tilemap():
     tiles = {}
-    if variables.gfx == "tiles":
+    if variables.gfx == "adambolt":
         tiles = {"tree": (0xE700 + 87, 0xE700 + 88, 0xE700 + 89, 0xE700 + 93, 0xE700 + 94, 0xE700 + 95),
                  "dead_tree": (0xE700 + 112, 0xE700 + 144),
                  "rocks": (0xE700 + 1726, 0xE700 + 1727),

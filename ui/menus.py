@@ -47,7 +47,7 @@ def main_menu(resume=False):
             exit()
 
         if key == blt.TK_ENTER and not resume and r == "Graphics: " + variables.gfx:
-            if variables.gfx == "tiles":
+            if variables.gfx == "adambolt":
                 variables.gfx = "ascii"
                 variables.tile_height = str(24)
                 variables.tile_width = str(16)
@@ -62,7 +62,7 @@ def main_menu(resume=False):
                 msg_panel, msg_panel_borders, screen_borders = init_ui()
                 draw_ui(msg_panel, msg_panel_borders, screen_borders)
             elif variables.gfx == "oryx":
-                variables.gfx = "tiles"
+                variables.gfx = "adambolt"
                 variables.tile_height = str(48)
                 variables.tile_width = str(32)
                 init_tiles()
@@ -120,7 +120,7 @@ def main_menu(resume=False):
                         blt.puts(center_x - 24 + 1, center_y - 2 + i * 5 + 2,
                                  "poison bite: " + abilities()["attack"]["poison bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
 
-                    if variables.gfx == "tiles":
+                    if variables.gfx == "adambolt":
                         # Draw a bg tile
                         blt.layer(0)
                         blt.puts(center_x - 30 + 1, center_y - 2 + i *
@@ -129,7 +129,7 @@ def main_menu(resume=False):
                     # Draw monster tile
                     blt.layer(1)
                     blt.color(get_monster_color(r))
-                    if variables.gfx == "tiles":
+                    if variables.gfx == "adambolt":
                         blt.color(None)
                     if variables.gfx == "ascii":
                         blt.puts(center_x - 30 + 1,
@@ -230,7 +230,7 @@ def choose_avatar(player):
                      ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0,
                      blt.TK_ALIGN_LEFT)
 
-            if variables.gfx == "tiles":
+            if variables.gfx == "adambolt":
                 # Draw a bg tile
                 blt.layer(0)
                 blt.puts(center_x - 30 + 1, center_y - 2 + i *
@@ -239,7 +239,7 @@ def choose_avatar(player):
             # Draw monster tile
             blt.layer(1)
             blt.color(get_monster_color(r))
-            if variables.gfx == "tiles":
+            if variables.gfx == "adambolt":
                 blt.color(None)
             if variables.gfx == "ascii":
                 blt.puts(center_x - 30 + 1, center_y - 2 + i * 3, c, 0, 0)

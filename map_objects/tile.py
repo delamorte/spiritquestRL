@@ -28,3 +28,4 @@ class Tile:
         self.spawnable = False
         self.occupied = False
         self.entities_on_tile = []
+        self.light_level = 1

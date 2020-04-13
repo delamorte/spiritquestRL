@@ -869,7 +869,7 @@ class TiledRoom(Room):
                         new_row[i] = 0
                         continue
                     value = int(char) - 1
-                    if variables.gfx == "ascii" or variables.gfx == "tiles":
+                    if variables.gfx == "ascii" or variables.gfx == "adambolt":
                         value = convert_tileset(value)
                         new_row[i] = value
                     else:
