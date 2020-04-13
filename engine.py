@@ -275,28 +275,28 @@ def game_loop(main_menu_show=True, choice=None):
                 player.fighter.hp = player.fighter.max_hp
 
             elif stairs:
+                if "stairs" in entities:
+                    for entity in entities["stairs"]:
+                        if player.x == entity.x and player.y == entity.y:
+                            game_map.tiles[player.x][player.y].entities_on_tile.remove(player)
+                            game_map, entities, player = level_change(
+                                entity.stairs.destination[0], levels, player, entities, game_map, entity.stairs)
 
-                for entity in entities["stairs"]:
-                    if player.x == entity.x and player.y == entity.y:
-                        game_map.tiles[player.x][player.y].entities_on_tile.remove(player)
-                        game_map, entities, player = level_change(
-                            entity.stairs.destination[0], levels, player, entities, game_map, entity.stairs)
+                    variables.old_stack = variables.stack
 
-                variables.old_stack = variables.stack
+                    if game_map.name == "cavern" and game_map.dungeon_level == 1:
+                        message_log.clear()
+                        message_log.send(
+                            "A sense of impending doom fills you as you delve into the cavern.")
+                        message_log.send("RIBBIT!")
 
-                if game_map.name == "cavern" and game_map.dungeon_level == 1:
-                    message_log.clear()
-                    message_log.send(
-                        "A sense of impending doom fills you as you delve into the cavern.")
-                    message_log.send("RIBBIT!")
-
-                elif game_map.name == "dream":
-                    message_log.clear()
-                    message_log.send(
-                        "I'm dreaming... I feel my spirit power draining.")
-                    message_log.send("I'm hungry..")
-                draw_messages(msg_panel, message_log)
-                fov_recompute = True
+                    elif game_map.name == "dream":
+                        message_log.clear()
+                        message_log.send(
+                            "I'm dreaming... I feel my spirit power draining.")
+                        message_log.send("I'm hungry..")
+                    draw_messages(msg_panel, message_log)
+                    fov_recompute = True
 
             elif key == blt.TK_M:
                 show_msg_history(
