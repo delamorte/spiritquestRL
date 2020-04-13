@@ -2,6 +2,13 @@ from bearlibterminal import terminal as blt
 from random import randint, random
 import variables
 
+# BLT colors by name:
+# grey (or gray), red, flame, orange,
+# amber, yellow, lime, chartreuse, green,
+# sea, turquoise, cyan, sky, azure, blue,
+# han, violet, purple, fuchsia, magenta, pink,
+# crimson, transparent
+
 dirt_colors = ["#402316", "#332925", "#4f3a28", "#4f3a28", "#3d342b", "#33221a", "#30170b", "#473c2b", "#332d16",
                "#361c18"]
 
@@ -39,6 +46,50 @@ def get_terrain_colors(mod=None):
 
     return colors[mod]
 
+def get_flower_colors(mod=0):
+    colors = []
+    if mod > 0:
+        colors = ["lightest orange",
+                  "lighter turquoise",
+                  "light orange",
+                  "light green",
+                  "lighter fuchsia",
+                  "light pink",
+                  "lighter pink",
+                  "lightest violet",
+                  "lighter violet",
+                  "light flame",
+                  "light sky",
+                  "light amber"]
+
+    if mod == 0 or mod == -1:
+        colors = ["dark orange",
+                  "turquoise",
+                  "darker orange",
+                  "dark green",
+                  "fuchsia",
+                  "pink",
+                  "lighter pink",
+                  "lighter violet",
+                  "dark violet",
+                  "flame",
+                  "sky",
+                  "dark amber"]
+
+    if mod < -1:
+        colors = ["darker orange",
+                  "darker turquoise",
+                  "dark orange",
+                  "darkest green",
+                  "darkest fuchsia",
+                  "dark pink",
+                  "darkest pink",
+                  "darkest violet",
+                  "darker violet",
+                  "darkest flame",
+                  "darker sky",
+                  "darkest amber"]
+    return colors
 
 def get_forest_colors(mod=-1):
     colors = []
@@ -65,24 +116,21 @@ def get_forest_colors(mod=-1):
     return colors
 
 
-def name_color_from_value(value, tileset=0xE500):
-    if isinstance(value, str):
-        name, color = name_color_from_ascii(value)
-        return name, color
-    elif value < 1000:
-        tileset = 0
+def name_color_from_value(value, mod=0):
+
     name = None
     color = None
-    if variables.gfx != "adambolt":
-        value -= tileset
 
     # Coffins
-    if value == 50 or value == 51 or value == 0xE700 + 158:
-        name = "coffin"
-        color = "darker amber"
+    if value == 50 or value == 51:
+        if value == 50:
+            name = "coffin (closed)"
+        else:
+            name = "coffin (open)"
+        color = "#856654"
 
     # Shrines
-    elif value in range(54, 58 + 1) or value == 0xE700 + 107:
+    elif value in range(54, 58 + 1):
         name = "shrine"
         if random() < 0.2:
             color = "bright yellow"
@@ -91,54 +139,79 @@ def name_color_from_value(value, tileset=0xE500):
 
     # Doors
     elif value in range(20, 38 + 1):
-        name = "door"
+        doors_open = [21, 23, 25, 29, 31, 33, 35, 37]
+        doors_closed = [20, 22, 24, 26, 27, 28, 30, 32, 36]
+        if value in doors_open:
+            name = "door (open)"
+        elif value in doors_closed:
+            name = "door (closed)"
+        else:
+            name = "door"
         color = "darker amber"
 
     # Gates
-    elif value in range(102, 103 + 1) or value in range(0xE700 + 67, 0xE700 + 68 + 1):
-        if value == 103 or value == 0xE700 + 68:
+    elif value in range(102, 103 + 1):
+        if value == 103:
             name = "gate (open)"
         else:
             name = "gate (closed)"
         color = "gray"
 
     # Fences
-    elif value in range(100, 111 + 1) or value == 0xE700 + 469:
-        name = "fence"
+    elif value in range(100, 111 + 1):
+        fences_horizontal = [100, 101, 107, 106, 111, 110]
+        if value in fences_horizontal:
+            name = "fence, horizontal"
+        else:
+            name = "fence, vertical"
         color = "dark gray"
 
     # Statues
-    elif value in range(60, 64 + 1) or value == 0xE700 + 945:
+    elif value in range(60, 64 + 1):
         name = "statue"
         color = "gray"
 
     # Candles
-    elif value == 70 or value == 0xE700 + 458:
+    elif value == 70:
         name = "candle"
         color = "amber"
 
     # Rocks & Rubble
-    elif value == 132 or value == 133 or value == 0xE700 + 388 or value == 0xE700 + 119:
+    elif value == 132 or value == 133:
         name = "rubble"
         color = "dark gray"
 
     # Bones
-    elif value in range(362, 366 + 1) or value in range(0xE700 + 468, 0xE700 + 471 + 1) or value == 0xE700 + 475:
+    elif value in range(362, 366 + 1):
         name = "bones"
         color = "gray"
 
     # Shrubs
-    elif value in range(450, 452 + 1) or value in range(410, 412 + 1) or value == 430 or value == 432 \
-            or value == 0xE700 + 93:
+    elif value in range(450, 452 + 1) or value in range(410, 412 + 1) or value == 430 or value == 432:
         name = "shrubs"
         if random() < 0.2:
             color = "darker amber"
         else:
             color = "darker green"
 
-    elif value == 2 or value == 4 or value == 0xE700 + 20:
+    # Plants, flowers
+    elif value in range(120, 123+1) or value in range(399, 401+1):
+        name = "plants"
+        colors = get_forest_colors(mod)
+        color = colors[randint(0, len(colors)-1)]
+
+    elif value in range(127, 129+1):
+        name = "flowers"
+        colors = get_flower_colors(mod)
+        color = colors[randint(0, len(colors)-1)]
+
+    elif value == 131:
+        name = "mushrooms"
+        color = dirt_colors[randint(0, len(dirt_colors)-1)]
+
+    elif value == 2 or value == 4:
         name = "pavement"
-        color = "darker gray"
+        color = "darkest gray"
 
     return name, color
 

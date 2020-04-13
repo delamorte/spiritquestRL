@@ -66,28 +66,35 @@ def tilemap_ui():
     }
     return tiles
 
-def tilemap():
+
+def tilemap(tileset=None):
     tiles = {}
-    if variables.gfx == "adambolt":
+    if tileset is None:
+        tileset = variables.gfx
+    if tileset == "adambolt":
         tiles = {"tree": (0xE700 + 87, 0xE700 + 88, 0xE700 + 89, 0xE700 + 93, 0xE700 + 94, 0xE700 + 95),
                  "dead_tree": (0xE700 + 112, 0xE700 + 144),
-                 "rocks": (0xE700 + 1726, 0xE700 + 1727),
-                 "coffin": 0xE700 + 158,
+                 "rocks": (0xE700 + 388, 0xE700 + 119),
+                 "coffin (open)": 0xE700 + 158,
+                 "coffin (closed)": 0xE700 + 158,
                  "shrine": 0xE700 + 107,
                  "candle": 0xE700 + 458,
                  "gate": {"open": 0xE700 + 68, "closed": 0xE700 + 67, "locked": 0xE700 + 78},
                  "gate (open)": 0xE700 + 68,
                  "gate (closed)": 0xE700 + 67,
-                 "fence": 0xE700 + 469,
+                 "fence, vertical": 0xE700 + 440,
+                 "fence, horizontal": 0xE700 + 441,
                  "statue": 0xE700 + 945,
                  "shrubs": 0xE700 + 93,
+                 "plants": (0xE700 + 93, 0xE700 + 94, 0xE700 + 95),
+                 "flowers": (0xE700 + 93, 0xE700 + 94, 0xE700 + 95),
+                 "mushrooms": (0xE700 + 118),
                  "ground_dot": (0xE700 + 1748),
                  "ground_soil": (0xE700 + 1748, 0xE700 + 1750),
                  "ground_moss": (0xE700 + 1751, 0xE700 + 1752, 0xE700 + 1753),
                  "floor": (0xE700 + 20, 0xE700 + 19, 0xE700 + 19),
                  "floor_wood": 0xE700 + 21,
                  "pavement": (0xE700 + 20),
-                 "rubble": (0xE700 + 388, 0xE700 + 119),
                  "bones": (0xE700 + 468, 0xE700 + 469, 0xE700 + 470, 0xE700 + 471, 0xE700 + 475),
                  "player": 0xE700 + 704,
                  "player_remains": 0xE700 + 468,
@@ -123,6 +130,8 @@ def tilemap():
                  "unique_monsters": {"king kobra": 0xE700 + 1105, "albino rat": 0xE700 + 1414},
                  "monster_remains": 0xE700 + 513,
                  "door": {"open": 0xE700 + 68, "closed": 0xE700 + 67, "locked": 0xE700 + 78},
+                 "door (open)": 0xE700 + 68,
+                 "door (closed)": 0xE700 + 67,
                  "campfire": 0xE700 + 427,
                  "stairs": {"up": 0xE700 + 22, "down": 0xE700 + 27},
                  "brick": {"horizontal": 0xE700 + 83, "vertical": 0xE700 + 83},
@@ -137,10 +146,9 @@ def tilemap():
                  "indicator": 0xE700 + 1746
                  }
 
-    elif variables.gfx == "oryx":
+    elif tileset == "oryx":
         tiles = {"tree": (0xE100 + 399, 0xE100 + 400, 0xE100 + 401, 0xE100 + 402, 0xE100 + 405),
                  "dead_tree": (0xE100 + 403, 0xE100 + 404),
-                 "rocks": (0xE500 + 133,),
                  "coffin": {"open": 0xE100 + 50, "closed": 0xE700 + 151},
                  "shrine": (0xE100 + 55, 0xE100 + 56, 0xE100 + 57, 0xE100 + 58),
                  "candle": 0xE100 + 70,
@@ -152,7 +160,11 @@ def tilemap():
                  "ground_dot": (0xE100 + 293),
                  "floor": (0xE100 + 237,),
                  "floor_wood": 0xE100 + 264,
-                 "rubble": (0xE500 + 132,),
+                 "plants": (
+                     0xE500 + 120, 0xE500 + 121, 0xE500 + 122, 0xE500 + 123, 0xE500 + 200, 0xE500 + 201, 0xE500 + 202),
+                 "flowers": (0xE500 + 127, 0xE500 + 128, 0xE500 + 129),
+                 "mushrooms": (0xE500 + 131),
+                 "rocks": (0xE500 + 132, 0xE500 + 133),
                  "bones": (0xE100 + 362, 0xE100 + 363, 0xE100 + 364, 0xE100 + 365, 0xE100 + 366),
                  "player": 0xE100 + 460,
                  "player_remains": 0xE100 + 379,
@@ -186,7 +198,7 @@ def tilemap():
                                     "fairy": 0xE100 + 579},
 
                  "unique_monsters": {"king kobra": 0xE100 + 602, "albino rat": 0xE100 + 498},
-                 "monster_remains": 0xE100 + 373,
+                 "monster_remains": 0xE500 + 86,
                  "door": {"open": 0xE100 + 307, "closed": 0xE100 + 306, "locked": 0xE100 + 308},
                  "campfire": 0xE100 + 303,
                  "stairs": {"up": 0xE100 + 324, "down": 0xE100 + 323},
@@ -203,7 +215,7 @@ def tilemap():
                  "indicator": 0xE100 + 671
                  }
 
-    elif variables.gfx == "ascii":
+    elif tileset == "ascii":
         tiles = {"tree": ("T", "t"),
                  "dead_tree": ("T", "t"),
                  "rocks": "^",
@@ -273,12 +285,3 @@ def tilemap():
                  }
 
     return tiles
-
-
-def convert_tileset(value):
-    name, _ = name_color_from_value(value)
-    converted_value = tilemap()[name]
-    # if variables.gfx == "ascii":
-    #     converted_value = ord(converted_value)
-
-    return converted_value

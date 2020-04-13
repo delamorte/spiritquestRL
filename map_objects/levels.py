@@ -30,6 +30,7 @@ def make_map(destination, levels, player, entities, game_map, stairs):
         player.light_source.initialize_fov(game_map)
         player.fighter = player.player.avatar[choice]
         player.char = player.player.char[choice]
+        player.light_source.radius = player.fighter.fov
 
     elif destination == "cavern" + str(stairs.floor + 1):
         game_map = GameMap(100, 100, destination, stairs.floor + 1)
@@ -54,6 +55,7 @@ def level_change(destination, levels, player, entities=None, game_map=None, stai
         entities["player"] = [player]
         player, entities = game_map.place_entities(player, entities, stairs)
         player.light_source.initialize_fov(game_map)
+        player.light_source.radius = player.fighter.fov
 
         if destination == "hub":
             player.fighter = player.player.avatar["player"]

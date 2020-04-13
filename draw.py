@@ -142,7 +142,11 @@ def draw_map(game_map, game_camera, player, cursor_x, cursor_y):
             if visible:
                 blt.layer(0)
                 dist = float(cityblock(center, np.array([map_y, map_x])))
-                game_map.tiles[map_x][map_y].light_level = (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
+                game_map.tiles[map_x][map_y].light_level = \
+                    game_map.tiles[map_x][map_y].natural_light_level * \
+                    (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
+
+                blt.color(game_map.tiles[map_x][map_y].color)
 
                 c = blt.color_from_name(game_map.tiles[map_x][map_y].color)
                 if variables.gfx == "adambolt":
@@ -202,7 +206,8 @@ def draw_map(game_map, game_camera, player, cursor_x, cursor_y):
                 if player.light_source.fov_map.fov[y, x]:
                     v = np.array([y, x])
                     dist = float(cityblock(center, v))
-                    light_level = (1.0 / (0.8 + 0.035 * dist + 0.025 * dist * dist))
+                    light_level = game_map.tiles[x][y].natural_light_level * \
+                                  (1.0 / (0.2 + 0.1 * dist + 0.025 * dist * dist))
 
                     if game_map.tiles[x][y].light_level < light_level:
                         game_map.tiles[x][y].light_level = light_level

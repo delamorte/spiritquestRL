@@ -332,8 +332,11 @@ def game_loop(main_menu_show=True, choice=None):
                     game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(cursor)
                     game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
                     fov_recompute = True
+
                     variables.old_stack = variables.stack
                     variables.stack = []
+                    if game_map.tiles[cursor.x][cursor.y].name is not None:
+                        variables.stack.append(game_map.tiles[cursor.x][cursor.y].name.capitalize())
 
             elif key == blt.TK_ESCAPE or key == blt.TK_X:
                 game_state = GameStates.PLAYER_TURN

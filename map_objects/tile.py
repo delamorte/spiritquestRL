@@ -25,7 +25,9 @@ class Tile:
         self.char = tilemap()["floor"]
         self.layers = []
         self.color = None
+        self.name = None
         self.spawnable = False
         self.occupied = False
         self.entities_on_tile = []
         self.light_level = 1
+        self.natural_light_level = 1
