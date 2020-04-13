@@ -78,16 +78,16 @@ def get_flower_colors(mod=0):
 
     if mod < -1:
         colors = ["darker orange",
-                  "darker turquoise",
-                  "dark orange",
+                  "darkest turquoise",
+                  "darkest orange",
                   "darkest green",
                   "darkest fuchsia",
-                  "dark pink",
+                  "darkest pink",
                   "darkest pink",
                   "darkest violet",
                   "darker violet",
                   "darkest flame",
-                  "darker sky",
+                  "darkest sky",
                   "darkest amber"]
     return colors
 

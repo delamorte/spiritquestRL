@@ -15,10 +15,9 @@ def kill_monster(monster):
     monster.char = tilemap()["monster_remains"]
     monster.color = "dark grey"
     monster.blocks = False
-    monster.fighter = False
-    monster.fighter_c = None
-    monster.ai = False
-    monster.ai_c = None
+    monster.fighter = None
+    monster.ai = None
+    monster.light_source = None
     monster.name = "remains of " + get_article(monster.name)+ " " + monster.name
     monster.layer = 1
 

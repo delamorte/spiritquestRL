@@ -777,7 +777,7 @@ class GameMap:
         if variables.gfx == "ascii":
             return
         # Generate rocks & rubble on floor tiles
-        decor_odds = 0.2
+        decor_odds = 0.1
         decor_options = ["rocks", "bones", "flowers", "plants", "mushrooms"]
         decormap = np.random.rand(self.height, self.width)
         for y in range(1, self.height - 1):
