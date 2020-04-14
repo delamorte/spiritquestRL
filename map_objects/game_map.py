@@ -16,6 +16,7 @@ import xml.etree.ElementTree as ET
 import variables
 import numpy as np
 
+
 class GameMap:
     def __init__(self, width, height, name, dungeon_level=0):
         self.width = width
@@ -29,9 +30,9 @@ class GameMap:
 
     def initialize_tiles(self):
 
-        tiles = [[Tile(False, False, x, y)
+        tiles = np.array([[Tile(False, False, x, y)
                   for y in range(self.height)]
-                 for x in range(self.width)]
+                 for x in range(self.width)])
 
         # Block edges of map
         for y in range(self.height):
