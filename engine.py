@@ -123,7 +123,7 @@ def game_loop(main_menu_show=True, choice=None):
     game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute = new_game(choice)
 
     game_map, entities, player = level_change(
-        "debug", levels, player)
+        "hub", levels, player)
 
     draw_ui(msg_panel, msg_panel_borders, screen_borders)
 
