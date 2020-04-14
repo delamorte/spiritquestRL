@@ -1,6 +1,7 @@
 from math import sqrt
 import tcod
 
+
 class Entity:
     """
     A generic object to represent players, enemies, items, etc.
@@ -8,7 +9,8 @@ class Entity:
 
     def __init__(self, x, y, layer, char, color, name, blocks=False, player=None,
                  fighter=None, ai=None, item=None, inventory=None, stairs=None,
-                 wall=None, door=None, cursor=None, light_source=None, stand_on_messages=True):
+                 wall=None, door=None, cursor=None, light_source=None, stand_on_messages=True,
+                 boss=False):
         self.x = x
         self.y = y
         self.layer = layer
@@ -30,6 +32,8 @@ class Entity:
         self.last_seen_y = y
         self.light_source = light_source
         self.stand_on_messages = stand_on_messages
+        self.occupied_tiles = None  # For entities bigger than 1 tile
+        self.boss = boss
 
         # Set entity as component owner, so components can call their owner
         if self.player:
@@ -40,13 +44,13 @@ class Entity:
 
         if self.ai:
             self.ai.owner = self
-            
+
         if self.item:
             self.item.owner = self
 
         if self.inventory:
             self.inventory.owner = self
-            
+
         if self.stairs:
             self.stairs.owner = self
 
@@ -95,8 +99,11 @@ class Entity:
         for entity in entities["monsters"]:
             if entity.blocks and entity != self and entity != target:
                 fov_map.walkable[entity.y, entity.x] = False
+                if entity.occupied_tiles is not None:
+                    fov_map.walkable[entity.y + 1, entity.x + 1] = False
+                    fov_map.walkable[entity.y, entity.x + 1] = False
+                    fov_map.walkable[entity.y + 1, entity.x] = False
                 fov_map.transparent[entity.y, entity.x] = True
-                
 
         # Allocate a A* path
         # The 1.41 is the normal diagonal cost of moving, it can be set as 0.0
@@ -119,21 +126,32 @@ class Entity:
                 # Set self's coordinates to the next path tile
                 self.x = x
                 self.y = y
+                if self.occupied_tiles is not None:
+                    self.occupied_tiles = [(x, y), (x, y + 1), (x + 1, y + 1), (x + 1, y)]
         else:
             # Keep the old move function as a backup so that if there are no paths (for example another monster blocks a corridor)
             # it will still try to move towards the player (closer to the
             # corridor opening)
             self.move_towards(target.x, target.y, game_map, entities)
 
-
     def distance_to(self, other):
         # Use Chebysev distance
-        return max(abs(other.x - self.x), abs(other.y - self.y))
+        if self.occupied_tiles is not None:
+            return min(max(abs(other.x - self.x), abs(other.y - self.y)),
+                       max(abs(other.x - (self.x + 1)), abs(other.y - self.y)),
+                       max(abs(other.x - self.x), abs(other.y - (self.y + 1))),
+                       max(abs(other.x - (self.x + 1)), abs(other.y - (self.y + 1))))
+        else:
+            return max(abs(other.x - self.x), abs(other.y - self.y))
 
 
 def blocking_entity(entities, x, y):
     for category in entities.values():
         for entity in category:
-            if entity.blocks and entity.x == x and entity.y == y:
+            if entity.blocks and entity.occupied_tiles is not None:
+                if (x, y) in entity.occupied_tiles:
+                    return entity
+            elif entity.blocks and entity.x == x and entity.y == y:
                 return entity
+
     return None

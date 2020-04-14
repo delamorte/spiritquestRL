@@ -44,9 +44,12 @@ def draw(entity, game_map, x, y, player_fov):
         blt.put_ext(x * variables.tile_offset_x, y *
                     variables.tile_offset_y, -3 * variables.tile_offset_x, -5 * variables.tile_offset_y, entity.char)
     else:
-
-        blt.put(x * variables.tile_offset_x, y *
-                variables.tile_offset_y, entity.char)
+        if entity.boss and not entity.fighter:
+            blt.put((x-1) * variables.tile_offset_x, (y-1) *
+                    variables.tile_offset_y, entity.char)
+        else:
+            blt.put(x * variables.tile_offset_x, y *
+                    variables.tile_offset_y, entity.char)
 
 
 def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
@@ -63,8 +66,21 @@ def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
                 variables.stack.append(entity.xtra_info)
 
         if cursor_x is not None:
-            if (entity.x == cursor_x and entity.y == cursor_y and not
-            entity.cursor and game_map.tiles[entity.x][entity.y].explored):
+            if entity.occupied_tiles is not None:
+                if (game_map.tiles[entity.x][entity.y].explored and not entity.cursor and
+                        (cursor_x, cursor_y) in entity.occupied_tiles):
+
+                    variables.stack.append(get_article(entity.name).capitalize() + " " + entity.name)
+                    variables.stack.append(str("x: " + (str(cursor_x) + ", y: " + str(cursor_y))))
+
+                    if entity.xtra_info:
+                        variables.stack.append(entity.xtra_info)
+
+                    if entity.fighter:
+                        draw_stats(player, entity)
+
+            elif (entity.x == cursor_x and entity.y == cursor_y and not
+                    entity.cursor and game_map.tiles[entity.x][entity.y].explored):
 
                 variables.stack.append(get_article(entity.name).capitalize() + " " + entity.name)
                 variables.stack.append(str("x: " + (str(cursor_x) + ", y: " + str(cursor_y))))
@@ -108,7 +124,7 @@ def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
 
         if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and variables.gfx != "ascii":
             draw_indicator(player.x, player.y, game_camera, "gray")
-            draw_indicator(entity.x, entity.y, game_camera, "dark red")
+            draw_indicator(entity.x, entity.y, game_camera, "dark red", entity.occupied_tiles)
 
     return light_sources
 
@@ -192,7 +208,9 @@ def draw_map(game_map, game_camera, player, cursor_x, cursor_y):
                         i += 1
 
             if len(game_map.tiles[map_x][map_y].entities_on_tile) > 0:
-                entities.extend(game_map.tiles[map_x][map_y].entities_on_tile)
+                for n in game_map.tiles[map_x][map_y].entities_on_tile:
+                    if n not in entities:
+                        entities.append(n)
 
     light_sources = draw_entities(entities, player,
                                   game_map, game_camera, cursor_x, cursor_y)
@@ -422,13 +440,16 @@ def draw_ui(msg_panel, msg_panel_borders, screen_borders):
                         variables.ui_offset_y, tilemap_ui()["ui_block_se"])
 
 
-def draw_indicator(entity_x, entity_y, game_camera, color=None):
+def draw_indicator(entity_x, entity_y, game_camera, color=None, occupied_tiles=None):
     # Draw player indicator
     blt.layer(4)
     x, y = game_camera.get_coordinates(entity_x, entity_y)
     blt.color(color)
-    blt.put_ext(x * variables.tile_offset_x, y *
-                variables.tile_offset_y, 0, 0, tilemap()["indicator"])
+    if occupied_tiles is not None:
+        return
+    else:
+        blt.put_ext(x * variables.tile_offset_x, y *
+                    variables.tile_offset_y, 0, 0, tilemap()["indicator"])
 
 
 def draw_all(game_map, game_camera, player, entities, msg_panel, msg_panel_borders, screen_borders):

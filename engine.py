@@ -8,7 +8,7 @@ from components.player import Player
 from components.cursor import Cursor
 from components.light_source import LightSource
 from death_functions import kill_monster, kill_player
-from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities, draw_indicator
+from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities
 from entity import Entity, blocking_entity
 from fighter_stats import get_fighter_stats
 from game_states import GameStates
@@ -123,7 +123,7 @@ def game_loop(main_menu_show=True, choice=None):
     game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute = new_game(choice)
 
     game_map, entities, player = level_change(
-        "hub", levels, player)
+        "debug", levels, player)
 
     draw_ui(msg_panel, msg_panel_borders, screen_borders)
 
@@ -177,7 +177,7 @@ def game_loop(main_menu_show=True, choice=None):
         if game_state == GameStates.PLAYER_TURN:
 
             if key == blt.TK_CLOSE:
-                break
+                return False, False, None
 
             if key == blt.TK_ESCAPE:
 
@@ -261,7 +261,7 @@ def game_loop(main_menu_show=True, choice=None):
             elif key == blt.TK_X:
                 game_state = GameStates.TARGETING
                 cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 4, 0xE700 + 1746, "light yellow", "cursor",
+                cursor = Entity(player.x, player.y, 5, 0xE700 + 1746, "light yellow", "cursor",
                                 cursor=cursor_component, stand_on_messages=False)
                 game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
                 entities["cursor"] = [cursor]
@@ -346,8 +346,8 @@ def game_loop(main_menu_show=True, choice=None):
                 del entities["cursor"]
 
         if game_state == GameStates.ENEMY_TURN:
-            if player.player.spirit_power >= insights:
-                insights += 10
+            if player.player.spirit_power >= insights and game_map.name != "debug":
+                insights += 20
                 message_log.clear()
                 message_log.send("My spirit has granted me new insights!")
                 message_log.send("I should explore around my home..")
@@ -377,6 +377,15 @@ def game_loop(main_menu_show=True, choice=None):
                         player, game_map, entities, time_counter)
                     game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(entity)
                     game_map.tiles[entity.x][entity.y].entities_on_tile.append(entity)
+                    if entity.occupied_tiles is not None:
+                        game_map.tiles[prev_pos_x][prev_pos_y+1].entities_on_tile.remove(entity)
+                        game_map.tiles[prev_pos_x+1][prev_pos_y+1].entities_on_tile.remove(entity)
+                        game_map.tiles[prev_pos_x+1][prev_pos_y].entities_on_tile.remove(entity)
+
+                        game_map.tiles[entity.x][entity.y+1].entities_on_tile.append(entity)
+                        game_map.tiles[entity.x+1][entity.y+1].entities_on_tile.append(entity)
+                        game_map.tiles[entity.x+1][entity.y].entities_on_tile.append(entity)
+
                     fov_recompute = True
                     if combat_msg:
                         message_log.send(combat_msg)

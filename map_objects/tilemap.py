@@ -46,6 +46,10 @@ def init_tiles():
         size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx1), 304, 1184) +
             "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
 
+    blt.set("U+F500: %d, \
+        size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx1), 304, 1184) +
+            "64x96" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
     variables.tile_offset_x = int(
         int(variables.tile_width) / blt.state(blt.TK_CELL_WIDTH))
     variables.tile_offset_y = int(
@@ -197,8 +201,10 @@ def tilemap(tileset=None):
                                     "mosquito": 0xE100 + 524,
                                     "fairy": 0xE100 + 579},
 
-                 "unique_monsters": {"king kobra": 0xE100 + 602, "albino rat": 0xE100 + 498},
+                 "unique_monsters": {"king kobra": 0xE100 + 602, "albino rat": 0xE100 + 498,
+                                     "keeper of dreams": 0xF500 + 645},
                  "monster_remains": 0xE500 + 86,
+                 "boss_remains": 0xF500 + 366,
                  "door": {"open": 0xE100 + 307, "closed": 0xE100 + 306, "locked": 0xE100 + 308},
                  "campfire": 0xE100 + 303,
                  "stairs": {"up": 0xE100 + 324, "down": 0xE100 + 323},
@@ -212,7 +218,8 @@ def tilemap(tileset=None):
                  "ui_block_ne": 0xE100 + 685,
                  "ui_block_sw": 0xE100 + 686,
                  "ui_block_se": 0xE100 + 687,
-                 "indicator": 0xE100 + 671
+                 "indicator": 0xE100 + 671,
+                 "indicator_2x2": 0xF500 + 671
                  }
 
     elif tileset == "ascii":

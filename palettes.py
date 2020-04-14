@@ -237,7 +237,8 @@ def get_monster_color(name):
               "ghost dog": None,
               "gecko": "dark green",
               "serpent": "violet",
-              "fairy": "light violet"}
+              "fairy": "light violet",
+              "keeper of dreams": "flame"}
 
     return colors[name]
 

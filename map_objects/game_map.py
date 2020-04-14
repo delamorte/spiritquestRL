@@ -571,7 +571,7 @@ class GameMap:
 
     def is_blocked(self, x, y):
 
-        if x >= self.width - 1 or x <= 0 or y >= self.height - 1 or y <= 0:
+        if x >= self.width - 2 or x <= 0 or y >= self.height - 2 or y <= 0:
             return True
         if self.tiles[x][y].blocked:
             return True
@@ -618,8 +618,12 @@ class GameMap:
             player.fighter.hp = 99999999
             number_of_monsters = 1
             monsters = []
-            for x, y in tilemap()["monsters"].items():
-                if x == "crow":
+            # for x, y in tilemap()["monsters"].items():
+            #     if x == "crow":
+            #         monsters.append((x, y))
+
+            for x, y in tilemap()["unique_monsters"].items():
+                if x == "keeper of dreams":
                     monsters.append((x, y))
 
             for i in range(number_of_monsters):
@@ -632,14 +636,19 @@ class GameMap:
                 if not any([entity for entity in entities["monsters"] if entity.x == x and entity.y == y]):
                     # r = randint(0, 2)
                     name, char = monsters[0]
+                    color = get_monster_color(name)
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(fighter_component.fov)
                     monster = Entity(x, y, 3, char,
-                                     None, name, blocks=True, fighter=fighter_component, ai=ai_component,
-                                     light_source=light_component)
+                                     color, name, blocks=True, fighter=fighter_component, ai=ai_component,
+                                     light_source=light_component, boss=True)
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
+                    self.tiles[x][y+1].entities_on_tile.append(monster)
+                    self.tiles[x+1][y + 1].entities_on_tile.append(monster)
+                    self.tiles[x+1][y].entities_on_tile.append(monster)
+                    monster.occupied_tiles = [(x, y), (x, y+1), (x+1, y+1), (x+1, y)]
                     entities["monsters"].append(monster)
 
         if stairs and self.name == "cavern" + str(stairs.floor + 1):
@@ -661,11 +670,12 @@ class GameMap:
                 if not any([entity for entity in entities["monsters"] if entity.x == x and entity.y == y]):
                     # r = randint(0, 2)
                     name, char = monsters[0]
+                    color = get_monster_color(name)
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(fighter_component.fov)
                     monster = Entity(x, y, 3, char,
-                                     None, name, blocks=True, fighter=fighter_component, ai=ai_component,
+                                     color, name, blocks=True, fighter=fighter_component, ai=ai_component,
                                      light_source=light_component)
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)

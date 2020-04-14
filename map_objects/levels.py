@@ -6,7 +6,7 @@ def make_map(destination, levels, player, entities, game_map, stairs):
     # Set debug level
     if destination == "debug":
         entities = {}
-        game_map = GameMap(100, 100, "debug")
+        game_map = GameMap(20, 20, "debug")
         # game_map.generate_trees(0, 0, game_map.width,
         #                        game_map.height, 20, block_sight=True)
         # game_map.generate_forest()
