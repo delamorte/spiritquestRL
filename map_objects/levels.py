@@ -33,9 +33,9 @@ def make_map(destination, levels, player, entities, game_map, stairs):
         player.light_source.radius = player.fighter.fov
 
     elif destination == "cavern" + str(stairs.floor + 1):
-        game_map = GameMap(100, 100, destination, stairs.floor + 1)
+        game_map = GameMap(20, 20, "debug")
         entities = game_map.generate_cavern(entities)
-        player, entities = game_map.place_entities(player, entities, stairs)
+        player, entities = game_map.place_entities(player, entities)
         # Initialize field of view
         player.light_source.initialize_fov(game_map)
         levels[game_map.name] = [game_map, entities]

@@ -2,12 +2,15 @@ from tcod import map
 
 
 class LightSource:
-    def __init__(self, radius=3, fov_map=None):
+    def __init__(self, name=None, radius=3, fov_map=None):
         self.owner = None
         self.radius = radius
         self.fov_map = fov_map
         self.algorithm = 0
         self.light_walls = True
+        self.name = name
+        if self.name == "candle":
+            self.radius = 0
 
     def initialize_fov(self, game_map):
         fov_map = map.Map(game_map.width, game_map.height)

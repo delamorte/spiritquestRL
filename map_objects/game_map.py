@@ -3,7 +3,7 @@ from entity import Entity
 from fighter_stats import get_fighter_stats, get_fighter_ai, get_spawn_rates
 from helpers import flatten
 from map_objects.tile import Tile
-from map_objects.tilemap import tilemap, openables
+from map_objects.tilemap import tilemap, openables, items, stairs
 from palettes import get_dngn_colors, get_forest_colors, get_monster_color, name_color_from_value, get_terrain_colors
 from random import choices, randint
 from components.stairs import Stairs
@@ -90,6 +90,20 @@ class GameMap:
                             self.tiles[x][y].entities_on_tile.append(door)
                             door_component.set_status(door_component.status, self)
                             entities.append(door)
+                        elif name in items:
+                            item_component = Item(name)
+                            item = Entity(x, y, 2, entity,
+                                          color, name, item=item_component)
+                            self.tiles[x][y].entities_on_tile.append(item)
+                            item_component.set_attributes(self)
+                            entities.append(item)
+                        elif name in stairs:
+                            stairs_component = Stairs(("hub", x, y), ["dream"], name)
+                            portal = Entity(x, y, 1, entity, color, name,
+                                                stairs=stairs_component)
+                            self.tiles[x][y].entities_on_tile.append(portal)
+                            stairs_component.set_attributes(self)
+                            portal.xtra_info = "Meditate and go to dream world with '<' or '>'"
                         else:
                             wall_component = Wall(name)
                             wall = Entity(x, y, 2, entity,
@@ -187,10 +201,15 @@ class GameMap:
 
         # Generate a house
         w = h = 10
+        # x1, y1 = self.get_rand_unoccupied_space(w, h)
+        # home = Room(x1, y1, w, h, "#6b3d24", "#423023", wall="brick", floor="floor_wood", name="home")
+        # objects = self.create_room(home)
+        # door_home = self.create_door(home, "open", random=True)
+        objects = []
+        shaman_room = TiledRoom(name="home", lightness=0.8, filename="hub_shaman")
         x1, y1 = self.get_rand_unoccupied_space(w, h)
-        home = Room(x1, y1, w, h, "#6b3d24", "#423023", wall="brick", floor="floor_wood", name="home")
-        objects = self.create_room(home)
-        door_home = self.create_door(home, "open", random=True)
+        shaman_room.update_coordinates(x1, y1)
+        objects.extend(self.create_room(shaman_room))
 
         # Generate dungeon entrance
         # Make sure room doesn't overlap with existing rooms
@@ -201,28 +220,14 @@ class GameMap:
         objects.extend(self.create_room(d_entrance))
         door_d_entrance = self.create_door(d_entrance, "locked", random=True)
 
-        test_map = TiledRoom(name="graveyard", lightness=0.5)
+        graveyard = TiledRoom(name="graveyard", lightness=0.5, filename="graveyard")
         x1, y1 = self.get_rand_unoccupied_space(w, h)
-        test_map.update_coordinates(x1, y1)
+        graveyard.update_coordinates(x1, y1)
+        objects.extend(self.create_room(graveyard))
 
-        objects.extend(self.create_room(test_map))
-        # doors = self.scan_doors(test_map)
-        doors = [door_home, door_d_entrance]
+        doors = [door_d_entrance]
 
         objects.extend(self.generate_trees(1, 1, self.width - 1, self.height - 1, 20))
-
-        # Create starting weapon in hub
-        x, y = self.rooms["home"].get_center()
-        item_component = Item("club")
-        weapon = Entity(x + 2, y + 2, 1, tilemap()
-        ["weapons"]["club"], "#6b3d24", "club", item=item_component)
-
-        center_x, center_y = self.rooms["home"].get_center()
-        stairs_component = Stairs(("hub", center_x, center_y), ["dream"])
-        campfire = Entity(center_x, center_y, 1, tilemap()["campfire"], "lightest orange", "campfire",
-                          stairs=stairs_component)
-        self.tiles[center_x][center_y].entities_on_tile.append(campfire)
-        campfire.xtra_info = "Meditate and go to dream world with '<' or '>'"
 
         center_x, center_y = self.rooms["d_entrance"].get_center()
 
@@ -233,12 +238,20 @@ class GameMap:
         self.tiles[center_x][center_y].entities_on_tile.append(stairs_down)
         self.create_decor()
         # objects = flatten(objects)
+        map_stairs = [stairs_down]
+        map_items = []
+        map_objects = []
         for obj in objects:
             if obj.door:
                 doors.append(obj)
-                objects.remove(obj)
+            elif obj.stairs:
+                map_stairs.append(obj)
+            elif obj.item:
+                map_items.append(obj)
+            else:
+                map_objects.append(obj)
 
-        entities = {"objects": objects, "stairs": [campfire, stairs_down], "doors": doors, "items": [weapon]}
+        entities = {"objects": objects, "stairs": map_stairs, "doors": doors, "items": map_items}
         return entities
 
     def room_addition(self, entities=None, world_tendency=0):
@@ -644,6 +657,7 @@ class GameMap:
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
                                      light_source=light_component, boss=True)
+                    monster.xtra_info = "It appears to be a terrifying red dragon."
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
                     self.tiles[x][y+1].entities_on_tile.append(monster)
@@ -899,11 +913,11 @@ class Room:
 
 class TiledRoom(Room):
     def __init__(self, x1=0, y1=0, w=0, h=0, wall_color="dark gray", floor_color="darkest amber",
-                 floor="floor", tiled=True, name=None, lightness=1.0):
+                 floor="floor", tiled=True, name=None, lightness=1.0, filename=None):
         Room.__init__(self, x1=x1, y1=y1, w=w, h=h, wall_color=wall_color, floor_color=floor_color,
                       floor=floor, tiled=tiled, name=name, lightness=lightness)
         self.layers = None
-        self.tiled_reader(name)
+        self.tiled_reader(filename)
 
     def tiled_reader(self, name):
         tree = ET.parse("./tilesets/" + name + ".tmx")

@@ -137,10 +137,20 @@ def name_color_from_value(value, mod=0):
         else:
             color = None
 
+    # Windows
+    elif value == 182:
+        name = "window"
+        color = "darker gray"
+
+    # Walls
+    elif value in range(300, 306+1) or value == 280 or value == 217 or value in range(230, 232+1):
+        name = "wall"
+        color = "#2e2016"
+
     # Doors
-    elif value in range(20, 38 + 1):
+    elif value in range(20, 38 + 1) or value == 327:
         doors_open = [21, 23, 25, 29, 31, 33, 35, 37]
-        doors_closed = [20, 22, 24, 26, 27, 28, 30, 32, 36]
+        doors_closed = [20, 22, 24, 26, 27, 28, 30, 32, 36, 327]
         if value in doors_open:
             name = "door (open)"
         elif value in doors_closed:
@@ -166,13 +176,38 @@ def name_color_from_value(value, mod=0):
             name = "fence, vertical"
         color = "dark gray"
 
+    # Campfires, symbols
+    elif value == 16:
+        name = "holy symbol"
+        color = "lightest orange"
+
+    elif value == 75:
+        name = "cross"
+        color = "gray"
+
+    # Chairs etc
+    elif value == 181:
+        name = "throne"
+        color = "dark gray"
+
+    elif value == 163:
+        name = "table"
+        color = "#36200f"
+
+    # Potions
+    elif value in range(502, 504+1):
+        name = "flask"
+        colors = ["light red", "light green", "light sky"]
+        color = colors[randint(0,2)]
+
+
     # Statues
     elif value in range(60, 64 + 1):
         name = "statue"
         color = "gray"
 
     # Candles
-    elif value == 70:
+    elif value == 70 or value == 520:
         name = "candle"
         color = "amber"
 
@@ -185,6 +220,15 @@ def name_color_from_value(value, mod=0):
     elif value in range(362, 366 + 1):
         name = "bones"
         color = "gray"
+
+    elif value == 523:
+        name = "skull"
+        color = None
+
+    # Books
+    elif value in range (662, 666+1):
+        name = "book"
+        color = "#856654"
 
     # Shrubs
     elif value in range(450, 452 + 1) or value in range(410, 412 + 1) or value == 430 or value == 432:
@@ -211,6 +255,10 @@ def name_color_from_value(value, mod=0):
 
     elif value == 2 or value == 4:
         name = "pavement"
+        color = "darkest gray"
+
+    elif value == 253:
+        name = "floor"
         color = "darkest gray"
 
     return name, color

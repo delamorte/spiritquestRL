@@ -1,8 +1,7 @@
 from components.light_source import LightSource
 
-solids = ["solid", "brick", "rock", "stone", "moss", "tree", "dead tree"]
+solids = ["solid", "brick", "brick wall", "rock", "stone", "moss", "tree", "dead tree", "wall"]
 draw_floor_under = ["tree", "dead tree", "fence", "gate", "shrubs"]
-light_sources = ["candle", "lantern"]
 
 class Wall:
     def __init__(self, name=None, status=None, blocked=True, block_sight=True):
@@ -33,10 +32,3 @@ class Wall:
             self.blocked = True
             game_map.tiles[self.owner.x][self.owner.y].blocked = True
             game_map.tiles[self.owner.x][self.owner.y].block_sight = False
-
-            if self.name in light_sources:
-                light_component = LightSource()
-                self.owner.light_source = light_component
-                self.owner.light_source.owner = self.owner
-                self.owner.light_source.initialize_fov(game_map)
-                self.owner.light_source.recompute_fov(self.owner.x, self.owner.y)

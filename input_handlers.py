@@ -24,6 +24,9 @@ def handle_keys(key):
     if key == blt.TK_G or key == blt.TK_COMMA:
         return {'pickup': True}
 
+    if key == blt.TK_C or key == blt.TK_ENTER:
+        return {'interact': True}
+
     # '<' and '> keys for stairs
     if key == 49:
         return {'stairs': True}

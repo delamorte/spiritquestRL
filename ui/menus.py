@@ -124,7 +124,7 @@ def main_menu(resume=False):
                         # Draw a bg tile
                         blt.layer(0)
                         blt.puts(center_x - 30 + 1, center_y - 2 + i *
-                                 5, "[U+" + hex(0xE700 + 3) + "]", 0, 0)
+                                 5, "[U+" + hex(0xE900 + 3) + "]", 0, 0)
 
                     # Draw monster tile
                     blt.layer(1)
@@ -234,7 +234,7 @@ def choose_avatar(player):
                 # Draw a bg tile
                 blt.layer(0)
                 blt.puts(center_x - 30 + 1, center_y - 2 + i *
-                         5, "[U+" + hex(0xE700 + 3) + "]", 0, 0)
+                         5, "[U+" + hex(0xE900 + 3) + "]", 0, 0)
 
             # Draw monster tile
             blt.layer(1)

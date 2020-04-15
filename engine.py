@@ -73,8 +73,8 @@ def new_game(choice):
 
     inventory_component = Inventory(26)
     fighter_component = get_fighter_stats("player")
-    player_component = Player(50)
     light_component = LightSource(fighter_component.fov)
+    player_component = Player(50)
     player = Entity(
         1, 1, 3, player_component.char["player"], None, "player", blocks=True, player=player_component,
         fighter=fighter_component, inventory=inventory_component, light_source=light_component,
@@ -130,6 +130,7 @@ def game_loop(main_menu_show=True, choice=None):
     while True:
         if fov_recompute:
             player.light_source.recompute_fov(player.x, player.y)
+            player.player.init_light()
 
         draw_all(game_map, game_camera, player, entities, msg_panel, msg_panel_borders, screen_borders)
         draw_messages(msg_panel, message_log)
@@ -143,6 +144,7 @@ def game_loop(main_menu_show=True, choice=None):
 
         move = action.get('move')
         pickup = action.get('pickup')
+        interact = action.get("interact")
         stairs = action.get('stairs')
         fullscreen = action.get('fullscreen')
 
@@ -235,19 +237,63 @@ def game_loop(main_menu_show=True, choice=None):
                 variables.old_stack = variables.stack
                 variables.stack = []
 
+            elif interact:
+                if "doors" in entities:
+                    for entity in entities["doors"]:
+                        if ((entity.x, entity.y) == (player.x - 1, player.y) or
+                                (entity.x, entity.y) == (player.x - 1, player.y - 1) or
+                                (entity.x, entity.y) == (player.x, player.y - 1) or
+                                (entity.x, entity.y) == (player.x + 1, player.y - 1) or
+                                (entity.x, entity.y) == (player.x + 1, player.y) or
+                                (entity.x, entity.y) == (player.x + 1, player.y + 1) or
+                                (entity.x, entity.y) == (player.x, player.y + 1) or
+                                (entity.x, entity.y) == (player.x - 1, player.y + 1)):
+                            if entity.door.status == "closed":
+                                entity.door.set_status("open", game_map)
+                                message_log.send("You open the door.")
+                                time_counter.take_turn(1)
+                                game_state = GameStates.ENEMY_TURN
+                            elif entity.door.status == "open":
+                                entity.door.set_status("closed", game_map)
+                                message_log.send("You close the door.")
+                                time_counter.take_turn(1)
+                                game_state = GameStates.ENEMY_TURN
+                            else:
+                                message_log.send("The door is locked.")
+                                time_counter.take_turn(1)
+                                game_state = GameStates.ENEMY_TURN
+                if "items" in entities:
+                    for entity in entities["items"]:
+                        if ((entity.x, entity.y) == (player.x - 1, player.y) or
+                                (entity.x, entity.y) == (player.x - 1, player.y - 1) or
+                                (entity.x, entity.y) == (player.x, player.y - 1) or
+                                (entity.x, entity.y) == (player.x + 1, player.y - 1) or
+                                (entity.x, entity.y) == (player.x + 1, player.y) or
+                                (entity.x, entity.y) == (player.x + 1, player.y + 1) or
+                                (entity.x, entity.y) == (player.x, player.y + 1) or
+                                (entity.x, entity.y) == (player.x, player.y) or
+                                (entity.x, entity.y) == (player.x - 1, player.y + 1)):
+
+                            interact_msg = entity.item.interaction(game_map)
+                            if interact_msg:
+                                message_log.send(interact_msg)
+
             elif pickup:
-                for entity in entities["items"]:
-                    if entity.x == player.x and entity.y == player.y and entity.item.pickable:
-                        pickup_msg = player.inventory.add_item(entity)
-                        message_log.send(pickup_msg)
-                        for item in variables.stack:
-                            if entity.name == item.split(" ", 1)[1]:
-                                variables.stack.remove(item)
-                        game_map.tiles[entity.x][entity.y].entities_on_tile.remove(entity)
-                        entities["items"].remove(entity)
-                        time_counter.take_turn(1)
-                        game_state = GameStates.ENEMY_TURN
-                        break
+                if "items" in entities:
+                    for entity in entities["items"]:
+                        if entity.x == player.x and entity.y == player.y and entity.item.pickable:
+                            pickup_msg = player.inventory.add_item(entity)
+                            message_log.send(pickup_msg)
+                            for item in variables.stack:
+                                if entity.name == item.split(" ", 1)[1]:
+                                    variables.stack.remove(item)
+                            game_map.tiles[entity.x][entity.y].entities_on_tile.remove(entity)
+                            entities["items"].remove(entity)
+                            time_counter.take_turn(1)
+                            game_state = GameStates.ENEMY_TURN
+                            break
+                        else:
+                            message_log.send("There is nothing here to pick up.")
                 else:
                     message_log.send("There is nothing here to pick up.")
 
@@ -261,7 +307,7 @@ def game_loop(main_menu_show=True, choice=None):
             elif key == blt.TK_X:
                 game_state = GameStates.TARGETING
                 cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 5, 0xE700 + 1746, "light yellow", "cursor",
+                cursor = Entity(player.x, player.y, 5, 0xE900 + 1746, "light yellow", "cursor",
                                 cursor=cursor_component, stand_on_messages=False)
                 game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
                 entities["cursor"] = [cursor]
@@ -378,13 +424,13 @@ def game_loop(main_menu_show=True, choice=None):
                     game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(entity)
                     game_map.tiles[entity.x][entity.y].entities_on_tile.append(entity)
                     if entity.occupied_tiles is not None:
-                        game_map.tiles[prev_pos_x][prev_pos_y+1].entities_on_tile.remove(entity)
-                        game_map.tiles[prev_pos_x+1][prev_pos_y+1].entities_on_tile.remove(entity)
-                        game_map.tiles[prev_pos_x+1][prev_pos_y].entities_on_tile.remove(entity)
+                        game_map.tiles[prev_pos_x][prev_pos_y + 1].entities_on_tile.remove(entity)
+                        game_map.tiles[prev_pos_x + 1][prev_pos_y + 1].entities_on_tile.remove(entity)
+                        game_map.tiles[prev_pos_x + 1][prev_pos_y].entities_on_tile.remove(entity)
 
-                        game_map.tiles[entity.x][entity.y+1].entities_on_tile.append(entity)
-                        game_map.tiles[entity.x+1][entity.y+1].entities_on_tile.append(entity)
-                        game_map.tiles[entity.x+1][entity.y].entities_on_tile.append(entity)
+                        game_map.tiles[entity.x][entity.y + 1].entities_on_tile.append(entity)
+                        game_map.tiles[entity.x + 1][entity.y + 1].entities_on_tile.append(entity)
+                        game_map.tiles[entity.x + 1][entity.y].entities_on_tile.append(entity)
 
                     fov_recompute = True
                     if combat_msg:
@@ -404,8 +450,6 @@ def game_loop(main_menu_show=True, choice=None):
             if not game_state == GameStates.PLAYER_DEAD:
                 game_state = GameStates.PLAYER_TURN
 
-    blt.close()
-
 
 if __name__ == '__main__':
     blt_init()
@@ -414,4 +458,4 @@ if __name__ == '__main__':
     menu_show = True
     while restart:
         restart, menu_show, avatar = game_loop(main_menu_show=menu_show, choice=avatar)
-
+    blt.close()
