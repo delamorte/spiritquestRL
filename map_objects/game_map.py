@@ -104,6 +104,7 @@ class GameMap:
                             self.tiles[x][y].entities_on_tile.append(portal)
                             stairs_component.set_attributes(self)
                             portal.xtra_info = "Meditate and go to dream world with '<' or '>'"
+                            entities.append(portal)
                         else:
                             wall_component = Wall(name)
                             wall = Entity(x, y, 2, entity,

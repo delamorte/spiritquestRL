@@ -119,7 +119,10 @@ def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
             # what is this if???????
             # if (ceil(variables.camera_offset) < x < game_camera.width - ceil(variables.camera_offset) and ceil(
             #        variables.camera_offset) < y < game_camera.height - ceil(variables.camera_offset)):
-            draw(entity, game_map, x, y, player)
+            if entity.light_source and not entity.fighter:
+                light_sources.append(entity.light_source)
+            else:
+                draw(entity, game_map, x, y, player)
 
         if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and variables.gfx != "ascii":
             draw_indicator(player.x, player.y, game_camera, "gray")
