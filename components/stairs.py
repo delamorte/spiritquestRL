@@ -20,7 +20,7 @@ class Stairs:
 
     def set_attributes(self, game_map):
         if self.name == "holy syhmbol":
-            light_component = LightSource(self.name)
+            light_component = LightSource(name=self.name)
             self.owner.light_source = light_component
             self.owner.light_source.owner = self.owner
             self.owner.light_source.initialize_fov(game_map)

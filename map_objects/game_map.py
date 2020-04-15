@@ -654,7 +654,7 @@ class GameMap:
                     color = get_monster_color(name)
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
-                    light_component = LightSource(fighter_component.fov)
+                    light_component = LightSource(radius=fighter_component.fov)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
                                      light_source=light_component, boss=True)
@@ -689,7 +689,7 @@ class GameMap:
                     color = get_monster_color(name)
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
-                    light_component = LightSource(fighter_component.fov)
+                    light_component = LightSource(radius=fighter_component.fov)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
                                      light_source=light_component)
@@ -732,7 +732,7 @@ class GameMap:
                     color = get_monster_color(name)
                     fighter_component = get_fighter_stats(name)
                     ai_component = get_fighter_ai(name)
-                    light_component = LightSource(fighter_component.fov)
+                    light_component = LightSource(radius=fighter_component.fov)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
                                      light_source=light_component)

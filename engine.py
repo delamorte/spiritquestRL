@@ -73,7 +73,7 @@ def new_game(choice):
 
     inventory_component = Inventory(26)
     fighter_component = get_fighter_stats("player")
-    light_component = LightSource(fighter_component.fov)
+    light_component = LightSource(radius=fighter_component.fov)
     player_component = Player(50)
     player = Entity(
         1, 1, 3, player_component.char["player"], None, "player", blocks=True, player=player_component,

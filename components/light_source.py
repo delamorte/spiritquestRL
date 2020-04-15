@@ -2,7 +2,7 @@ from tcod import map
 
 
 class LightSource:
-    def __init__(self, name=None, radius=3, fov_map=None):
+    def __init__(self, radius=3, name=None, fov_map=None):
         self.owner = None
         self.radius = radius
         self.fov_map = fov_map
