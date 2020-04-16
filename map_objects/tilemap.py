@@ -166,7 +166,7 @@ def tilemap(tileset=None):
                  "ground_soil": (0xE100 + 692,),
                  "ground_moss": (0xE100 + 186,),
                  "ground_dot": (0xE100 + 293),
-                 "floor": (0xE100 + 237,),
+                 "floor": 0xE100 + 237,
                  "floor_wood": 0xE100 + 264,
                  "plants": (
                      0xE500 + 120, 0xE500 + 121, 0xE500 + 122, 0xE500 + 123, 0xE500 + 200, 0xE500 + 201, 0xE500 + 202),

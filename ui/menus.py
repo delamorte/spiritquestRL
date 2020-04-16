@@ -214,7 +214,7 @@ def choose_avatar(player):
     center_y = int(variables.viewport_y / 2)
 
     while True:
-        clear_camera(2)
+        clear_camera(5)
         animals = player.player.char
         exclude = {"player"}
         avatars = {x: animals[x] for x in animals if x not in exclude}

@@ -106,7 +106,7 @@ def new_game(choice):
 
     levels = {}
     time_counter = variables.TimeCounter()
-    insights = 100
+    insights = 51
     game_state = GameStates.PLAYER_TURN
 
     return game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute
@@ -319,6 +319,7 @@ def game_loop(main_menu_show=True, choice=None):
                 message_log.send("I have no power to meditate longer..")
                 player.player.spirit_power = 50
                 player.fighter.hp = player.fighter.max_hp
+                draw_ui(msg_panel, msg_panel_borders, screen_borders)
 
             elif stairs:
                 if "stairs" in entities:
@@ -403,7 +404,7 @@ def game_loop(main_menu_show=True, choice=None):
                 for entity in entities["doors"]:
                     if entity.door.name == "d_entrance":
                         entity.door.set_status("open", game_map)
-
+            fov_recompute = True
             draw_messages(msg_panel, message_log)
 
             for entity in entities["monsters"]:

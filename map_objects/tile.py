@@ -22,7 +22,7 @@ class Tile:
         self.explored = False
         self.visited = False
         self.seed = randint(1, 100)
-        self.char = tilemap()["floor"][0]
+        self.char = tilemap()["floor"]
         self.layers = []
         self.color = "darkest amber"
         self.name = None

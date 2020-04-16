@@ -232,7 +232,7 @@ class GameMap:
 
         center_x, center_y = self.rooms["d_entrance"].get_center()
 
-        stairs_component = Stairs(("hub", center_x, center_y), ["cavern1"], "stairs down", 0)
+        stairs_component = Stairs(("hub", center_x, center_y), ["debug"], "stairs down", 0)
         stairs_down = Entity(center_x, center_y, 1, tilemap()["stairs"]["down"], "dark amber",
                              "stairs to a mysterious cavern", stairs=stairs_component)
         stairs_down.xtra_info = "You feel an ominous presence. Go down with '<' or '>'"
@@ -586,7 +586,7 @@ class GameMap:
 
     def is_blocked(self, x, y):
 
-        if x >= self.width - 2 or x <= 0 or y >= self.height - 2 or y <= 0:
+        if x >= self.width - 1 or x <= 0 or y >= self.height - 1 or y <= 0:
             return True
         if self.tiles[x][y].blocked:
             return True

@@ -482,6 +482,9 @@ def clear(entity, x, y):
     blt.layer(entity.layer)
     blt.clear_area(x * variables.tile_offset_x, y *
                    variables.tile_offset_y, 1, 1)
+    if entity.boss:
+        blt.clear_area(x * variables.tile_offset_x, y *
+                       variables.tile_offset_y, 2, 2)
 
 
 def clear_entities(entities, game_camera):

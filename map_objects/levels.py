@@ -6,7 +6,7 @@ def make_map(destination, levels, player, entities, game_map, stairs):
     # Set debug level
     if destination == "debug":
         entities = {}
-        game_map = GameMap(10, 10, "debug")
+        game_map = GameMap(20, 20, "debug")
         # game_map.generate_trees(0, 0, game_map.width,
         #                        game_map.height, 20, block_sight=True)
         # game_map.generate_forest()
@@ -31,6 +31,7 @@ def make_map(destination, levels, player, entities, game_map, stairs):
         player.fighter = player.player.avatar[choice]
         player.char = player.player.char[choice]
         player.light_source.radius = player.fighter.fov
+        player.light_source.recompute_fov(player.x, player.y)
 
     elif destination == "cavern" + str(stairs.floor + 1):
         game_map = GameMap(20, 20, "debug")
@@ -54,8 +55,10 @@ def level_change(destination, levels, player, entities=None, game_map=None, stai
         entities = levels[destination][1]
         entities["player"] = [player]
         player, entities = game_map.place_entities(player, entities, stairs)
+        player.fighter = player.player.avatar["player"]
         player.light_source.initialize_fov(game_map)
         player.light_source.radius = player.fighter.fov
+        player.light_source.recompute_fov(player.x, player.y)
 
         if destination == "hub":
             player.fighter = player.player.avatar["player"]

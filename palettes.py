@@ -23,12 +23,12 @@ mod_colors = ["gray",
 
 def get_dngn_colors(mod=0):
     color = dirt_colors[randint(0, len(dirt_colors) - 1)]
-    if mod < 0:
-        color = "#111111"
-    if mod < -1:
-        color = "#0e0f0f"
-    if mod < -3:
-        color = "#000000"
+    # if mod < 0:
+    #     color = "#111111"
+    # if mod < -1:
+    #     color = "#0e0f0f"
+    # if mod < -3:
+    #     color = "#000000"
 
     return color
 
