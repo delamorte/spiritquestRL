@@ -134,7 +134,8 @@ def tilemap(tileset=None):
                                     "mosquito": 0xE900 + 1554,
                                     "fairy": 0xE900 + 1032},
 
-                 "unique_monsters": {"king kobra": 0xE900 + 1105, "albino rat": 0xE900 + 1414},
+                 "unique_monsters": {"king kobra": 0xE900 + 1105, "albino rat": 0xE900 + 1414,
+                                     "keeper of dreams": 0xE900 + 974},
                  "monster_remains": 0xE900 + 513,
                  "boss_remains": 0xE900 + 513,
                  "door": {"open": 0xE900 + 68, "closed": 0xE900 + 67, "locked": 0xE900 + 78},
@@ -296,7 +297,7 @@ def tilemap(tileset=None):
                                     "mosquito": "m",
                                     "fairy": "F"},
 
-                 "unique_monsters": {"king kobra": "K", "albino rat": "R"},
+                 "unique_monsters": {"king kobra": "K", "albino rat": "R", "keeper of dreams": "K"},
                  "monster_remains": "%",
                  "boss_remains": "%",
                  "door": {"open": "-", "closed": "+", "locked": "+"},
