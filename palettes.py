@@ -261,6 +261,10 @@ def name_color_from_value(value, mod=0):
         name = "floor"
         color = "darkest gray"
 
+    elif value == 277:
+        name = "floor"
+        color = None
+
     return name, color
 
 

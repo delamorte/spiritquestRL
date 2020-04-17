@@ -254,7 +254,7 @@ def choose_avatar(player):
         key = blt.read()
 
         if key == blt.TK_ESCAPE:
-            break
+            return None, None
         elif key == blt.TK_UP:
             if current_range > 0:
                 current_range -= 1

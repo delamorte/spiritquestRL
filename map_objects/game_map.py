@@ -79,7 +79,10 @@ class GameMap:
                         if variables.gfx == "oryx":
                             entity += 0xE500
                         else:
-                            entity = tilemap()[name]
+                            if isinstance(tilemap()[name], tuple):
+                                entity = tilemap()[name][0]
+                            else:
+                                entity = tilemap()[name]
 
                         if "," in name:
                             name = name.split(",")[0]

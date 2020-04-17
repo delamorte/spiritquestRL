@@ -106,7 +106,7 @@ def new_game(choice):
 
     levels = {}
     time_counter = variables.TimeCounter()
-    insights = 51
+    insights = 100
     game_state = GameStates.PLAYER_TURN
 
     return game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute

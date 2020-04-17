@@ -18,8 +18,10 @@ def make_map(destination, levels, player, entities, game_map, stairs):
     elif destination == "dream":
         choice, params = choose_avatar(player)
         if not choice:
+            game_map.tiles[player.x][player.y].entities_on_tile.append(player)
             return game_map, entities, player
         if not params:
+            game_map.tiles[player.x][player.y].entities_on_tile.append(player)
             return game_map, entities, player
         world_tendency = sum(params.values())
         game_map = GameMap(100, 100, "dream")
