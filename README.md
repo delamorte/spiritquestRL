@@ -7,13 +7,17 @@ See [design docs](https://github.com/delamorte/spiritquestRL/blob/master/docs/de
 Based on [Roguelike Tutorial Revised](http://rogueliketutorials.com/) and [jcerise's roguelike tutorial for Go](https://jeremyceri.se/roguelikes/).
 
 #### Keys:
-move: numpad or vim keys
+move: arrows, numpad or vim keys
+
+interact: 'c' or 'enter'
 
 stairs: '<' or '>'
 
 examine: 'x'
 
 message log: 'm'
+
+map: 'tab'
 
 pick up: ',' or 'g'
 

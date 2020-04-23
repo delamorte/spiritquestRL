@@ -2,23 +2,37 @@ from bearlibterminal import terminal as blt
 from math import floor
 import variables
 
-def init_ui():
 
-    screen_w = blt.state(floor(blt.TK_WIDTH))
-    screen_h = blt.state(floor(blt.TK_HEIGHT))
+class UIElements:
+    def __init__(self):
+        self.screen_w = blt.state(floor(blt.TK_WIDTH))
+        self.screen_h = blt.state(floor(blt.TK_HEIGHT))
+        self.msg_panel = None
+        self.msg_panel_borders = None
+        self.screen_borders = None
+        self.side_panel_borders = None
+        self.viewport_x = None
+        self.viewport_y = None
+        self.viewport = None
 
-    w = floor(screen_w / variables.ui_offset_x)
-    h = floor(screen_h / variables.ui_offset_y - 5)
 
-    msg_panel = Panel(1, h + 1, w - 1, h + 4)
-    msg_panel_borders = Panel(0, h, w, h + 5)
-    screen_borders = Panel(0, 0, w, h)
+        self.init_ui()
 
-    viewport_x = w * variables.ui_offset_x - (variables.ui_offset_x + 1)
-    viewport_y = h * variables.ui_offset_y - (variables.ui_offset_y + 1)
-    variables.viewport_x = viewport_x
-    variables.viewport_y = viewport_y
-    return msg_panel, msg_panel_borders, screen_borders
+    def init_ui(self):
+        w = floor(self.screen_w / variables.ui_offset_x)
+        h = floor(self.screen_h / variables.ui_offset_y)
+
+        side_panel_w = 8
+
+        self.screen_borders = Panel(0, 0, w-side_panel_w, h-5)
+        self.side_panel_borders = Panel(w-side_panel_w, 0, side_panel_w-1, h)
+
+        self.msg_panel_borders = Panel(0, self.screen_borders.h, w-8, h-(self.screen_borders.h))
+        self.msg_panel = Panel(1, self.msg_panel_borders.y+1, self.msg_panel_borders.w-1, self.msg_panel_borders.h-1)
+
+        variables.viewport_w = (w-side_panel_w) * variables.ui_offset_x - (variables.ui_offset_x + 1)
+        variables.viewport_h = (h-5) * variables.ui_offset_y - (variables.ui_offset_y + 1)
+
 
 class Panel:
 
@@ -27,3 +41,5 @@ class Panel:
         self.y = int(y)
         self.w = int(w)
         self.h = int(h)
+        self.x2 = self.x + self.w
+        self.y2 = self.y + self.h

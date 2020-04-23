@@ -9,6 +9,7 @@ from scipy.spatial.distance import cityblock
 import variables
 from palettes import argb_from_color
 import random
+from ctypes import c_uint32, addressof
 
 
 def draw(entity, game_map, x, y, player):
@@ -131,7 +132,14 @@ def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
     return light_sources
 
 
-def draw_map(game_map, game_camera, player, cursor_x, cursor_y):
+def draw_map(game_map, game_camera, player, cursor_x, cursor_y, ui_elements):
+    
+    x0 = ui_elements.side_panel_borders.x
+    y0 = ui_elements.side_panel_borders.y
+
+    minimap = np.ones_like(game_map.tiles, dtype=int)
+    
+    
     # Set boundaries where to draw map
     bound_x = ceil(variables.camera_offset)
     bound_y = ceil(variables.camera_offset)
@@ -155,6 +163,24 @@ def draw_map(game_map, game_camera, player, cursor_x, cursor_y):
             if game_map.height < game_camera.height:
                 map_y = y
             visible = player.light_source.fov_map.fov[map_y, map_x]
+
+            minimap[map_y][map_x] = blt.color_from_name("dark gray")
+            if len(game_map.tiles[map_x][map_y].entities_on_tile) > 0:
+                if game_map.tiles[map_x][map_y].entities_on_tile[-1].name == "tree":
+                    minimap[map_y][map_x] = blt.color_from_name("dark green")
+                elif "wall" in game_map.tiles[map_x][map_y].entities_on_tile[-1].name:
+                    minimap[map_y][map_x] = blt.color_from_name("dark amber")
+                elif game_map.tiles[map_x][map_y].entities_on_tile[-1].name == "player":
+                    minimap[map_y][map_x] = blt.color_from_name(None)
+                elif game_map.tiles[map_x][map_y].entities_on_tile[-1].fighter \
+                        and game_map.tiles[map_x][map_y].entities_on_tile[-1].name != "player":
+                    minimap[map_y][map_x] = blt.color_from_name("light red")
+                else:
+                    minimap[map_y][map_x] = blt.color_from_name("light gray")
+            elif game_map.tiles[map_x][map_y].blocked:
+                minimap[map_y][map_x] = blt.color_from_name("light gray")
+            if not game_map.tiles[map_x][map_y].explored:
+                minimap[map_y][map_x] = blt.color_from_name("#000000")
 
             # Draw tiles within fov
             if visible:
@@ -214,6 +240,18 @@ def draw_map(game_map, game_camera, player, cursor_x, cursor_y):
                     if n not in entities:
                         entities.append(n)
 
+    minimap = minimap.flatten()
+    minimap = (c_uint32 * len(minimap))(*minimap)
+
+    blt.set(
+        "U+F900: %d, raw-size=%dx%d, resize=%dx%d, resize-filter=nearest" % (
+            addressof(minimap),
+            game_map.width, game_map.height,
+            200, 240)
+    )
+    blt.color(None)
+    blt.put_ext(x0 * variables.ui_offset_x + 3, y0 * variables.ui_offset_y + 3, 0, 0, 0xF900)
+
     light_sources = draw_entities(entities, player,
                                   game_map, game_camera, cursor_x, cursor_y)
     if len(light_sources) > 0:
@@ -254,7 +292,7 @@ def draw_light_sources(player, game_map, game_camera, sources):
 
         blt.color(blt.color_from_argb(a, r, g, b))
         blt.put(cam_x * variables.tile_offset_x, cam_y * variables.tile_offset_y,
-            game_map.tiles[x][y].char)
+                game_map.tiles[x][y].char)
 
         if len(game_map.tiles[x][y].layers) > 0:
             i = 1
@@ -316,28 +354,28 @@ def draw_messages(msg_panel, message_log):
 def draw_stats(player, target=None):
     power_msg = "Spirit power left: " + str(player.player.spirit_power)
     blt.layer(1)
-    blt.clear_area(2, variables.viewport_y + variables.ui_offset_y + 1,
-                   int(variables.viewport_x / 2) + int(len(power_msg) / 2 + 5) - 5, 1)
+    blt.clear_area(2, variables.viewport_h + variables.ui_offset_y + 1,
+                   int(variables.viewport_w / 2) + int(len(power_msg) / 2 + 5) - 5, 1)
     blt.color("gray")
 
     # Draw spirit power left and position it depending on window size
-    if variables.viewport_x > 90:
-        #         blt.puts(int(variables.viewport_x / 2) - int(len(power_msg) / 2) - 5,
-        #                  variables.viewport_y + variables.ui_offset_y, "[offset=0,5]" + "[U+EAB8]", 0, 0, blt.TK_ALIGN_CENTER)
-        #         blt.puts(int(variables.viewport_x / 2) + int(len(power_msg) / 2 + 3),
-        #                  variables.viewport_y + variables.ui_offset_y, "[offset=0,2]" + "[U+EADC]", 0, 0, blt.TK_ALIGN_CENTER)
+    if variables.viewport_w > 90:
+        #         blt.puts(int(variables.viewport_w / 2) - int(len(power_msg) / 2) - 5,
+        #                  variables.viewport_h + variables.ui_offset_y, "[offset=0,5]" + "[U+EAB8]", 0, 0, blt.TK_ALIGN_CENTER)
+        #         blt.puts(int(variables.viewport_w / 2) + int(len(power_msg) / 2 + 3),
+        #                  variables.viewport_h + variables.ui_offset_y, "[offset=0,2]" + "[U+EADC]", 0, 0, blt.TK_ALIGN_CENTER)
         blt.color("default")
-        blt.puts(int(variables.viewport_x / 2),
-                 variables.viewport_y + variables.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0,
+        blt.puts(int(variables.viewport_w / 2),
+                 variables.viewport_h + variables.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0,
                  blt.TK_ALIGN_CENTER)
     else:
-        #         blt.puts(variables.viewport_x - len(power_msg) - 5,
-        #                  variables.viewport_y + variables.ui_offset_y, "[offset=0,5]" + "[U+EAB8]", 0, 0, blt.TK_ALIGN_CENTER)
-        #         blt.puts(variables.viewport_x,
-        #                  variables.viewport_y + variables.ui_offset_y, "[offset=0,2]" + "[U+EADC]", 0, 0, blt.TK_ALIGN_CENTER)
+        #         blt.puts(variables.viewport_w - len(power_msg) - 5,
+        #                  variables.viewport_h + variables.ui_offset_y, "[offset=0,5]" + "[U+EAB8]", 0, 0, blt.TK_ALIGN_CENTER)
+        #         blt.puts(variables.viewport_w,
+        #                  variables.viewport_h + variables.ui_offset_y, "[offset=0,2]" + "[U+EADC]", 0, 0, blt.TK_ALIGN_CENTER)
         blt.color("default")
-        blt.puts(variables.viewport_x - len(power_msg),
-                 variables.viewport_y + variables.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0,
+        blt.puts(variables.viewport_w - len(power_msg),
+                 variables.viewport_h + variables.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0,
                  blt.TK_ALIGN_LEFT)
 
     # Draw player stats
@@ -360,14 +398,14 @@ def draw_stats(player, target=None):
     ev_player = "EV:" + str(player.fighter.ev) + "  "
     power_player = "ATK:" + str(player.fighter.power)
 
-    blt.puts(4, variables.viewport_y + variables.ui_offset_y + 1,
+    blt.puts(4, variables.viewport_h + variables.ui_offset_y + 1,
              "[offset=0,-2]" + "[color=lightest green]Player:  " + hp_player + ac_player + ev_player + power_player, 0,
              0, blt.TK_ALIGN_LEFT)
 
     # Draw target stats
     if target:
-        blt.clear_area(int(variables.viewport_x / 2) - int(len(power_msg) / 2) - 5,
-                       variables.viewport_y + variables.ui_offset_y + 1, variables.viewport_x, 1)
+        blt.clear_area(int(variables.viewport_w / 2) - int(len(power_msg) / 2) - 5,
+                       variables.viewport_h + variables.ui_offset_y + 1, variables.viewport_w, 1)
         if target.fighter.hp / target.fighter.max_hp < 0.34:
             hp_target = "[color=light red]HP:" + \
                         str(target.fighter.hp) + "/" + \
@@ -380,16 +418,16 @@ def draw_stats(player, target=None):
         ev_target = "EV:" + str(target.fighter.ev) + "  "
         power_target = "ATK:" + str(target.fighter.power) + " "
 
-        blt.puts(variables.viewport_x, variables.viewport_y + variables.ui_offset_y + 1,
+        blt.puts(variables.viewport_w, variables.viewport_h + variables.ui_offset_y + 1,
                  "[offset=0,-2]" + "[color=lightest red]" + target.name.capitalize() + ":  " + hp_target + ac_target + ev_target + power_target,
                  0, 0, blt.TK_ALIGN_RIGHT)
 
         if target.fighter.hp <= 0:
-            blt.clear_area(2, variables.viewport_y +
-                           variables.ui_offset_y + 1, variables.viewport_x, 1)
+            blt.clear_area(2, variables.viewport_h +
+                           variables.ui_offset_y + 1, variables.viewport_w, 1)
 
 
-def draw_ui(msg_panel, msg_panel_borders, screen_borders):
+def draw_ui(ui_elements):
     blt.color("gray")
     blt.layer(0)
     #     for y in range(msg_panel.y, msg_panel.h):
@@ -397,57 +435,88 @@ def draw_ui(msg_panel, msg_panel_borders, screen_borders):
     #             blt.put_ext(x * variables.ui_offset_x, y *
     #                         variables.ui_offset_y, 0, 0, 0xE100 + 692)
 
-    for y in range(msg_panel_borders.y, msg_panel_borders.h):
-        for x in range(msg_panel_borders.x, msg_panel_borders.w):
+    msg_panel_borders = ui_elements.msg_panel_borders
+    screen_borders = ui_elements.screen_borders
+    side_panel_borders = ui_elements.side_panel_borders
+
+    for y in range(msg_panel_borders.y, msg_panel_borders.y2):
+        for x in range(msg_panel_borders.x, msg_panel_borders.x2):
             if (y == msg_panel_borders.y):
                 blt.put_ext(x * variables.ui_offset_x, y *
                             variables.ui_offset_y, 0, 10, tilemap_ui()["ui_block_horizontal"])
-            elif (y == msg_panel_borders.h - 1):
+            elif (y == msg_panel_borders.y2 - 1):
                 blt.put_ext(x * variables.ui_offset_x, y *
                             variables.ui_offset_y, 0, -10, tilemap_ui()["ui_block_horizontal"])
             elif (x == msg_panel_borders.x):
                 blt.put_ext(x * variables.ui_offset_x, y *
                             variables.ui_offset_y, 10, 0, tilemap_ui()["ui_block_vertical"])
-            elif (x == msg_panel_borders.w - 1):
+            elif (x == msg_panel_borders.x2 - 1):
                 blt.put_ext(x * variables.ui_offset_x, y *
                             variables.ui_offset_y, -10, 0, tilemap_ui()["ui_block_vertical"])
             if (x == msg_panel_borders.x and y == msg_panel_borders.y):
                 blt.put_ext(x * variables.ui_offset_x, y *
                             variables.ui_offset_y, 10, 10, tilemap_ui()["ui_block_nw"])
-            if (x == msg_panel_borders.w - 1 and y == msg_panel_borders.y):
+            if (x == msg_panel_borders.x2 - 1 and y == msg_panel_borders.y):
                 blt.put_ext(x * variables.ui_offset_x, y *
                             variables.ui_offset_y, -10, 10, tilemap_ui()["ui_block_ne"])
-            if (x == msg_panel_borders.x and y == msg_panel_borders.h - 1):
+            if (x == msg_panel_borders.x and y == msg_panel_borders.y2 - 1):
                 blt.put_ext(x * variables.ui_offset_x, y *
                             variables.ui_offset_y, 10, -10, tilemap_ui()["ui_block_sw"])
-            if (x == msg_panel_borders.w - 1 and y == msg_panel_borders.h - 1):
+            if (x == msg_panel_borders.x2 - 1 and y == msg_panel_borders.y2 - 1):
                 blt.put_ext(x * variables.ui_offset_x, y *
                             variables.ui_offset_y, -10, -10, tilemap_ui()["ui_block_se"])
 
-    for y in range(screen_borders.y, screen_borders.h):
-        for x in range(screen_borders.x, screen_borders.w):
+    for y in range(screen_borders.y, screen_borders.y2):
+        for x in range(screen_borders.x, screen_borders.x2):
             if (y == screen_borders.y):
-                blt.put_ext(x * variables.ui_offset_x, y *
-                            variables.ui_offset_y, 0, 0, tilemap_ui()["ui_block_horizontal"])
-            elif (y == screen_borders.h - 1):
+                blt.put(x * variables.ui_offset_x, y *
+                        variables.ui_offset_y, tilemap_ui()["ui_block_horizontal"])
+            elif (y == screen_borders.y2 - 1):
                 blt.put(x * variables.ui_offset_x, y *
                         variables.ui_offset_y, tilemap_ui()["ui_block_horizontal"])
             elif (x == screen_borders.x):
                 blt.put(x * variables.ui_offset_x, y *
                         variables.ui_offset_y, tilemap_ui()["ui_block_vertical"])
-            elif (x == screen_borders.w - 1):
+            elif (x == screen_borders.x2 - 1):
                 blt.put(x * variables.ui_offset_x, y *
                         variables.ui_offset_y, tilemap_ui()["ui_block_vertical"])
             if (x == screen_borders.x and y == screen_borders.y):
                 blt.put(x * variables.ui_offset_x, y *
                         variables.ui_offset_y, tilemap_ui()["ui_block_nw"])
-            if (x == screen_borders.w - 1 and y == screen_borders.y):
+            if (x == screen_borders.x2 - 1 and y == screen_borders.y):
                 blt.put(x * variables.ui_offset_x, y *
                         variables.ui_offset_y, tilemap_ui()["ui_block_ne"])
-            if (x == screen_borders.x and y == screen_borders.h - 1):
+            if (x == screen_borders.x and y == screen_borders.y2 - 1):
                 blt.put(x * variables.ui_offset_x, y *
                         variables.ui_offset_y, tilemap_ui()["ui_block_sw"])
-            if (x == screen_borders.w - 1 and y == screen_borders.h - 1):
+            if (x == screen_borders.x2 - 1 and y == screen_borders.y2 - 1):
+                blt.put(x * variables.ui_offset_x, y *
+                        variables.ui_offset_y, tilemap_ui()["ui_block_se"])
+
+    for y in range(side_panel_borders.y, side_panel_borders.y2):
+        for x in range(side_panel_borders.x, side_panel_borders.x2 + 1):
+            if (y == side_panel_borders.y):
+                blt.put(x * variables.ui_offset_x, y *
+                        variables.ui_offset_y, tilemap_ui()["ui_block_horizontal"])
+            elif (y == side_panel_borders.h - 1):
+                blt.put(x * variables.ui_offset_x, y *
+                        variables.ui_offset_y, tilemap_ui()["ui_block_horizontal"])
+            elif (x == side_panel_borders.x):
+                blt.put(x * variables.ui_offset_x, y *
+                        variables.ui_offset_y, tilemap_ui()["ui_block_vertical"])
+            elif (x == side_panel_borders.x2):
+                blt.put(x * variables.ui_offset_x, y *
+                        variables.ui_offset_y, tilemap_ui()["ui_block_vertical"])
+            if (x == side_panel_borders.x and y == side_panel_borders.y):
+                blt.put(x * variables.ui_offset_x, y *
+                        variables.ui_offset_y, tilemap_ui()["ui_block_nw"])
+            if (x == side_panel_borders.x2 and y == side_panel_borders.y):
+                blt.put(x * variables.ui_offset_x, y *
+                        variables.ui_offset_y, tilemap_ui()["ui_block_ne"])
+            if (x == side_panel_borders.x and y == side_panel_borders.h - 1):
+                blt.put(x * variables.ui_offset_x, y *
+                        variables.ui_offset_y, tilemap_ui()["ui_block_sw"])
+            if (x == side_panel_borders.x2 and y == side_panel_borders.h - 1):
                 blt.put(x * variables.ui_offset_x, y *
                         variables.ui_offset_y, tilemap_ui()["ui_block_se"])
 
@@ -464,7 +533,46 @@ def draw_indicator(entity_x, entity_y, game_camera, color=None, occupied_tiles=N
                     variables.tile_offset_y, 0, 0, tilemap()["indicator"])
 
 
-def draw_all(game_map, game_camera, player, entities, msg_panel, msg_panel_borders, screen_borders):
+def draw_minimap(game_map, ui_elements):
+    blt.layer(1)
+    x0 = ui_elements.side_panel_borders.x
+    y0 = ui_elements.side_panel_borders.y
+
+    minimap = np.ones_like(game_map.tiles, dtype=int)
+    for x in range(game_map.width):
+        for y in range(game_map.height):
+            minimap[y][x] = blt.color_from_name("dark gray")
+            if len(game_map.tiles[x][y].entities_on_tile) > 0:
+                if game_map.tiles[x][y].entities_on_tile[-1].name == "tree":
+                    minimap[y][x] = blt.color_from_name("dark green")
+                elif "wall" in game_map.tiles[x][y].entities_on_tile[-1].name:
+                    minimap[y][x] = blt.color_from_name("dark amber")
+                elif game_map.tiles[x][y].entities_on_tile[-1].name == "player":
+                    minimap[y][x] = blt.color_from_name(None)
+                elif game_map.tiles[x][y].entities_on_tile[-1].fighter \
+                        and game_map.tiles[x][y].entities_on_tile[-1].name != "player":
+                    minimap[y][x] = blt.color_from_name("light red")
+                else:
+                    minimap[y][x] = blt.color_from_name("light gray")
+            elif game_map.tiles[x][y].blocked:
+                minimap[y][x] = blt.color_from_name("light gray")
+            if not game_map.tiles[x][y].explored:
+                minimap[y][x] = blt.color_from_name("#000000")
+
+    minimap = minimap.flatten()
+    minimap = (c_uint32 * len(minimap))(*minimap)
+    
+    blt.set(
+        "U+F900: %d, raw-size=%dx%d, resize=%dx%d, resize-filter=nearest" % (
+            addressof(minimap),
+            game_map.width, game_map.height,
+            200, 240)
+    )
+
+    blt.put_ext(x0 * variables.ui_offset_x + 3, y0 * variables.ui_offset_y + 3, 0, 0, 0xF900)
+
+
+def draw_all(game_map, game_camera, player, entities, ui_elements):
     game_camera.move_camera(
         player.x, player.y, game_map.width, game_map.height)
     cursor_x, cursor_y = None, None
@@ -472,9 +580,10 @@ def draw_all(game_map, game_camera, player, entities, msg_panel, msg_panel_borde
         cursor_x = entities["cursor"][0].x
         cursor_y = entities["cursor"][0].y
 
-    draw_map(game_map, game_camera, player, cursor_x, cursor_y)
-    draw_ui(msg_panel, msg_panel_borders, screen_borders)
+    draw_map(game_map, game_camera, player, cursor_x, cursor_y, ui_elements)
+    draw_ui(ui_elements)
     draw_stats(player)
+    #draw_minimap(game_map, ui_elements)
 
 
 def clear(entity, x, y):
@@ -501,5 +610,5 @@ def clear_camera(n):
     i = 0
     while i < n:
         blt.layer(i)
-        blt.clear_area(1, 1, variables.viewport_x, variables.viewport_y)
+        blt.clear_area(1, 1, variables.viewport_w, variables.viewport_h)
         i += 1
