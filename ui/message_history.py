@@ -109,8 +109,8 @@ def show_msg_history(message_log, name):
     frame.update_geometry(
         padding_left+1,
         padding_top,
-        variables.viewport_x +5- (padding_left + padding_right),
-        variables.viewport_y - (padding_top + padding_bottom))
+        variables.viewport_w +5- (padding_left + padding_right),
+        variables.viewport_h - (padding_top + padding_bottom))
 
     if name == "Message history":
         prompt = \

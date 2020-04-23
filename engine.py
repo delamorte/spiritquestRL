@@ -18,7 +18,7 @@ from map_objects.levels import level_change
 from map_objects.tilemap import init_tiles, tilemap
 from map_objects.minimap import test_dynamic_sprites
 from random import randint
-from ui.elements import init_ui
+from ui.elements import UIElements
 from ui.game_messages import MessageLog
 from ui.menus import main_menu
 from ui.message_history import show_msg_history
@@ -40,12 +40,10 @@ TODO:
 
 FIX:
 
-- Text alignment when resizing window
+- 2x2 monsters for adambolt & ascii
 
 BUGS:
 
-- Enemy HP not updated properly on death
-- Sometimes floor gets drawn over wall in home
 
 
 """
@@ -57,7 +55,7 @@ def blt_init():
     blt.open()
 
     window_title = 'SpiritQuestRL'
-    size = 'size=150x60'
+    size = 'size=160x60'
     title = 'title=' + window_title
     cellsize = 'cellsize=auto'
     resizable = 'resizeable=false'
@@ -68,7 +66,7 @@ def blt_init():
     init_tiles()
 
 
-def new_game(choice):
+def new_game(choice, ui_elements):
     # Create player
 
     inventory_component = Inventory(26)
@@ -88,8 +86,8 @@ def new_game(choice):
     player.player.avatar[choice].hp += 20
     player.player.avatar[choice].power += 1
 
-    blt.clear_area(2, variables.viewport_y +
-                   variables.ui_offset_y + 1, variables.viewport_x, 1)
+    blt.clear_area(2, variables.viewport_h +
+                   variables.ui_offset_y + 1, ui_elements.viewport_x, 1)
 
     if variables.gfx == "ascii":
         player.char = tilemap()["player"]
@@ -99,9 +97,8 @@ def new_game(choice):
     message_log = MessageLog(4)
 
     # Initialize game camera
-    variables.camera_width = int(floor(blt.state(blt.TK_WIDTH) / variables.ui_offset_x) * variables.camera_offset)
-    variables.camera_height = int(
-        floor(blt.state(blt.TK_HEIGHT) / variables.ui_offset_y - 5) * variables.camera_offset)
+    variables.camera_width = int(floor(variables.viewport_w / variables.ui_offset_x+2))
+    variables.camera_height = int(floor(variables.viewport_h / variables.ui_offset_y+2))
     game_camera = Camera(1, 1, variables.camera_width, variables.camera_height)
 
     levels = {}
@@ -113,27 +110,27 @@ def new_game(choice):
 
 
 def game_loop(main_menu_show=True, choice=None):
-    msg_panel, msg_panel_borders, screen_borders = init_ui()
-    draw_ui(msg_panel, msg_panel_borders, screen_borders)
+    ui_elements = UIElements()
+    draw_ui(ui_elements)
 
     if main_menu_show:
-        choice = main_menu()
-        msg_panel, msg_panel_borders, screen_borders = init_ui()
-        draw_ui(msg_panel, msg_panel_borders, screen_borders)
-    game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute = new_game(choice)
+        choice = main_menu(ui_elements=ui_elements)
+        draw_ui(ui_elements)
+    game_camera, game_state, player, levels, message_log, time_counter, \
+        insights, fov_recompute = new_game(choice, ui_elements)
 
     game_map, entities, player = level_change(
         "hub", levels, player)
 
-    draw_ui(msg_panel, msg_panel_borders, screen_borders)
+    draw_ui(ui_elements)
 
     while True:
         if fov_recompute:
             player.light_source.recompute_fov(player.x, player.y)
             player.player.init_light()
 
-        draw_all(game_map, game_camera, player, entities, msg_panel, msg_panel_borders, screen_borders)
-        draw_messages(msg_panel, message_log)
+        draw_all(game_map, game_camera, player, entities, ui_elements)
+        draw_messages(ui_elements.msg_panel, message_log)
 
         fov_recompute = False
         blt.refresh()
@@ -163,17 +160,17 @@ def game_loop(main_menu_show=True, choice=None):
                     break
 
                 if key == blt.TK_ESCAPE:
-                    new_choice = main_menu(resume=False)
+                    new_choice = main_menu(resume=False, ui_elements=ui_elements)
                     if not new_choice:
-                        draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                        draw_ui(ui_elements)
                         fov_recompute = True
                     else:
                         blt.layer(1)
-                        blt.clear_area(msg_panel.x * variables.ui_offset_x, msg_panel.y * variables.ui_offset_y,
-                                       msg_panel.w *
-                                       variables.ui_offset_x, msg_panel.h * variables.ui_offset_y)
-                        blt.clear_area(int(variables.viewport_x / 2) - 5,
-                                       variables.viewport_y + variables.ui_offset_y + 1, variables.viewport_x, 1)
+                        blt.clear_area(ui_elements.msg_panel.x * variables.ui_offset_x, ui_elements.msg_panel.y * variables.ui_offset_y,
+                                       ui_elements.msg_panel.w *
+                                       variables.ui_offset_x, ui_elements.msg_panel.h * variables.ui_offset_y)
+                        blt.clear_area(int(ui_elements.viewport_x / 2) - 5,
+                                       variables.viewport_h + variables.ui_offset_y + 1, ui_elements.viewport_x, 1)
                         game_loop(False, new_choice)
 
         if game_state == GameStates.PLAYER_TURN:
@@ -183,9 +180,9 @@ def game_loop(main_menu_show=True, choice=None):
 
             if key == blt.TK_ESCAPE:
 
-                new_choice = main_menu(resume=True)
+                new_choice = main_menu(resume=True, ui_elements=ui_elements)
                 if not new_choice:
-                    draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                    draw_ui(ui_elements)
                     fov_recompute = True
                 else:
                     return True, False, new_choice
@@ -319,7 +316,7 @@ def game_loop(main_menu_show=True, choice=None):
                 message_log.send("I have no power to meditate longer..")
                 player.player.spirit_power = 50
                 player.fighter.hp = player.fighter.max_hp
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                draw_ui(ui_elements)
 
             elif stairs:
                 if "stairs" in entities:
@@ -342,13 +339,13 @@ def game_loop(main_menu_show=True, choice=None):
                         message_log.send(
                             "I'm dreaming... I feel my spirit power draining.")
                         message_log.send("I'm hungry..")
-                    draw_messages(msg_panel, message_log)
+                    draw_messages(ui_elements.msg_panel, message_log)
                     fov_recompute = True
 
             elif key == blt.TK_M:
                 show_msg_history(
                     message_log.history, "Message history")
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                draw_ui(ui_elements)
                 fov_recompute = True
 
             elif key == blt.TK_I:
@@ -357,12 +354,12 @@ def game_loop(main_menu_show=True, choice=None):
                     show_items.append(get_article(item.name) + " " + item.name)
                 show_msg_history(
                     show_items, "Inventory")
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                draw_ui(ui_elements)
                 fov_recompute = True
 
             elif key == blt.TK_TAB:
                 test_dynamic_sprites(game_map)
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                draw_ui(ui_elements)
                 fov_recompute = True
 
         elif game_state == GameStates.TARGETING:
@@ -405,7 +402,7 @@ def game_loop(main_menu_show=True, choice=None):
                     if entity.door.name == "d_entrance":
                         entity.door.set_status("open", game_map)
             fov_recompute = True
-            draw_messages(msg_panel, message_log)
+            draw_messages(ui_elements.msg_panel, message_log)
 
             for entity in entities["monsters"]:
 

@@ -2,7 +2,6 @@ from bearlibterminal import terminal as blt
 from descriptions import abilities, bestiary, meditate_params
 from draw import clear_camera, draw_ui
 from map_objects.tilemap import init_tiles, tilemap
-from ui.elements import init_ui
 import variables
 from random import sample
 from palettes import get_monster_color
@@ -10,10 +9,10 @@ from os import path
 from textwrap import wrap
 
 
-def main_menu(resume=False):
+def main_menu(resume=False, ui_elements=None):
     current_range = 0
-    center_x = int(variables.viewport_x / 2)
-    center_y = int(variables.viewport_y / 2)
+    center_x = int(variables.viewport_w / 2)
+    center_y = int(variables.viewport_h / 2)
 
     while True:
 
@@ -53,21 +52,21 @@ def main_menu(resume=False):
                 variables.tile_width = str(16)
                 init_tiles()
                 msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                draw_ui(ui_elements)
             elif variables.gfx == "ascii":
                 variables.gfx = "oryx"
                 variables.tile_height = str(48)
                 variables.tile_width = str(32)
                 init_tiles()
                 msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                draw_ui(ui_elements)
             elif variables.gfx == "oryx":
                 variables.gfx = "adambolt"
                 variables.tile_height = str(48)
                 variables.tile_width = str(32)
                 init_tiles()
                 msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                draw_ui(ui_elements)
 
         if key == blt.TK_ENTER and not resume and r == "Tilesize: " + \
                 variables.tile_width + "x" + variables.tile_height:
@@ -76,13 +75,13 @@ def main_menu(resume=False):
                 variables.tile_width = str(16)
                 init_tiles()
                 msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                draw_ui(ui_elements)
             else:
                 variables.tile_height = str(48)
                 variables.tile_width = str(32)
                 init_tiles()
                 msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                draw_ui(ui_elements)
 
         if key == blt.TK_ENTER and r is "New game":
 
@@ -163,11 +162,11 @@ def main_menu(resume=False):
             key = None
             while key not in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_ENTER):
                 msg_panel, msg_panel_borders, screen_borders = init_ui()
-                center_x = int(variables.viewport_x / 2)
-                center_y = int(variables.viewport_y / 2)
+                center_x = int(variables.viewport_w / 2)
+                center_y = int(variables.viewport_h / 2)
                 h = blt.state(blt.TK_HEIGHT)
                 w = blt.state(blt.TK_WIDTH)
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
+                draw_ui(ui_elements)
                 clear_camera(5)
                 blt.puts(center_x + 2, center_y,
                          "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.",
@@ -210,8 +209,8 @@ def main_menu(resume=False):
 def choose_avatar(player):
     key = None
     current_range = 0
-    center_x = int(variables.viewport_x / 2)
-    center_y = int(variables.viewport_y / 2)
+    center_x = int(variables.viewport_w / 2)
+    center_y = int(variables.viewport_h / 2)
 
     while True:
         clear_camera(5)
@@ -276,8 +275,8 @@ def choose_avatar(player):
 def set_up_level_params(question_number, prev_choices):
     key = None
     current_range = 0
-    center_x = int(variables.viewport_x / 2)
-    center_y = int(variables.viewport_y / 2)
+    center_x = int(variables.viewport_w / 2)
+    center_y = int(variables.viewport_h / 2)
     choice_params = dict(sample(meditate_params().items(), 3))
     choice_params = {x: choice_params[x] for x in choice_params if x not in prev_choices}
 

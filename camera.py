@@ -22,6 +22,7 @@ class Camera:
         x = target_x - int(self.width / 2)
         y = target_y - int(self.height / 2)
 
+
         if x < 0:
             x = -int(variables.camera_offset/2)
         if y < 0:
