@@ -58,7 +58,8 @@ class BasicMonster:
                 monster.move_astar(target, entities, game_map)
             
         else:
-            self.idle_actions(game_map)
+            # why..
+            # self.idle_actions(game_map)
             self.action_begin = False
 
         return combat_msg

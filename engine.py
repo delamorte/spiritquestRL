@@ -143,6 +143,7 @@ def game_loop(main_menu_show=True, choice=None):
         pickup = action.get('pickup')
         interact = action.get("interact")
         stairs = action.get('stairs')
+        minimap = action.get('map')
         fullscreen = action.get('fullscreen')
 
         if not player.fighter.dead:
@@ -169,8 +170,8 @@ def game_loop(main_menu_show=True, choice=None):
                         blt.clear_area(ui_elements.msg_panel.x * variables.ui_offset_x, ui_elements.msg_panel.y * variables.ui_offset_y,
                                        ui_elements.msg_panel.w *
                                        variables.ui_offset_x, ui_elements.msg_panel.h * variables.ui_offset_y)
-                        blt.clear_area(int(ui_elements.viewport_x / 2) - 5,
-                                       variables.viewport_h + variables.ui_offset_y + 1, ui_elements.viewport_x, 1)
+                        blt.clear_area(int(variables.viewport_w / 2) - 5,
+                                       variables.viewport_h + variables.ui_offset_y + 1, variables.viewport_w, 1)
                         game_loop(False, new_choice)
 
         if game_state == GameStates.PLAYER_TURN:
@@ -358,7 +359,7 @@ def game_loop(main_menu_show=True, choice=None):
                 fov_recompute = True
 
             elif key == blt.TK_TAB:
-                test_dynamic_sprites(game_map)
+                test_dynamic_sprites(game_map, ui_elements)
                 draw_ui(ui_elements)
                 fov_recompute = True
 
