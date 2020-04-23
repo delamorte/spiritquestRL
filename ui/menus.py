@@ -51,21 +51,21 @@ def main_menu(resume=False, ui_elements=None):
                 variables.tile_height = str(24)
                 variables.tile_width = str(16)
                 init_tiles()
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                ui_elements.init_ui()
                 draw_ui(ui_elements)
             elif variables.gfx == "ascii":
                 variables.gfx = "oryx"
                 variables.tile_height = str(48)
                 variables.tile_width = str(32)
                 init_tiles()
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                ui_elements.init_ui()
                 draw_ui(ui_elements)
             elif variables.gfx == "oryx":
                 variables.gfx = "adambolt"
                 variables.tile_height = str(48)
                 variables.tile_width = str(32)
                 init_tiles()
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                ui_elements.init_ui()
                 draw_ui(ui_elements)
 
         if key == blt.TK_ENTER and not resume and r == "Tilesize: " + \
@@ -74,13 +74,13 @@ def main_menu(resume=False, ui_elements=None):
                 variables.tile_height = str(24)
                 variables.tile_width = str(16)
                 init_tiles()
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                ui_elements.init_ui()
                 draw_ui(ui_elements)
             else:
                 variables.tile_height = str(48)
                 variables.tile_width = str(32)
                 init_tiles()
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                ui_elements.init_ui()
                 draw_ui(ui_elements)
 
         if key == blt.TK_ENTER and r is "New game":
@@ -161,7 +161,7 @@ def main_menu(resume=False, ui_elements=None):
             blt.set("window: resizeable=true, minimum-size=60x20")
             key = None
             while key not in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_ENTER):
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
+                ui_elements.init_ui()
                 center_x = int(variables.viewport_w / 2)
                 center_y = int(variables.viewport_h / 2)
                 h = blt.state(blt.TK_HEIGHT)
