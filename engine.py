@@ -55,7 +55,7 @@ def blt_init():
     blt.open()
 
     window_title = 'SpiritQuestRL'
-    size = 'size=160x60'
+    size = 'size=200x80'
     title = 'title=' + window_title
     cellsize = 'cellsize=auto'
     resizable = 'resizeable=false'
@@ -122,7 +122,7 @@ def game_loop(main_menu_show=True, choice=None):
     game_map, entities, player = level_change(
         "hub", levels, player)
 
-    draw_ui(ui_elements)
+    #draw_ui(ui_elements)
 
     while True:
         if fov_recompute:
@@ -136,7 +136,7 @@ def game_loop(main_menu_show=True, choice=None):
         blt.refresh()
 
         key = blt.read()
-        clear_entities(entities, game_camera)
+        #clear_entities(entities, game_camera)
         action = handle_keys(key)
 
         move = action.get('move')
@@ -186,6 +186,8 @@ def game_loop(main_menu_show=True, choice=None):
                     draw_ui(ui_elements)
                     fov_recompute = True
                 else:
+                    message_log.clear()
+                    draw_messages(ui_elements.msg_panel, message_log)
                     return True, False, new_choice
 
             if move:

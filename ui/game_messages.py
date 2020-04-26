@@ -1,3 +1,5 @@
+
+
 class MessageLog:
 
     def __init__(self, max_length):
@@ -27,3 +29,4 @@ class MessageLog:
     def clear(self):
 
         self.buffer = []
+        self.new_msgs = True

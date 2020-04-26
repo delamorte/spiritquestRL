@@ -134,12 +134,6 @@ def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
 
 def draw_map(game_map, game_camera, player, cursor_x, cursor_y, ui_elements):
     
-    x0 = ui_elements.side_panel_borders.x
-    y0 = ui_elements.side_panel_borders.y
-
-    minimap = np.ones_like(game_map.tiles, dtype=int)
-    
-    
     # Set boundaries where to draw map
     bound_x = ceil(variables.camera_offset)
     bound_y = ceil(variables.camera_offset)
@@ -163,24 +157,6 @@ def draw_map(game_map, game_camera, player, cursor_x, cursor_y, ui_elements):
             if game_map.height < game_camera.height:
                 map_y = y
             visible = player.light_source.fov_map.fov[map_y, map_x]
-
-            minimap[map_y][map_x] = blt.color_from_name("dark gray")
-            if len(game_map.tiles[map_x][map_y].entities_on_tile) > 0:
-                if game_map.tiles[map_x][map_y].entities_on_tile[-1].name == "tree":
-                    minimap[map_y][map_x] = blt.color_from_name("dark green")
-                elif "wall" in game_map.tiles[map_x][map_y].entities_on_tile[-1].name:
-                    minimap[map_y][map_x] = blt.color_from_name("dark amber")
-                elif game_map.tiles[map_x][map_y].entities_on_tile[-1].name == "player":
-                    minimap[map_y][map_x] = blt.color_from_name(None)
-                elif game_map.tiles[map_x][map_y].entities_on_tile[-1].fighter \
-                        and game_map.tiles[map_x][map_y].entities_on_tile[-1].name != "player":
-                    minimap[map_y][map_x] = blt.color_from_name("light red")
-                else:
-                    minimap[map_y][map_x] = blt.color_from_name("light gray")
-            elif game_map.tiles[map_x][map_y].blocked:
-                minimap[map_y][map_x] = blt.color_from_name("light gray")
-            if not game_map.tiles[map_x][map_y].explored:
-                minimap[map_y][map_x] = blt.color_from_name("#000000")
 
             # Draw tiles within fov
             if visible:
@@ -239,18 +215,6 @@ def draw_map(game_map, game_camera, player, cursor_x, cursor_y, ui_elements):
                 for n in game_map.tiles[map_x][map_y].entities_on_tile:
                     if n not in entities:
                         entities.append(n)
-
-    minimap = minimap.flatten()
-    minimap = (c_uint32 * len(minimap))(*minimap)
-
-    blt.set(
-        "U+F900: %d, raw-size=%dx%d, resize=%dx%d, resize-filter=nearest" % (
-            addressof(minimap),
-            game_map.width, game_map.height,
-            200, 240)
-    )
-    blt.color(None)
-    blt.put_ext(x0 * variables.ui_offset_x + 3, y0 * variables.ui_offset_y + 3, 0, 0, 0xF900)
 
     light_sources = draw_entities(entities, player,
                                   game_map, game_camera, cursor_x, cursor_y)
@@ -529,11 +493,11 @@ def draw_indicator(entity_x, entity_y, game_camera, color=None, occupied_tiles=N
     if occupied_tiles is not None:
         return
     else:
-        blt.put_ext(x * variables.tile_offset_x, y *
-                    variables.tile_offset_y, 0, 0, tilemap()["indicator"])
+        blt.put(x * variables.tile_offset_x, y *
+                    variables.tile_offset_y, tilemap()["indicator"])
 
 
-def draw_minimap(game_map, ui_elements):
+def draw_minimap(game_map, ui_elements, player):
     blt.layer(1)
     x0 = ui_elements.side_panel_borders.x
     y0 = ui_elements.side_panel_borders.y
@@ -541,23 +505,29 @@ def draw_minimap(game_map, ui_elements):
     minimap = np.ones_like(game_map.tiles, dtype=int)
     for x in range(game_map.width):
         for y in range(game_map.height):
-            minimap[y][x] = blt.color_from_name("dark gray")
-            if len(game_map.tiles[x][y].entities_on_tile) > 0:
-                if game_map.tiles[x][y].entities_on_tile[-1].name == "tree":
-                    minimap[y][x] = blt.color_from_name("dark green")
-                elif "wall" in game_map.tiles[x][y].entities_on_tile[-1].name:
-                    minimap[y][x] = blt.color_from_name("dark amber")
-                elif game_map.tiles[x][y].entities_on_tile[-1].name == "player":
-                    minimap[y][x] = blt.color_from_name(None)
-                elif game_map.tiles[x][y].entities_on_tile[-1].fighter \
-                        and game_map.tiles[x][y].entities_on_tile[-1].name != "player":
-                    minimap[y][x] = blt.color_from_name("light red")
-                else:
+            visible = player.light_source.fov_map.fov[y, x]
+            if visible:
+                minimap[y][x] = blt.color_from_name("dark gray")
+                if len(game_map.tiles[x][y].entities_on_tile) > 0:
+                    if game_map.tiles[x][y].entities_on_tile[-1].name == "tree":
+                        minimap[y][x] = blt.color_from_name("dark green")
+                    elif "wall" in game_map.tiles[x][y].entities_on_tile[-1].name:
+                        minimap[y][x] = blt.color_from_name("dark amber")
+                    elif game_map.tiles[x][y].entities_on_tile[-1].name == "player":
+                        minimap[y][x] = blt.color_from_name(None)
+                    elif game_map.tiles[x][y].entities_on_tile[-1].fighter \
+                            and game_map.tiles[x][y].entities_on_tile[-1].name != "player":
+                        minimap[y][x] = blt.color_from_name("light red")
+                    else:
+                        minimap[y][x] = blt.color_from_name("light gray")
+                elif game_map.tiles[x][y].blocked:
                     minimap[y][x] = blt.color_from_name("light gray")
-            elif game_map.tiles[x][y].blocked:
-                minimap[y][x] = blt.color_from_name("light gray")
-            if not game_map.tiles[x][y].explored:
-                minimap[y][x] = blt.color_from_name("#000000")
+            elif game_map.tiles[x][y].explored:
+                if len(game_map.tiles[x][y].entities_on_tile) > 0:
+                    minimap[y][x] = blt.color_from_name("light gray")
+                else:
+                    minimap[y][x] = blt.color_from_name("dark gray")
+
 
     minimap = minimap.flatten()
     minimap = (c_uint32 * len(minimap))(*minimap)
@@ -569,7 +539,7 @@ def draw_minimap(game_map, ui_elements):
             200, 240)
     )
 
-    blt.put_ext(x0 * variables.ui_offset_x + 3, y0 * variables.ui_offset_y + 3, 0, 0, 0xF900)
+    blt.put(x0 * variables.ui_offset_x + 3, y0 * variables.ui_offset_y + 3, 0xF900)
 
 
 def draw_all(game_map, game_camera, player, entities, ui_elements):
@@ -581,9 +551,9 @@ def draw_all(game_map, game_camera, player, entities, ui_elements):
         cursor_y = entities["cursor"][0].y
 
     draw_map(game_map, game_camera, player, cursor_x, cursor_y, ui_elements)
-    draw_ui(ui_elements)
+    #draw_ui(ui_elements)
     draw_stats(player)
-    #draw_minimap(game_map, ui_elements)
+    draw_minimap(game_map, ui_elements, player)
 
 
 def clear(entity, x, y):
