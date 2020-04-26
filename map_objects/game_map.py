@@ -41,6 +41,7 @@ class GameMap:
                         y == 0 or y == self.height - 1):
                     tiles[x][y].blocked = True
                     tiles[x][y].block_sight = True
+                    tiles[x][y].char = " "
 
         return tiles
 

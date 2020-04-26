@@ -1,8 +1,10 @@
 from map_objects.game_map import GameMap
+from draw import draw_side_panel_content
 from ui.menus import choose_avatar
 
 
 def make_map(destination, levels, player, entities, game_map, stairs):
+    world_tendency = 0
     # Set debug level
     if destination == "debug":
         entities = {}
@@ -43,10 +45,11 @@ def make_map(destination, levels, player, entities, game_map, stairs):
         player.light_source.initialize_fov(game_map)
         levels[game_map.name] = [game_map, entities]
 
-    return game_map, entities, player
+    return game_map, entities, player, world_tendency
 
 
-def level_change(destination, levels, player, entities=None, game_map=None, stairs=None):
+def level_change(destination, levels, player, entities=None, game_map=None, stairs=None, ui_elements=None):
+    world_tendency = 0
     if not levels:
         game_map = GameMap(40, 40, "hub")
         entities = game_map.generate_hub()
@@ -68,6 +71,7 @@ def level_change(destination, levels, player, entities=None, game_map=None, stai
             # player.color = None
 
     else:
-        game_map, entities, player = make_map(destination, levels, player, entities, game_map, stairs)
+        game_map, entities, player, world_tendency = make_map(destination, levels, player, entities, game_map, stairs)
 
+    draw_side_panel_content(game_map, player, ui_elements, world_tendency)
     return game_map, entities, player

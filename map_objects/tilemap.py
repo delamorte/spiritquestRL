@@ -54,8 +54,8 @@ def init_tiles():
             "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
 
     blt.set("U+F100: %d, \
-        size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx5), 192, 448) +
-            "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+        size=32x32, raw-size=%dx%d, resize=" % (addressof(gfx5), 192, 448) +
+            "32x32" + ", resize-filter=nearest, spacing=4x4, align=top-left")
 
     # Big tiles
     blt.set("U+F300: %d, \

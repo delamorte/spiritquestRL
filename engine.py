@@ -8,7 +8,7 @@ from components.player import Player
 from components.cursor import Cursor
 from components.light_source import LightSource
 from death_functions import kill_monster, kill_player
-from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities
+from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities, draw_side_panel_content
 from entity import Entity, blocking_entity
 from fighter_stats import get_fighter_stats
 from game_states import GameStates
@@ -120,7 +120,7 @@ def game_loop(main_menu_show=True, choice=None):
         insights, fov_recompute = new_game(choice, ui_elements)
 
     game_map, entities, player = level_change(
-        "debug", levels, player)
+        "hub", levels, player, ui_elements=ui_elements)
 
     #draw_ui(ui_elements)
 
@@ -292,8 +292,8 @@ def game_loop(main_menu_show=True, choice=None):
                             time_counter.take_turn(1)
                             game_state = GameStates.ENEMY_TURN
                             break
-                        else:
-                            message_log.send("There is nothing here to pick up.")
+                        # else:
+                        #     message_log.send("There is nothing here to pick up.")
                 else:
                     message_log.send("There is nothing here to pick up.")
 
@@ -307,14 +307,14 @@ def game_loop(main_menu_show=True, choice=None):
             elif key == blt.TK_X:
                 game_state = GameStates.TARGETING
                 cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 5, 0xE800 + 1746, "light yellow", "cursor",
+                cursor = Entity(player.x, player.y, 4, 0xE800 + 1746, "light yellow", "cursor",
                                 cursor=cursor_component, stand_on_messages=False)
                 game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
                 entities["cursor"] = [cursor]
 
             elif player.player.spirit_power <= 0:
                 game_map, entities, player = level_change(
-                    "hub", levels, player, entities, game_map)
+                    "hub", levels, player, entities, game_map, ui_elements=ui_elements)
                 message_log.clear()
                 message_log.send("I have no power to meditate longer..")
                 player.player.spirit_power = 50
@@ -327,7 +327,7 @@ def game_loop(main_menu_show=True, choice=None):
                         if player.x == entity.x and player.y == entity.y:
                             game_map.tiles[player.x][player.y].entities_on_tile.remove(player)
                             game_map, entities, player = level_change(
-                                entity.stairs.destination[0], levels, player, entities, game_map, entity.stairs)
+                                entity.stairs.destination[0], levels, player, entities, game_map, entity.stairs, ui_elements=ui_elements)
 
                     variables.old_stack = variables.stack
 
@@ -399,7 +399,7 @@ def game_loop(main_menu_show=True, choice=None):
                 message_log.send("My spirit has granted me new insights!")
                 message_log.send("I should explore around my home..")
                 game_map, entities, player = level_change(
-                    "hub", levels, player, entities, game_map)
+                    "hub", levels, player, entities, game_map, ui_elements=ui_elements)
                 # Currently opens the door in hub
                 for entity in entities["doors"]:
                     if entity.door.name == "d_entrance":

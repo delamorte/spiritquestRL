@@ -294,7 +294,7 @@ def draw_messages(msg_panel, message_log):
             ". ".join(formatted_stack) + ".")
 
     if message_log.new_msgs:
-        blt.layer(1)
+        blt.layer(0)
         blt.clear_area(msg_panel.x * variables.ui_offset_x, msg_panel.y * variables.ui_offset_y, msg_panel.w *
                        variables.ui_offset_x, msg_panel.h * variables.ui_offset_y)
         blt.color("white")
@@ -316,7 +316,7 @@ def draw_messages(msg_panel, message_log):
 
 def draw_stats(player, target=None):
     power_msg = "Spirit power left: " + str(player.player.spirit_power)
-    blt.layer(1)
+    blt.layer(0)
     blt.clear_area(2, variables.viewport_h + variables.ui_offset_y + 1,
                    int(variables.viewport_w / 2) + int(len(power_msg) / 2 + 5) - 5, 1)
     blt.color("gray")
@@ -392,7 +392,7 @@ def draw_stats(player, target=None):
 
 def draw_ui(ui_elements):
     blt.color("gray")
-    blt.layer(0)
+    blt.layer(1)
     #     for y in range(msg_panel.y, msg_panel.h):
     #         for x in range(msg_panel.x, msg_panel.w):
     #             blt.put_ext(x * variables.ui_offset_x, y *
@@ -482,6 +482,9 @@ def draw_ui(ui_elements):
             if (x == side_panel_borders.x2 and y == side_panel_borders.h - 1):
                 blt.put(x * variables.ui_offset_x, y *
                         variables.ui_offset_y, tilemap_ui()["ui_block_se"])
+            if (x > side_panel_borders.x and x < side_panel_borders.x2 and y == side_panel_borders.y+6):
+                blt.put(x * variables.ui_offset_x, y *
+                        variables.ui_offset_y, tilemap_ui()["ui_block_horizontal"])
 
 
 def draw_indicator(entity_x, entity_y, game_camera, color=None, occupied_tiles=None):
@@ -539,6 +542,51 @@ def draw_minimap(game_map, ui_elements, player):
 
     blt.put(x0 * variables.ui_offset_x + 3, y0 * variables.ui_offset_y + 3, 0xF900)
 
+def draw_side_panel_content(game_map, player, ui_elements, world_tendency=0):
+    side_panel_borders = ui_elements.side_panel_borders
+    # Draw side panel content
+    blt.layer(10)
+    blt.color(None)
+    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
+             side_panel_borders.y * variables.ui_offset_y + 21,  "Location: " + game_map.name, 0, 0,
+             blt.TK_ALIGN_LEFT)
+    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
+             side_panel_borders.y * variables.ui_offset_y + 22,  "World tendency: " + str(world_tendency), 0, 0,
+             blt.TK_ALIGN_LEFT)
+
+    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
+             side_panel_borders.y * variables.ui_offset_y + 30,  "Atk: crow talons 2d3", 0, 0,
+             blt.TK_ALIGN_LEFT)
+    blt.color("dark amber")
+    blt.put(side_panel_borders.x * variables.ui_offset_x + 4,
+             side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 29)
+    blt.color(None)
+    blt.put(side_panel_borders.x * variables.ui_offset_x + 10,
+             side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 4)
+    blt.put(side_panel_borders.x * variables.ui_offset_x + 16,
+             side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 22)
+
+    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
+             side_panel_borders.y * variables.ui_offset_y + 35,  "Atk mod: swoop 1d3 (20% chance)", 0, 0,
+             blt.TK_ALIGN_LEFT)
+
+    blt.color("dark amber")
+    blt.put(side_panel_borders.x * variables.ui_offset_x + 4,
+             side_panel_borders.y * variables.ui_offset_y + 37,  0xF100 + 25)
+
+    blt.color(None)
+    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
+             side_panel_borders.y * variables.ui_offset_y + 40,  "Abilities: reveal", 0, 0,
+             blt.TK_ALIGN_LEFT)
+
+    blt.color("dark amber")
+    blt.put(side_panel_borders.x * variables.ui_offset_x + 4,
+             side_panel_borders.y * variables.ui_offset_y + 42,  0xF100 + 13)
+
+    blt.color(None)
+    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
+             side_panel_borders.y * variables.ui_offset_y + 45,  "Reveal an area of radius 8 around you, may reveal secrets.", 30, 0,
+             blt.TK_ALIGN_LEFT)
 
 def draw_all(game_map, game_camera, player, entities, ui_elements):
     game_camera.move_camera(
