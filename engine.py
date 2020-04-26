@@ -120,7 +120,7 @@ def game_loop(main_menu_show=True, choice=None):
         insights, fov_recompute = new_game(choice, ui_elements)
 
     game_map, entities, player = level_change(
-        "hub", levels, player)
+        "debug", levels, player)
 
     #draw_ui(ui_elements)
 
@@ -307,7 +307,7 @@ def game_loop(main_menu_show=True, choice=None):
             elif key == blt.TK_X:
                 game_state = GameStates.TARGETING
                 cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 5, 0xE900 + 1746, "light yellow", "cursor",
+                cursor = Entity(player.x, player.y, 5, 0xE800 + 1746, "light yellow", "cursor",
                                 cursor=cursor_component, stand_on_messages=False)
                 game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
                 entities["cursor"] = [cursor]

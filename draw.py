@@ -17,7 +17,7 @@ def draw(entity, game_map, x, y, player):
     #     blt.layer(0)
     #     blt.color("lighter amber")
     #     blt.put(x * variables.tile_offset_x, y *
-    #             variables.tile_offset_y, 0xE900 + 3)
+    #             variables.tile_offset_y, 0xE800 + 3)
 
     # Draw the entity to the screen
     blt.layer(entity.layer)
@@ -133,7 +133,6 @@ def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
 
 
 def draw_map(game_map, game_camera, player, cursor_x, cursor_y, ui_elements):
-    
     # Set boundaries where to draw map
     bound_x = ceil(variables.camera_offset)
     bound_y = ceil(variables.camera_offset)
@@ -397,7 +396,7 @@ def draw_ui(ui_elements):
     #     for y in range(msg_panel.y, msg_panel.h):
     #         for x in range(msg_panel.x, msg_panel.w):
     #             blt.put_ext(x * variables.ui_offset_x, y *
-    #                         variables.ui_offset_y, 0, 0, 0xE100 + 692)
+    #                         variables.ui_offset_y, 0, 0, 0xE000 + 692)
 
     msg_panel_borders = ui_elements.msg_panel_borders
     screen_borders = ui_elements.screen_borders
@@ -494,7 +493,7 @@ def draw_indicator(entity_x, entity_y, game_camera, color=None, occupied_tiles=N
         return
     else:
         blt.put(x * variables.tile_offset_x, y *
-                    variables.tile_offset_y, tilemap()["indicator"])
+                variables.tile_offset_y, tilemap()["indicator"])
 
 
 def draw_minimap(game_map, ui_elements, player):
@@ -528,10 +527,9 @@ def draw_minimap(game_map, ui_elements, player):
                 else:
                     minimap[y][x] = blt.color_from_name("dark gray")
 
-
     minimap = minimap.flatten()
     minimap = (c_uint32 * len(minimap))(*minimap)
-    
+
     blt.set(
         "U+F900: %d, raw-size=%dx%d, resize=%dx%d, resize-filter=nearest" % (
             addressof(minimap),
@@ -551,7 +549,7 @@ def draw_all(game_map, game_camera, player, entities, ui_elements):
         cursor_y = entities["cursor"][0].y
 
     draw_map(game_map, game_camera, player, cursor_x, cursor_y, ui_elements)
-    #draw_ui(ui_elements)
+    # draw_ui(ui_elements)
     draw_stats(player)
     draw_minimap(game_map, ui_elements, player)
 

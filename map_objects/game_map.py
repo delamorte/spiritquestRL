@@ -59,7 +59,7 @@ class GameMap:
                     if ground != 0:
                         name, color = name_color_from_value(ground)
                         if variables.gfx == "oryx":
-                            ground += 0xE500
+                            ground += 0xE400
                         else:
                             ground = tilemap()[name]
                         self.tiles[x][y].char = ground
@@ -69,7 +69,7 @@ class GameMap:
                     if ground_top != 0:
                         name, color = name_color_from_value(ground_top)
                         if variables.gfx == "oryx":
-                            ground_top += 0xE500
+                            ground_top += 0xE400
                         else:
                             ground_top = tilemap()[name]
                         self.tiles[x][y].layers.append((ground_top, color))
@@ -77,7 +77,7 @@ class GameMap:
                     if entity != 0:
                         name, color = name_color_from_value(entity)
                         if variables.gfx == "oryx":
-                            entity += 0xE500
+                            entity += 0xE400
                         else:
                             if isinstance(tilemap()[name], tuple):
                                 entity = tilemap()[name][0]
@@ -783,10 +783,10 @@ class GameMap:
         return door
 
     def scan_doors(self, room):
-        doors_open = [0xE500 + 21, 0xE500 + 23, 0xE500 + 25, 0xE500 + 29, 0xE500 + 31, 0xE500 + 33, 0xE500 + 35,
-                      0xE500 + 37, 0xE500 + 103]
-        doors_closed = [0xE500 + 20, 0xE500 + 22, 0xE500 + 24, 0xE500 + 26, 0xE500 + 27, 0xE500 + 28, 0xE500 + 30,
-                        0xE500 + 32, 0xE500 + 36, 0xE500 + 102]
+        doors_open = [0xE400 + 21, 0xE400 + 23, 0xE400 + 25, 0xE400 + 29, 0xE400 + 31, 0xE400 + 33, 0xE400 + 35,
+                      0xE400 + 37, 0xE400 + 103]
+        doors_closed = [0xE400 + 20, 0xE400 + 22, 0xE400 + 24, 0xE400 + 26, 0xE400 + 27, 0xE400 + 28, 0xE400 + 30,
+                        0xE400 + 32, 0xE400 + 36, 0xE400 + 102]
         doors = []
         for y, row in enumerate(room.layers["terrain_objects"]):
             for x, char in enumerate(row):
@@ -817,28 +817,28 @@ class GameMap:
                         option = randint(0, len(decor_options)-1)
 
                         if option == 0:
-                            name, color = name_color_from_value(tilemap("oryx")["rocks"][0]-0xE500)
+                            name, color = name_color_from_value(tilemap("oryx")["rocks"][0]-0xE400)
                             char = tilemap()["rocks"][randint(
                                 0, (len(tilemap()["rocks"]) - 1))]
                             self.tiles[x][y].layers.append((char, color))
                             self.tiles[x][y].name = name
 
                         if option == 1:
-                            name, color = name_color_from_value(tilemap("oryx")["plants"][0]-0xE500)
+                            name, color = name_color_from_value(tilemap("oryx")["plants"][0]-0xE400)
                             char = tilemap()["plants"][randint(
                                 0, (len(tilemap()["plants"]) - 1))]
                             self.tiles[x][y].layers.append((char, color))
                             self.tiles[x][y].name = name
 
                         if option == 2:
-                            name, color = name_color_from_value(tilemap("oryx")["flowers"][0]-0xE500)
+                            name, color = name_color_from_value(tilemap("oryx")["flowers"][0]-0xE400)
                             char = tilemap()["flowers"][randint(
                                 0, (len(tilemap()["flowers"]) - 1))]
                             self.tiles[x][y].layers.append((char, color))
                             self.tiles[x][y].name = name
 
                         if option == 3:
-                            name, color = name_color_from_value(tilemap("oryx")["mushrooms"]-0xE500)
+                            name, color = name_color_from_value(tilemap("oryx")["mushrooms"]-0xE400)
                             char = tilemap()["mushrooms"]
                             self.tiles[x][y].layers.append((char, color))
                             self.tiles[x][y].name = name
@@ -846,7 +846,7 @@ class GameMap:
                     if world_tendency < 0:
                         if randint(1, 4) >= self.tiles[x][y].seed and len(self.tiles[x][y].layers) == 0:
                             if abs(world_tendency) * 33 > randint(1, 100):
-                                name, color = name_color_from_value(tilemap("oryx")["bones"][0]-0xE500)
+                                name, color = name_color_from_value(tilemap("oryx")["bones"][0]-0xE400)
                                 char = tilemap()["bones"][randint(
                                     0, (len(tilemap()["bones"]) - 1))]
                                 self.tiles[x][y].layers.append((char, color))
