@@ -5,8 +5,7 @@ import variables
 
 class UIElements:
     def __init__(self):
-        self.screen_w = blt.state(floor(blt.TK_WIDTH))
-        self.screen_h = blt.state(floor(blt.TK_HEIGHT))
+
         self.msg_panel = None
         self.msg_panel_borders = None
         self.screen_borders = None
@@ -15,19 +14,20 @@ class UIElements:
         self.viewport_y = None
         self.viewport = None
 
-
         self.init_ui()
 
     def init_ui(self):
-        w = floor(self.screen_w / variables.ui_offset_x)
-        h = floor(self.screen_h / variables.ui_offset_y)
+        screen_w = blt.state(floor(blt.TK_WIDTH))
+        screen_h = blt.state(floor(blt.TK_HEIGHT))
+        w = floor(screen_w / variables.ui_offset_x)
+        h = floor(screen_h / variables.ui_offset_y)
 
-        side_panel_w = 8
+        side_panel_w = 10
 
         self.screen_borders = Panel(0, 0, w-side_panel_w, h-5)
         self.side_panel_borders = Panel(w-side_panel_w, 0, side_panel_w-1, h)
 
-        self.msg_panel_borders = Panel(0, self.screen_borders.h, w-8, h-(self.screen_borders.h))
+        self.msg_panel_borders = Panel(0, self.screen_borders.h, w-side_panel_w, h-(self.screen_borders.h))
         self.msg_panel = Panel(1, self.msg_panel_borders.y+1, self.msg_panel_borders.w-1, self.msg_panel_borders.h-1)
 
         variables.viewport_w = (w-side_panel_w) * variables.ui_offset_x - (variables.ui_offset_x + 1)
