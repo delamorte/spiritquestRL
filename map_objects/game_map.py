@@ -925,7 +925,7 @@ class TiledRoom(Room):
         self.tiled_reader(filename)
 
     def tiled_reader(self, name):
-        tree = ET.parse("./tilesets/" + name + ".tmx")
+        tree = ET.parse("./maps/" + name + ".tmx")
         root = tree.getroot()
         layers = [ None, None, None ]
         for layer in root.iter("layer"):

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.3.3" orientation="orthogonal" renderorder="right-down" width="9" height="8" tilewidth="16" tileheight="24" infinite="0" nextlayerid="6" nextobjectid="1">
+ <editorsettings>
+  <export target="graveyard.tmx" format="tmx"/>
+ </editorsettings>
+ <tileset firstgid="1" name="terrain_objects_comb" tilewidth="16" tileheight="24" tilecount="500" columns="20">
+  <image source="oryx_roguelike_2.0/terrain_objects_comb.png" width="320" height="600"/>
+ </tileset>
+ <layer id="4" name="2" width="9" height="8">
+  <data encoding="csv">
+108,102,102,101,101,101,102,101,107,
+110,51,0,0,0,0,0,51,109,
+110,0,0,71,0,71,0,0,109,
+110,51,0,0,56,0,0,51,109,
+110,0,0,71,0,71,0,0,109,
+110,51,0,0,0,0,0,51,109,
+112,101,101,101,104,102,101,102,111,
+0,0,0,62,0,64,0,0,0
+</data>
+ </layer>
+ <layer id="5" name="1" width="9" height="8" opacity="0.37">
+  <data encoding="csv">
+452,452,452,452,452,452,452,452,452,
+5,5,5,5,5,5,5,3,5,
+3,5,5,5,3,3,5,5,5,
+3,3,5,5,5,3,5,5,5,
+5,5,5,3,3,3,5,5,3,
+3,5,3,3,3,3,3,5,3,
+5,5,5,5,5,3,5,3,5,
+412,412,412,412,412,412,412,412,412
+</data>
+ </layer>
+ <layer id="1" name="0" width="9" height="8" visible="0">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>
