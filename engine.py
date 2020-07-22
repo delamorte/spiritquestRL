@@ -20,7 +20,7 @@ from map_objects.minimap import test_dynamic_sprites
 from random import randint
 from ui.elements import UIElements
 from ui.game_messages import MessageLog
-from ui.menus import main_menu
+from ui.menus import main_menu, character_menu
 from ui.message_history import show_msg_history
 import variables
 
@@ -81,6 +81,7 @@ def new_game(choice, ui_elements):
     player.player.avatar[choice] = get_fighter_stats(choice)
     player.player.avatar[choice].owner = player
     player.player.char[choice] = tilemap()["monsters"][choice]
+    player.player.char_exp[choice] = 20
 
     player.player.avatar[choice].max_hp += 20
     player.player.avatar[choice].hp += 20
@@ -297,7 +298,6 @@ def game_loop(main_menu_show=True, choice=None):
                 else:
                     message_log.send("There is nothing here to pick up.")
 
-
             elif key == blt.TK_PERIOD or key == blt.TK_KP_5:
                 time_counter.take_turn(1)
                 # player.player.spirit_power -= 1
@@ -346,9 +346,11 @@ def game_loop(main_menu_show=True, choice=None):
                     draw_messages(ui_elements.msg_panel, message_log)
                     fov_recompute = True
 
-
             elif key == blt.TK_F1:
-                pass
+                character_menu(player)
+                draw_ui(ui_elements)
+                draw_side_panel_content(game_map, player, ui_elements)
+                fov_recompute = True
 
             elif key == blt.TK_M:
                 show_msg_history(
@@ -449,11 +451,25 @@ def game_loop(main_menu_show=True, choice=None):
                         message_log.send(kill_msg)
                         draw_stats(player)
                         break
+                    # Functions on monster death
                     if entity.fighter and entity.fighter.dead:
                         player.player.spirit_power += entity.fighter.max_hp
                         player.fighter.hp += entity.fighter.power
+                        # Handle exp for kills
+                        if entity.name in tilemap()["monsters"].keys():
+                            player.player.char[entity.name] = tilemap()["monsters"][entity.name]
+                        elif entity.name in tilemap()["monsters_light"].keys():
+                            player.player.char[entity.name] = tilemap()["monsters_light"][entity.name]
+                        elif entity.name in tilemap()["monsters_chaos"].keys():
+                            player.player.char[entity.name] = tilemap()["monsters_chaos"][entity.name]
+
+                        if entity.name in player.player.char_exp.keys():
+                            player.player.char_exp[entity.name] += 1
+                        else:
+                            player.player.char_exp[entity.name] = 1
                         message_log.send(kill_monster(entity))
                         message_log.send("I feel my power returning!")
+
 
             if not game_state == GameStates.PLAYER_DEAD:
                 game_state = GameStates.PLAYER_TURN

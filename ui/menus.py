@@ -207,7 +207,7 @@ def main_menu(resume=False, ui_elements=None):
 
 
 def choose_avatar(player):
-    key = None
+
     current_range = 0
     center_x = int(variables.viewport_w / 2)
     center_y = int(variables.viewport_h / 2)
@@ -325,3 +325,62 @@ def set_up_level_params(question_number, prev_choices):
                 current_range += 1
         elif key == blt.TK_ENTER:
             return choice
+
+
+def character_menu(player):
+    current_range = 0
+    center_x = int(variables.viewport_w / 2)
+    center_y = int(variables.viewport_h / 2)
+
+    while True:
+        clear_camera(5)
+        animals = player.player.char
+        exclude = {"player"}
+        avatars = {x: animals[x] for x in animals if x not in exclude}
+        blt.layer(0)
+        blt.puts(center_x, center_y - 5,
+                 "[color=white]The following spirits have awakened within you..", 0, 0, blt.TK_ALIGN_CENTER)
+        for i, (r, c) in enumerate(avatars.items()):
+            selected = i == current_range
+
+            # Draw select symbol, monster name and description
+            blt.color("orange" if selected else "default")
+            blt.puts(center_x - 24, center_y - 2 + i * 4, "%s%s" %
+                     ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0,
+                     blt.TK_ALIGN_LEFT)
+
+            # Put exp amount
+            blt.puts(center_x - 24, center_y - 2 + i * 4+2, " EXP: " + str(player.player.char_exp[r]) +"\n ", 0, 0,
+                     blt.TK_ALIGN_LEFT)
+
+            if variables.gfx == "adambolt":
+                # Draw a bg tile
+                blt.layer(0)
+                blt.puts(center_x - 30 + 1, center_y - 2 + i *
+                         5, "[U+" + hex(0xE800 + 3) + "]", 0, 0)
+
+            # Draw monster tile
+            blt.layer(1)
+            blt.color(get_monster_color(r))
+            if variables.gfx == "adambolt":
+                blt.color(None)
+            if variables.gfx == "ascii":
+                blt.puts(center_x - 30 + 1, center_y - 2 + i * 4, c, 0, 0)
+            else:
+                blt.puts(center_x - 30 + 1, center_y - 2 + i *
+                         4, "[U+" + hex(c) + "]", 0, 0)
+
+            if selected:
+                choice = r
+
+        blt.refresh()
+        key = blt.read()
+
+        if key == blt.TK_ESCAPE:
+            return None, None
+        elif key == blt.TK_UP:
+            if current_range > 0:
+                current_range -= 1
+        elif key == blt.TK_DOWN:
+            if current_range < len(avatars) - 1:
+                current_range += 1

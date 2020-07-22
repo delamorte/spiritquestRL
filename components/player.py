@@ -7,6 +7,7 @@ class Player:
         self.owner = None
         self.spirit_power = spirit_power
         self.char = {"player": tilemap()["player"]}
+        self.char_exp = {"player": 0}
         self.avatar = {"player": None}
         self.lightmap = None
 

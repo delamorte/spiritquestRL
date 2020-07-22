@@ -2,8 +2,31 @@ def bestiary():
 
     animals = {"crow": "quick, very agile, very weak, excellent vision",
                "rat": "very quick, agile, weak, small, poor vision",
-               "snake": "strong, slow, small, average vision"}
+               "snake": "strong, slow, small, average vision",
+               "frog": "no description",
+               "bear": "no description",
+               "felid": "no description",
+               "mosquito": "no description",
+               "chaos cat": "no description",
+               "chaos bear": "no description",
+               "cockroach": "no description",
+               "bone snake": "no description",
+               "chaos dog": "no description",
+               "bat": "no description",
+               "imp": "no description",
+               "leech": "no description",
+               "spirit": "no description",
+               "chaos spirit": "no description",
+               "ghost dog": "no description",
+               "gecko": "no description",
+               "serpent": "no description",
+               "fairy": "no description",
+               "king kobra": "no description",
+               "albino_rat": "no description",
+               "keeper of dreams": "no description"
+    }
     return animals
+
 
 
 def abilities():
