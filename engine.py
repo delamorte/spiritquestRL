@@ -297,6 +297,7 @@ def game_loop(main_menu_show=True, choice=None):
                 else:
                     message_log.send("There is nothing here to pick up.")
 
+
             elif key == blt.TK_PERIOD or key == blt.TK_KP_5:
                 time_counter.take_turn(1)
                 # player.player.spirit_power -= 1
@@ -345,10 +346,15 @@ def game_loop(main_menu_show=True, choice=None):
                     draw_messages(ui_elements.msg_panel, message_log)
                     fov_recompute = True
 
+
+            elif key == blt.TK_F1:
+                pass
+
             elif key == blt.TK_M:
                 show_msg_history(
                     message_log.history, "Message history")
                 draw_ui(ui_elements)
+                draw_side_panel_content(game_map, player, ui_elements)
                 fov_recompute = True
 
             elif key == blt.TK_I:
@@ -358,6 +364,7 @@ def game_loop(main_menu_show=True, choice=None):
                 show_msg_history(
                     show_items, "Inventory")
                 draw_ui(ui_elements)
+                draw_side_panel_content(game_map, player, ui_elements)
                 fov_recompute = True
 
             elif key == blt.TK_TAB:

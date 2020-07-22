@@ -121,11 +121,12 @@ def show_msg_history(message_log, name):
             "Inventory: \n"
 
     while True:
-        clear_camera(2)
+
         frame.draw()
         blt.color("white")
 
-        blt.layer(1)
+        blt.layer(0)
+        clear_camera(5)
         current_line = 0
         blt.puts(padding_left, padding_top - frame.offset, prompt, frame.width)
         for text, height in messages:

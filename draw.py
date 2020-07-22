@@ -545,7 +545,7 @@ def draw_minimap(game_map, ui_elements, player):
 def draw_side_panel_content(game_map, player, ui_elements, world_tendency=0):
     side_panel_borders = ui_elements.side_panel_borders
     # Draw side panel content
-    blt.layer(10)
+    blt.layer(1)
     blt.color(None)
     blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
              side_panel_borders.y * variables.ui_offset_y + 21,  "Location: " + game_map.name, 0, 0,
