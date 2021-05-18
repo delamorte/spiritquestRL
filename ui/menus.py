@@ -100,7 +100,7 @@ def main_menu(resume=False, ui_elements=None):
                     # Draw select symbol, monster name and description
                     blt.color("orange" if selected else "default")
                     blt.puts(center_x - 24, center_y - 2 + i * 5 + 1, "%s%s" %
-                             ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0,
+                             ("[U+203A]" if selected else " ", r.capitalize() + ": " + bestiary()[r]), 0, 0,
                              blt.TK_ALIGN_LEFT)
 
                     if r == "crow":
