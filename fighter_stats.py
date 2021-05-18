@@ -31,7 +31,7 @@ def get_fighter_stats(name):
                 "serpent": {"hp": 15, "ac": 2, "ev": 5, "power": 5, "mv_spd": 1.3, "atk_spd": 1, "size": "normal", "fov": 6, "abilities": [("strangle", 20)]},
                 "fairy": {"hp": 12, "ac": 1, "ev": 4, "power": 4, "mv_spd": 1.4, "atk_spd": 1, "size": "normal", "fov": 6, "abilities": [("invisibility", 5), ("heal", 10), ("give power", 5), ("harm", 5)]},
                 "king kobra": {"hp": 30, "ac": 3, "ev": 3, "power": 6, "mv_spd": 1, "atk_spd": 1, "size": "normal", "fov": 6, "abilities": [("poison bite", 20), ("strangle", 20)]},
-                "albino_rat": {"hp": 20, "ac": 2, "ev": 6, "power": 5, "mv_spd": 2, "atk_spd": 1, "size": "small", "fov": 6, "abilities": [("claw", 20), ("diseasing bite", 10), ("poison bite", 0), ("call allies", 20)]},
+                "albino rat": {"hp": 20, "ac": 2, "ev": 6, "power": 5, "mv_spd": 2, "atk_spd": 1, "size": "small", "fov": 6, "abilities": [("claw", 20), ("diseasing bite", 10), ("poison bite", 0), ("call allies", 20)]},
                 "keeper of dreams": {"hp": 50, "ac": 3, "ev": 6, "power": 5, "mv_spd": 0.7, "atk_spd": 1, "size": "gigantic", "fov": 6, "abilities": [("claw", 20), ("diseasing bite", 10), ("poison bite", 20), ("call allies", 20)]},}
 
     a = fighters[name]
