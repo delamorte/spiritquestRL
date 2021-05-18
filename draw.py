@@ -542,7 +542,7 @@ def draw_minimap(game_map, ui_elements, player):
 
     blt.put(x0 * variables.ui_offset_x + 3, y0 * variables.ui_offset_y + 3, 0xF900)
 
-def draw_side_panel_content(game_map, player, ui_elements, world_tendency=0):
+def draw_side_panel_content(game_map, player, ui_elements):
     side_panel_borders = ui_elements.side_panel_borders
     # Draw side panel content
     blt.layer(1)
@@ -551,7 +551,7 @@ def draw_side_panel_content(game_map, player, ui_elements, world_tendency=0):
              side_panel_borders.y * variables.ui_offset_y + 21,  "Location: " + game_map.name, 0, 0,
              blt.TK_ALIGN_LEFT)
     blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 22,  "World tendency: " + str(world_tendency), 0, 0,
+             side_panel_borders.y * variables.ui_offset_y + 22,  "World tendency: " + str(variables.world_tendency), 0, 0,
              blt.TK_ALIGN_LEFT)
 
     blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,

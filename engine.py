@@ -31,7 +31,6 @@ TODO:
 - Add stealth
 - Items and inventory
 - Npcs
-- Minimap 
 - UI elements for displaying current game map name
   and status effects
 - Level up system
@@ -40,7 +39,7 @@ TODO:
 
 FIX:
 
-- 2x2 monsters for adambolt & ascii
+- 2x2 monsters for ascii & other tilese
 
 BUGS:
 

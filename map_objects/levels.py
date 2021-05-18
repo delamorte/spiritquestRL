@@ -1,10 +1,11 @@
 from map_objects.game_map import GameMap
 from draw import draw_side_panel_content
 from ui.menus import choose_avatar
+import variables
 
 
 def make_map(destination, levels, player, entities, game_map, stairs):
-    world_tendency = 0
+
     # Set debug level
     if destination == "debug":
         entities = {}
@@ -25,11 +26,11 @@ def make_map(destination, levels, player, entities, game_map, stairs):
         if not params:
             game_map.tiles[player.x][player.y].entities_on_tile.append(player)
             return game_map, entities, player
-        world_tendency = sum(params.values())
+        variables.world_tendency = sum(params.values())
         game_map = GameMap(100, 100, "dream")
         # entities = game_map.generate_forest(world_tendency)
-        entities = game_map.room_addition(world_tendency=world_tendency)
-        player, entities = game_map.place_entities(player, entities, world_tendency)
+        entities = game_map.room_addition()
+        player, entities = game_map.place_entities(player, entities)
         # Initialize field of view
         player.light_source.initialize_fov(game_map)
         player.fighter = player.player.avatar[choice]
@@ -45,11 +46,11 @@ def make_map(destination, levels, player, entities, game_map, stairs):
         player.light_source.initialize_fov(game_map)
         levels[game_map.name] = [game_map, entities]
 
-    return game_map, entities, player, world_tendency
+    return game_map, entities, player
 
 
 def level_change(destination, levels, player, entities=None, game_map=None, stairs=None, ui_elements=None):
-    world_tendency = 0
+
     if not levels:
         game_map = GameMap(40, 40, "hub")
         entities = game_map.generate_hub()
@@ -71,7 +72,7 @@ def level_change(destination, levels, player, entities=None, game_map=None, stai
             # player.color = None
 
     else:
-        game_map, entities, player, world_tendency = make_map(destination, levels, player, entities, game_map, stairs)
+        game_map, entities, player = make_map(destination, levels, player, entities, game_map, stairs)
 
-    draw_side_panel_content(game_map, player, ui_elements, world_tendency)
+    draw_side_panel_content(game_map, player, ui_elements)
     return game_map, entities, player

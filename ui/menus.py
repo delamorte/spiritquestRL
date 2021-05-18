@@ -357,7 +357,7 @@ def character_menu(player):
                 # Draw a bg tile
                 blt.layer(0)
                 blt.puts(center_x - 30 + 1, center_y - 2 + i *
-                         5, "[U+" + hex(0xE800 + 3) + "]", 0, 0)
+                         6, "[U+" + hex(0xE800 + 3) + "]", 0, 0)
 
             # Draw monster tile
             blt.layer(1)
