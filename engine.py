@@ -24,29 +24,6 @@ from ui.menus import main_menu, character_menu
 from ui.message_history import show_msg_history
 import variables
 
-"""
-TODO:
-
-- Add abilities on player and give them action cost
-- Add stealth
-- Items and inventory
-- Npcs
-- UI elements for displaying current game map name
-  and status effects
-- Level up system
-- Saving and loading
-- Generate levels with a seed
-
-FIX:
-
-- 2x2 monsters for ascii & other tilese
-
-BUGS:
-
-
-
-"""
-
 
 def blt_init():
     blt.composition(True)

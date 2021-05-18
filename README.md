@@ -2,8 +2,6 @@
 
 A roguelike/adventure game using Python, BearLibTerminal and tcod.
 
-See [design docs](https://github.com/delamorte/spiritquestRL/blob/master/docs/design.md) for my ambitious development plans and goals.
-
 Based on [Roguelike Tutorial Revised](http://rogueliketutorials.com/) and [jcerise's roguelike tutorial for Go](https://jeremyceri.se/roguelikes/).
 
 #### Keys:
