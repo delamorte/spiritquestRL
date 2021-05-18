@@ -16,6 +16,7 @@ viewport_center_y = 0
 stack = []
 old_stack = []
 world_tendency = 0
+flicker = False
 
 class TimeCounter:
     def __init__(self, turn=0):

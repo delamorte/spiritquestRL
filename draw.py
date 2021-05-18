@@ -247,7 +247,7 @@ def draw_light_sources(player, game_map, game_camera, sources):
         if variables.gfx == "adambolt":
             c = blt.color_from_name("gray")
         argb = argb_from_color(c)
-        flicker = random.uniform(0.95, 1.05)
+        flicker = random.uniform(0.95, 1.05) if variables.flicker is True else 1
         a = argb[0]
         r = min(int(argb[1] * light_map[y][x] * flicker), 255)
         g = min(int(argb[2] * light_map[y][x] * flicker), 255)

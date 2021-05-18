@@ -83,7 +83,7 @@ def main_menu(resume=False, ui_elements=None):
                 ui_elements.init_ui()
                 draw_ui(ui_elements)
 
-        if key == blt.TK_ENTER and r is "New game":
+        if key == blt.TK_ENTER and r == "New game":
 
             current_range = 0
             while True:
@@ -154,10 +154,10 @@ def main_menu(resume=False, ui_elements=None):
                 elif key == blt.TK_ENTER:
                     return choice
 
-        elif key == blt.TK_ENTER and r is "Exit":
+        elif key == blt.TK_ENTER and r == "Exit":
             exit()
 
-        elif key == blt.TK_ENTER and not resume and r is "Resize window":
+        elif key == blt.TK_ENTER and not resume and r == "Resize window":
             blt.set("window: resizeable=true, minimum-size=60x20")
             key = None
             while key not in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_ENTER):
