@@ -18,10 +18,11 @@ import numpy as np
 
 
 class GameMap:
-    def __init__(self, width, height, name, dungeon_level=0):
+    def __init__(self, width, height, name, title=None, dungeon_level=0):
         self.width = width
         self.height = height
         self.name = name
+        self.title = title if title is not None else name
         self.dungeon_level = dungeon_level
         self.rooms = {}
         self.tiles = self.initialize_tiles()

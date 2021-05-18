@@ -225,7 +225,7 @@ def choose_mission(levels):
             # Draw select symbol, destination name and description
             blt.color("orange" if selected else "default")
             blt.puts(center_x - 24, center_y - 2 + i * 3, "%s%s" %
-                     ("[U+203A]" if selected else " ", level["title"] + ":" + "\n " + "Rescue: Blacksmith"), 0, 0,
+                     ("[U+203A]" if selected else " ", level["title"] + "\n " + "Rescue: Blacksmith"), 0, 0,
                      blt.TK_ALIGN_LEFT)
 
             if variables.gfx == "adambolt":

@@ -2,7 +2,7 @@ from bearlibterminal import terminal as blt
 from collections import Counter
 from helpers import get_article
 from math import ceil
-from textwrap import shorten
+from textwrap import shorten, fill
 import numpy as np
 from map_objects.tilemap import tilemap, tilemap_ui
 from scipy.spatial.distance import cityblock
@@ -542,29 +542,35 @@ def draw_minimap(game_map, ui_elements, player):
 
     blt.put(x0 * variables.ui_offset_x + 3, y0 * variables.ui_offset_y + 3, 0xF900)
 
+
 def draw_side_panel_content(game_map, player, ui_elements):
     side_panel_borders = ui_elements.side_panel_borders
     # Draw side panel content
     blt.layer(1)
     blt.color(None)
+    map_title = fill(game_map.title, 21)
+
+    blt.clear_area(side_panel_borders.x * variables.ui_offset_x + 4, side_panel_borders.y * variables.ui_offset_y + 20,
+                   side_panel_borders.w * variables.ui_offset_x - 4, side_panel_borders.h * variables.ui_offset_y - 40)
+
     blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 21,  "Location: " + game_map.name, 0, 0,
+             side_panel_borders.y * variables.ui_offset_y + 21,  "Location: " + map_title, 0, 0,
              blt.TK_ALIGN_LEFT)
     blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 22,  "World tendency: " + str(variables.world_tendency), 0, 0,
-             blt.TK_ALIGN_LEFT)
+             side_panel_borders.y * variables.ui_offset_y + 24 + map_title.count('\n'),  "World tendency: " +
+             str(variables.world_tendency), 0, 0, blt.TK_ALIGN_LEFT)
 
     blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
              side_panel_borders.y * variables.ui_offset_y + 30,  "Atk: crow talons 2d3", 0, 0,
              blt.TK_ALIGN_LEFT)
     blt.color("dark amber")
     blt.put(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 29)
+            side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 29)
     blt.color(None)
     blt.put(side_panel_borders.x * variables.ui_offset_x + 10,
-             side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 4)
+            side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 4)
     blt.put(side_panel_borders.x * variables.ui_offset_x + 16,
-             side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 22)
+            side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 22)
 
     blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
              side_panel_borders.y * variables.ui_offset_y + 35,  "Atk mod: swoop 1d3 (20% chance)", 0, 0,
@@ -572,7 +578,7 @@ def draw_side_panel_content(game_map, player, ui_elements):
 
     blt.color("dark amber")
     blt.put(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 37,  0xF100 + 25)
+            side_panel_borders.y * variables.ui_offset_y + 37,  0xF100 + 25)
 
     blt.color(None)
     blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
@@ -581,12 +587,14 @@ def draw_side_panel_content(game_map, player, ui_elements):
 
     blt.color("dark amber")
     blt.put(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 42,  0xF100 + 13)
+            side_panel_borders.y * variables.ui_offset_y + 42,  0xF100 + 13)
 
     blt.color(None)
     blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 45,  "Reveal an area of radius 8 around you, may reveal secrets.", 30, 0,
+             side_panel_borders.y * variables.ui_offset_y + 45,
+             "Reveal an area of radius 8 around you, may reveal secrets.", 30, 0,
              blt.TK_ALIGN_LEFT)
+
 
 def draw_all(game_map, game_camera, player, entities, ui_elements):
     game_camera.move_camera(

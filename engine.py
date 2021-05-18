@@ -459,3 +459,4 @@ if __name__ == '__main__':
     while restart:
         restart, menu_show, avatar = game_loop(main_menu_show=menu_show, choice=avatar)
     blt.close()
+
