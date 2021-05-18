@@ -91,7 +91,8 @@ def get_flower_colors(mod=0):
                   "darkest amber"]
     return colors
 
-def get_forest_colors(mod=-1):
+
+def get_forest_colors(mod=0):
     colors = []
     if mod > 0:
         colors = ["lightest orange",
@@ -104,15 +105,15 @@ def get_forest_colors(mod=-1):
         colors = ["darkest amber",
                   "darker gray",
                   "dark gray",
-                  "darker green",
-                  "darkest green"]
+                  "green",
+                  "dark green",
+                  "darker green"]
     if mod == 0:
         colors = ["lightest green",
                   "lighter green",
                   "light green",
-                  "dark green",
-                  "darker green",
-                  "darkest green"]
+                  "green",
+                  "dark green"]
     return colors
 
 
