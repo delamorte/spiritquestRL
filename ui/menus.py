@@ -169,7 +169,8 @@ def main_menu(resume=False, ui_elements=None):
                 draw_ui(ui_elements)
                 clear_camera(5)
                 blt.puts(center_x + 2, center_y,
-                         "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.",
+                         "[color=white]Use arrow keys or drag window borders to resize.\n"
+                         "Alt+Enter for fullscreen.\n Press Enter or Esc when done.",
                          0, 0, blt.TK_ALIGN_CENTER)
                 blt.refresh()
 
@@ -240,7 +241,7 @@ def choose_mission(levels):
             if variables.gfx == "adambolt":
                 blt.color(None)
             if variables.gfx == "ascii":
-                blt.puts(center_x - 30 + 1, center_y - 2 + i * 3, 0xE000 + 399, 0, 0)
+                blt.puts(center_x - 30 + 1, center_y - 2 + i * 3, "#", 0, 0)
             else:
                 blt.puts(center_x - 30 + 1, center_y - 2 + i *
                          3, "[U+" + hex(0xE000 + 399) + "]", 0, 0)
