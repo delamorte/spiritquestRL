@@ -1,6 +1,7 @@
 from random import randint
 from descriptions import abilities as abilities_db
 from game_states import GameStates
+import json
 
 
 class Fighter:
@@ -15,10 +16,15 @@ class Fighter:
         self.atk_spd = atk_spd
         self.fov = fov
         self.size = size
-        self.abilities = abilities
         self.effects = []
         self.dead = False
         self.paralysis = False
+
+        self.abilities = None
+        self.initialize_abilities(abilities)
+
+    def initialize_abilities(self, abilities):
+        self.abilities = None
 
     def take_damage(self, amount):
         results = []
@@ -27,12 +33,13 @@ class Fighter:
             self.dead = True
         return results
 
-    def attack(self, target, ability=None):
+    def attack(self, target):
         results = []
         d = None
         hit_chance = randint(1, 100)
         damage = randint(1, self.power) - target.fighter.ac
-        
+        self.use_ability()
+
         if ability in abilities_db()["attack"]:
             damage, effect = self.use_ability(ability, target)
 

@@ -17,6 +17,7 @@ stack = []
 old_stack = []
 world_tendency = 0
 flicker = False
+data = None
 
 
 class TimeCounter:

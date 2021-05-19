@@ -3,14 +3,16 @@ from math import floor
 from bearlibterminal import terminal as blt
 
 from camera import Camera
+from components.fighter import Fighter
 from components.inventory import Inventory
 from components.player import Player
 from components.cursor import Cursor
 from components.light_source import LightSource
+from data.json_data import JsonData
 from death_functions import kill_monster, kill_player
 from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities, draw_side_panel_content
 from entity import Entity, blocking_entity
-from fighter_stats import get_fighter_stats
+from fighter_stats import get_fighter_data
 from game_states import GameStates
 from helpers import get_article
 from input_handlers import handle_keys
@@ -43,10 +45,13 @@ def blt_init():
 
 
 def new_game(choice, ui_elements):
-    # Create player
 
+    # Initialize game data
+    game_data = JsonData()
+    variables.data = game_data
+    # Create player
     inventory_component = Inventory(26)
-    fighter_component = get_fighter_stats("player")
+    fighter_component = get_fighter_data("player")
     light_component = LightSource(radius=fighter_component.fov)
     player_component = Player(50)
     player = Entity(
@@ -54,7 +59,7 @@ def new_game(choice, ui_elements):
         fighter=fighter_component, inventory=inventory_component, light_source=light_component,
         stand_on_messages=False)
     player.player.avatar["player"] = fighter_component
-    player.player.avatar[choice] = get_fighter_stats(choice)
+    player.player.avatar[choice] = get_fighter_data(choice)
     player.player.avatar[choice].owner = player
     player.player.char[choice] = tilemap()["monsters"][choice]
     player.player.char_exp[choice] = 20
@@ -378,17 +383,6 @@ def game_loop(main_menu_show=True, choice=None):
                 del entities["cursor"]
 
         if game_state == GameStates.ENEMY_TURN:
-            if player.player.spirit_power >= insights and game_map.name != "debug":
-                insights += 20
-                message_log.clear()
-                message_log.send("My spirit has granted me new insights!")
-                message_log.send("I should explore around my home..")
-                game_map, entities, player = level_change(
-                    "hub", levels, player, entities, game_map, ui_elements=ui_elements)
-                # Currently opens the door in hub
-                for entity in entities["doors"]:
-                    if entity.door.name == "d_entrance":
-                        entity.door.set_status("open", game_map)
             fov_recompute = True
             draw_messages(ui_elements.msg_panel, message_log)
 

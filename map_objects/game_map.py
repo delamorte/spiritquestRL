@@ -1,6 +1,8 @@
+from components.fighter import Fighter
 from components.item import Item
+from data.json_data import JsonData
 from entity import Entity
-from fighter_stats import get_fighter_stats, get_fighter_ai, get_spawn_rates
+from fighter_stats import get_fighter_ai, get_spawn_rates, get_fighter_data
 from helpers import flatten
 from map_objects.tile import Tile
 from map_objects.tilemap import tilemap, openables, items, stairs
@@ -15,7 +17,7 @@ from resources.dungeon_generation.dungeon_generator import RoomAddition
 import xml.etree.ElementTree as ET
 import variables
 import numpy as np
-
+import json
 
 class GameMap:
     def __init__(self, width, height, name, title=None, dungeon_level=0):
@@ -657,7 +659,7 @@ class GameMap:
                     # r = randint(0, 2)
                     name, char = monsters[0]
                     color = get_monster_color(name)
-                    fighter_component = get_fighter_stats(name)
+                    fighter_component = get_fighter_data(name)
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(radius=fighter_component.fov)
                     monster = Entity(x, y, 3, char,
@@ -692,7 +694,7 @@ class GameMap:
                     # r = randint(0, 2)
                     name, char = monsters[0]
                     color = get_monster_color(name)
-                    fighter_component = get_fighter_stats(name)
+                    fighter_component = get_fighter_data(name)
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(radius=fighter_component.fov)
                     monster = Entity(x, y, 3, char,
@@ -735,7 +737,7 @@ class GameMap:
                     name = mon[0]
                     char = mon[1]
                     color = get_monster_color(name)
-                    fighter_component = get_fighter_stats(name)
+                    fighter_component = get_fighter_data(name)
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(radius=fighter_component.fov)
                     monster = Entity(x, y, 3, char,

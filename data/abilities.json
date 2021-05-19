@@ -1,0 +1,100 @@
+{
+    "talons": {
+        "name": "talons",
+        "description": "Attack with sharp talons",
+        "type": "attack",
+        "damage": ["2d3", "2d4", "2d5"],
+        "effect": "",
+        "chance": [100]
+    },
+    "bite": {
+        "name": "bite",
+        "description": "Ferocious bite with sharp teeth",
+        "type": "attack",
+        "damage": ["1d6", "1d8", "1d10"],
+        "effect": "",
+        "chance": [100]
+    },
+    "claw": {
+        "name": "claw",
+        "description": "Rends the enemy with sharp claws",
+        "type": "attack",
+        "damage": ["1d4", "1d6", "1d8"],
+        "effect": "",
+        "chance": [100]
+    },
+    "maul": {
+        "name": "maul",
+        "description": "Mauls the enemy with massive strength",
+        "type": "attack",
+        "damage": ["1d8", "1d10", "1d12"],
+        "effect": "",
+        "chance": [100]
+    },
+    "poison bite": {
+        "name": "poison bite",
+        "description": "may poison",
+        "type": "attack mod",
+        "damage": ["1d6", "1d6", "1d8"],
+        "effect": "poison",
+        "chance": [
+            0.2,
+            0.3,
+            0.4
+        ]
+    },
+    "paralyzing bite": {
+        "name": "paralyzing bite",
+        "description": "may paralyze",
+        "type": "attack mod",
+        "damage": ["1d4"],
+        "effect": "paralyze",
+        "chance": [
+            0.2,
+            0.3,
+            0.4
+        ]
+    },
+    "swoop": {
+        "name": "swoop",
+        "description": "extra dmg on small targets",
+        "type": "attack mod",
+        "damage": ["1d3", "1d4", "1d6"],
+        "effect": "",
+        "chance": [
+            0.33,
+            0.5,
+            0.66
+        ]
+    },
+    "lacerate": {
+        "name": "lacerate",
+        "description": "extra dmg",
+        "type": "attack mod",
+        "damage": ["1d3", "1d4", "1d5"],
+        "effect": "bleed",
+        "chance": [
+            0.2,
+            0.4,
+            0.6
+        ]
+    },
+    "leap": {
+        "name": "leap",
+        "description": "leap to a tile in a radius",
+        "type": "utility",
+        "damage": [""],
+        "effect": "",
+        "radius": [2, 3, 4],
+        "chance": [100]
+    },
+    "reveal": {
+        "name": "leap",
+        "description": "reveal an area around you, may reveal secrets.",
+        "type": "utility",
+        "damage": [""],
+        "effect": "",
+        "radius": [8, 10, 12],
+        "chance": [100]
+    }
+}

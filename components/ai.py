@@ -32,10 +32,7 @@ class BasicMonster:
 
                 if monster.distance_to(target) == 1 and self.owner.fighter.atk_spd <= time_to_act - action_cost: 
                     if target.fighter.hp > 0:
-                        if randint(1,100) < monster.fighter.abilities[0][1]:
-                            combat_msg = monster.fighter.attack(target, monster.fighter.abilities[0][0])
-                        else:
-                            combat_msg = monster.fighter.attack(target)
+                        combat_msg = monster.fighter.attack(target)
                         action_cost += 1
                         #self.last_action += action_cost
 
@@ -75,8 +72,3 @@ class BasicMonster:
         if not game_map.is_blocked(dest_x, dest_y):
             
             self.owner.move(dx, dy)
-
-            
-
-        
-    
