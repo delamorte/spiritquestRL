@@ -101,6 +101,7 @@ class FrameWithScrollbar(object):
 def show_msg_history(message_log, name):
     messages = MessageList()
     frame = FrameWithScrollbar(messages)
+    message_log.reverse()
 
     for msg in message_log:
         messages.append(msg)
@@ -150,7 +151,7 @@ def show_msg_history(message_log, name):
             blt.clear()
             break
 
-        elif key == blt.TK_I and name is "Inventory":
+        elif key == blt.TK_I and name == "Inventory":
             blt.clear()
             break
 

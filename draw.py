@@ -359,11 +359,15 @@ def draw_stats(player, target=None):
 
     ac_player = "[color=default]AC:" + str(player.fighter.ac) + "  "
     ev_player = "EV:" + str(player.fighter.ev) + "  "
-    power_player = "ATK:" + str(player.fighter.power)
+    power_player = "ATK:" + str(player.fighter.power) + "  "
+    lvl_player = "LVL:" + str(player.player.char_level) + "  "
+    exp_player = "EXP:" + str(player.player.char_exp["player"]) + "/" +\
+                 str(player.player.char_level * player.player.exp_lvl_interval)
 
     blt.puts(4, variables.viewport_h + variables.ui_offset_y + 1,
-             "[offset=0,-2]" + "[color=lightest green]Player:  " + hp_player + ac_player + ev_player + power_player, 0,
-             0, blt.TK_ALIGN_LEFT)
+             "[offset=0,-2]" + "[color=lightest green]Player:  " +
+             hp_player + ac_player + ev_player + power_player + lvl_player + exp_player,
+             0, 0, blt.TK_ALIGN_LEFT)
 
     # Draw target stats
     if target:

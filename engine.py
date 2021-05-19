@@ -80,7 +80,7 @@ def new_game(choice, ui_elements):
 
     levels = {}
     time_counter = variables.TimeCounter()
-    insights = 100
+    insights = 200
     game_state = GameStates.PLAYER_TURN
 
     return game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute
@@ -429,22 +429,12 @@ def game_loop(main_menu_show=True, choice=None):
                         break
                     # Functions on monster death
                     if entity.fighter and entity.fighter.dead:
-                        player.player.spirit_power += entity.fighter.max_hp
-                        player.fighter.hp += entity.fighter.power
-                        # Handle exp for kills
-                        if entity.name in tilemap()["monsters"].keys():
-                            player.player.char[entity.name] = tilemap()["monsters"][entity.name]
-                        elif entity.name in tilemap()["monsters_light"].keys():
-                            player.player.char[entity.name] = tilemap()["monsters_light"][entity.name]
-                        elif entity.name in tilemap()["monsters_chaos"].keys():
-                            player.player.char[entity.name] = tilemap()["monsters_chaos"][entity.name]
-
-                        if entity.name in player.player.char_exp.keys():
-                            player.player.char_exp[entity.name] += 1
-                        else:
-                            player.player.char_exp[entity.name] = 1
+                        level_up_msg = player.player.handle_player_exp(entity.fighter)
                         message_log.send(kill_monster(entity))
                         message_log.send("I feel my power returning!")
+                        if level_up_msg:
+                            message_log.send(level_up_msg)
+
 
 
             if not game_state == GameStates.PLAYER_DEAD:

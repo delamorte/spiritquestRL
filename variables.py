@@ -18,6 +18,7 @@ old_stack = []
 world_tendency = 0
 flicker = False
 
+
 class TimeCounter:
     def __init__(self, turn=0):
         self.turn = turn
@@ -29,5 +30,6 @@ class TimeCounter:
         
     def get_turn(self):
         return self.turn
+
     def get_last_turn(self):
         return self.last_turn

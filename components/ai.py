@@ -1,5 +1,6 @@
 from random import randint
 
+
 class BasicMonster:
     def __init__(self):
         self.owner = None
