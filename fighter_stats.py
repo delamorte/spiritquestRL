@@ -1,15 +1,14 @@
 import variables
+from data import json_data
 from components.ai import BasicMonster
 from components.fighter import Fighter
 
 
 def get_fighter_data(name):
 
-    a = variables.data.fighters[name]
+    a = json_data.data.fighters[name]
     fighter_component = Fighter(hp=a["hp"], ac=a["ac"], ev=a["ev"], power=a["power"],
-                                mv_spd=a["mv_spd"],
-                                atk_spd=a["atk_spd"], size=a["size"], fov=a["fov"],
-                                abilities=a["abilities"])
+                                mv_spd=a["mv_spd"], atk_spd=a["atk_spd"], size=a["size"], fov=a["fov"])
     return fighter_component
 
 

@@ -1,11 +1,15 @@
 from random import randint
+
+from components.abilities import Abilities
+from components.ability import Ability
+from data import json_data
 from descriptions import abilities as abilities_db
 from game_states import GameStates
 import json
 
 
 class Fighter:
-    def __init__(self, hp, ac, ev, power, mv_spd, atk_spd, size, fov=6, abilities=None):
+    def __init__(self, hp, ac, ev, power, mv_spd, atk_spd, size, fov=6):
         self.owner = None
         self.max_hp = hp
         self.hp = hp
@@ -19,12 +23,6 @@ class Fighter:
         self.effects = []
         self.dead = False
         self.paralysis = False
-
-        self.abilities = None
-        self.initialize_abilities(abilities)
-
-    def initialize_abilities(self, abilities):
-        self.abilities = None
 
     def take_damage(self, amount):
         results = []

@@ -3,12 +3,14 @@ from math import floor
 from bearlibterminal import terminal as blt
 
 from camera import Camera
+from components.abilities import Abilities
+from components.ability import Ability
 from components.fighter import Fighter
 from components.inventory import Inventory
 from components.player import Player
 from components.cursor import Cursor
 from components.light_source import LightSource
-from data.json_data import JsonData
+from data import json_data
 from death_functions import kill_monster, kill_player
 from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities, draw_side_panel_content
 from entity import Entity, blocking_entity
@@ -47,20 +49,22 @@ def blt_init():
 def new_game(choice, ui_elements):
 
     # Initialize game data
-    game_data = JsonData()
-    variables.data = game_data
+    game_data = json_data.JsonData()
+    json_data.data = game_data
     # Create player
     inventory_component = Inventory(26)
     fighter_component = get_fighter_data("player")
     light_component = LightSource(radius=fighter_component.fov)
     player_component = Player(50)
+    abilities_component = Abilities("player")
     player = Entity(
         1, 1, 3, player_component.char["player"], None, "player", blocks=True, player=player_component,
         fighter=fighter_component, inventory=inventory_component, light_source=light_component,
-        stand_on_messages=False)
+        abilities=abilities_component, stand_on_messages=False)
     player.player.avatar["player"] = fighter_component
     player.player.avatar[choice] = get_fighter_data(choice)
     player.player.avatar[choice].owner = player
+    player.abilities.initialize_abilities(choice)
     player.player.char[choice] = tilemap()["monsters"][choice]
     player.player.char_exp[choice] = 20
 

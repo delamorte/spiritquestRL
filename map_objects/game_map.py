@@ -1,3 +1,4 @@
+from components.abilities import Abilities
 from components.fighter import Fighter
 from components.item import Item
 from data.json_data import JsonData
@@ -18,6 +19,7 @@ import xml.etree.ElementTree as ET
 import variables
 import numpy as np
 import json
+
 
 class GameMap:
     def __init__(self, width, height, name, title=None, dungeon_level=0):
@@ -662,9 +664,10 @@ class GameMap:
                     fighter_component = get_fighter_data(name)
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(radius=fighter_component.fov)
+                    abilities_component = Abilities(name)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
-                                     light_source=light_component, boss=True)
+                                     light_source=light_component, abilities=abilities_component, boss=True)
                     monster.xtra_info = "It appears to be a terrifying red dragon."
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
@@ -697,9 +700,10 @@ class GameMap:
                     fighter_component = get_fighter_data(name)
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(radius=fighter_component.fov)
+                    abilities_component = Abilities(name)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
-                                     light_source=light_component)
+                                     light_source=light_component, abilities=abilities_component)
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
                     entities["monsters"].append(monster)
@@ -740,9 +744,10 @@ class GameMap:
                     fighter_component = get_fighter_data(name)
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(radius=fighter_component.fov)
+                    abilities_component = Abilities(name)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
-                                     light_source=light_component)
+                                     light_source=light_component, abilities=abilities_component)
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
                     entities["monsters"].append(monster)

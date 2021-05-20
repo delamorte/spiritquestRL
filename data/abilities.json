@@ -2,99 +2,192 @@
     "talons": {
         "name": "talons",
         "description": "Attack with sharp talons",
-        "type": "attack",
+        "skill_type": "attack",
         "damage": ["2d3", "2d4", "2d5"],
-        "effect": "",
         "chance": [100]
     },
     "bite": {
         "name": "bite",
         "description": "Ferocious bite with sharp teeth",
-        "type": "attack",
+        "skill_type": "attack",
         "damage": ["1d6", "1d8", "1d10"],
-        "effect": "",
         "chance": [100]
     },
     "claw": {
         "name": "claw",
         "description": "Rends the enemy with sharp claws",
-        "type": "attack",
+        "skill_type": "attack",
         "damage": ["1d4", "1d6", "1d8"],
-        "effect": "",
         "chance": [100]
     },
     "maul": {
         "name": "maul",
         "description": "Mauls the enemy with massive strength",
-        "type": "attack",
+        "skill_type": "attack",
         "damage": ["1d8", "1d10", "1d12"],
-        "effect": "",
         "chance": [100]
     },
     "poison bite": {
         "name": "poison bite",
         "description": "may poison",
-        "type": "attack mod",
+        "skill_type": "attack mod",
         "damage": ["1d6", "1d6", "1d8"],
-        "effect": "poison",
+        "effect": ["poison"],
+        "duration": ["1d4"],
         "chance": [
+            0.1,
             0.2,
-            0.3,
-            0.4
+            0.3
+        ]
+    },
+    "leeching bite": {
+        "name": "leeching bite",
+        "description": "may drain life",
+        "skill_type": "attack mod",
+        "damage": ["1d4", "1d6", "1d8"],
+        "effect": ["drain"],
+        "chance": [
+            0.1,
+            0.2,
+            0.3
         ]
     },
     "paralyzing bite": {
         "name": "paralyzing bite",
         "description": "may paralyze",
-        "type": "attack mod",
+        "skill_type": "attack mod",
         "damage": ["1d4"],
-        "effect": "paralyze",
+        "effect": ["paralyze"],
+        "duration": ["1d2", "1d3", "1d4"],
         "chance": [
+            0.1,
             0.2,
-            0.3,
-            0.4
+            0.3
+        ]
+    },
+    "diseasing bite": {
+        "name": "diseasing bite",
+        "description": "may cause disease",
+        "skill_type": "attack mod",
+        "damage": ["1d4"],
+        "effect": ["disease"],
+        "duration": ["1d2", "1d3", "1d4"],
+        "chance": [
+            0.1,
+            0.2,
+            0.3
         ]
     },
     "swoop": {
         "name": "swoop",
         "description": "extra dmg on small targets",
-        "type": "attack mod",
+        "skill_type": "attack mod",
         "damage": ["1d3", "1d4", "1d6"],
-        "effect": "",
         "chance": [
             0.33,
             0.5,
             0.66
-        ]
+        ],
+        "needs_ai": true
     },
     "lacerate": {
         "name": "lacerate",
         "description": "extra dmg",
-        "type": "attack mod",
+        "skill_type": "attack mod",
         "damage": ["1d3", "1d4", "1d5"],
-        "effect": "bleed",
+        "effect": ["bleed"],
         "chance": [
+            0.1,
             0.2,
-            0.4,
-            0.6
+            0.3
         ]
     },
     "leap": {
         "name": "leap",
         "description": "leap to a tile in a radius",
-        "type": "utility",
-        "damage": [""],
-        "effect": "",
+        "skill_type": "utility",
         "radius": [2, 3, 4],
-        "chance": [100]
+        "needs_ai": true
     },
     "reveal": {
-        "name": "leap",
+        "name": "reveal",
         "description": "reveal an area around you, may reveal secrets.",
-        "type": "utility",
-        "damage": [""],
-        "effect": "",
-        "radius": [8, 10, 12],
-        "chance": [100]
+        "skill_type": "utility",
+        "radius": [8, 10, 12]
+    },
+    "stunning roar": {
+        "name": "stunning roar",
+        "description": "stun enemies around you with a voracious roar",
+        "skill_type": "attack mod",
+        "effect": ["stun"],
+        "radius": [2, 3, 4],
+        "chance": [10, 15, 20]
+    },
+    "call allies": {
+        "name": "call allies",
+        "description": "make a loud beckoning noise calling friends",
+        "skill_type": "utility",
+        "chance": [5, 7, 10]
+    },
+    "heal": {
+        "name": "heal",
+        "description": "cast a magical spell to heal one's wounds",
+        "skill_type": "utility",
+        "damage": ["-1d4", "-1d6", "-1d8"],
+        "chance": [10, 15, 20],
+        "target_self": true
+    },
+    "give power": {
+        "name": "give power",
+        "description": "cast a magical spell to temporarily raise one's strength",
+        "skill_type": "utility",
+        "damage": ["1d4"],
+        "effect": ["strength"],
+        "duration": ["1d4"],
+        "chance": [10, 15, 20],
+        "target_self": true
+    },
+    "drain power": {
+        "name": "drain power",
+        "description": "cast a magical spell to temporarily drain one's strength",
+        "skill_type": "utility",
+        "damage": ["1d4"],
+        "effect": ["strength"],
+        "duration": ["1d4"],
+        "chance": [10, 15, 20]
+    },
+    "harm": {
+        "name": "harm",
+        "description": "cast a magical spell to drain one's life power",
+        "skill_type": "utility",
+        "damage": ["1d4", "1d6", "1d8"],
+        "radius": [3, 4, 5],
+        "chance": [10, 15, 20]
+    },
+    "fire breath": {
+        "name": "fire breath",
+        "description": "breathe a fiery cone in front of you",
+        "skill_type": "utility",
+        "damage": ["1d8", "1d10", "1d12"],
+        "radius": [2, 3, 5],
+        "chance": [10, 15, 20]
+    },
+    "invisibility": {
+        "name": "invisibility",
+        "description": "cast a magical spell to make yourself invisible",
+        "skill_type": "utility",
+        "effect": ["invisibility"],
+        "duration": ["1d8"],
+        "chance": [10, 15, 20],
+        "target_self": true
+    },
+    "strangle": {
+        "name": "strangle",
+        "description": "wrap yourself around your enemy in a chokehold",
+        "skill_type": "attack mod",
+        "damage": ["1d4", "1d6", "1d8"],
+        "effect": ["strangle"],
+        "duration": ["1d3"],
+        "chance": [10, 15, 20]
     }
 }

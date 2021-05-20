@@ -1,10 +1,12 @@
 import json
 
+data = None
+
 
 def fetch_data(path):
     with open(path) as file:
-        data = json.load(file)
-    return data
+        d = json.load(file)
+    return d
 
 
 class JsonData:
