@@ -72,6 +72,8 @@ class BasicMonster:
             for skill in self.owner.abilities.items:
                 if skill.needs_ai is True or skill.target_self is True or skill.target_other is True:
                     result.append("Skill {} not yet implemented :(".format(skill.name))
+                elif skill.player_only is True:
+                    continue
                 elif skill.skill_type != "weapon":
                     skills.append(skill)
                     chance = skill.chance[min(self.owner.fighter.level, 2)]

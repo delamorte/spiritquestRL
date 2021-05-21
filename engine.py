@@ -4,8 +4,6 @@ from bearlibterminal import terminal as blt
 
 from camera import Camera
 from components.abilities import Abilities
-from components.ability import Ability
-from components.fighter import Fighter
 from components.inventory import Inventory
 from components.player import Player
 from components.cursor import Cursor
@@ -266,10 +264,7 @@ def game_loop(main_menu_show=True, choice=None):
                     target = blocking_entity(
                         entities, destination_x, destination_y)
                     if target:
-                        if len(player.fighter.abilities) > 0 and randint(1, 100) < player.fighter.abilities[0][1]:
-                            combat_msg = player.fighter.attack(target, player.fighter.abilities[0][0])
-                        else:
-                            combat_msg = player.fighter.attack(target)
+                        combat_msg = player.fighter.attack(target, player.player.default_attack)
 
                         message_log.send(combat_msg)
                         # player.player.spirit_power -= 0.5

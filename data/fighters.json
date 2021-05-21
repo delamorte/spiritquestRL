@@ -19,6 +19,7 @@
         "atk_spd": 1,
         "size": "small",
         "fov": 4,
+        "player_abilities": ["nasty bite", "paralyzing bite", "sneak", "diseasing bite", "call allies"],
         "abilities": [
             "bite",
             "paralyzing bite"
@@ -33,6 +34,7 @@
         "atk_spd": 1,
         "size": "normal",
         "fov": 8,
+        "player_abilities": ["crow talons", "peck eyes", "fly", "reveal", "summon crow"],
         "abilities": [
             "talons",
             "swoop",
@@ -48,6 +50,7 @@
         "atk_spd": 1,
         "size": "small",
         "fov": 6,
+        "player_abilities": ["snaketail whip", "poison bite", "spit poison", "strangle"],
         "abilities": [
             "bite",
             "poison bite"

@@ -1,6 +1,7 @@
 class Ability:
     def __init__(self, name, description, skill_type, damage=None, dps=None, effect=None, duration=None,
-                 radius=None, chance=None, rank=None, needs_ai=None, target_self=None, target_other=None):
+                 radius=None, chance=None, rank=None, needs_ai=None, target_self=None, target_other=None,
+                 player_only=None):
         self.owner = None
         self.name = name
         self.description = description
@@ -15,4 +16,5 @@ class Ability:
         self.needs_ai = needs_ai
         self.target_self = target_self
         self.target_other = target_other
+        self.player_only = player_only
 

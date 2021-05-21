@@ -12,6 +12,7 @@ class Player:
         self.exp_lvl_interval = 100
         self.avatar = {"player": None}
         self.lightmap = None
+        self.default_attack = None
 
     def init_light(self):
         self.lightmap = np.ones_like(self.owner.light_source.fov_map.fov, dtype=float)

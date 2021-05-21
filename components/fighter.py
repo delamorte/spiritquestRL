@@ -1,16 +1,8 @@
-from data import json_data
 from helpers import roll_dice
 from math import ceil
 from random import randint
-
-from components.abilities import Abilities
-from components.ability import Ability
 from components.status_effect import StatusEffect
 from data import json_data
-from descriptions import abilities as abilities_db
-from game_states import GameStates
-import random
-import json
 
 
 class Fighter:

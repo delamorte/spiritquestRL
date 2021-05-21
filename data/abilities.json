@@ -1,4 +1,25 @@
 {
+    "crow talons": {
+        "name": "corw talons",
+        "description": "Attack with sharp talons",
+        "skill_type": "weapon",
+        "player_only": true,
+        "damage": ["2d3", "2d4", "2d5"]
+    },
+    "nasty bite": {
+        "name": "nasty bite",
+        "description": "Take a nasty bite",
+        "skill_type": "weapon",
+        "player_only": true,
+        "damage": ["1d4", "1d6", "1d8"]
+    },
+    "snaketail whip": {
+        "name": "snaketail whip",
+        "description": "Lash your enemy with a whip resembling a living snake",
+        "skill_type": "weapon",
+        "player_only": true,
+        "damage": ["1d8", "1d10", "1d12"]
+    },
     "talons": {
         "name": "talons",
         "description": "Attack with sharp talons",
@@ -150,6 +171,12 @@
         "skill_type": "utility",
         "chance": [5, 7, 10]
     },
+    "summon crow": {
+        "name": "summon crow",
+        "description": "Beckon to the skies and summon a friend to attack from above",
+        "skill_type": "utility",
+        "player_only": true
+    },
     "heal": {
         "name": "heal",
         "description": "cast a magical spell to heal one's wounds",
@@ -197,6 +224,17 @@
         "radius": [2, 3, 5],
         "chance": [10, 15, 20]
     },
+    "spit poison": {
+        "name": "spit poison",
+        "description": "spit slimy poison at the enemy. Yuck!",
+        "skill_type": "attack",
+        "damage": ["1d8", "1d10", "1d12"],
+        "effect": ["poison"],
+        "radius": [3, 4, 6],
+        "chance": [10, 15, 20],
+        "needs_ai": true,
+        "target_other": true
+    },
     "invisibility": {
         "name": "invisibility",
         "description": "cast a magical spell to make yourself invisible",
@@ -206,13 +244,29 @@
         "chance": [10, 15, 20],
         "target_self": true
     },
+    "sneak": {
+        "name": "sneak",
+        "description": "Go into stealth mode",
+        "skill_type": "utility",
+        "effect": ["sneak"],
+        "duration": ["1d8", "1d10", "1d12"],
+        "player_only": true
+    },
+    "fly": {
+        "name": "fly",
+        "description": "focus your spirit power to spread magical wings and fly over objects",
+        "skill_type": "utility",
+        "effect": ["fly"],
+        "duration": ["1d8", "1d10", "1d12"],
+        "player_only": true
+    },
     "strangle": {
         "name": "strangle",
         "description": "wrap yourself around your enemy in a chokehold",
         "skill_type": "attack",
         "damage": ["1d4", "1d6", "1d8"],
         "effect": ["strangle"],
-        "duration": ["1d3"],
+        "duration": ["1d3", "1d4", "1d6"],
         "chance": [10, 15, 20]
     }
 }
