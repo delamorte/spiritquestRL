@@ -1,6 +1,7 @@
 from components.abilities import Abilities
 from components.fighter import Fighter
 from components.item import Item
+from components.status_effects import StatusEffects
 from data.json_data import JsonData
 from entity import Entity
 from fighter_stats import get_fighter_ai, get_spawn_rates, get_fighter_data
@@ -665,9 +666,11 @@ class GameMap:
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(radius=fighter_component.fov)
                     abilities_component = Abilities(name)
+                    status_effects_component = StatusEffects(name)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
-                                     light_source=light_component, abilities=abilities_component, boss=True)
+                                     light_source=light_component, abilities=abilities_component,
+                                     status_effects=status_effects_component, boss=True)
                     monster.xtra_info = "It appears to be a terrifying red dragon."
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
@@ -701,9 +704,11 @@ class GameMap:
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(radius=fighter_component.fov)
                     abilities_component = Abilities(name)
+                    status_effects_component = StatusEffects(name)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
-                                     light_source=light_component, abilities=abilities_component)
+                                     light_source=light_component, abilities=abilities_component,
+                                     status_effects=status_effects_component)
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
                     entities["monsters"].append(monster)
@@ -745,9 +750,11 @@ class GameMap:
                     ai_component = get_fighter_ai(name)
                     light_component = LightSource(radius=fighter_component.fov)
                     abilities_component = Abilities(name)
+                    status_effects_component = StatusEffects(name)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
-                                     light_source=light_component, abilities=abilities_component)
+                                     light_source=light_component, abilities=abilities_component,
+                                     status_effects=status_effects_component)
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].entities_on_tile.append(monster)
                     entities["monsters"].append(monster)

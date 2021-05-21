@@ -21,16 +21,18 @@ class Abilities:
             description = item["description"]
             skill_type = item["skill_type"]
             damage = item["damage"] if "damage" in item.keys() else [""]
-            effect = item["effect"] if "effect" in item.keys() else [""]
+            dps = item["dps"] if "dps" in item.keys() else []
+            effect = item["effect"] if "effect" in item.keys() else []
             duration = item["duration"] if "duration" in item.keys() else [""]
             radius = item["radius"] if "radius" in item.keys() else [""]
-            chance = item["chance"] if "chance" in item.keys() else [""]
+            chance = item["chance"] if "chance" in item.keys() else [100]
             needs_ai = item["needs_ai"] if "needs_ai" in item.keys() else None
             target_self = item["target_self"] if "target_self" in item.keys() else None
+            target_other = item["target_other"] if "target_other" in item.keys() else None
 
-            a = Ability(name=name, description=description, skill_type=skill_type, damage=damage,
+            a = Ability(name=name, description=description, skill_type=skill_type, damage=damage, dps=dps,
                         effect=effect, duration=duration, radius=radius, chance=chance, needs_ai=needs_ai,
-                        target_self=target_self)
+                        target_self=target_self, target_other=target_other)
 
             self.add_item(a)
 

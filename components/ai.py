@@ -1,4 +1,4 @@
-from random import randint
+from random import choices, randint
 
 
 class BasicMonster:
@@ -18,9 +18,7 @@ class BasicMonster:
         action_cost = 0
         combat_msg = []
         self.owner.light_source.recompute_fov(monster.x, monster.y)
-        
-        if monster.fighter.paralysis:
-            return combat_msg
+
         if self.owner.light_source.fov_map.fov[target.y, target.x]:
             
             self.target_seen = True
@@ -32,7 +30,10 @@ class BasicMonster:
 
                 if monster.distance_to(target) == 1 and self.owner.fighter.atk_spd <= time_to_act - action_cost: 
                     if target.fighter.hp > 0:
-                        combat_msg = monster.fighter.attack(target)
+                        combat_msg, skill = self.choose_skill()
+                        if skill is None:
+                            return combat_msg
+                        combat_msg = monster.fighter.attack(target, skill)
                         action_cost += 1
                         #self.last_action += action_cost
 
@@ -56,19 +57,34 @@ class BasicMonster:
                 monster.move_astar(target, entities, game_map)
             
         else:
-            # why..
-            # self.idle_actions(game_map)
             self.action_begin = False
 
         return combat_msg
-    
-    def idle_actions(self, game_map):
-        
-        dx = randint(-1, 1)
-        dy = randint(-1, 1)
-        dest_x = dx + self.owner.x
-        dest_y = dy + self.owner.y
-        
-        if not game_map.is_blocked(dest_x, dest_y):
-            
-            self.owner.move(dx, dy)
+
+    def choose_skill(self):
+        result = []
+        skill_choice = None
+        if self.owner.abilities.items:
+            skills = []
+            attacks = []
+            weights = []
+            default_atk_chance = 100
+            for skill in self.owner.abilities.items:
+                if skill.needs_ai is True or skill.target_self is True or skill.target_other is True:
+                    result.append("Skill {} not yet implemented :(".format(skill.name))
+                elif skill.skill_type != "weapon":
+                    skills.append(skill)
+                    chance = skill.chance[min(self.owner.fighter.level, 2)]
+                    weights.append(chance)
+                    default_atk_chance -= chance
+
+                else:
+                    attacks.append(skill)
+
+            for attack in attacks:
+                skills.append(attack)
+                weights.append(default_atk_chance/len(attacks))
+            skill_choice = choices(skills, weights, k=1)[0]
+        else:
+            result.append("Monster doesn't know what to do!")
+        return result, skill_choice

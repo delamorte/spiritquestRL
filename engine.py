@@ -10,6 +10,7 @@ from components.inventory import Inventory
 from components.player import Player
 from components.cursor import Cursor
 from components.light_source import LightSource
+from components.status_effects import StatusEffects
 from data import json_data
 from death_functions import kill_monster, kill_player
 from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities, draw_side_panel_content
@@ -57,10 +58,11 @@ def new_game(choice, ui_elements):
     light_component = LightSource(radius=fighter_component.fov)
     player_component = Player(50)
     abilities_component = Abilities("player")
+    status_effects_component = StatusEffects("player")
     player = Entity(
         1, 1, 3, player_component.char["player"], None, "player", blocks=True, player=player_component,
         fighter=fighter_component, inventory=inventory_component, light_source=light_component,
-        abilities=abilities_component, stand_on_messages=False)
+        abilities=abilities_component, status_effects=status_effects_component, stand_on_messages=False)
     player.player.avatar["player"] = fighter_component
     player.player.avatar[choice] = get_fighter_data(choice)
     player.player.avatar[choice].owner = player
@@ -133,9 +135,7 @@ def game_loop(main_menu_show=True, choice=None):
         fullscreen = action.get('fullscreen')
 
         if not player.fighter.dead:
-            effect_msg, game_state = player.fighter.process_effects(time_counter, game_state)
-
-        message_log.send(effect_msg)
+            player.status_effects.process_effects()
 
         if fullscreen:
             blt.set("window.fullscreen=true")
@@ -161,6 +161,8 @@ def game_loop(main_menu_show=True, choice=None):
                         game_loop(False, new_choice)
 
         if game_state == GameStates.PLAYER_TURN:
+            # Begin player turn
+            # Non-turn taking UI functions
 
             if key == blt.TK_CLOSE:
                 return False, False, None
@@ -176,7 +178,84 @@ def game_loop(main_menu_show=True, choice=None):
                     draw_messages(ui_elements.msg_panel, message_log)
                     return True, False, new_choice
 
-            if move:
+            if key == blt.TK_PERIOD or key == blt.TK_KP_5:
+                time_counter.take_turn(1)
+                # player.player.spirit_power -= 1
+                message_log.send("You wait a turn.")
+                variables.old_stack = variables.stack
+                game_state = GameStates.ENEMY_TURN
+
+            if key == blt.TK_X:
+                game_state = GameStates.TARGETING
+                cursor_component = Cursor()
+                cursor = Entity(player.x, player.y, 4, 0xE800 + 1746, "light yellow", "cursor",
+                                cursor=cursor_component, stand_on_messages=False)
+                game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
+                entities["cursor"] = [cursor]
+
+            if key == blt.TK_F1:
+                character_menu(player)
+                draw_ui(ui_elements)
+                draw_side_panel_content(game_map, player, ui_elements)
+                fov_recompute = True
+
+            if key == blt.TK_M:
+                show_msg_history(
+                    message_log.history, "Message history")
+                draw_ui(ui_elements)
+                draw_side_panel_content(game_map, player, ui_elements)
+                fov_recompute = True
+
+            if key == blt.TK_I:
+                show_items = []
+                for item in player.inventory.items:
+                    show_items.append(get_article(item.name) + " " + item.name)
+                show_msg_history(
+                    show_items, "Inventory")
+                draw_ui(ui_elements)
+                draw_side_panel_content(game_map, player, ui_elements)
+                fov_recompute = True
+
+            if key == blt.TK_TAB:
+                test_dynamic_sprites(game_map, ui_elements)
+                draw_ui(ui_elements)
+                fov_recompute = True
+
+            # Turn taking functions
+
+            if game_state == GameStates.TARGETING:
+
+                if move:
+                    dx, dy = move
+                    destination_x = cursor.x + dx
+                    destination_y = cursor.y + dy
+                    x, y = game_camera.get_coordinates(destination_x, destination_y)
+
+                    if 0 < x < game_camera.width - 1 and 0 < y < game_camera.height - 1:
+                        prev_pos_x, prev_pos_y = cursor.x, cursor.y
+                        cursor.move(dx, dy)
+                        game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(cursor)
+                        game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
+                        fov_recompute = True
+
+                        variables.old_stack = variables.stack
+                        variables.stack = []
+                        if game_map.tiles[cursor.x][cursor.y].name is not None:
+                            variables.stack.append(game_map.tiles[cursor.x][cursor.y].name.capitalize())
+
+                elif key == blt.TK_ESCAPE or key == blt.TK_X:
+                    game_state = GameStates.PLAYER_TURN
+                    variables.old_stack = variables.stack
+                    variables.stack = []
+                    game_map.tiles[cursor.x][cursor.y].entities_on_tile.remove(cursor)
+                    del entities["cursor"]
+
+            if player.fighter.paralyzed:
+                message_log.send("You are paralyzed!")
+                time_counter.take_turn(1)
+                game_state = GameStates.ENEMY_TURN
+
+            elif move:
 
                 dx, dy = move
                 destination_x = player.x + dx
@@ -283,30 +362,6 @@ def game_loop(main_menu_show=True, choice=None):
                 else:
                     message_log.send("There is nothing here to pick up.")
 
-            elif key == blt.TK_PERIOD or key == blt.TK_KP_5:
-                time_counter.take_turn(1)
-                # player.player.spirit_power -= 1
-                message_log.send("You wait a turn.")
-                variables.old_stack = variables.stack
-                game_state = GameStates.ENEMY_TURN
-
-            elif key == blt.TK_X:
-                game_state = GameStates.TARGETING
-                cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 4, 0xE800 + 1746, "light yellow", "cursor",
-                                cursor=cursor_component, stand_on_messages=False)
-                game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
-                entities["cursor"] = [cursor]
-
-            elif player.player.spirit_power <= 0:
-                game_map, entities, player = level_change(
-                    "hub", levels, player, entities, game_map, ui_elements=ui_elements)
-                message_log.clear()
-                message_log.send("I have no power to meditate longer..")
-                player.player.spirit_power = 50
-                player.fighter.hp = player.fighter.max_hp
-                draw_ui(ui_elements)
-
             elif stairs:
                 if "stairs" in entities:
                     for entity in entities["stairs"]:
@@ -331,77 +386,27 @@ def game_loop(main_menu_show=True, choice=None):
                     draw_messages(ui_elements.msg_panel, message_log)
                     fov_recompute = True
 
-            elif key == blt.TK_F1:
-                character_menu(player)
-                draw_ui(ui_elements)
-                draw_side_panel_content(game_map, player, ui_elements)
-                fov_recompute = True
-
-            elif key == blt.TK_M:
-                show_msg_history(
-                    message_log.history, "Message history")
-                draw_ui(ui_elements)
-                draw_side_panel_content(game_map, player, ui_elements)
-                fov_recompute = True
-
-            elif key == blt.TK_I:
-                show_items = []
-                for item in player.inventory.items:
-                    show_items.append(get_article(item.name) + " " + item.name)
-                show_msg_history(
-                    show_items, "Inventory")
-                draw_ui(ui_elements)
-                draw_side_panel_content(game_map, player, ui_elements)
-                fov_recompute = True
-
-            elif key == blt.TK_TAB:
-                test_dynamic_sprites(game_map, ui_elements)
-                draw_ui(ui_elements)
-                fov_recompute = True
-
-        elif game_state == GameStates.TARGETING:
-
-            if move:
-                dx, dy = move
-                destination_x = cursor.x + dx
-                destination_y = cursor.y + dy
-                x, y = game_camera.get_coordinates(destination_x, destination_y)
-
-                if 0 < x < game_camera.width - 1 and 0 < y < game_camera.height - 1:
-                    prev_pos_x, prev_pos_y = cursor.x, cursor.y
-                    cursor.move(dx, dy)
-                    game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(cursor)
-                    game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
-                    fov_recompute = True
-
-                    variables.old_stack = variables.stack
-                    variables.stack = []
-                    if game_map.tiles[cursor.x][cursor.y].name is not None:
-                        variables.stack.append(game_map.tiles[cursor.x][cursor.y].name.capitalize())
-
-            elif key == blt.TK_ESCAPE or key == blt.TK_X:
-                game_state = GameStates.PLAYER_TURN
-                variables.old_stack = variables.stack
-                variables.stack = []
-                game_map.tiles[cursor.x][cursor.y].entities_on_tile.remove(cursor)
-                del entities["cursor"]
-
         if game_state == GameStates.ENEMY_TURN:
+            # Begin enemy turn
             fov_recompute = True
             draw_messages(ui_elements.msg_panel, message_log)
 
             for entity in entities["monsters"]:
 
                 if entity.fighter:
-                    effect_msg, game_state = entity.fighter.process_effects(time_counter, game_state)
-                    message_log.send(effect_msg)
+                    entity.status_effects.process_effects()
 
                 if player.fighter.dead:
                     kill_msg, game_state = kill_player(player)
                     message_log.send(kill_msg)
                     draw_stats(player)
                     break
-                if entity.ai:
+
+                if entity.fighter.paralyzed:
+                    message_log.send("The monster is paralyzed!")
+                    game_state = GameStates.PLAYER_TURN
+
+                elif entity.ai:
                     prev_pos_x, prev_pos_y = entity.x, entity.y
                     combat_msg = entity.ai.take_turn(
                         player, game_map, entities, time_counter)
@@ -432,8 +437,6 @@ def game_loop(main_menu_show=True, choice=None):
                         message_log.send("I feel my power returning!")
                         if level_up_msg:
                             message_log.send(level_up_msg)
-
-
 
             if not game_state == GameStates.PLAYER_DEAD:
                 game_state = GameStates.PLAYER_TURN

@@ -9,8 +9,8 @@ class Entity:
 
     def __init__(self, x, y, layer, char, color, name, blocks=False, player=None,
                  fighter=None, ai=None, item=None, inventory=None, stairs=None,
-                 wall=None, door=None, cursor=None, light_source=None, abilities=None, stand_on_messages=True,
-                 boss=False):
+                 wall=None, door=None, cursor=None, light_source=None, abilities=None,
+                 status_effects=None, stand_on_messages=True, boss=False):
         self.x = x
         self.y = y
         self.layer = layer
@@ -32,6 +32,7 @@ class Entity:
         self.last_seen_y = y
         self.light_source = light_source
         self.abilities = abilities
+        self.status_effects = status_effects
         self.stand_on_messages = stand_on_messages
         self.occupied_tiles = None  # For entities bigger than 1 tile
         self.boss = boss
@@ -69,6 +70,9 @@ class Entity:
 
         if self.abilities:
             self.abilities.owner = self
+
+        if self.status_effects:
+            self.status_effects.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount
