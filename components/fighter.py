@@ -47,7 +47,7 @@ class Fighter:
             else:
                 if self.owner.player:
                     results.append("You use {0} on {1}!".format(
-                        skill, target.name))
+                        skill.name, target.name))
                 else:
                     results.append("The {0} uses {1} on you!".format(
                         self.owner.name, skill.name))
@@ -78,21 +78,21 @@ class Fighter:
 
                 if damage > 0:
                     if self.owner.player:
-                        results.append("You attack the {0} for {1} hit points.".format(
-                            target.name, str(damage)))
+                        results.append(results[-1] + (" You attack the {0} for {1} hit points.".format(
+                            target.name, str(damage))))
                     else:
-                        results.append("The {0} attacks you for {1} hit points.".format(
-                            self.owner.name, str(damage)))
+                        results.append(results[-1] + (" The {0} attacks you for {1} hit points.".format(
+                            self.owner.name, str(damage))))
                     
                     results.extend(target.fighter.take_damage(damage))
 
                 else:
                     if self.owner.player:
-                        results.append(
-                            "You attack the {0} with {1} but do no damage.".format(target.name, skill.name))
+                        results.append(results[-1] + (
+                            " You attack the {0} with {1} but do no damage.".format(target.name, skill.name)))
                     else:
-                        results.append(
-                            "The {0} attacks you  with {1} but does no damage.".format(self.owner.name, skill.name))
+                        results.append(results[-1] + (
+                            "The {0} attacks you  with {1} but does no damage.".format(self.owner.name, skill.name)))
         return results
 
     def calculate_damage(self, skill, target):

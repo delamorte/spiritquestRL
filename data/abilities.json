@@ -1,6 +1,6 @@
 {
     "crow talons": {
-        "name": "corw talons",
+        "name": "crow talons",
         "description": "Attack with sharp talons",
         "skill_type": "weapon",
         "player_only": true,
