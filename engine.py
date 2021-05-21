@@ -397,7 +397,14 @@ def game_loop(main_menu_show=True, choice=None):
                     draw_stats(player)
                     break
 
-                if entity.fighter.paralyzed:
+                if entity.fighter and entity.fighter.dead:
+                    level_up_msg = player.player.handle_player_exp(entity.fighter)
+                    message_log.send(kill_monster(entity))
+                    message_log.send("I feel my power returning!")
+                    if level_up_msg:
+                        message_log.send(level_up_msg)
+
+                elif entity.fighter and entity.fighter.paralyzed:
                     message_log.send("The monster is paralyzed!")
                     game_state = GameStates.PLAYER_TURN
 
