@@ -183,77 +183,9 @@ def game_loop(main_menu_show=True, choice=None):
                 variables.old_stack = variables.stack
                 game_state = GameStates.ENEMY_TURN
 
-            if key == blt.TK_X:
-                game_state = GameStates.TARGETING
-                cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 4, 0xE800 + 1746, "light yellow", "cursor",
-                                cursor=cursor_component, stand_on_messages=False)
-                game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
-                entities["cursor"] = [cursor]
-
-            if key == blt.TK_F1:
-                character_menu(player)
-                draw_ui(ui_elements)
-                draw_side_panel_content(game_map, player, ui_elements)
-                fov_recompute = True
-
-            if key == blt.TK_M:
-                show_msg_history(
-                    message_log.history, "Message history")
-                draw_ui(ui_elements)
-                draw_side_panel_content(game_map, player, ui_elements)
-                fov_recompute = True
-
-            if key == blt.TK_I:
-                show_items = []
-                for item in player.inventory.items:
-                    show_items.append(get_article(item.name) + " " + item.name)
-                show_msg_history(
-                    show_items, "Inventory")
-                draw_ui(ui_elements)
-                draw_side_panel_content(game_map, player, ui_elements)
-                fov_recompute = True
-
-            if key == blt.TK_TAB:
-                test_dynamic_sprites(game_map, ui_elements)
-                draw_ui(ui_elements)
-                fov_recompute = True
-
             # Turn taking functions
 
-            if game_state == GameStates.TARGETING:
-
-                if move:
-                    dx, dy = move
-                    destination_x = cursor.x + dx
-                    destination_y = cursor.y + dy
-                    x, y = game_camera.get_coordinates(destination_x, destination_y)
-
-                    if 0 < x < game_camera.width - 1 and 0 < y < game_camera.height - 1:
-                        prev_pos_x, prev_pos_y = cursor.x, cursor.y
-                        cursor.move(dx, dy)
-                        game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(cursor)
-                        game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
-                        fov_recompute = True
-
-                        variables.old_stack = variables.stack
-                        variables.stack = []
-                        if game_map.tiles[cursor.x][cursor.y].name is not None:
-                            variables.stack.append(game_map.tiles[cursor.x][cursor.y].name.capitalize())
-
-                elif key == blt.TK_ESCAPE or key == blt.TK_X:
-                    game_state = GameStates.PLAYER_TURN
-                    variables.old_stack = variables.stack
-                    variables.stack = []
-                    game_map.tiles[cursor.x][cursor.y].entities_on_tile.remove(cursor)
-                    del entities["cursor"]
-
-            if player.fighter.paralyzed:
-                message_log.send("You are paralyzed!")
-                time_counter.take_turn(1)
-                game_state = GameStates.ENEMY_TURN
-
-            elif move:
+            if move:
 
                 dx, dy = move
                 destination_x = player.x + dx
@@ -380,6 +312,74 @@ def game_loop(main_menu_show=True, choice=None):
                         message_log.send("I'm hungry..")
                     draw_messages(ui_elements.msg_panel, message_log)
                     fov_recompute = True
+
+            elif key == blt.TK_X:
+                game_state = GameStates.TARGETING
+                cursor_component = Cursor()
+                cursor = Entity(player.x, player.y, 4, 0xE800 + 1746, "light yellow", "cursor",
+                                cursor=cursor_component, stand_on_messages=False)
+                game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
+                entities["cursor"] = [cursor]
+
+            if key == blt.TK_F1:
+                character_menu(player)
+                draw_ui(ui_elements)
+                draw_side_panel_content(game_map, player, ui_elements)
+                fov_recompute = True
+
+            if key == blt.TK_M:
+                show_msg_history(
+                    message_log.history, "Message history")
+                draw_ui(ui_elements)
+                draw_side_panel_content(game_map, player, ui_elements)
+                fov_recompute = True
+
+            if key == blt.TK_I:
+                show_items = []
+                for item in player.inventory.items:
+                    show_items.append(get_article(item.name) + " " + item.name)
+                show_msg_history(
+                    show_items, "Inventory")
+                draw_ui(ui_elements)
+                draw_side_panel_content(game_map, player, ui_elements)
+                fov_recompute = True
+
+            if key == blt.TK_TAB:
+                test_dynamic_sprites(game_map, ui_elements)
+                draw_ui(ui_elements)
+                fov_recompute = True
+
+        if game_state == GameStates.TARGETING:
+
+            if move:
+                dx, dy = move
+                destination_x = cursor.x + dx
+                destination_y = cursor.y + dy
+                x, y = game_camera.get_coordinates(destination_x, destination_y)
+
+                if 0 < x < game_camera.width - 1 and 0 < y < game_camera.height - 1:
+                    prev_pos_x, prev_pos_y = cursor.x, cursor.y
+                    cursor.move(dx, dy)
+                    game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(cursor)
+                    game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
+                    fov_recompute = True
+
+                    variables.old_stack = variables.stack
+                    variables.stack = []
+                    if game_map.tiles[cursor.x][cursor.y].name is not None:
+                        variables.stack.append(game_map.tiles[cursor.x][cursor.y].name.capitalize())
+
+            elif key == blt.TK_ESCAPE or key == blt.TK_X:
+                game_state = GameStates.PLAYER_TURN
+                variables.old_stack = variables.stack
+                variables.stack = []
+                game_map.tiles[cursor.x][cursor.y].entities_on_tile.remove(cursor)
+                del entities["cursor"]
+
+            if player.fighter.paralyzed:
+                message_log.send("You are paralyzed!")
+                time_counter.take_turn(1)
+                game_state = GameStates.ENEMY_TURN
 
         if game_state == GameStates.ENEMY_TURN:
             # Begin enemy turn
