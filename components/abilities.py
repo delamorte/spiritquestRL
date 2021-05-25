@@ -24,12 +24,12 @@ class Abilities:
                     continue
                 name = item["name"]
                 description = item["description"]
-                damage = item["damage"] if "damage" in item.keys() else [""]
+                damage = item["damage"] if "damage" in item.keys() else []
                 dps = item["dps"] if "dps" in item.keys() else []
                 effect = item["effect"] if "effect" in item.keys() else []
-                duration = item["duration"] if "duration" in item.keys() else [""]
-                radius = item["radius"] if "radius" in item.keys() else [""]
-                chance = item["chance"] if "chance" in item.keys() else [100]
+                duration = item["duration"] if "duration" in item.keys() else []
+                radius = item["radius"] if "radius" in item.keys() else []
+                chance = item["chance"] if "chance" in item.keys() else [1.0]
                 needs_ai = item["needs_ai"] if "needs_ai" in item.keys() else None
                 target_self = item["target_self"] if "target_self" in item.keys() else None
                 target_other = item["target_other"] if "target_other" in item.keys() else None
@@ -49,12 +49,12 @@ class Abilities:
                 name = item["name"]
                 description = item["description"]
                 skill_type = item["skill_type"]
-                damage = item["damage"] if "damage" in item.keys() else [""]
+                damage = item["damage"] if "damage" in item.keys() else []
                 dps = item["dps"] if "dps" in item.keys() else []
                 effect = item["effect"] if "effect" in item.keys() else []
-                duration = item["duration"] if "duration" in item.keys() else [""]
-                radius = item["radius"] if "radius" in item.keys() else [""]
-                chance = item["chance"] if "chance" in item.keys() else [100]
+                duration = item["duration"] if "duration" in item.keys() else []
+                radius = item["radius"] if "radius" in item.keys() else []
+                chance = item["chance"] if "chance" in item.keys() else [1.0]
                 needs_ai = item["needs_ai"] if "needs_ai" in item.keys() else None
                 target_self = item["target_self"] if "target_self" in item.keys() else None
                 target_other = item["target_other"] if "target_other" in item.keys() else None

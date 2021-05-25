@@ -8,8 +8,8 @@
             1.0
         ]
     },
-    "paralysis": {
-        "name": "paralysis",
+    "paralyze": {
+        "name": "paralyze",
         "paralyze": true,
         "description": "paralyzed",
         "duration": ["1d3", "1d4", "1d6"],
@@ -42,6 +42,16 @@
         "description": "blinded",
         "duration": ["1d4", "1d6", "1d8"],
         "hit_penalty": [25, 50, 75],
+        "chance": [
+            1.0
+        ]
+    },
+    "strangle": {
+        "name": "strangle",
+        "description": "strangled",
+        "duration": ["1d4", "1d6", "1d8"],
+        "dps": [1, 2, 3],
+        "slow": [0],
         "chance": [
             1.0
         ]

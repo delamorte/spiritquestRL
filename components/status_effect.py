@@ -1,11 +1,14 @@
+from random import random
+
 from game_states import GameStates
 from helpers import roll_dice
 
 
 class StatusEffect:
-    def __init__(self, owner, name, description=None, dps=None, delayed_damage=None, rank=None, slow=None, drain_stats=None,
+    def __init__(self, owner, source, name, description=None, dps=None, delayed_damage=None, rank=None, slow=None, drain_stats=None,
                  hit_penalty=None, paralyze=None, duration=None, chance=None):
         self.owner = owner
+        self.source = source
         self.name = name
         self.description = description
         self.dps = dps
@@ -21,22 +24,26 @@ class StatusEffect:
 
     def process(self):
 
-        if self.description not in self.owner.effects:
-            self.owner.effects.append(self.description)
+        if self.source.dead and self.name == "strangle":
+            self.duration = 0
 
         if self.duration <= 0:
-            self.owner.hit_penalty -= self.hit_penalty[self.rank]
-            self.owner.ac += self.drain_stats[self.rank]
-            self.owner.ev += self.drain_stats[self.rank]
-            self.owner.mv_spd += self.slow_amount
+            if self.hit_penalty:
+                self.owner.hit_penalty -= self.hit_penalty[self.rank]
+            if self.drain_stats:
+                self.owner.ac += self.drain_stats[self.rank]
+                self.owner.ev += self.drain_stats[self.rank]
+            if self.slow_amount:
+                self.owner.mv_spd += self.slow_amount
             if self.delayed_damage:
                 self.owner.take_damage(self.delayed_damage)
             if self.paralyze:
                 self.owner.paralyzed = False
+            self.owner.effects.remove(self.description)
             return self
 
         if self.dps:
-            self.owner.take_damage(self.dps)
+            self.owner.take_damage(self.dps[self.rank])
 
         if self.hit_penalty:
             if self.description not in self.owner.effects:
@@ -54,6 +61,13 @@ class StatusEffect:
                 self.owner.mv_spd -= self.slow_amount
 
         if self.paralyze:
-            self.owner.paralyzed = True
+            if random() <= self.chance[self.rank]:
+                self.owner.paralyzed = True
+            else:
+                self.owner.paralyzed = True
 
+        if self.description not in self.owner.effects:
+            self.owner.effects.append(self.description)
         self.duration -= 1
+
+        return None

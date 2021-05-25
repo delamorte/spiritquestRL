@@ -158,6 +158,11 @@ def game_loop(main_menu_show=True, choice=None):
                                        variables.viewport_h + variables.ui_offset_y + 1, variables.viewport_w, 1)
                         game_loop(False, new_choice)
 
+        if player.fighter.paralyzed:
+            message_log.send("You are paralyzed!")
+            time_counter.take_turn(1)
+            game_state = GameStates.ENEMY_TURN
+
         if game_state == GameStates.PLAYER_TURN:
             # Begin player turn
             # Non-turn taking UI functions
@@ -204,12 +209,16 @@ def game_loop(main_menu_show=True, choice=None):
                         draw_stats(player, target)
 
                     else:
-                        prev_pos_x, prev_pos_y = player.x, player.y
-                        player.move(dx, dy)
-                        time_counter.take_turn(1 / player.fighter.mv_spd)
-                        fov_recompute = True
-                        game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(player)
-                        game_map.tiles[player.x][player.y].entities_on_tile.append(player)
+                        if player.fighter.mv_spd <= 0:
+                            message_log.send("You are unable to move!")
+                            time_counter.take_turn(1)
+                        else:
+                            prev_pos_x, prev_pos_y = player.x, player.y
+                            player.move(dx, dy)
+                            time_counter.take_turn(1 / player.fighter.mv_spd)
+                            fov_recompute = True
+                            game_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(player)
+                            game_map.tiles[player.x][player.y].entities_on_tile.append(player)
 
                     game_state = GameStates.ENEMY_TURN
 

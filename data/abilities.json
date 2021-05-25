@@ -69,7 +69,7 @@
         "description": "may drain life",
         "skill_type": "attack",
         "damage": ["1d4", "1d6", "1d8"],
-        "effect": ["drain"],
+        "needs_ai": true,
         "chance": [
             0.1,
             0.2,
@@ -162,13 +162,15 @@
         "skill_type": "attack",
         "effect": ["stun"],
         "radius": [2, 3, 4],
-        "chance": [0.1, 0.15, 0.2]
+        "chance": [0.1, 0.15, 0.2],
+        "needs_ai": true
     },
     "call allies": {
         "name": "call allies",
         "description": "make a loud beckoning noise calling friends",
         "skill_type": "utility",
-        "chance": [0.05, 0.07, 0.1]
+        "chance": [0.05, 0.07, 0.1],
+        "needs_ai": true
     },
     "summon crow": {
         "name": "summon crow",

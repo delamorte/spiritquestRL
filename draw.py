@@ -318,7 +318,7 @@ def draw_messages(msg_panel, message_log):
 def draw_stats(player, target=None):
     power_msg = "[color=light azure]Spirit power left: " + str(player.player.spirit_power)
     blt.layer(0)
-    blt.clear_area(2, variables.viewport_h + variables.ui_offset_y + 1,
+    blt.clear_area(2, variables.viewport_h + variables.ui_offset_y + 3,
                    int(variables.viewport_w / 2) + int(len(power_msg) / 2 + 5) - 5, 1)
     blt.color("gray")
 
@@ -353,13 +353,17 @@ def draw_stats(player, target=None):
                     str(player.fighter.hp) + "/" + \
                     str(player.fighter.max_hp) + "  "
 
+    active_effects = []
     for x in player.status_effects.items:
+        active_effects.append(x.description + "("+str(x.duration + 1)+")")
         if x.name == "poison":
             hp_player = "[color=green]HP:" + \
                         str(player.fighter.hp) + "/" + \
                         str(player.fighter.max_hp) + "  "
+
+    if active_effects:
         blt.puts(4, variables.viewport_h + variables.ui_offset_y + 3,
-                 "[offset=0,-2]" + x.name + "  ",
+                 "[offset=0,-2]" + "  ".join(active_effects) + "  ",
                  0, 0, blt.TK_ALIGN_LEFT)
 
     ac_player = "[color=default]AC:" + str(player.fighter.ac) + "  "

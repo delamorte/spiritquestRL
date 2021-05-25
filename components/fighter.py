@@ -53,35 +53,34 @@ class Fighter:
                         self.owner.name, skill.name)])
 
                 if skill.effect:
-                    effect = skill.effect
-                    json_efx = json_data.data.status_effects
-                    duration = roll_dice(skill.duration[min(self.level-1, 2)])
-                    if not duration:
-                        roll_dice(json_efx[effect]["duration"][min(self.level - 1, 2)])
-                    hit_penalty = json_efx[effect]["hit_penalty"] if "hit_penalty" in json_efx.keys() else [0]
-                    if "delayed_damage" in json_efx.keys():
-                        delayed_damage = roll_dice(json_efx[effect]["delayed_damage"])
-                    else:
-                        delayed_damage = [0]
-                    slow = json_efx[effect]["slow"] if "slow" in json_efx.keys() else [0]
-                    dps = json_efx[effect]["dps"] if "dps" in json_efx.keys() else [0]
-                    rank = min(self.owner.level-1, 2)
-                    drain_stats = json_efx[effect]["drain_stats"] if "drain_stats" in json_efx.keys() else [0]
-                    description = json_efx[effect]["description"]
-                    paralyze = json_efx[effect]["paralyze"] if "paralyze" in json_efx.keys() else False
-                    chance = json_efx[effect]["chance"]
-                    effect_component = StatusEffect(owner=self,
-                                                    name=effect, duration=duration, slow=slow, dps=dps,
-                                                    delayed_damage=delayed_damage,  rank=rank, drain_stats=drain_stats,
-                                                    hit_penalty=hit_penalty, paralyze=paralyze, description=description,
-                                                    chance=chance)
+                    for effect in skill.effect:
+                        json_efx = json_data.data.status_effects[effect]
+                        if skill.duration:
+                            duration = roll_dice(skill.duration[min(self.level-1, 2)])
+                        else:
+                            duration = roll_dice(json_efx["duration"][min(self.level - 1, 2)])
+                        hit_penalty = json_efx["hit_penalty"] if "hit_penalty" in json_efx.keys() else []
+                        if "delayed_damage" in json_efx.keys():
+                            delayed_damage = roll_dice(json_efx["delayed_damage"][min(self.level - 1, 2)])
+                        else:
+                            delayed_damage = []
+                        rank = min(self.level-1, 2)
+                        dps = json_efx["dps"] if "dps" in json_efx.keys() else []
+                        slow = json_efx["slow"] if "slow" in json_efx.keys() else []
+                        drain_stats = json_efx["drain_stats"] if "drain_stats" in json_efx.keys() else []
+                        description = json_efx["description"]
+                        paralyze = json_efx["paralyze"] if "paralyze" in json_efx.keys() else False
+                        chance = json_efx["chance"]
+                        effect_component = StatusEffect(owner=target.fighter, source=self, name=effect, duration=duration, slow=slow, dps=dps,
+                                                        delayed_damage=delayed_damage,  rank=rank, drain_stats=drain_stats,
+                                                        hit_penalty=hit_penalty, paralyze=paralyze, description=description,
+                                                        chance=chance)
 
-                    if self.owner.player:
-                        target.owner.status_effects.add_item(effect_component)
-                        results.append(["The {0} is inflicted with {1}!".format(target.name, effect)])
-                    else:
-                        self.owner.status_effects.add_item(effect_component)
-                        results.append(["You are inflicted with {} !".format(effect), "green"])
+                        target.status_effects.add_item(effect_component)
+                        if self.owner.player:
+                            results.append(["The {0} is inflicted with {1}!".format(target.name, effect)])
+                        else:
+                            results.append(["You are inflicted with {} !".format(effect), "green"])
 
                 if damage > 0:
                     if self.owner.player:
