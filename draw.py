@@ -297,13 +297,14 @@ def draw_messages(msg_panel, message_log):
         blt.layer(0)
         blt.clear_area(msg_panel.x * variables.ui_offset_x, msg_panel.y * variables.ui_offset_y, msg_panel.w *
                        variables.ui_offset_x, msg_panel.h * variables.ui_offset_y)
-        blt.color("white")
+
         # Print the game messages, one line at a time. Display newest
         # msg at the bottom and scroll others up
         i = 4
         # if i > message_log.max_length:
         #    i = 0
-        for msg in message_log.buffer:
+        for idx, msg in enumerate(message_log.buffer):
+            blt.color(message_log.buffer_colors[idx])
             msg = shorten(msg, msg_panel.w * variables.ui_offset_x - 2,
                           placeholder="..(Press 'M' for log)")
             blt.puts(msg_panel.x * variables.ui_offset_x + 1, msg_panel.y *

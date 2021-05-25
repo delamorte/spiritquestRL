@@ -39,18 +39,18 @@ class Fighter:
             damage = self.calculate_damage(skill, target)
             if miss:
                 if self.owner.player:
-                    results.append(
-                        "You attack the {0} with {1}, but miss.".format(target.name, skill.name))
+                    results.append([
+                        "You attack the {0} with {1}, but miss.".format(target.name, skill.name), "gray"])
                 else:
-                    results.append(
-                        "The {0} attacks you with {1}, but misses.".format(self.owner.name, skill.name))
+                    results.append([
+                        "The {0} attacks you with {1}, but misses.".format(self.owner.name, skill.name), "gray"])
             else:
                 if self.owner.player:
-                    results.append("You use {0} on {1}!".format(
-                        skill.name, target.name))
+                    results.append(["You use {0} on {1}!".format(
+                        skill.name, target.name), "orange"])
                 else:
-                    results.append("The {0} uses {1} on you!".format(
-                        self.owner.name, skill.name))
+                    results.append(["The {0} uses {1} on you!".format(
+                        self.owner.name, skill.name)])
 
                 if skill.effect:
                     effect = skill.effect
@@ -71,27 +71,27 @@ class Fighter:
 
                     if self.owner.player:
                         target.owner.status_effects.add_item(effect_component)
-                        results.append("The {0} is inflicted with {1}!".format(target.name, effect))
+                        results.append(["The {0} is inflicted with {1}!".format(target.name, effect)])
                     else:
                         self.owner.status_effects.add_item(effect_component)
-                        results.append("You are inflicted with {} !".format(effect))
+                        results.append(["You are inflicted with {} !".format(effect), "green"])
 
                 if damage > 0:
                     if self.owner.player:
-                        results[-1] += (" You attack the {0} for {1} hit points.".format(
+                        results[-1][0] += (" You attack the {0} for {1} hit points.".format(
                             target.name, str(damage)))
                     else:
-                        results[-1] += (" The {0} attacks you for {1} hit points.".format(
+                        results[-1][0] += (" The {0} attacks you for {1} hit points.".format(
                             self.owner.name, str(damage)))
                     
                     results.extend(target.fighter.take_damage(damage))
 
                 else:
                     if self.owner.player:
-                        results[-1] += (
+                        results[-1][0] += (
                             " You attack the {0} with {1} but do no damage.".format(target.name, skill.name))
                     else:
-                        results[-1] += (
+                        results[-1][0] += (
                             "The {0} attacks you  with {1} but does no damage.".format(self.owner.name, skill.name))
         return results
 
