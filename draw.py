@@ -316,7 +316,7 @@ def draw_messages(msg_panel, message_log):
 
 
 def draw_stats(player, target=None):
-    power_msg = "Spirit power left: " + str(player.player.spirit_power)
+    power_msg = "[color=light azure]Spirit power left: " + str(player.player.spirit_power)
     blt.layer(0)
     blt.clear_area(2, variables.viewport_h + variables.ui_offset_y + 1,
                    int(variables.viewport_w / 2) + int(len(power_msg) / 2 + 5) - 5, 1)
@@ -358,6 +358,9 @@ def draw_stats(player, target=None):
             hp_player = "[color=green]HP:" + \
                         str(player.fighter.hp) + "/" + \
                         str(player.fighter.max_hp) + "  "
+        blt.puts(4, variables.viewport_h + variables.ui_offset_y + 3,
+                 "[offset=0,-2]" + x.name + "  ",
+                 0, 0, blt.TK_ALIGN_LEFT)
 
     ac_player = "[color=default]AC:" + str(player.fighter.ac) + "  "
     ev_player = "EV:" + str(player.fighter.ev) + "  "

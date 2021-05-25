@@ -27,7 +27,7 @@ class UIElements:
         self.screen_borders = Panel(0, 0, w-side_panel_w, h-5)
         self.side_panel_borders = Panel(w-side_panel_w, 0, side_panel_w-1, h)
 
-        self.msg_panel_borders = Panel(0, self.screen_borders.h, w-side_panel_w, h-(self.screen_borders.h))
+        self.msg_panel_borders = Panel(0, self.screen_borders.h+1, w-side_panel_w, h-(self.screen_borders.h))
         self.msg_panel = Panel(1, self.msg_panel_borders.y+1, self.msg_panel_borders.w-1, self.msg_panel_borders.h-1)
 
         variables.viewport_w = (w-side_panel_w) * variables.ui_offset_x - (variables.ui_offset_x + 1)
