@@ -23,7 +23,8 @@ def flatten(objects):
 
 
 def roll_dice(dice_str):
-
+    if isinstance(dice_str, int):
+        return dice_str
     result = 0
     dice_arr = dice_str.split("d")
     dice_rolls = int(dice_arr[0])

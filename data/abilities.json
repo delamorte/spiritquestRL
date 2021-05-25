@@ -132,7 +132,6 @@
         "description": "extra dmg",
         "skill_type": "attack",
         "damage": ["1d3", "1d4", "1d5"],
-        "dps": [1],
         "effect": ["bleed"],
         "chance": [
             0.1,
@@ -163,13 +162,13 @@
         "skill_type": "attack",
         "effect": ["stun"],
         "radius": [2, 3, 4],
-        "chance": [10, 15, 20]
+        "chance": [0.1, 0.15, 0.2]
     },
     "call allies": {
         "name": "call allies",
         "description": "make a loud beckoning noise calling friends",
         "skill_type": "utility",
-        "chance": [5, 7, 10]
+        "chance": [0.05, 0.07, 0.1]
     },
     "summon crow": {
         "name": "summon crow",
@@ -182,7 +181,7 @@
         "description": "cast a magical spell to heal one's wounds",
         "skill_type": "utility",
         "damage": ["-1d4", "-1d6", "-1d8"],
-        "chance": [10, 15, 20],
+        "chance": [0.1, 0.15, 0.2],
         "target_self": true,
         "target_other": true,
         "needs_ai": true
@@ -194,7 +193,7 @@
         "damage": ["1d4"],
         "effect": ["strength"],
         "duration": ["1d4"],
-        "chance": [10, 15, 20],
+        "chance": [0.1, 0.15, 0.2],
         "target_self": true,
         "target_other": true,
         "needs_ai": true
@@ -206,7 +205,7 @@
         "damage": ["1d4"],
         "effect": ["strength"],
         "duration": ["1d4"],
-        "chance": [10, 15, 20]
+        "chance": [0.1, 0.15, 0.2]
     },
     "harm": {
         "name": "harm",
@@ -214,7 +213,7 @@
         "skill_type": "utility",
         "damage": ["1d4", "1d6", "1d8"],
         "radius": [3, 4, 5],
-        "chance": [10, 15, 20]
+        "chance": [0.1, 0.15, 0.2]
     },
     "fire breath": {
         "name": "fire breath",
@@ -222,7 +221,7 @@
         "skill_type": "utility",
         "damage": ["1d8", "1d10", "1d12"],
         "radius": [2, 3, 5],
-        "chance": [10, 15, 20]
+        "chance": [0.1, 0.15, 0.2]
     },
     "spit poison": {
         "name": "spit poison",
@@ -231,7 +230,7 @@
         "damage": ["1d8", "1d10", "1d12"],
         "effect": ["poison"],
         "radius": [3, 4, 6],
-        "chance": [10, 15, 20],
+        "chance": [0.1, 0.15, 0.2],
         "needs_ai": true,
         "target_other": true
     },
@@ -241,7 +240,7 @@
         "skill_type": "utility",
         "effect": ["invisibility"],
         "duration": ["1d8"],
-        "chance": [10, 15, 20],
+        "chance": [0.1, 0.15, 0.2],
         "target_self": true
     },
     "sneak": {
@@ -267,6 +266,6 @@
         "damage": ["1d4", "1d6", "1d8"],
         "effect": ["strangle"],
         "duration": ["1d3", "1d4", "1d6"],
-        "chance": [10, 15, 20]
+        "chance": [0.1, 0.15, 0.2]
     }
 }

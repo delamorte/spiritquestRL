@@ -68,7 +68,7 @@ class BasicMonster:
             skills = []
             attacks = []
             weights = []
-            default_atk_chance = 100
+            default_atk_chance = 1.0
             for skill in self.owner.abilities.items:
                 if skill.needs_ai is True or skill.target_self is True or skill.target_other is True:
                     result.append("Skill {} not yet implemented :(".format(skill.name))

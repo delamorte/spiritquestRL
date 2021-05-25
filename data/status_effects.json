@@ -31,7 +31,7 @@
     "bleed": {
         "name": "bleed",
         "description": "bleeding",
-        "strength": ["1d4"],
+        "delayed_damage": ["1d4"],
         "duration": ["1d4"],
         "chance": [
             1.0

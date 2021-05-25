@@ -54,9 +54,15 @@ class Fighter:
 
                 if skill.effect:
                     effect = skill.effect
-                    duration = roll_dice(skill.duration[min(self.level-1, 2)])
                     json_efx = json_data.data.status_effects
+                    duration = roll_dice(skill.duration[min(self.level-1, 2)])
+                    if not duration:
+                        roll_dice(json_efx[effect]["duration"][min(self.level - 1, 2)])
                     hit_penalty = json_efx[effect]["hit_penalty"] if "hit_penalty" in json_efx.keys() else [0]
+                    if "delayed_damage" in json_efx.keys():
+                        delayed_damage = roll_dice(json_efx[effect]["delayed_damage"])
+                    else:
+                        delayed_damage = [0]
                     slow = json_efx[effect]["slow"] if "slow" in json_efx.keys() else [0]
                     dps = json_efx[effect]["dps"] if "dps" in json_efx.keys() else [0]
                     rank = min(self.owner.level-1, 2)
@@ -66,8 +72,9 @@ class Fighter:
                     chance = json_efx[effect]["chance"]
                     effect_component = StatusEffect(owner=self,
                                                     name=effect, duration=duration, slow=slow, dps=dps,
-                                                    rank=rank, drain_stats=drain_stats, hit_penalty=hit_penalty,
-                                                    paralyze=paralyze, description=description, chance=chance)
+                                                    delayed_damage=delayed_damage,  rank=rank, drain_stats=drain_stats,
+                                                    hit_penalty=hit_penalty, paralyze=paralyze, description=description,
+                                                    chance=chance)
 
                     if self.owner.player:
                         target.owner.status_effects.add_item(effect_component)

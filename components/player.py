@@ -24,7 +24,7 @@ class Player:
         self.spirit_power += killed_fighter.max_hp
         self.char_exp["player"] += killed_fighter.max_hp
         self.owner.fighter.hp += killed_fighter.power
-        levels_gained = int(round(self.char_exp["player"] / (self.exp_lvl_interval * self.char_level)))
+        levels_gained = int(self.char_exp["player"] / (self.exp_lvl_interval * self.char_level))
         entity_name = killed_fighter.owner.name
 
         if entity_name in tilemap()["monsters"].keys():
