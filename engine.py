@@ -349,7 +349,7 @@ def game_loop(main_menu_show=True, choice=None):
                 draw_ui(ui_elements)
                 fov_recompute = True
 
-        if game_state == GameStates.TARGETING:
+        elif game_state == GameStates.TARGETING:
 
             if move:
                 dx, dy = move
