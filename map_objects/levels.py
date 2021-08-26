@@ -30,9 +30,8 @@ def make_map(destination, levels, player, entities, game_map, stairs):
             game_map.tiles[player.x][player.y].entities_on_tile.append(player)
             return game_map, entities, player
         variables.world_tendency = level_choice["modifier"]
-        game_map = GameMap(100, 100, "dream", level_choice["title"])
-        # entities = game_map.generate_forest(world_tendency)
-        entities = game_map.room_addition()
+        game_map = GameMap(50, 50, "dream", level_choice["title"])
+        entities = game_map.generate_map()
         player, entities = game_map.place_entities(player, entities)
         # Initialize field of view
         player.light_source.initialize_fov(game_map)
