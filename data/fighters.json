@@ -37,8 +37,7 @@
         "player_abilities": ["crow talons", "peck eyes", "fly", "reveal", "summon crow"],
         "abilities": [
             "talons",
-            "swoop",
-            "reveal"
+            "swoop"
         ]
     },
     "snake": {

@@ -25,6 +25,8 @@ class Abilities:
                 name = item["name"]
                 description = item["description"]
                 damage = item["damage"] if "damage" in item.keys() else []
+                rank = 0
+                icon = item["icon"] if "icon" in item.keys() else 12
                 dps = item["dps"] if "dps" in item.keys() else []
                 effect = item["effect"] if "effect" in item.keys() else []
                 duration = item["duration"] if "duration" in item.keys() else []
@@ -35,12 +37,18 @@ class Abilities:
                 target_other = item["target_other"] if "target_other" in item.keys() else None
                 player_only = item["player_only"] if "player_only" in item.keys() else False
 
-                a = Ability(name=name, description=description, skill_type=skill_type, damage=damage, dps=dps,
-                            effect=effect, duration=duration, radius=radius, chance=chance, needs_ai=needs_ai,
-                            target_self=target_self, target_other=target_other, player_only=player_only)
+                a = Ability(name=name, description=description, skill_type=skill_type, damage=damage, rank=rank,
+                            icon=icon, dps=dps, effect=effect, duration=duration, radius=radius, chance=chance,
+                            needs_ai=needs_ai, target_self=target_self, target_other=target_other,
+                            player_only=player_only)
 
                 self.add_item(a)
-                self.owner.player.default_attack = a
+                if skill_type == "weapon" and not self.owner.player.sel_weapon:
+                    self.owner.player.sel_weapon = a
+                if skill_type == "attack" and not self.owner.player.sel_attack:
+                    self.owner.player.sel_attack = a
+                if skill_type == "utility" and not self.owner.player.sel_utility:
+                    self.owner.player.sel_utility = a
         else:
             initial_abilities = json_data.data.fighters[name]["abilities"]
 

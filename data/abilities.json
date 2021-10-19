@@ -4,7 +4,8 @@
         "description": "Attack with sharp talons",
         "skill_type": "weapon",
         "player_only": true,
-        "damage": ["2d3", "2d4", "2d5"]
+        "damage": ["2d3", "2d4", "2d5"],
+        "icon": 29
     },
     "nasty bite": {
         "name": "nasty bite",
@@ -145,6 +146,8 @@
         "skill_type": "utility",
         "radius": [2, 3, 4],
         "chance": [
+            0.1,
+            0.1,
             0.1
         ],
         "needs_ai": true

@@ -561,52 +561,96 @@ def draw_side_panel_content(game_map, player, ui_elements):
     # Draw side panel content
     blt.layer(1)
     blt.color(None)
+    x_margin = 4
     map_title = fill(game_map.title, 21)
 
-    blt.clear_area(side_panel_borders.x * variables.ui_offset_x + 4, side_panel_borders.y * variables.ui_offset_y + 20,
-                   side_panel_borders.w * variables.ui_offset_x - 4, side_panel_borders.h * variables.ui_offset_y - 40)
+    blt.clear_area(side_panel_borders.x * variables.ui_offset_x + x_margin, side_panel_borders.y * variables.ui_offset_y + 20,
+                   side_panel_borders.w * variables.ui_offset_x - x_margin, side_panel_borders.h * variables.ui_offset_y - 40)
 
-    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
+    blt.puts(side_panel_borders.x * variables.ui_offset_x + x_margin,
              side_panel_borders.y * variables.ui_offset_y + 21,  "Location: " + map_title, 0, 0,
              blt.TK_ALIGN_LEFT)
-    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
+    blt.puts(side_panel_borders.x * variables.ui_offset_x + x_margin,
              side_panel_borders.y * variables.ui_offset_y + 24 + map_title.count('\n'),  "World tendency: " +
              str(variables.world_tendency), 0, 0, blt.TK_ALIGN_LEFT)
 
-    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 30,  "Atk: crow talons 2d3", 0, 0,
-             blt.TK_ALIGN_LEFT)
-    blt.color("dark amber")
-    blt.put(side_panel_borders.x * variables.ui_offset_x + 4,
-            side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 29)
-    blt.color(None)
-    blt.put(side_panel_borders.x * variables.ui_offset_x + 10,
-            side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 4)
-    blt.put(side_panel_borders.x * variables.ui_offset_x + 16,
-            side_panel_borders.y * variables.ui_offset_y + 32,  0xF100 + 22)
-
-    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 35,  "Atk mod: swoop 1d3 (20% chance)", 0, 0,
-             blt.TK_ALIGN_LEFT)
-
-    blt.color("dark amber")
-    blt.put(side_panel_borders.x * variables.ui_offset_x + 4,
-            side_panel_borders.y * variables.ui_offset_y + 37,  0xF100 + 25)
+    # Fetch player skills and draw icons
+    weapon = []
+    attack = []
+    utility = []
+    for skill in player.abilities.items:
+        if skill.skill_type == "weapon":
+            weapon.append(skill)
+        elif skill.skill_type == "attack":
+            attack.append(skill)
+        elif skill.skill_type == "utility":
+            utility.append(skill)
 
     blt.color(None)
-    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 40,  "Abilities: reveal", 0, 0,
-             blt.TK_ALIGN_LEFT)
 
-    blt.color("dark amber")
-    blt.put(side_panel_borders.x * variables.ui_offset_x + 4,
-            side_panel_borders.y * variables.ui_offset_y + 42,  0xF100 + 13)
+    # Weapon skills
+    y_margin = 0
+    fill_chars = 32
+    for i, wpn in enumerate(weapon):
+        if wpn.name == player.player.sel_weapon.name:
+            # name of the selected skill
+            skill_str = "Atk: {0}, {1} dmg".format(wpn.name.capitalize(), wpn.damage[wpn.rank])
+            blt.puts(side_panel_borders.x * variables.ui_offset_x + x_margin,
+                     side_panel_borders.y * variables.ui_offset_y + 30,  fill(skill_str, fill_chars), 0, 0,
+                     blt.TK_ALIGN_LEFT)
+            # highlight icon of the selected skill
+            blt.color("dark amber")
+            y_margin += skill_str.count('\n')
 
-    blt.color(None)
-    blt.puts(side_panel_borders.x * variables.ui_offset_x + 4,
-             side_panel_borders.y * variables.ui_offset_y + 45,
-             "Reveal an area of radius 8 around you, may reveal secrets.", 30, 0,
-             blt.TK_ALIGN_LEFT)
+        blt.put(side_panel_borders.x * variables.ui_offset_x + x_margin + i * 6,
+                side_panel_borders.y * variables.ui_offset_y + 32, wpn.icon)
+        blt.color(None)
+
+    # Attack skills
+    for i, atk in enumerate(attack):
+        if player.player.sel_attack and atk.name == player.player.sel_attack.name:
+            skill_str = "{0}: ".format(atk.name)
+            chance_str, atk_str, effect_str, duration_str = "", "", "", ""
+            if atk.chance:
+                chance_str = str(int(1 / atk.chance[atk.rank])) + "% chance of "
+            if atk.effect:
+                effect_str = ", ".join(atk.effect) + ", "
+            if atk.duration:
+                duration_str = atk.duration[atk.rank] + " turns"
+            if atk.damage:
+                atk_str = ", " + atk.damage[atk.rank] + " dmg" if duration_str else atk.damage[atk.rank] + " dmg"
+            skill_str += chance_str + effect_str + duration_str + atk_str
+
+            blt.puts(side_panel_borders.x * variables.ui_offset_x + x_margin,
+                     side_panel_borders.y * variables.ui_offset_y + 35 + y_margin,  fill(skill_str.capitalize(), fill_chars), 0, 0,
+                     blt.TK_ALIGN_LEFT)
+            # highlight icon of the selected skill
+            blt.color("dark amber")
+            y_margin += skill_str.count('\n')
+
+        blt.put(side_panel_borders.x * variables.ui_offset_x + x_margin + i * 6,
+                side_panel_borders.y * variables.ui_offset_y + 38 + y_margin, atk.icon)
+        blt.color(None)
+
+    # Utility skills
+    for i, utl in enumerate(utility):
+        if player.player.sel_utility and utl.name == player.player.sel_utility.name:
+            # name of the selected skill
+            skill_str = utl.name
+            blt.puts(side_panel_borders.x * variables.ui_offset_x + x_margin,
+                     side_panel_borders.y * variables.ui_offset_y + 41 + y_margin, fill(skill_str.capitalize(), fill_chars),
+                     0, 0, blt.TK_ALIGN_LEFT)
+            y_margin += skill_str.count('\n')
+            blt.puts(side_panel_borders.x * variables.ui_offset_x + x_margin,
+                     side_panel_borders.y * variables.ui_offset_y + 46 + y_margin,
+                     fill(utl.description.capitalize(), fill_chars), 46 + y_margin, 0,
+                     blt.TK_ALIGN_LEFT)
+            # highlight icon of the selected skill
+            blt.color("dark amber")
+
+        blt.put(side_panel_borders.x * variables.ui_offset_x + x_margin + i * 6,
+                side_panel_borders.y * variables.ui_offset_y + 43 + y_margin, utl.icon)
+        blt.color(None)
 
 
 def draw_all(game_map, game_camera, player, entities, ui_elements):
