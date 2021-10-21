@@ -9,6 +9,7 @@ class Player:
         self.char = {"player": tilemap()["player"]}
         self.char_exp = {"player": 0}
         self.char_level = 1
+        self.skill_points = 0
         self.exp_lvl_interval = 100
         self.avatar = {"player": None}
         self.lightmap = None
@@ -49,3 +50,4 @@ class Player:
 
     def level_up(self, levels_gained):
         self.char_level += levels_gained
+        self.skill_points += 1

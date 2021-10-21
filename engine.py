@@ -1,4 +1,4 @@
-from math import floor
+from math import floor, ceil
 
 from bearlibterminal import terminal as blt
 
@@ -21,11 +21,11 @@ from map_objects.levels import level_change
 from map_objects.tilemap import init_tiles, tilemap
 from map_objects.minimap import test_dynamic_sprites
 from random import randint
-from ui.elements import UIElements
+from ui.elements import UIElements, Panel
 from ui.game_messages import MessageLog
 from ui.menus import main_menu, character_menu
 from ui.message_history import show_msg_history
-import variables
+import settings
 
 
 def blt_init():
@@ -72,10 +72,10 @@ def new_game(choice, ui_elements):
     player.player.avatar[choice].hp += 20
     player.player.avatar[choice].power += 1
 
-    blt.clear_area(2, variables.viewport_h +
-                   variables.ui_offset_y + 1, ui_elements.viewport_x, 1)
+    blt.clear_area(2, settings.viewport_h +
+                   settings.ui_offset_y + 1, ui_elements.viewport_x, 1)
 
-    if variables.gfx == "ascii":
+    if settings.gfx == "ascii":
         player.char = tilemap()["player"]
         player.color = "lightest green"
 
@@ -83,12 +83,18 @@ def new_game(choice, ui_elements):
     message_log = MessageLog(4)
 
     # Initialize game camera
-    variables.camera_width = int(floor(variables.viewport_w / variables.ui_offset_x+2))
-    variables.camera_height = int(floor(variables.viewport_h / variables.ui_offset_y+2))
-    game_camera = Camera(1, 1, variables.camera_width, variables.camera_height)
+    settings.camera_width = int(floor(settings.viewport_w / settings.ui_offset_x + 2))
+    settings.camera_height = int(floor(settings.viewport_h / settings.ui_offset_y + 2))
+    settings.camera_bound_x = ceil(settings.camera_offset)
+    settings.camera_bound_y = ceil(settings.camera_offset)
+    settings.camera_bound_x2 = settings.camera_width - ceil(settings.camera_offset)
+    settings.camera_bound_y2 = settings.camera_height - ceil(settings.camera_offset)
+
+    game_camera = Camera(1, 1, settings.camera_width, settings.camera_height)
+
 
     levels = {}
-    time_counter = variables.TimeCounter()
+    time_counter = settings.TimeCounter()
     insights = 200
     game_state = GameStates.PLAYER_TURN
 
@@ -151,11 +157,11 @@ def game_loop(main_menu_show=True, choice=None):
                         fov_recompute = True
                     else:
                         blt.layer(1)
-                        blt.clear_area(ui_elements.msg_panel.x * variables.ui_offset_x, ui_elements.msg_panel.y * variables.ui_offset_y,
+                        blt.clear_area(ui_elements.msg_panel.x * settings.ui_offset_x, ui_elements.msg_panel.y * settings.ui_offset_y,
                                        ui_elements.msg_panel.w *
-                                       variables.ui_offset_x, ui_elements.msg_panel.h * variables.ui_offset_y)
-                        blt.clear_area(int(variables.viewport_w / 2) - 5,
-                                       variables.viewport_h + variables.ui_offset_y + 1, variables.viewport_w, 1)
+                                       settings.ui_offset_x, ui_elements.msg_panel.h * settings.ui_offset_y)
+                        blt.clear_area(settings.viewport_center_x - 5,
+                                       settings.viewport_h + settings.ui_offset_y + 1, settings.viewport_w, 1)
                         game_loop(False, new_choice)
 
         if player.fighter.paralyzed:
@@ -185,7 +191,7 @@ def game_loop(main_menu_show=True, choice=None):
                 time_counter.take_turn(1)
                 # player.player.spirit_power -= 1
                 message_log.send("You wait a turn.")
-                variables.old_stack = variables.stack
+                settings.old_stack = settings.stack
                 game_state = GameStates.ENEMY_TURN
 
             # Turn taking functions
@@ -235,8 +241,8 @@ def game_loop(main_menu_show=True, choice=None):
                                 time_counter.take_turn(1)
                                 game_state = GameStates.ENEMY_TURN
 
-                variables.old_stack = variables.stack
-                variables.stack = []
+                settings.old_stack = settings.stack
+                settings.stack = []
 
             elif interact:
                 if "doors" in entities:
@@ -285,9 +291,9 @@ def game_loop(main_menu_show=True, choice=None):
                         if entity.x == player.x and entity.y == player.y and entity.item.pickable:
                             pickup_msg = player.inventory.add_item(entity)
                             message_log.send(pickup_msg)
-                            for item in variables.stack:
+                            for item in settings.stack:
                                 if entity.name == item.split(" ", 1)[1]:
-                                    variables.stack.remove(item)
+                                    settings.stack.remove(item)
                             game_map.tiles[entity.x][entity.y].entities_on_tile.remove(entity)
                             entities["items"].remove(entity)
                             time_counter.take_turn(1)
@@ -306,7 +312,7 @@ def game_loop(main_menu_show=True, choice=None):
                             game_map, entities, player = level_change(
                                 entity.stairs.destination[0], levels, player, entities, game_map, entity.stairs, ui_elements=ui_elements)
 
-                    variables.old_stack = variables.stack
+                    settings.old_stack = settings.stack
 
                     if game_map.name == "cavern" and game_map.dungeon_level == 1:
                         message_log.clear()
@@ -343,6 +349,10 @@ def game_loop(main_menu_show=True, choice=None):
                 draw_side_panel_content(game_map, player, ui_elements)
                 fov_recompute = True
 
+            if key == blt.TK_A:
+                game_state = GameStates.MENU
+
+
             if key == blt.TK_I:
                 show_items = []
                 for item in player.inventory.items:
@@ -357,6 +367,10 @@ def game_loop(main_menu_show=True, choice=None):
                 test_dynamic_sprites(game_map, ui_elements)
                 draw_ui(ui_elements)
                 fov_recompute = True
+
+        elif game_state == GameStates.MENU:
+            if key == blt.TK_A or key == blt.TK_ESCAPE:
+                game_state = GameStates.PLAYER_TURN
 
         elif game_state == GameStates.TARGETING:
 
@@ -373,15 +387,15 @@ def game_loop(main_menu_show=True, choice=None):
                     game_map.tiles[cursor.x][cursor.y].entities_on_tile.append(cursor)
                     fov_recompute = True
 
-                    variables.old_stack = variables.stack
-                    variables.stack = []
+                    settings.old_stack = settings.stack
+                    settings.stack = []
                     if game_map.tiles[cursor.x][cursor.y].name is not None:
-                        variables.stack.append(game_map.tiles[cursor.x][cursor.y].name.capitalize())
+                        settings.stack.append(game_map.tiles[cursor.x][cursor.y].name.capitalize())
 
             elif key == blt.TK_ESCAPE or key == blt.TK_X:
                 game_state = GameStates.PLAYER_TURN
-                variables.old_stack = variables.stack
-                variables.stack = []
+                settings.old_stack = settings.stack
+                settings.stack = []
                 game_map.tiles[cursor.x][cursor.y].entities_on_tile.remove(cursor)
                 del entities["cursor"]
 

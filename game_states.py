@@ -6,3 +6,4 @@ class GameStates(Enum):
     ENEMY_TURN = auto()
     PLAYER_DEAD = auto()
     TARGETING = auto()
+    MENU = auto()

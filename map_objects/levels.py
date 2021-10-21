@@ -6,7 +6,7 @@ from map_objects.tilemap import tilemap
 from descriptions import level_biomes, meditate_params
 from draw import draw_side_panel_content
 from ui.menus import choose_mission
-import variables
+import settings
 
 
 def make_map(destination, levels, player, entities, game_map, stairs):
@@ -29,7 +29,7 @@ def make_map(destination, levels, player, entities, game_map, stairs):
         if not level_choice:
             game_map.tiles[player.x][player.y].entities_on_tile.append(player)
             return game_map, entities, player
-        variables.world_tendency = level_choice["modifier"]
+        settings.world_tendency = level_choice["modifier"]
         game_map = GameMap(50, 50, "dream", level_choice["title"])
         entities = game_map.generate_map()
         player, entities = game_map.place_entities(player, entities)
@@ -65,10 +65,10 @@ def generate_level_params(level_params=None):
         # Generate level title
         if random.random() > 0.7:
             monsters = []
-            if variables.world_tendency < 0:
+            if settings.world_tendency < 0:
                 for x, y in tilemap()["monsters_chaos"].items():
                     monsters.append((x, y))
-            elif variables.world_tendency > 0:
+            elif settings.world_tendency > 0:
                 for x, y in tilemap()["monsters_light"].items():
                     monsters.append((x, y))
             else:

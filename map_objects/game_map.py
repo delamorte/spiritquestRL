@@ -17,7 +17,7 @@ from components.light_source import LightSource
 from resources.dungeon_generation.dungeon_generator import DrunkardsWalk, RoomAddition, MessyBSPTree, CellularAutomata, \
     MazeWithRooms
 import xml.etree.ElementTree as ET
-import variables
+import settings
 import numpy as np
 import json
 
@@ -68,7 +68,7 @@ class GameMap:
 
                     if ground != 0:
                         name, color = name_color_from_value(ground)
-                        if variables.gfx == "oryx":
+                        if settings.gfx == "oryx":
                             ground += 0xE400
                         else:
                             ground = tilemap()[name]
@@ -78,7 +78,7 @@ class GameMap:
 
                     if ground_top != 0:
                         name, color = name_color_from_value(ground_top)
-                        if variables.gfx == "oryx":
+                        if settings.gfx == "oryx":
                             ground_top += 0xE400
                         else:
                             ground_top = tilemap()[name]
@@ -86,7 +86,7 @@ class GameMap:
 
                     if entity != 0:
                         name, color = name_color_from_value(entity)
-                        if variables.gfx == "oryx":
+                        if settings.gfx == "oryx":
                             entity += 0xE400
                         else:
                             if isinstance(tilemap()[name], tuple):
@@ -301,7 +301,7 @@ class GameMap:
                     # Don't make unvisible trees entities to save in performance
                     if self.count_walls(1, x, y) < 8:
 
-                        if abs(variables.world_tendency) * 33 > randint(1, 100):
+                        if abs(settings.world_tendency) * 33 > randint(1, 100):
                             name = "dead tree"
                             char = tilemap()["dead_tree"][randint(0, (len(tilemap()["dead_tree"]) - 1))]
                             wall_component = Wall(name)
@@ -370,7 +370,7 @@ class GameMap:
                     # Generate forest tiles
                     if randint(1, 100) < freq:
 
-                        if abs(variables.world_tendency) * 33 > randint(1, 100):
+                        if abs(settings.world_tendency) * 33 > randint(1, 100):
                             name = "dead tree"
                             char = tilemap()["dead_tree"][randint(0, (len(tilemap()["dead_tree"]) - 1))]
                             wall_component = Wall(name)
@@ -696,10 +696,10 @@ class GameMap:
             number_of_monsters = randint(self.width / 2 - 30, self.width / 2)
             monsters = []
 
-            if variables.world_tendency < 0:
+            if settings.world_tendency < 0:
                 for x, y in tilemap()["monsters_chaos"].items():
                     monsters.append((x, y))
-            elif variables.world_tendency > 0:
+            elif settings.world_tendency > 0:
                 for x, y in tilemap()["monsters_light"].items():
                     monsters.append((x, y))
             else:
@@ -794,7 +794,7 @@ class GameMap:
 
     def create_decor(self):
 
-        if variables.gfx == "ascii":
+        if settings.gfx == "ascii":
             return
         # Generate rocks & rubble on floor tiles
         decor_odds = 0.1
@@ -834,9 +834,9 @@ class GameMap:
                             self.tiles[x][y].layers.append((char, color))
                             self.tiles[x][y].name = name
 
-                    if variables.world_tendency < 0:
+                    if settings.world_tendency < 0:
                         if randint(1, 4) >= self.tiles[x][y].seed and len(self.tiles[x][y].layers) == 0:
-                            if abs(variables.world_tendency) * 33 > randint(1, 100):
+                            if abs(settings.world_tendency) * 33 > randint(1, 100):
                                 name, color = name_color_from_value(tilemap("oryx")["bones"][0] - 0xE400)
                                 char = tilemap()["bones"][randint(
                                     0, (len(tilemap()["bones"]) - 1))]

@@ -2,27 +2,27 @@ from bearlibterminal import terminal as blt
 from descriptions import abilities, bestiary, meditate_params
 from draw import clear_camera, draw_ui
 from map_objects.tilemap import init_tiles, tilemap
-import variables
+import settings
 from random import sample
 from palettes import get_monster_color
 from os import path
 from textwrap import wrap
-
+import settings
 
 def main_menu(resume=False, ui_elements=None):
     current_range = 0
-    center_x = int(variables.viewport_w / 2)
-    center_y = int(variables.viewport_h / 2)
+    center_x = settings.viewport_center_x
+    center_y = settings.viewport_center_y
 
     while True:
 
         choices = ["New game", "Resize window",
-                   "Graphics: " + variables.gfx, "Tilesize: " + variables.tile_width + "x" + variables.tile_height,
+                   "Graphics: " + settings.gfx, "Tilesize: " + settings.tile_width + "x" + settings.tile_height,
                    "Exit"]
         if resume:
             choices = ["New game", "Resize window",
-                       "Graphics: " + variables.gfx + " (restart game to change)",
-                       "Tilesize: " + variables.tile_width + "x" + variables.tile_height + " (restart game to change)",
+                       "Graphics: " + settings.gfx + " (restart game to change)",
+                       "Tilesize: " + settings.tile_width + "x" + settings.tile_height + " (restart game to change)",
                        "Exit"]
             choices.insert(0, "Resume game")
 
@@ -45,40 +45,40 @@ def main_menu(resume=False, ui_elements=None):
         if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
             exit()
 
-        if key == blt.TK_ENTER and not resume and r == "Graphics: " + variables.gfx:
-            if variables.gfx == "adambolt":
-                variables.gfx = "ascii"
-                variables.tile_height = str(24)
-                variables.tile_width = str(16)
+        if key == blt.TK_ENTER and not resume and r == "Graphics: " + settings.gfx:
+            if settings.gfx == "adambolt":
+                settings.gfx = "ascii"
+                settings.tile_height = str(24)
+                settings.tile_width = str(16)
                 init_tiles()
                 ui_elements.init_ui()
                 draw_ui(ui_elements)
-            elif variables.gfx == "ascii":
-                variables.gfx = "oryx"
-                variables.tile_height = str(48)
-                variables.tile_width = str(32)
+            elif settings.gfx == "ascii":
+                settings.gfx = "oryx"
+                settings.tile_height = str(48)
+                settings.tile_width = str(32)
                 init_tiles()
                 ui_elements.init_ui()
                 draw_ui(ui_elements)
-            elif variables.gfx == "oryx":
-                variables.gfx = "adambolt"
-                variables.tile_height = str(48)
-                variables.tile_width = str(32)
+            elif settings.gfx == "oryx":
+                settings.gfx = "adambolt"
+                settings.tile_height = str(48)
+                settings.tile_width = str(32)
                 init_tiles()
                 ui_elements.init_ui()
                 draw_ui(ui_elements)
 
         if key == blt.TK_ENTER and not resume and r == "Tilesize: " + \
-                variables.tile_width + "x" + variables.tile_height:
-            if int(variables.tile_height) == 48:
-                variables.tile_height = str(24)
-                variables.tile_width = str(16)
+                settings.tile_width + "x" + settings.tile_height:
+            if int(settings.tile_height) == 48:
+                settings.tile_height = str(24)
+                settings.tile_width = str(16)
                 init_tiles()
                 ui_elements.init_ui()
                 draw_ui(ui_elements)
             else:
-                variables.tile_height = str(48)
-                variables.tile_width = str(32)
+                settings.tile_height = str(48)
+                settings.tile_width = str(32)
                 init_tiles()
                 ui_elements.init_ui()
                 draw_ui(ui_elements)
@@ -119,7 +119,7 @@ def main_menu(resume=False, ui_elements=None):
                         blt.puts(center_x - 24 + 1, center_y - 2 + i * 5 + 2,
                                  "poison bite: " + abilities()["attack"]["poison bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
 
-                    if variables.gfx == "adambolt":
+                    if settings.gfx == "adambolt":
                         # Draw a bg tile
                         blt.layer(0)
                         blt.puts(center_x - 30 + 1, center_y - 2 + i *
@@ -128,9 +128,9 @@ def main_menu(resume=False, ui_elements=None):
                     # Draw monster tile
                     blt.layer(1)
                     blt.color(get_monster_color(r))
-                    if variables.gfx == "adambolt":
+                    if settings.gfx == "adambolt":
                         blt.color(None)
-                    if variables.gfx == "ascii":
+                    if settings.gfx == "ascii":
                         blt.puts(center_x - 30 + 1,
                                  center_y - 2 + i * 5, c, 0, 0)
                     else:
@@ -162,8 +162,8 @@ def main_menu(resume=False, ui_elements=None):
             key = None
             while key not in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_ENTER):
                 ui_elements.init_ui()
-                center_x = int(variables.viewport_w / 2)
-                center_y = int(variables.viewport_h / 2)
+                center_x = settings.viewport_center_x
+                center_y = settings.viewport_center_y
                 h = blt.state(blt.TK_HEIGHT)
                 w = blt.state(blt.TK_WIDTH)
                 draw_ui(ui_elements)
@@ -179,18 +179,18 @@ def main_menu(resume=False, ui_elements=None):
                     blt.set("window.fullscreen=true")
                 if key == blt.TK_UP:
                     blt.set("window: size=" + str(w) + "x" +
-                            (str(h + variables.tile_offset_y)))
+                            (str(h + settings.tile_offset_y)))
                 if key == blt.TK_DOWN:
                     blt.set("window: size=" + str(w) + "x" +
-                            (str(h - variables.tile_offset_y)))
+                            (str(h - settings.tile_offset_y)))
                     if h <= 30:
                         blt.set("window: size=" + str(w) + "x" + "30")
                 if key == blt.TK_RIGHT:
                     blt.set("window: size=" +
-                            (str(w + variables.tile_offset_x)) + "x" + str(h))
+                            (str(w + settings.tile_offset_x)) + "x" + str(h))
                 if key == blt.TK_LEFT:
                     blt.set("window: size=" +
-                            (str(w - variables.tile_offset_x)) + "x" + str(h))
+                            (str(w - settings.tile_offset_x)) + "x" + str(h))
                     if w <= 60:
                         blt.set("window: size=60" + "x" + str(h))
 
@@ -210,8 +210,8 @@ def main_menu(resume=False, ui_elements=None):
 def choose_mission(levels):
 
     current_range = 0
-    center_x = int(variables.viewport_w / 2)
-    center_y = int(variables.viewport_h / 2)
+    center_x = settings.viewport_center_x
+    center_y = settings.viewport_center_y
 
     while True:
         clear_camera(5)
@@ -229,7 +229,7 @@ def choose_mission(levels):
                      ("[U+203A]" if selected else " ", level["title"] + "\n " + "Rescue: Blacksmith"), 0, 0,
                      blt.TK_ALIGN_LEFT)
 
-            if variables.gfx == "adambolt":
+            if settings.gfx == "adambolt":
                 # Draw a bg tile
                 blt.layer(0)
                 blt.puts(center_x - 30 + 1, center_y - 2 + i *
@@ -238,9 +238,9 @@ def choose_mission(levels):
             # Draw map tile
             blt.layer(1)
             blt.color("dark green")
-            if variables.gfx == "adambolt":
+            if settings.gfx == "adambolt":
                 blt.color(None)
-            if variables.gfx == "ascii":
+            if settings.gfx == "ascii":
                 blt.puts(center_x - 30 + 1, center_y - 2 + i * 3, "#", 0, 0)
             else:
                 blt.puts(center_x - 30 + 1, center_y - 2 + i *
@@ -265,10 +265,9 @@ def choose_mission(levels):
 
 
 def set_up_level_params(question_number, prev_choices):
-    key = None
     current_range = 0
-    center_x = int(variables.viewport_w / 2)
-    center_y = int(variables.viewport_h / 2)
+    center_x = settings.viewport_center_x
+    center_y = settings.viewport_center_y
     choice_params = dict(sample(meditate_params().items(), 3))
     choice_params = {x: choice_params[x] for x in choice_params if x not in prev_choices}
 
@@ -321,8 +320,8 @@ def set_up_level_params(question_number, prev_choices):
 
 def character_menu(player):
     current_range = 0
-    center_x = int(variables.viewport_w / 2)
-    center_y = int(variables.viewport_h / 2)
+    center_x = settings.viewport_center_x
+    center_y = settings.viewport_center_y
 
     while True:
         clear_camera(5)
@@ -345,7 +344,7 @@ def character_menu(player):
             blt.puts(center_x - 24, center_y - 2 + i * 4+2, " EXP: " + str(player.player.char_exp[r]) +"\n ", 0, 0,
                      blt.TK_ALIGN_LEFT)
 
-            if variables.gfx == "adambolt":
+            if settings.gfx == "adambolt":
                 # Draw a bg tile
                 blt.layer(0)
                 blt.puts(center_x - 30 + 1, center_y - 2 + i *
@@ -354,9 +353,9 @@ def character_menu(player):
             # Draw monster tile
             blt.layer(1)
             blt.color(get_monster_color(r))
-            if variables.gfx == "adambolt":
+            if settings.gfx == "adambolt":
                 blt.color(None)
-            if variables.gfx == "ascii":
+            if settings.gfx == "ascii":
                 blt.puts(center_x - 30 + 1, center_y - 2 + i * 4, c, 0, 0)
             else:
                 blt.puts(center_x - 30 + 1, center_y - 2 + i *

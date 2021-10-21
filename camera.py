@@ -1,4 +1,4 @@
-import variables
+import settings
 
 class Camera:
 
@@ -13,24 +13,24 @@ class Camera:
         if map_width <= self.width:
             self.width = map_width
         else:
-            self.width = variables.camera_width
+            self.width = settings.camera_width
         if map_height <= self.height:
             self.height = map_height
         else:
-            self.height = variables.camera_height
+            self.height = settings.camera_height
         
         x = target_x - int(self.width / 2)
         y = target_y - int(self.height / 2)
 
 
         if x < 0:
-            x = -int(variables.camera_offset/2)
+            x = -int(settings.camera_offset / 2)
         if y < 0:
-            y = -int(variables.camera_offset/2)
+            y = -int(settings.camera_offset / 2)
         if x > map_width - self.width:
-            x = map_width - self.width + int(variables.camera_offset/2)
+            x = map_width - self.width + int(settings.camera_offset / 2)
         if y > map_height - self.height:
-            y = map_height - self.height + int(variables.camera_offset/2)
+            y = map_height - self.height + int(settings.camera_offset / 2)
         self.x, self.y = x, y
 
     def get_coordinates(self, map_x, map_y):
