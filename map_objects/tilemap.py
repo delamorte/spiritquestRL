@@ -1,7 +1,7 @@
 from ctypes import c_uint32, addressof
 from bearlibterminal import terminal as blt
 from palettes import name_color_from_value
-import variables
+import settings
 from os import path
 import pickle
 
@@ -27,7 +27,7 @@ def init_gfx(f):
 
 
 def init_tiles():
-    tilesize = variables.tile_width + 'x' + variables.tile_height
+    tilesize = settings.tile_width + 'x' + settings.tile_height
 
     gfx1 = init_gfx('./gfx/gfx1')
     gfx2 = init_gfx('./gfx/gfx2')
@@ -62,11 +62,11 @@ def init_tiles():
         size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx6), 144, 48) +
             "64x96" + ", resize-filter=nearest, spacing=4x4, align=top-left")
 
-    variables.tile_offset_x = int(
-        int(variables.tile_width) / blt.state(blt.TK_CELL_WIDTH))
-    variables.tile_offset_y = int(
-        int(variables.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
-    variables.camera_offset = int(variables.ui_size) / int(variables.tile_height)
+    settings.tile_offset_x = int(
+        int(settings.tile_width) / blt.state(blt.TK_CELL_WIDTH))
+    settings.tile_offset_y = int(
+        int(settings.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
+    settings.camera_offset = int(settings.ui_size) / int(settings.tile_height)
 
     blt.clear()
 
@@ -86,7 +86,7 @@ def tilemap_ui():
 def tilemap(tileset=None):
     tiles = {}
     if tileset is None:
-        tileset = variables.gfx
+        tileset = settings.gfx
     if tileset == "adambolt":
         tiles = {"tree": (0xE800 + 87, 0xE800 + 88, 0xE800 + 89, 0xE800 + 93, 0xE800 + 94, 0xE800 + 95),
                  "dead_tree": (0xE800 + 112, 0xE800 + 144),

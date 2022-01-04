@@ -9,8 +9,8 @@ class Entity:
 
     def __init__(self, x, y, layer, char, color, name, blocks=False, player=None,
                  fighter=None, ai=None, item=None, inventory=None, stairs=None,
-                 wall=None, door=None, cursor=None, light_source=None, stand_on_messages=True,
-                 boss=False):
+                 wall=None, door=None, cursor=None, light_source=None, abilities=None,
+                 status_effects=None, stand_on_messages=True, boss=False):
         self.x = x
         self.y = y
         self.layer = layer
@@ -31,6 +31,8 @@ class Entity:
         self.last_seen_x = x
         self.last_seen_y = y
         self.light_source = light_source
+        self.abilities = abilities
+        self.status_effects = status_effects
         self.stand_on_messages = stand_on_messages
         self.occupied_tiles = None  # For entities bigger than 1 tile
         self.boss = boss
@@ -65,6 +67,12 @@ class Entity:
 
         if self.light_source:
             self.light_source.owner = self
+
+        if self.abilities:
+            self.abilities.owner = self
+
+        if self.status_effects:
+            self.status_effects.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount
@@ -115,7 +123,8 @@ class Entity:
         tcod.path_compute(astar, self.x, self.y, target.x, target.y)
 
         # Check if the path exists, and in this case, also the path is shorter than 25 tiles
-        # The path size matters if you want the monster to use alternative longer paths (for example through other rooms) if for example the player is in a corridor
+        # The path size matters if you want the monster to use alternative longer paths
+        # (for example through other rooms) if for example the player is in a corridor
         # It makes sense to keep path size relatively low to keep the monsters
         # from running around the map if there's an alternative path really far
         # away
@@ -129,7 +138,8 @@ class Entity:
                 if self.occupied_tiles is not None:
                     self.occupied_tiles = [(x, y), (x, y + 1), (x + 1, y + 1), (x + 1, y)]
         else:
-            # Keep the old move function as a backup so that if there are no paths (for example another monster blocks a corridor)
+            # Keep the old move function as a backup so that if there are no paths
+            # (for example another monster blocks a corridor)
             # it will still try to move towards the player (closer to the
             # corridor opening)
             self.move_towards(target.x, target.y, game_map, entities)

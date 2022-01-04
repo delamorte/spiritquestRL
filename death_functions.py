@@ -9,7 +9,7 @@ def kill_player(player):
 
 
 def kill_monster(monster):
-    death_message = "The {0} is dead!".format(monster.name)
+    death_message = [["The {0} is dead!".format(monster.name), "red"]]
     if monster.boss:
         monster.char = tilemap()["boss_remains"]
         monster.color = "darkest red"

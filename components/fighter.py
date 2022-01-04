@@ -1,24 +1,27 @@
+from helpers import roll_dice
+from math import ceil
 from random import randint
-from descriptions import abilities as abilities_db
-from game_states import GameStates
+from components.status_effect import StatusEffect
+from data import json_data
 
 
 class Fighter:
-    def __init__(self, hp, ac, ev, power, mv_spd, atk_spd, size, fov=6, abilities=None):
+    def __init__(self, hp, ac, ev, power, mv_spd, atk_spd, size, level=1, fov=6):
         self.owner = None
         self.max_hp = hp
         self.hp = hp
         self.ac = ac
         self.ev = ev
+        self.hit_penalty = 0
         self.power = power
         self.mv_spd = mv_spd
         self.atk_spd = atk_spd
+        self.level = level
         self.fov = fov
         self.size = size
-        self.abilities = abilities
-        self.effects = []
         self.dead = False
-        self.paralysis = False
+        self.paralyzed = False
+        self.effects = []
 
     def take_damage(self, amount):
         results = []
@@ -27,98 +30,80 @@ class Fighter:
             self.dead = True
         return results
 
-    def attack(self, target, ability=None):
+    def attack(self, target, skill):
         results = []
-        d = None
         hit_chance = randint(1, 100)
-        damage = randint(1, self.power) - target.fighter.ac
-        
-        if ability in abilities_db()["attack"]:
-            damage, effect = self.use_ability(ability, target)
+        miss = (target.fighter.ev * 2 - self.hit_penalty) >= hit_chance
 
-            if len(effect) > 0:
-                d = [effect, damage]
-            if self.owner.player:
-                results.append("You use {0} on {1}!".format(
-                    ability, target.name))
-            else:
-                results.append("The {0} uses {1} on you!".format(
-                    self.owner.name, ability))
+        if skill is not None:
+            if skill.skill_type == "attack" or skill.skill_type == "weapon":
+                damage = self.calculate_damage(skill, target)
+                if miss:
+                    if self.owner.player:
+                        results.append([
+                            "You attack the {0} with {1}, but miss.".format(target.name, skill.name), "gray"])
+                    else:
+                        results.append([
+                            "The {0} attacks you with {1}, but misses.".format(self.owner.name, skill.name), "gray"])
+                else:
+                    if self.owner.player:
+                        results.append(["You use {0} on {1}!".format(
+                            skill.name, target.name), "orange"])
+                    else:
+                        results.append(["The {0} uses {1} on you!".format(
+                            self.owner.name, skill.name)])
 
-        if target.fighter.ev * 5 >= hit_chance:
-            if self.owner.player:
-                results.append(
-                    "You attack the {0}, but miss.".format(target.name))
-            else:
-                results.append(
-                    "The {0} attacks you, but misses.".format(self.owner.name))
+                    if skill.effect:
+                        for effect in skill.effect:
+                            json_efx = json_data.data.status_effects[effect]
+                            if skill.duration:
+                                duration = roll_dice(skill.duration[min(self.level-1, 2)])
+                            else:
+                                duration = roll_dice(json_efx["duration"][min(self.level - 1, 2)])
+                            hit_penalty = json_efx["hit_penalty"] if "hit_penalty" in json_efx.keys() else []
+                            if "delayed_damage" in json_efx.keys():
+                                delayed_damage = roll_dice(json_efx["delayed_damage"][min(self.level - 1, 2)])
+                            else:
+                                delayed_damage = []
+                            rank = min(self.level-1, 2)
+                            dps = json_efx["dps"] if "dps" in json_efx.keys() else []
+                            slow = json_efx["slow"] if "slow" in json_efx.keys() else []
+                            drain_stats = json_efx["drain_stats"] if "drain_stats" in json_efx.keys() else []
+                            description = json_efx["description"]
+                            paralyze = json_efx["paralyze"] if "paralyze" in json_efx.keys() else False
+                            chance = json_efx["chance"]
+                            effect_component = StatusEffect(owner=target.fighter, source=self, name=effect, duration=duration, slow=slow, dps=dps,
+                                                            delayed_damage=delayed_damage,  rank=rank, drain_stats=drain_stats,
+                                                            hit_penalty=hit_penalty, paralyze=paralyze, description=description,
+                                                            chance=chance)
 
-        elif damage > 0:
-            if self.owner.player:
-                results.append("You attack the {0} for {1} hit points.".format(
-                    target.name, str(damage)))
-                if d:
-                    target.fighter.effects.append(d)
-                    results.append("The {0} is inflicted with {1}!".format(target.name, d[0]))
+                            target.status_effects.add_item(effect_component)
+                            if self.owner.player:
+                                results.append(["The {0} is inflicted with {1}!".format(target.name, effect)])
+                            else:
+                                results.append(["You are inflicted with {} !".format(effect), "green"])
 
-            else:
-                results.append("The {0} attacks you for {1} hit points.".format(
-                    self.owner.name, str(damage)))
-                
-                if d:
-                    target.fighter.effects.append(d)
-                    results.append("You are inflicted with " + d[0] + "!")
-                    
-            results.extend(target.fighter.take_damage(damage))
+                    if damage > 0:
+                        if self.owner.player:
+                            results[-1][0] += (" You attack the {0} for {1} hit points.".format(
+                                target.name, str(damage)))
+                        else:
+                            results[-1][0] += (" The {0} attacks you for {1} hit points.".format(
+                                self.owner.name, str(damage)))
 
-        else:
-            if self.owner.player:
-                results.append(
-                    "You attack the {0} but do no damage.".format(target.name))
-            else:
-                results.append(
-                    "The {0} attacks you but does no damage.".format(self.owner.name))
+                        results.extend(target.fighter.take_damage(damage))
+
+                    else:
+                        if self.owner.player:
+                            results[-1][0] += (
+                                " You attack the {0} with {1} but do no damage.".format(target.name, skill.name))
+                        else:
+                            results[-1][0] += (
+                                "The {0} attacks you  with {1} but does no damage.".format(self.owner.name, skill.name))
         return results
 
-    def use_ability(self, ability, target):
-
-        effects = abilities_db()["attack"][ability]
-        damage = randint(int(effects[1][0]), int(effects[1][2]))
-        if ability == "swoop" and target.fighter.size == "small":
-            damage += 2
-        effect = effects[2]
-
-        return damage, effect
-
-    def process_effects(self, time_counter, game_state):
-        results = []
-        if len(self.effects) == 0:
-            return results, game_state
-        else:
-            for x in self.effects:
-                effect = x[0]
-                duration = x[1]
-                if duration == 0:
-                    if effect == "paralyze":
-                        self.paralysis = False
-                    self.effects.remove(x)
-                if effect == "poison":
-                    self.take_damage(1)
-                    x[1] -= 1
-                if effect == "paralyze":
-                    self.paralysis = True
-
-                    time_counter.take_turn(1)
-                    x[1] -= 2
-                    
-                    if x[1] <= 0:
-                        self.paralysis = False
-                    
-                    if self.owner.player and self.paralysis:
-                        results.append("You are paralyzed!")
-                        game_state = GameStates.ENEMY_TURN
-                    elif self.paralysis:
-                        results.append("The {0} is paralyzed!".format(self.owner.name))
-                        game_state = GameStates.PLAYER_TURN
-                        
-        return results, game_state
+    def calculate_damage(self, skill, target):
+        str_bonus = max(self.power / 2 - 1, 0)
+        damage_str = skill.damage[min(self.level - 1, 2)]
+        damage = roll_dice(damage_str) + str_bonus - target.fighter.ac
+        return int(ceil(damage))

@@ -9,6 +9,10 @@ ui_offset_y = 3
 camera_offset = int(ui_size) / int(tile_height)
 camera_width = 0
 camera_height = 0
+camera_bound_x = 0
+camera_bound_y = 0
+camera_bound_x2 = 0
+camera_bound_y2 = 0
 viewport_w = 0
 viewport_h = 0
 viewport_center_x = 0
@@ -16,6 +20,8 @@ viewport_center_y = 0
 stack = []
 old_stack = []
 world_tendency = 0
+flicker = False
+
 
 class TimeCounter:
     def __init__(self, turn=0):
@@ -28,5 +34,6 @@ class TimeCounter:
         
     def get_turn(self):
         return self.turn
+
     def get_last_turn(self):
         return self.last_turn

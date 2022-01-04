@@ -1,6 +1,6 @@
 from bearlibterminal import terminal as blt
 from random import randint, random
-import variables
+import settings
 
 # BLT colors by name:
 # grey (or gray), red, flame, orange,
@@ -12,16 +12,10 @@ import variables
 dirt_colors = ["#402316", "#332925", "#4f3a28", "#4f3a28", "#3d342b", "#33221a", "#30170b", "#473c2b", "#332d16",
                "#361c18"]
 
-mod_colors = ["gray",
-              "dark gray",
-              "dark gray",
-              "darker gray",
-              "darker gray",
-              "darkest gray",
-              "darkest gray"]
-
 
 def get_dngn_colors(mod=0):
+    if settings.world_tendency != 0:
+        mod = settings.world_tendency
     color = dirt_colors[randint(0, len(dirt_colors) - 1)]
     # if mod < 0:
     #     color = "#111111"
@@ -34,11 +28,13 @@ def get_dngn_colors(mod=0):
 
 
 def get_terrain_colors(mod=None):
+    if settings.world_tendency != 0:
+        mod = settings.world_tendency
     colors = [
         "darker green",
-        "darkest green",
+        "dark green",
         "darker amber",
-        "darkest amber"
+        "dark amber"
     ]
 
     if mod is None:
@@ -46,7 +42,10 @@ def get_terrain_colors(mod=None):
 
     return colors[mod]
 
+
 def get_flower_colors(mod=0):
+    if settings.world_tendency != 0:
+        mod = settings.world_tendency
     colors = []
     if mod > 0:
         colors = ["lightest orange",
@@ -91,7 +90,10 @@ def get_flower_colors(mod=0):
                   "darkest amber"]
     return colors
 
-def get_forest_colors(mod=-1):
+
+def get_forest_colors(mod=0):
+    if settings.world_tendency != 0:
+        mod = settings.world_tendency
     colors = []
     if mod > 0:
         colors = ["lightest orange",
@@ -101,18 +103,18 @@ def get_forest_colors(mod=-1):
                   "light amber"]
 
     if mod < 0:
-        colors = ["darkest amber",
-                  "darker gray",
+        colors = ["darker amber",
+                  "darker amber",
                   "dark gray",
-                  "darker green",
-                  "darkest green"]
+                  "green",
+                  "dark green",
+                  "darker green"]
     if mod == 0:
         colors = ["lightest green",
                   "lighter green",
                   "light green",
-                  "dark green",
-                  "darker green",
-                  "darkest green"]
+                  "green",
+                  "dark green"]
     return colors
 
 

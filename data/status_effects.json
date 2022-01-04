@@ -1,0 +1,68 @@
+{
+    "poison": {
+        "name": "poison",
+        "description": "poisoned",
+        "dps": [1],
+        "duration": ["1d4"],
+        "chance": [
+            1.0
+        ]
+    },
+    "paralyze": {
+        "name": "paralyze",
+        "paralyze": true,
+        "description": "paralyzed",
+        "duration": ["1d3", "1d4", "1d6"],
+        "chance": [
+            0.5,
+            0.6,
+            0.8
+        ]
+    },
+    "disease": {
+        "name": "disease",
+        "description": "diseased",
+        "drain_stats": [2, 4, 6],
+        "duration": ["1d4", "1d6", "1d8"],
+        "chance": [
+            1.0
+        ]
+    },
+    "bleed": {
+        "name": "bleed",
+        "description": "bleeding",
+        "delayed_damage": ["1d4"],
+        "duration": ["1d4"],
+        "chance": [
+            1.0
+        ]
+    },
+    "blind": {
+        "name": "blind",
+        "description": "blinded",
+        "duration": ["1d4", "1d6", "1d8"],
+        "hit_penalty": [25, 50, 75],
+        "chance": [
+            1.0
+        ]
+    },
+    "strangle": {
+        "name": "strangle",
+        "description": "strangled",
+        "duration": ["1d4", "1d6", "1d8"],
+        "dps": [1, 2, 3],
+        "slow": [0],
+        "chance": [
+            1.0
+        ]
+    },
+    "slow": {
+        "name": "slow",
+        "description": "slowed",
+        "slow": [0.8, 0.6, 0.4],
+        "duration": ["1d4", "1d6", "1d8"],
+        "chance": [
+            1.0
+        ]
+    }
+}
