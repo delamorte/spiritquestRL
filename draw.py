@@ -117,9 +117,6 @@ def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
 
             x, y = game_camera.get_coordinates(entity.last_seen_x, entity.last_seen_y)
 
-            # what is this if???????
-            # if (ceil(variables.camera_offset) < x < game_camera.width - ceil(variables.camera_offset) and ceil(
-            #        variables.camera_offset) < y < game_camera.height - ceil(variables.camera_offset)):
             if entity.light_source and not entity.fighter:
                 light_sources.append(entity.light_source)
             else:
@@ -134,10 +131,10 @@ def draw_entities(entities, player, game_map, game_camera, cursor_x, cursor_y):
 
 def draw_map(game_map, game_camera, player, cursor_x, cursor_y, ui_elements):
     # Set boundaries where to draw map
-    bound_x = settings.camera_bound_x
-    bound_y = settings.camera_bound_y
-    bound_x2 = settings.camera_bound_x2
-    bound_y2 = settings.camera_bound_y2
+    bound_x = game_camera.bound_x
+    bound_y = game_camera.bound_y
+    bound_x2 = game_camera.bound_x2
+    bound_y2 = game_camera.bound_y2
     # Clear what's drawn in camera
     clear_camera(5)
     # Set boundaries if map is smaller than viewport

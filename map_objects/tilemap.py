@@ -66,7 +66,6 @@ def init_tiles():
         int(settings.tile_width) / blt.state(blt.TK_CELL_WIDTH))
     settings.tile_offset_y = int(
         int(settings.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
-    settings.camera_offset = int(settings.ui_size) / int(settings.tile_height)
 
     blt.clear()
 

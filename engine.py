@@ -83,15 +83,7 @@ def new_game(choice, ui_elements):
     message_log = MessageLog(4)
 
     # Initialize game camera
-    settings.camera_width = int(floor(settings.viewport_w / settings.ui_offset_x + 2))
-    settings.camera_height = int(floor(settings.viewport_h / settings.ui_offset_y + 2))
-    settings.camera_bound_x = ceil(settings.camera_offset)
-    settings.camera_bound_y = ceil(settings.camera_offset)
-    settings.camera_bound_x2 = settings.camera_width - ceil(settings.camera_offset)
-    settings.camera_bound_y2 = settings.camera_height - ceil(settings.camera_offset)
-
-    game_camera = Camera(1, 1, settings.camera_width, settings.camera_height)
-
+    game_camera = Camera(1, 1)
 
     levels = {}
     time_counter = settings.TimeCounter()
