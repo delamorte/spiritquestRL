@@ -5,7 +5,6 @@ from map_objects.game_map import GameMap
 from map_objects.tilemap import tilemap
 from descriptions import level_biomes, meditate_params
 from draw import draw_side_panel_content
-from ui.menus import choose_mission
 import settings
 
 

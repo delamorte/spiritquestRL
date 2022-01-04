@@ -23,7 +23,7 @@ from map_objects.minimap import test_dynamic_sprites
 from random import randint
 from ui.elements import UIElements, Panel
 from ui.game_messages import MessageLog
-from ui.menus import main_menu, character_menu
+from ui.menus import Menu
 from ui.message_history import show_msg_history
 import settings
 
@@ -37,7 +37,7 @@ def blt_init():
     size = 'size=200x80'
     title = 'title=' + window_title
     cellsize = 'cellsize=auto'
-    resizable = 'resizeable=false'
+    resizable = 'resizeable=true'
     window = "window: " + size + "," + title + "," + cellsize + "," + resizable
 
     blt.set(window)
@@ -47,9 +47,6 @@ def blt_init():
 
 def new_game(choice, ui_elements):
 
-    # Initialize game data
-    game_data = json_data.JsonData()
-    json_data.data = game_data
     # Create player
     inventory_component = Inventory(26)
     fighter_component = get_fighter_data("player")
@@ -93,13 +90,9 @@ def new_game(choice, ui_elements):
     return game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute
 
 
-def game_loop(main_menu_show=True, choice=None):
-    ui_elements = UIElements()
-    draw_ui(ui_elements)
+def game_loop(choice, ui_elements, main_menu):
 
-    if main_menu_show:
-        choice = main_menu(ui_elements=ui_elements)
-        draw_ui(ui_elements)
+    draw_ui(ui_elements)
     game_camera, game_state, player, levels, message_log, time_counter, \
         insights, fov_recompute = new_game(choice, ui_elements)
 
@@ -143,7 +136,7 @@ def game_loop(main_menu_show=True, choice=None):
                     break
 
                 if key == blt.TK_ESCAPE:
-                    new_choice = main_menu(resume=False, ui_elements=ui_elements)
+                    new_choice = main_menu.show()
                     if not new_choice:
                         draw_ui(ui_elements)
                         fov_recompute = True
@@ -154,7 +147,7 @@ def game_loop(main_menu_show=True, choice=None):
                                        settings.ui_offset_x, ui_elements.msg_panel.h * settings.ui_offset_y)
                         blt.clear_area(settings.viewport_center_x - 5,
                                        settings.viewport_h + settings.ui_offset_y + 1, settings.viewport_w, 1)
-                        game_loop(False, new_choice)
+                        return True, new_choice
 
         if player.fighter.paralyzed:
             message_log.send("You are paralyzed!")
@@ -166,18 +159,17 @@ def game_loop(main_menu_show=True, choice=None):
             # Non-turn taking UI functions
 
             if key == blt.TK_CLOSE:
-                return False, False, None
+                return False
 
             if key == blt.TK_ESCAPE:
-
-                new_choice = main_menu(resume=True, ui_elements=ui_elements)
+                new_choice = main_menu.show()
                 if not new_choice:
                     draw_ui(ui_elements)
                     fov_recompute = True
                 else:
                     message_log.clear()
                     draw_messages(ui_elements.msg_panel, message_log)
-                    return True, False, new_choice
+                    return True, new_choice
 
             if key == blt.TK_PERIOD or key == blt.TK_KP_5:
                 time_counter.take_turn(1)
@@ -329,7 +321,8 @@ def game_loop(main_menu_show=True, choice=None):
                 entities["cursor"] = [cursor]
 
             if key == blt.TK_F1:
-                character_menu(player)
+                character_menu = Menu(ui_elements=ui_elements, menu_type="character_info")
+                character_menu.show()
                 draw_ui(ui_elements)
                 draw_side_panel_content(game_map, player, ui_elements)
                 fov_recompute = True
@@ -460,11 +453,18 @@ def game_loop(main_menu_show=True, choice=None):
 
 
 if __name__ == '__main__':
+    # Initialize game data
+    game_data = json_data.JsonData()
+    json_data.data = game_data
+    # Init blt
     blt_init()
     restart = True
-    avatar = None
-    menu_show = True
+    # Init UI and launch main menu
+    ui = UIElements()
+    draw_ui(ui)
+    menu = Menu(first_init=True, ui_elements=ui, menu_type="main")
+    avatar = menu.show()
     while restart:
-        restart, menu_show, avatar = game_loop(main_menu_show=menu_show, choice=avatar)
+        restart, avatar = game_loop(choice=avatar, main_menu=menu, ui_elements=ui)
     blt.close()
 
