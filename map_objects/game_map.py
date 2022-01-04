@@ -693,7 +693,7 @@ class GameMap:
         if self.name == "dream":
 
             self.create_decor()
-            number_of_monsters = randint(self.width / 2 - 30, self.width / 2)
+            number_of_monsters = randint(int(self.width / 4), int(self.width / 2))
             monsters = []
 
             if settings.world_tendency < 0:
