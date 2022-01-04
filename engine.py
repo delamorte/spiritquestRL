@@ -207,7 +207,7 @@ def game_loop(main_menu_show=True, choice=None):
                     target = blocking_entity(
                         entities, destination_x, destination_y)
                     if target:
-                        combat_msg = player.fighter.attack(target, player.player.sel_attack)
+                        combat_msg = player.fighter.attack(target, player.player.sel_weapon)
 
                         message_log.send(combat_msg)
                         # player.player.spirit_power -= 0.5
