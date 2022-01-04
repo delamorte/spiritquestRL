@@ -35,7 +35,7 @@ class Fighter:
         hit_chance = randint(1, 100)
         miss = (target.fighter.ev * 2 - self.hit_penalty) >= hit_chance
 
-        if skill.skill_type == "attack" or skill.skill_type == "weapon":
+        if skill is not None and skill.skill_type == "attack" or skill.skill_type == "weapon":
             damage = self.calculate_damage(skill, target)
             if miss:
                 if self.owner.player:
