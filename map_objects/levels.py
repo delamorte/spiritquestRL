@@ -6,9 +6,10 @@ from map_objects.tilemap import tilemap
 from descriptions import level_biomes, meditate_params
 from draw import draw_side_panel_content
 import settings
+from ui.menus import Menu
 
 
-def make_map(destination, levels, player, entities, game_map, stairs):
+def make_map(destination, levels, player, entities, game_map, stairs, ui_elements):
 
     # Set debug level
     if destination == "debug":
@@ -24,7 +25,8 @@ def make_map(destination, levels, player, entities, game_map, stairs):
 
     elif destination == "dream":
         level_params = generate_level_params()
-        level_choice = choose_mission(level_params)
+        menu = Menu(ui_elements=ui_elements, menu_type="choose_level", data=level_params)
+        level_choice = menu.show()
         if not level_choice:
             game_map.tiles[player.x][player.y].entities_on_tile.append(player)
             return game_map, entities, player
@@ -108,7 +110,7 @@ def level_change(destination, levels, player, entities=None, game_map=None, stai
             # player.color = None
 
     else:
-        game_map, entities, player = make_map(destination, levels, player, entities, game_map, stairs)
+        game_map, entities, player = make_map(destination, levels, player, entities, game_map, stairs, ui_elements)
 
     draw_side_panel_content(game_map, player, ui_elements)
     return game_map, entities, player

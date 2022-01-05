@@ -102,8 +102,8 @@ def game_loop(choice=None):
     draw_ui(ui_elements)
 
     if not choice:
-        menu = Menu(first_init=True, ui_elements=ui_elements, menu_type="main")
-        choice = menu.show()
+        main_menu = Menu(first_init=True, ui_elements=ui_elements, menu_type="main")
+        choice = main_menu.show()
         draw_ui(ui_elements)
 
     game_camera, game_state, player, levels, message_log, time_counter, \
@@ -173,7 +173,7 @@ def game_loop(choice=None):
                 return False
 
             if key == blt.TK_ESCAPE:
-                new_choice = menu.show()
+                new_choice = main_menu.show()
                 if not new_choice:
                     draw_ui(ui_elements)
                     fov_recompute = True
@@ -332,7 +332,7 @@ def game_loop(choice=None):
                 entities["cursor"] = [cursor]
 
             if key == blt.TK_F1:
-                character_menu = Menu(ui_elements=ui_elements, menu_type="character_info")
+                character_menu = Menu(ui_elements=ui_elements, menu_type="avatar_info", data=player, sub_menu=True)
                 character_menu.show()
                 draw_ui(ui_elements)
                 draw_side_panel_content(game_map, player, ui_elements)

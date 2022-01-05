@@ -293,8 +293,12 @@ def get_monster_color(name):
               "serpent": "violet",
               "fairy": "light violet",
               "keeper of dreams": "flame"}
+    if name not in colors:
+        color = "amber"
+    else:
+        color = colors[name]
 
-    return colors[name]
+    return color
 
 
 def name_color_from_ascii(value):

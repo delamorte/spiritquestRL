@@ -13,10 +13,11 @@ import settings
 
 
 class Menu:
-    def __init__(self, first_init=False, ui_elements=None, menu_type=None, sub_menu=False):
+    def __init__(self, first_init=False, ui_elements=None, menu_type=None, data=None, sub_menu=False):
         self.first_init = first_init
         self.ui_elements = ui_elements
         self.menu_type = menu_type
+        self.data = data
         self.heading = None
         self.margin = 1
         self.text_wrap = 50
@@ -52,16 +53,33 @@ class Menu:
                 self.items_icons.append(v)
                 self.sub_items[k] = [stats, skills]
 
-    def refresh(self):
+        elif self.menu_type == "choose_level":
+            self.heading = "[color=white]Choose your destination..."
+            self.margin = 6
+            for item in self.data:
+                name = item["title"]
+                self.items.append(name)
+                self.items_icons.append(0xE000 + 399)
+                self.sub_items[name] = ["Rescue: Blacksmith"]
 
+        elif self.menu_type == "avatar_info":
+            self.heading = "[color=white]The following spirits have awakened within you.."
+            animals = self.data.player.char
+            exclude = {"player"}
+            avatars = {x: animals[x] for x in animals if x not in exclude}
+            for (k, v) in avatars.items():
+                self.items.append(k)
+                self.items_icons.append(v)
+                exp = " EXP: " + str(self.data.player.char_exp[k])
+                self.sub_items[k] = [exp]
+
+    def refresh(self):
         self.ui_elements.init_ui()
-        self.center_x = settings.viewport_center_x - int(len(self.heading)/2)
-        self.center_y = settings.viewport_center_y
+        self.center_x = settings.viewport_center_x - int(len(self.heading) / 2)
+        self.center_y = settings.viewport_center_y - 5
         draw_ui(self.ui_elements)
 
-
     def show(self):
-
         self.sel_index = 0
         output = False
 
@@ -98,7 +116,7 @@ class Menu:
                         blt.puts(self.center_x - 6 + 1, self.center_y + i *
                                  self.margin, "[U+" + hex(0xE800 + 3) + "]", 0, 0)
 
-                    # Draw monster tile
+                    # Draw icon tile
                     blt.layer(1)
                     blt.color(get_monster_color(sel))
                     if settings.gfx == "adambolt":
@@ -120,175 +138,7 @@ class Menu:
                 break
             elif output:
                 return output
-
-    def choose_mission(self, levels):
-
-        current_range = 0
-        center_x = settings.viewport_center_x
-        center_y = settings.viewport_center_y
-
-        while True:
-            clear_camera(5)
-            blt.layer(0)
-            blt.puts(center_x, center_y - 5,
-                     "[color=white]Choose your destination...", 0, 0, blt.TK_ALIGN_CENTER)
-
-            choice = None
-            for i, level in enumerate(levels):
-                selected = i == current_range
-
-                # Draw select symbol, destination name and description
-                blt.color("orange" if selected else "default")
-                blt.puts(center_x - 24, center_y - 2 + i * 3, "%s%s" %
-                         ("[U+203A]" if selected else " ", level["title"] + "\n " + "Rescue: Blacksmith"), 0, 0,
-                         blt.TK_ALIGN_LEFT)
-
-                if settings.gfx == "adambolt":
-                    # Draw a bg tile
-                    blt.layer(0)
-                    blt.puts(center_x - 30 + 1, center_y - 2 + i *
-                             5, "[U+" + hex(0xE800 + 3) + "]", 0, 0)
-
-                # Draw map tile
-                blt.layer(1)
-                blt.color("dark green")
-                if settings.gfx == "adambolt":
-                    blt.color(None)
-                if settings.gfx == "ascii":
-                    blt.puts(center_x - 30 + 1, center_y - 2 + i * 3, "#", 0, 0)
-                else:
-                    blt.puts(center_x - 30 + 1, center_y - 2 + i *
-                             3, "[U+" + hex(0xE000 + 399) + "]", 0, 0)
-
-                if selected:
-                    choice = level
-
-            blt.refresh()
-            key = blt.read()
-
-            if key == blt.TK_ESCAPE:
-                return None
-            elif key == blt.TK_UP:
-                if current_range > 0:
-                    current_range -= 1
-            elif key == blt.TK_DOWN:
-                if current_range < len(levels) - 1:
-                    current_range += 1
-            elif key == blt.TK_ENTER:
-                return choice
-
-
-    def set_up_level_params(self, question_number, prev_choices):
-        current_range = 0
-        center_x = settings.viewport_center_x
-        center_y = settings.viewport_center_y
-        choice_params = dict(sample(meditate_params().items(), 3))
-        choice_params = {x: choice_params[x] for x in choice_params if x not in prev_choices}
-
-        while True:
-            clear_camera(2)
-            blt.layer(0)
-            if question_number == 0:
-                blt.puts(center_x, center_y - 5,
-                         "[color=white]You sit by the campfire to meditate. The world begins to drift away... ", 0, 0,
-                         blt.TK_ALIGN_CENTER)
-                blt.puts(center_x, center_y - 4,
-                         "[color=white]Your mind gets visions of..", 0, 0, blt.TK_ALIGN_CENTER)
-            if question_number == 1:
-                blt.puts(center_x, center_y - 5,
-                         "[color=white]Pictures of " + list(prev_choices)[0] + " begin to form in your mind.", 0, 0,
-                         blt.TK_ALIGN_CENTER)
-                blt.puts(center_x, center_y - 4,
-                         "[color=white]Then, a new image appears..", 0, 0, blt.TK_ALIGN_CENTER)
-
-            if question_number == 2:
-                blt.puts(center_x, center_y - 5,
-                         "[color=white]You have dreamt about " + list(prev_choices)[0] + ", which shall bring about " +
-                         list(prev_choices)[1] + ".", 0, 0, blt.TK_ALIGN_CENTER)
-                blt.puts(center_x, center_y - 4,
-                         "[color=white]The last thing that enters your mind is...", 0, 0, blt.TK_ALIGN_CENTER)
-
-            for i, r in enumerate(choice_params):
-                selected = i == current_range
-                blt.color("orange" if selected else "light_gray")
-                blt.puts(center_x + 2, center_y + 2 + i, "%s%s" %
-                         ("[U+203A]" if selected else " ", ".." + r + "."), 0, 0, blt.TK_ALIGN_CENTER)
-
-                if selected:
-                    choice = {r: choice_params[r]}
-
-            blt.refresh()
-            key = blt.read()
-
-            if key == blt.TK_ESCAPE:
-                break
-            elif key == blt.TK_UP:
-                if current_range > 0:
-                    current_range -= 1
-            elif key == blt.TK_DOWN:
-                if current_range < len(choice_params) - 1:
-                    current_range += 1
-            elif key == blt.TK_ENTER:
-                return choice
-
-
-    def character_menu(self, player):
-        current_range = 0
-        center_x = settings.viewport_center_x
-        center_y = settings.viewport_center_y
-
-        while True:
-            clear_camera(5)
-            animals = player.player.char
-            exclude = {"player"}
-            avatars = {x: animals[x] for x in animals if x not in exclude}
-            blt.layer(0)
-            blt.puts(center_x, center_y - 5,
-                     "[color=white]The following spirits have awakened within you..", 0, 0, blt.TK_ALIGN_CENTER)
-            for i, (r, c) in enumerate(avatars.items()):
-                selected = i == current_range
-
-                # Draw select symbol, monster name and description
-                blt.color("orange" if selected else "default")
-                blt.puts(center_x - 24, center_y - 2 + i * 4, "%s%s" %
-                         ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0,
-                         blt.TK_ALIGN_LEFT)
-
-                # Put exp amount
-                blt.puts(center_x - 24, center_y - 2 + i * 4+2, " EXP: " + str(player.player.char_exp[r]) +"\n ", 0, 0,
-                         blt.TK_ALIGN_LEFT)
-
-                if settings.gfx == "adambolt":
-                    # Draw a bg tile
-                    blt.layer(0)
-                    blt.puts(center_x - 30 + 1, center_y - 2 + i *
-                             6, "[U+" + hex(0xE800 + 3) + "]", 0, 0)
-
-                # Draw monster tile
-                blt.layer(1)
-                blt.color(get_monster_color(r))
-                if settings.gfx == "adambolt":
-                    blt.color(None)
-                if settings.gfx == "ascii":
-                    blt.puts(center_x - 30 + 1, center_y - 2 + i * 4, c, 0, 0)
-                else:
-                    blt.puts(center_x - 30 + 1, center_y - 2 + i *
-                             4, "[U+" + hex(c) + "]", 0, 0)
-
-                if selected:
-                    choice = r
-
-            blt.refresh()
-            key = blt.read()
-
-            if key == blt.TK_ESCAPE:
-                return None, None
-            elif key == blt.TK_UP:
-                if current_range > 0:
-                    current_range -= 1
-            elif key == blt.TK_DOWN:
-                if current_range < len(avatars) - 1:
-                    current_range += 1
+        return
 
     def handle_input(self, key, sel):
         output = False
@@ -339,6 +189,9 @@ class Menu:
                 output = new_game_menu.show()
                 del new_game_menu
             else:
-                output = sel
+                try:
+                    output = self.data[self.sel_index]
+                except TypeError:
+                    output = sel
 
         return output
