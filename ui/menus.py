@@ -88,7 +88,8 @@ class Menu:
                 self.items.remove("Graphics: " + settings.gfx)
             if "Tilesize: " + settings.tile_width + "x" + settings.tile_height in self.items:
                 self.items.remove("Tilesize: " + settings.tile_width + "x" + settings.tile_height)
-            self.items.insert(0, "Resume game")
+            if "Resume game" not in self.items:
+                self.items.insert(0, "Resume game")
 
         self.refresh()
 
@@ -135,8 +136,13 @@ class Menu:
 
             output = self.handle_input(key, sel)
             if output == "break":
-                break
+                if self.menu_type == "main" and self.first_init:
+                    output = False
+                    continue
+                else:
+                    break
             elif output:
+                self.first_init = False
                 return output
         return
 
@@ -144,10 +150,8 @@ class Menu:
         output = False
         if key == blt.TK_CLOSE:
             exit()
-        elif key == blt.TK_ESCAPE and self.sub_menu:
-            return "break"
         elif key == blt.TK_ESCAPE:
-            exit()
+            return "break"
         elif key == blt.TK_UP:
             if self.sel_index > 0:
                 self.sel_index -= 1
@@ -156,7 +160,7 @@ class Menu:
                 self.sel_index += 1
         elif key == blt.TK_ENTER:
             if sel == "Resume game":
-                return False
+                return "break"
             elif sel == "Exit":
                 exit()
             elif sel == "Graphics: " + settings.gfx:
