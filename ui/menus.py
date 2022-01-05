@@ -53,27 +53,30 @@ class Menu:
                 self.sub_items[k] = [stats, skills]
 
     def refresh(self):
-        init_tiles()
+
         self.ui_elements.init_ui()
         self.center_x = settings.viewport_center_x - int(len(self.heading)/2)
         self.center_y = settings.viewport_center_y
         draw_ui(self.ui_elements)
+
 
     def show(self):
 
         self.sel_index = 0
         output = False
 
+        if not self.first_init and self.menu_type == "main":
+            if "Graphics: " + settings.gfx in self.items:
+                self.items.remove("Graphics: " + settings.gfx)
+            if "Tilesize: " + settings.tile_width + "x" + settings.tile_height in self.items:
+                self.items.remove("Tilesize: " + settings.tile_width + "x" + settings.tile_height)
+            self.items.insert(0, "Resume game")
+
         self.refresh()
 
         while not output:
-            if not self.first_init and self.menu_type == "main":
-                if "Graphics: " + settings.gfx in self.items:
-                    self.items.remove("Graphics: " + settings.gfx)
-                if "Tilesize: " + settings.tile_width + "x" + settings.tile_height in self.items:
-                    self.items.remove("Tilesize: " + settings.tile_width + "x" + settings.tile_height)
-                self.items.insert(0, "Resume game")
 
+            self.refresh()
             blt.layer(0)
             clear_camera(5)
             blt.puts(self.center_x, self.center_y - 5,
@@ -321,6 +324,7 @@ class Menu:
                     settings.gfx = "adambolt"
                     settings.tile_height = str(48)
                     settings.tile_width = str(32)
+                init_tiles()
                 self.refresh()
 
             elif sel == "Tilesize: " + settings.tile_width + "x" + settings.tile_height:
@@ -330,11 +334,12 @@ class Menu:
                 else:
                     settings.tile_height = str(48)
                     settings.tile_width = str(32)
+                init_tiles()
                 self.refresh()
             elif sel == "New game":
                 new_game_menu = Menu(ui_elements=self.ui_elements, menu_type="choose_animal", sub_menu=True)
-                self.sub_menus.append(new_game_menu)
                 output = new_game_menu.show()
+                del new_game_menu
             else:
                 output = sel
 

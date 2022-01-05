@@ -42,6 +42,7 @@ def blt_init():
 
     blt.set(window)
     blt.set("font: default")
+    blt.set("input: filter=[keyboard]")
     init_tiles()
 
 
@@ -90,16 +91,21 @@ def new_game(choice, ui_elements):
     return game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute
 
 
-def game_loop(choice, ui_elements, main_menu):
-
+def game_loop(choice=None):
+    print(blt.read())
+    ui_elements = UIElements()
     draw_ui(ui_elements)
+
+    if not choice:
+        menu = Menu(first_init=True, ui_elements=ui_elements, menu_type="main")
+        choice = menu.show()
+        draw_ui(ui_elements)
+
     game_camera, game_state, player, levels, message_log, time_counter, \
         insights, fov_recompute = new_game(choice, ui_elements)
 
     game_map, entities, player = level_change(
         "hub", levels, player, ui_elements=ui_elements)
-
-    #draw_ui(ui_elements)
 
     while True:
         if fov_recompute:
@@ -162,7 +168,7 @@ def game_loop(choice, ui_elements, main_menu):
                 return False
 
             if key == blt.TK_ESCAPE:
-                new_choice = main_menu.show()
+                new_choice = menu.show()
                 if not new_choice:
                     draw_ui(ui_elements)
                     fov_recompute = True
@@ -459,12 +465,8 @@ if __name__ == '__main__':
     # Init blt
     blt_init()
     restart = True
-    # Init UI and launch main menu
-    ui = UIElements()
-    draw_ui(ui)
-    menu = Menu(first_init=True, ui_elements=ui, menu_type="main")
-    avatar = menu.show()
+    avatar = None
     while restart:
-        restart, avatar = game_loop(choice=avatar, main_menu=menu, ui_elements=ui)
+        restart, avatar = game_loop(choice=avatar)
     blt.close()
 
