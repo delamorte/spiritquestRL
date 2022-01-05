@@ -43,6 +43,11 @@ def blt_init():
     blt.set(window)
     blt.set("font: default")
     blt.set("input: filter=[keyboard]")
+
+    # needed to avoid insta-close and flush TK_RESIZED from input queue
+    blt.refresh()
+    blt.read()
+
     init_tiles()
 
 
@@ -92,7 +97,7 @@ def new_game(choice, ui_elements):
 
 
 def game_loop(choice=None):
-    print(blt.read())
+
     ui_elements = UIElements()
     draw_ui(ui_elements)
 

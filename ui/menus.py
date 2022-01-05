@@ -75,8 +75,6 @@ class Menu:
         self.refresh()
 
         while not output:
-
-            self.refresh()
             blt.layer(0)
             clear_camera(5)
             blt.puts(self.center_x, self.center_y - 5,
