@@ -1,17 +1,20 @@
 from bearlibterminal import terminal as blt
 from math import floor
-import settings
+
+from components.ui.message_panel import MessagePanel
+from components.ui.side_panel import SidePanel
+from components.ui.viewport import Viewport
 
 
 class UIElements:
     def __init__(self):
-
+        self.owner = None
+        self.render_functions = None
+        self.elements = []
+        self.ui_offset_y = 3
+        self.ui_offset_x = 4
         self.msg_panel = None
-        self.msg_panel_borders = None
-        self.screen_borders = None
-        self.side_panel_borders = None
-        self.viewport_x = None
-        self.viewport_y = None
+        self.side_panel = None
         self.viewport = None
 
         self.init_ui()
@@ -19,38 +22,40 @@ class UIElements:
     def init_ui(self):
         screen_w = blt.state(floor(blt.TK_WIDTH))
         screen_h = blt.state(floor(blt.TK_HEIGHT))
-        w = floor(screen_w / settings.ui_offset_x)
-        h = floor(screen_h / settings.ui_offset_y)
+        w = floor(screen_w / self.ui_offset_x)
+        h = floor(screen_h / self.ui_offset_y)
 
+        # Side panel
         side_panel_w = 10
+        side_panel_x = w - side_panel_w
+        if not self.side_panel:
+            self.side_panel = SidePanel(side_panel_x, 0, side_panel_w-1, h)
+            self.side_panel.owner = self
+            self.elements.append(self.side_panel)
+            self.side_panel.update_offset(self.ui_offset_x, self.ui_offset_y)
+        else:
+            self.side_panel.update(side_panel_x, 0, side_panel_w-1, h)
+            self.side_panel.update_offset(self.ui_offset_x, self.ui_offset_y)
 
-        self.screen_borders = Panel(0, 0, w-side_panel_w, h-5)
-        self.side_panel_borders = Panel(w-side_panel_w, 0, side_panel_w-1, h)
+        if not self.viewport:
+            self.viewport = Viewport(0, 0, w-side_panel_w, h-5)
+            self.viewport.owner = self
+            self.elements.append(self.viewport)
+        else:
+            self.viewport.update_borders(w-side_panel_w, h-5)
 
-        self.msg_panel_borders = Panel(0, self.screen_borders.h+1, w-side_panel_w, h-(self.screen_borders.h))
-        self.msg_panel = Panel(1, self.msg_panel_borders.y+1, self.msg_panel_borders.w-1, self.msg_panel_borders.h-1)
+        if not self.msg_panel:
+            self.msg_panel = MessagePanel(0, self.viewport.h + 1, w - side_panel_w, h-self.viewport.h)
+            self.msg_panel.owner = self
+            self.elements.append(self.msg_panel)
+        else:
+            self.msg_panel.update(0, self.viewport.h + 1, w - side_panel_w, h-self.viewport.h)
 
-        settings.viewport_w = (w - side_panel_w) * settings.ui_offset_x - (settings.ui_offset_x + 1)
-        settings.viewport_h = (h - 5) * settings.ui_offset_y - (settings.ui_offset_y + 1)
+        # Calculate real viewport width and height with tile size offsets
+        viewport_w = (w - side_panel_w) * self.ui_offset_x - (self.ui_offset_x + 1)
+        viewport_h = (h - 5) * self.ui_offset_y - (self.ui_offset_y + 1)
+        self.viewport.update(viewport_w, viewport_h)
 
-        settings.viewport_center_x = int(settings.viewport_w / 2)
-        settings.viewport_center_y = int(settings.viewport_h / 2)
-
-
-class Panel:
-
-    def __init__(self, x=0, y=0, w=0, h=0):
-        self.x = int(x)
-        self.y = int(y)
-        self.w = int(w)
-        self.h = int(h)
-        self.x2 = self.x + self.w
-        self.y2 = self.y + self.h
-
-    def new_popup(self):
-        self.x = settings.viewport_center_x - 20
-        self.y = settings.viewport_center_y - 10
-        self.w = 30
-        self.h = 10
-        self.x2 = self.x + self.w
-        self.y2 = self.y + self.h
+    def draw(self):
+        for element in self.elements:
+            self.render_functions.draw_ui(element)

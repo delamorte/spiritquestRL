@@ -5,7 +5,8 @@ import settings
 from os import path
 import pickle
 
-openables = ["gate",
+# TODO: REFACTOR THESE NAMES?? WTF, PUT THEM UNDER A CLASS OR SOMETHING
+openables_names = ["gate",
              "gate (open)",
              "gate (closed)",
              "gate (locked)",
@@ -14,9 +15,9 @@ openables = ["gate",
              "door (closed)",
              "door (locked)"]
 
-items = ["flask", "skull", "book", "bone", "candle"]
+items_names = ["flask", "skull", "book", "bone", "candle"]
 
-stairs = ["campfire", "holy symbol"]
+stairs_names = ["campfire", "holy symbol"]
 
 def init_gfx(f):
     with open(f, 'rb') as gfx:
