@@ -402,32 +402,24 @@ class RenderFunctions:
         blt.layer(1)
 
         # Draw borders
-        for y in range(element.y, element.y2):
-            for x in range(element.x, element.x2):
-                if y == element.y:
-                    blt.put_ext(x * self.ui_offset_x, y *
-                                self.ui_offset_y, 0, element.dy, element.tile_horizontal)
-                elif y == element.y2 - 1:
-                    blt.put_ext(x * self.ui_offset_x, y *
-                                self.ui_offset_y, 0, -element.dy, element.tile_horizontal)
-                elif x == element.x:
-                    blt.put_ext(x * self.ui_offset_x, y *
-                                self.ui_offset_y, element.dx, 0, element.tile_vertical)
-                elif x == element.x2 - 1:
-                    blt.put_ext(x * self.ui_offset_x, y *
-                                self.ui_offset_y, -element.dx, 0, element.tile_vertical)
-                if x == element.x and y == element.y:
-                    blt.put_ext(x * self.ui_offset_x, y *
-                                self.ui_offset_y, element.dx, element.dy, element.tile_nw)
-                if x == element.x2 - 1 and y == element.y:
-                    blt.put_ext(x * self.ui_offset_x, y *
-                                self.ui_offset_y, -element.dx, element.dy, element.tile_ne)
-                if x == element.x and y == element.y2 - 1:
-                    blt.put_ext(x * self.ui_offset_x, y *
-                                self.ui_offset_y, element.dx, -element.dy, element.tile_sw)
-                if x == element.x2 - 1 and y == element.y2 - 1:
-                    blt.put_ext(x * self.ui_offset_x, y *
-                                self.ui_offset_y, -element.dx, -element.dy, element.tile_se)
+        for y in range(element.offset_y, element.offset_y2):
+            for x in range(element.offset_x, element.offset_x2):
+                if y == element.offset_y:
+                    blt.put(x, y, element.tile_horizontal)
+                elif y == element.offset_y2 - 1:
+                    blt.put(x, y, element.tile_horizontal)
+                elif x == element.offset_x:
+                    blt.put(x, y, element.tile_vertical)
+                elif x == element.offset_x2 - 1:
+                    blt.put(x, y, element.tile_vertical)
+                if x == element.offset_x and y == element.offset_y:
+                    blt.put(x, y, element.tile_nw)
+                if x == element.offset_x2 - 1 and y == element.offset_y:
+                    blt.put(x, y, element.tile_ne)
+                if x == element.offset_x and y == element.offset_y2 - 1:
+                    blt.put(x, y, element.tile_sw)
+                if x == element.offset_x2 - 1 and y == element.offset_y2 - 1:
+                    blt.put(x, y, element.tile_se)
 
     def draw_indicator(self, entity_x, entity_y, color=None, occupied_tiles=None):
         # Draw player indicator

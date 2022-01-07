@@ -8,16 +8,20 @@ class Viewport:
         self.y = y
         self.w = w
         self.h = h
-        self.content_x = x+1
-        self.content_y = y+1
-        self.content_w = w-1
-        self.content_h = h-1
         self.x2 = self.x + self.w
         self.y2 = self.y + self.h
         self.dx = 0
         self.dy = 0
+        self.offset_x = 0
+        self.offset_y = 0
+        self.offset_w = 0
+        self.offset_h = 0
+        self.offset_x2 = 0
+        self.offset_y2 = 0
         self.center_x = 0
         self.center_y = 0
+        self.offset_center_x = 0
+        self.offset_center_y = 0
         self.tile_horizontal = tilemap_ui()["ui_block_horizontal"]
         self.tile_vertical = tilemap_ui()["ui_block_vertical"]
         self.tile_nw = tilemap_ui()["ui_block_nw"]
@@ -34,9 +38,15 @@ class Viewport:
         self.h = h
         self.x2 = self.x + self.w
         self.y2 = self.y + self.h
-        self.content_x = self.x+1
-        self.content_y = self.y+1
-        self.content_w = self.w-1
-        self.content_h = self.h-1
         self.center_x = int(self.w / 2)
         self.center_y = int(self.h / 2)
+
+    def update_offset(self, offset_x, offset_y):
+        self.offset_x = self.x * offset_x
+        self.offset_y = self.y * offset_y
+        self.offset_w = self.w * offset_x - (offset_x + 1)
+        self.offset_h = self.h * offset_y - (offset_y + 1)
+        self.offset_x2 = self.offset_x + self.offset_w
+        self.offset_y2 = self.offset_y + self.offset_h
+        self.offset_center_x = int(self.offset_w / 2)
+        self.offset_center_y = int(self.offset_h / 2)

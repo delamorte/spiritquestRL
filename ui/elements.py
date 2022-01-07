@@ -41,20 +41,19 @@ class UIElements:
             self.viewport = Viewport(0, 0, w-side_panel_w, h-5)
             self.viewport.owner = self
             self.elements.append(self.viewport)
+            self.viewport.update_offset(self.ui_offset_x, self.ui_offset_y)
         else:
             self.viewport.update(w-side_panel_w, h-5)
+            self.viewport.update_offset(self.ui_offset_x, self.ui_offset_y)
 
         if not self.msg_panel:
-            self.msg_panel = MessagePanel(0, self.viewport.h + 1, w - side_panel_w, h-self.viewport.h)
+            self.msg_panel = MessagePanel(0, self.viewport.h, self.viewport.w, h-self.viewport.h+1)
             self.msg_panel.owner = self
             self.elements.append(self.msg_panel)
+            self.msg_panel.update_offset(self.ui_offset_x, self.ui_offset_y)
         else:
             self.msg_panel.update(0, self.viewport.h + 1, w - side_panel_w, h-self.viewport.h)
-
-        # Calculate real viewport width and height with tile size offsets
-        viewport_w = (w - side_panel_w) * self.ui_offset_x - (self.ui_offset_x + 1)
-        viewport_h = (h - 5) * self.ui_offset_y - (self.ui_offset_y + 1)
-        self.viewport.update(viewport_w, viewport_h)
+            self.msg_panel.update_offset(self.ui_offset_x, self.ui_offset_y)
 
     def draw(self):
         for element in self.elements:

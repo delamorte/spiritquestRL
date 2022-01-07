@@ -32,11 +32,11 @@ class Menus:
             self.avatar_info.owner = self
 
     def refresh(self, heading):
-        self.owner.ui.init_ui()
-        self.center_x = self.owner.ui.viewport.center_x - int(len(heading) / 2)
-        self.center_y = self.owner.ui.viewport.center_y - 5
-        self.viewport_w = self.owner.ui.viewport.w
-        self.viewport_h = self.owner.ui.viewport.h
+        #self.owner.ui.init_ui()
+        self.center_x = self.owner.ui.viewport.offset_center_x - int(len(heading) / 2)
+        self.center_y = self.owner.ui.viewport.offset_center_y - 5
+        self.viewport_w = self.owner.ui.viewport.offset_w
+        self.viewport_h = self.owner.ui.viewport.offset_h
         self.owner.ui.draw()
 
     def show(self, menu):
