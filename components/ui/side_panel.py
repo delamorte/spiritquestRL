@@ -8,6 +8,10 @@ class SidePanel:
         self.y = y
         self.w = w
         self.h = h
+        self.content_x = x+1
+        self.content_y = y+1
+        self.content_w = w-1
+        self.content_h = h-1
         self.x2 = self.x + self.w
         self.y2 = self.y + self.h
         self.dx = 0
@@ -35,6 +39,10 @@ class SidePanel:
         self.y = y
         self.w = w
         self.h = h
+        self.content_x = x+1
+        self.content_y = y+1
+        self.content_w = w-1
+        self.content_h = h-1
         self.x2 = self.x + self.w
         self.y2 = self.y + self.h
 

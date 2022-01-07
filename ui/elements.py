@@ -42,7 +42,7 @@ class UIElements:
             self.viewport.owner = self
             self.elements.append(self.viewport)
         else:
-            self.viewport.update_borders(w-side_panel_w, h-5)
+            self.viewport.update(w-side_panel_w, h-5)
 
         if not self.msg_panel:
             self.msg_panel = MessagePanel(0, self.viewport.h + 1, w - side_panel_w, h-self.viewport.h)
