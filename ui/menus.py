@@ -122,7 +122,7 @@ class Menus:
                 data.prev_menu.show()
         elif data.event == "new_game":
             self.owner.init_new_game(params=data.params)
-        elif data.event == "level_change":
+        elif self.current_menu.event == "level_change":
             self.owner.levels.params = data.params
         self.owner.game_state = GameStates.PLAYER_TURN
 

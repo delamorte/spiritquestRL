@@ -23,6 +23,6 @@ class ChooseLevel:
     def show(self):
         output = self.owner.show(self)
         if output:
-            self.event = "go_to_level"
-            output = self.data[self.owner.sel_index]
+            self.event = "level_change"
+            output.params = self.data[self.owner.sel_index]
             self.owner.handle_output(output)
