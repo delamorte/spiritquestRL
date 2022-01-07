@@ -32,7 +32,6 @@ class Menus:
             self.avatar_info.owner = self
 
     def refresh(self, heading):
-        #self.owner.ui.init_ui()
         self.center_x = self.owner.ui.viewport.offset_center_x - int(len(heading) / 2)
         self.center_y = self.owner.ui.viewport.offset_center_y - 5
         self.viewport_w = self.owner.ui.viewport.offset_w
@@ -107,7 +106,7 @@ class Menus:
             elif sel == "Exit":
                 exit()
             elif sel == "New game":
-                output = MenuData(name="choose_animal", submenu=True, prev_menu=self.current_menu)
+                output = MenuData(name="choose_animal", sub_menu=True, prev_menu=self.current_menu)
             elif self.current_menu.name == "choose_animal":
                 output = MenuData(params=sel, event="new_game")
             else:
@@ -116,9 +115,9 @@ class Menus:
         return output
 
     def handle_output(self, data):
-        if data.submenu:
+        if data.sub_menu:
             self.create_or_show_menu(data)
-            if self.current_menu.name != "choose_animal":
+            if self.current_menu.event == "show_prev_menu":
                 data.prev_menu.show()
         elif data.event == "new_game":
             self.owner.init_new_game(params=data.params)
@@ -134,7 +133,7 @@ class Menus:
             if self.choose_animal:
                 self.choose_animal.show()
             else:
-                choose_animal_menu = ChooseAnimal()
+                choose_animal_menu = ChooseAnimal(sub_menu=data.sub_menu)
                 self.choose_animal = choose_animal_menu
                 self.choose_animal.owner = self
                 self.choose_animal.show()
@@ -161,9 +160,9 @@ class Menus:
 
 
 class MenuData:
-    def __init__(self, name=None, submenu=False, prev_menu=None, params=None, event=None):
+    def __init__(self, name=None, sub_menu=False, prev_menu=None, params=None, event=None):
         self.name = name
-        self.submenu = submenu
+        self.sub_menu = sub_menu
         self.prev_menu = prev_menu
         self.params = params
         self.event = event
