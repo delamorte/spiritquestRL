@@ -156,6 +156,7 @@ class Entity:
 
 
 def blocking_entity(entities, x, y):
+    # TODO: Must be a better way to check this?
     for category in entities.values():
         for entity in category:
             if entity.blocks and entity.occupied_tiles is not None:

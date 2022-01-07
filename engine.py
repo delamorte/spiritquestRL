@@ -1,5 +1,6 @@
 from bearlibterminal import terminal as blt
 
+from actions import Actions
 from camera import Camera
 from components.abilities import Abilities
 from components.inventory import Inventory
@@ -27,6 +28,7 @@ from ui.message_history import show_msg_history
 
 class Engine:
     def __init__(self):
+        self.actions = None
         self.render_functions = None
         self.cursor = None
         self.fov_recompute = None
@@ -67,6 +69,9 @@ class Engine:
         # Init UI
         self.ui = UIElements()
         self.ui.owner = self
+
+        self.actions = Actions()
+        self.actions.owner = self
 
         self.render_functions = RenderFunctions(self.ui.offset_x, self.ui.offset_y)
         self.render_functions.owner = self
@@ -162,31 +167,30 @@ class Engine:
             action = handle_keys(key)
 
             move = action.get('move')
+            wait = action.get('wait')
             pickup = action.get('pickup')
             interact = action.get("interact")
             stairs = action.get('stairs')
+            examine = action.get('examine')
             minimap = action.get('map')
             fullscreen = action.get('fullscreen')
+            close = action.get('close')
+            main_menu = action.get('main_menu')
+            avatar_info = action.get('avatar_info')
+            inventory = action.get('inventory')
+            msg_history = action.get('msg_history')
 
-            if not self.player.fighter.dead:
-                self.player.status_effects.process_effects()
-
-            if fullscreen:
-                blt.set("window.fullscreen=true")
-                self.fov_recompute = True
+            if self.actions.window_actions(fullscreen=fullscreen, close=close):
                 continue
 
             if self.game_state == GameStates.PLAYER_DEAD:
                 while self.game_state == GameStates.PLAYER_DEAD:
                     key = blt.read()
-                    if key == blt.TK_CLOSE:
-                        break
-
-                    if key == blt.TK_ESCAPE:
-                        self.menus.main_menu.show()
-                        key = None
-                        self.fov_recompute = True
+                    if self.actions.dead_actions(key):
                         continue
+
+            if not self.player.fighter.dead:
+                self.player.status_effects.process_effects()
 
             if self.player.fighter.paralyzed:
                 self.message_log.send("You are paralyzed!")
@@ -197,290 +201,31 @@ class Engine:
                 # Begin player turn
                 # Non-turn taking UI functions
 
-                if key == blt.TK_CLOSE:
-                    return
-
-                if key == blt.TK_ESCAPE:
-                    self.menus.main_menu.show()
-                    self.fov_recompute = True
+                if self.actions.menu_actions(main_menu=main_menu,
+                                             avatar_info=avatar_info,
+                                             inventory=inventory,
+                                             msg_history=msg_history):
                     continue
-
-                if key == blt.TK_PERIOD or key == blt.TK_KP_5:
-                    self.time_counter.take_turn(1)
-                    # player.player.spirit_power -= 1
-                    self.message_log.send("You wait a turn.")
-                    self.message_log.old_stack = self.message_log.stack
-                    self.game_state = GameStates.ENEMY_TURN
 
                 # Turn taking functions
 
-                if move:
-
-                    dx, dy = move
-                    destination_x = self.player.x + dx
-                    destination_y = self.player.y + dy
-
-                    # Handle player attack
-                    if not self.levels.current_map.is_blocked(destination_x, destination_y):
-                        target = blocking_entity(
-                            self.levels.current_map.entities, destination_x, destination_y)
-                        if target:
-                            combat_msg = self.player.fighter.attack(target, self.player.player.sel_weapon)
-
-                            self.message_log.send(combat_msg)
-                            # player.player.spirit_power -= 0.5
-                            self.time_counter.take_turn(1)
-                            self.render_functions.draw_stats(target)
-
-                        else:
-                            if self.player.fighter.mv_spd <= 0:
-                                self.message_log.send("You are unable to move!")
-                                self.time_counter.take_turn(1)
-                            else:
-                                prev_pos_x, prev_pos_y = self.player.x, self.player.y
-                                self.player.move(dx, dy)
-                                self.time_counter.take_turn(1 / self.player.fighter.mv_spd)
-                                self.fov_recompute = True
-                                if self.player in self.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile:
-                                    self.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(self.player)
-                                self.levels.current_map.tiles[self.player.x][self.player.y].entities_on_tile.append(self.player)
-
-                        self.game_state = GameStates.ENEMY_TURN
-
-                    elif self.levels.current_map.tiles[destination_x][destination_y].is_door:
-                        door = self.levels.current_map.tiles[destination_x][destination_y].door
-                        if door.status == "locked":
-                            self.message_log.send("The door is locked...")
-                            self.time_counter.take_turn(1)
-                            self.game_state = GameStates.ENEMY_TURN
-                        elif door.status == "closed":
-                            door.set_status("open", self.levels.current_map)
-                            self.message_log.send("You open the door.")
-                            self.time_counter.take_turn(1)
-                            self.game_state = GameStates.ENEMY_TURN
-                            self.fov_recompute = True
-
-                    self.message_log.old_stack = self.message_log.stack
-                    self.message_log.stack = []
-
-                elif interact:
-                    if "doors" in self.levels.current_map.entities:
-                        for entity in self.levels.current_map.entities["doors"]:
-                            if ((entity.x, entity.y) == (self.player.x - 1, self.player.y) or
-                                    (entity.x, entity.y) == (self.player.x - 1, self.player.y - 1) or
-                                    (entity.x, entity.y) == (self.player.x, self.player.y - 1) or
-                                    (entity.x, entity.y) == (self.player.x + 1, self.player.y - 1) or
-                                    (entity.x, entity.y) == (self.player.x + 1, self.player.y) or
-                                    (entity.x, entity.y) == (self.player.x + 1, self.player.y + 1) or
-                                    (entity.x, entity.y) == (self.player.x, self.player.y + 1) or
-                                    (entity.x, entity.y) == (self.player.x - 1, self.player.y + 1)):
-                                if entity.door.status == "closed":
-                                    entity.door.set_status("open", self.levels.current_map)
-                                    self.message_log.send("You open the door.")
-                                    self.time_counter.take_turn(1)
-                                    self.game_state = GameStates.ENEMY_TURN
-                                elif entity.door.status == "open":
-                                    entity.door.set_status("closed", self.levels.current_map)
-                                    self.message_log.send("You close the door.")
-                                    self.time_counter.take_turn(1)
-                                    self.game_state = GameStates.ENEMY_TURN
-                                else:
-                                    self.message_log.send("The door is locked.")
-                                    self.time_counter.take_turn(1)
-                                    self.game_state = GameStates.ENEMY_TURN
-                    if "items" in self.levels.current_map.entities:
-                        for entity in self.levels.current_map.entities["items"]:
-                            if ((entity.x, entity.y) == (self.player.x - 1, self.player.y) or
-                                    (entity.x, entity.y) == (self.player.x - 1, self.player.y - 1) or
-                                    (entity.x, entity.y) == (self.player.x, self.player.y - 1) or
-                                    (entity.x, entity.y) == (self.player.x + 1, self.player.y - 1) or
-                                    (entity.x, entity.y) == (self.player.x + 1, self.player.y) or
-                                    (entity.x, entity.y) == (self.player.x + 1, self.player.y + 1) or
-                                    (entity.x, entity.y) == (self.player.x, self.player.y + 1) or
-                                    (entity.x, entity.y) == (self.player.x, self.player.y) or
-                                    (entity.x, entity.y) == (self.player.x - 1, self.player.y + 1)):
-
-                                interact_msg = entity.item.interaction(self.levels.current_map)
-                                if interact_msg:
-                                    self.message_log.send(interact_msg)
-
-                elif pickup:
-                    if "items" in self.levels.current_map.entities:
-                        for entity in self.levels.current_map.entities["items"]:
-                            if entity.x == self.player.x and entity.y == self.player.y and entity.item.pickable:
-                                pickup_msg = self.player.inventory.add_item(entity)
-                                self.message_log.send(pickup_msg)
-                                for item in self.message_log.stack:
-                                    if entity.name == item.split(" ", 1)[1]:
-                                        self.message_log.stack.remove(item)
-                                self.levels.current_map.tiles[entity.x][entity.y].entities_on_tile.remove(entity)
-                                self.levels.current_map.entities["items"].remove(entity)
-                                self.time_counter.take_turn(1)
-                                self.game_state = GameStates.ENEMY_TURN
-                                break
-                            # else:
-                            #     message_log.send("There is nothing here to pick up.")
-                    else:
-                        self.message_log.send("There is nothing here to pick up.")
-
-                elif stairs:
-                    if "stairs" in self.levels.current_map.entities:
-                        for entity in self.levels.current_map.entities["stairs"]:
-                            if self.player.x == entity.x and self.player.y == entity.y:
-                                self.levels.change(entity.stairs.destination[0])
-
-                        self.message_log.old_stack = self.message_log.stack
-
-                        if self.levels.current_map.name == "cavern" and self.levels.current_map.dungeon_level == 1:
-                            self.message_log.clear()
-                            self.message_log.send(
-                                "A sense of impending doom fills you as you delve into the cavern.")
-                            self.message_log.send("RIBBIT!")
-
-                        elif self.levels.current_map.name == "dream":
-                            self.message_log.clear()
-                            self.message_log.send(
-                                "I'm dreaming... I feel my spirit power draining.")
-                            self.message_log.send("I'm hungry..")
-                        self.render_functions.draw_messages()
-                        self.fov_recompute = True
-
-                elif key == blt.TK_X:
-                    self.game_state = GameStates.TARGETING
-                    cursor_component = Cursor()
-                    cursor = Entity(self.player.x, self.player.y, 4, 0xE800 + 1746, "light yellow", "cursor",
-                                    cursor=cursor_component, stand_on_messages=False)
-                    self.cursor = cursor
-                    self.levels.current_map.tiles[self.cursor.x][self.cursor.y].entities_on_tile.append(self.cursor)
-                    self.levels.current_map.entities["cursor"] = [self.cursor]
-
-                if key == blt.TK_F1:
-                    self.menus.avatar_info.show()
-                    self.fov_recompute = True
-                    continue
-
-                if key == blt.TK_M:
-                    # TODO: Refactor to use menu components
-                    show_msg_history(
-                        self.message_log.history, "Message history", self.ui.viewport.offset_w-1, self.ui.viewport.offset_h-1)
-                    self.ui.side_panel.draw_content()
-                    self.ui.draw()
-                    self.fov_recompute = True
-                    continue
-
-                if key == blt.TK_I:
-                    # TODO: Refactor to use menu components
-                    show_items = []
-                    for item in self.player.inventory.items:
-                        show_items.append(get_article(item.name) + " " + item.name)
-                    show_msg_history(
-                        show_items, "Inventory", self.ui.viewport.offset_w-1, self.ui.viewport.offset_h-1)
-                    self.ui.side_panel.draw_content()
-                    self.ui.draw()
-                    self.fov_recompute = True
-                    continue
-
-                if key == blt.TK_TAB:
-                    test_dynamic_sprites(self.levels.current_map, self.ui)
-                    self.fov_recompute = True
-                    continue
+                self.actions.turn_taking_actions(wait=wait,
+                                                 move=move,
+                                                 interact=interact,
+                                                 pickup=pickup,
+                                                 stairs=stairs,
+                                                 examine=examine)
 
             elif self.game_state == GameStates.TARGETING:
 
-                if move:
-                    dx, dy = move
-                    destination_x = self.cursor.x + dx
-                    destination_y = self.cursor.y + dy
-                    x, y = self.game_camera.get_coordinates(destination_x, destination_y)
-
-                    if 0 < x < self.game_camera.width - 1 and 0 < y < self.game_camera.height - 1:
-                        prev_pos_x, prev_pos_y = self.cursor.x, self.cursor.y
-                        self.cursor.move(dx, dy)
-                        self.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(self.cursor)
-                        self.levels.current_map.tiles[self.cursor.x][self.cursor.y].entities_on_tile.append(self.cursor)
-                        self.fov_recompute = True
-
-                        self.message_log.old_stack = self.message_log.stack
-                        self.message_log.stack = []
-                        if self.levels.current_map.tiles[self.cursor.x][self.cursor.y].name is not None:
-                            self.message_log.stack.append(self.levels.current_map.tiles[self.cursor.x][self.cursor.y].name.capitalize())
-
-                elif key == blt.TK_ESCAPE or key == blt.TK_X:
-                    self.game_state = GameStates.PLAYER_TURN
-                    self.message_log.old_stack = self.message_log.stack
-                    self.message_log.stack = []
-                    self.levels.current_map.tiles[self.cursor.x][self.cursor.y].entities_on_tile.remove(self.cursor)
-                    del self.levels.current_map.entities["cursor"]
-                    self.cursor = None
-
-                if self.player.fighter.paralyzed:
-                    self.message_log.send("You are paralyzed!")
-                    self.time_counter.take_turn(1)
-                    self.game_state = GameStates.ENEMY_TURN
+                if self.actions.targeting_actions(move=move,
+                                                  examine=examine,
+                                                  main_menu=main_menu):
+                    continue
 
             if self.game_state == GameStates.ENEMY_TURN:
                 # Begin enemy turn
-                self.render_functions.draw_messages()
-
-                for entity in self.levels.current_map.entities["monsters"]:
-                    visible = self.player.light_source.fov_map.fov[entity.y, entity.x]
-                    if visible:
-                        if entity.fighter:
-                            entity.status_effects.process_effects()
-
-                        if self.player.fighter.dead:
-                            kill_msg, self.game_state = kill_player(self.player)
-                            self.message_log.send(kill_msg)
-                            self.render_functions.draw_stats()
-                            break
-
-                        if entity.fighter and entity.fighter.dead:
-                            level_up_msg = self.player.player.handle_player_exp(entity.fighter)
-                            self.message_log.send(kill_monster(entity))
-                            self.message_log.send("I feel my power returning!")
-                            if level_up_msg:
-                                self.message_log.send(level_up_msg)
-
-                        elif entity.fighter and entity.fighter.paralyzed:
-                            self.message_log.send("The monster is paralyzed!")
-                            self.game_state = GameStates.PLAYER_TURN
-
-                        elif entity.ai:
-                            prev_pos_x, prev_pos_y = entity.x, entity.y
-                            combat_msg = entity.ai.take_turn(
-                                self.player, self.levels.current_map, self.levels.current_map.entities, self.time_counter)
-                            self.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(entity)
-                            self.levels.current_map.tiles[entity.x][entity.y].entities_on_tile.append(entity)
-                            if entity.occupied_tiles is not None:
-                                self.levels.current_map.tiles[prev_pos_x][prev_pos_y + 1].entities_on_tile.remove(entity)
-                                self.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y + 1].entities_on_tile.remove(entity)
-                                self.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y].entities_on_tile.remove(entity)
-
-                                self.levels.current_map.tiles[entity.x][entity.y + 1].entities_on_tile.append(entity)
-                                self.levels.current_map.tiles[entity.x + 1][entity.y + 1].entities_on_tile.append(entity)
-                                self.levels.current_map.tiles[entity.x + 1][entity.y].entities_on_tile.append(entity)
-
-                            self.fov_recompute = True
-                            if combat_msg:
-                                self.message_log.send(combat_msg)
-                                self.render_functions.draw_stats()
-                            if self.player.fighter.dead:
-                                kill_msg, self.game_state = kill_player(self.player)
-                                self.message_log.send(kill_msg)
-                                self.render_functions.draw_stats()
-                                break
-                            # Functions on monster death
-                            if entity.fighter and entity.fighter.dead:
-                                level_up_msg = self.player.player.handle_player_exp(entity.fighter)
-                                self.message_log.send(kill_monster(entity))
-                                self.message_log.send("I feel my power returning!")
-                                if level_up_msg:
-                                    self.message_log.send(level_up_msg)
-
-                if not self.game_state == GameStates.PLAYER_DEAD:
-                    self.game_state = GameStates.PLAYER_TURN
-
-        print(self.game_state)
+                self.actions.enemy_actions()
 
     class TimeCounter:
         def __init__(self, turn=0):
