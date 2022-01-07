@@ -3,12 +3,15 @@
 class MessageLog:
 
     def __init__(self, max_length):
+        self.owner = None
         self.buffer = []
         self.buffer_colors = []
         self.history = []
         self.history_colors = []
         self.max_length = max_length
         self.new_msgs = False
+        self.stack = []
+        self.old_stack = []
 
     def send(self, msg):
 
