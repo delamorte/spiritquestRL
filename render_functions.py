@@ -330,7 +330,7 @@ class RenderFunctions:
         if self.owner.ui.viewport.offset_w > 90:
             blt.color("default")
             blt.puts(self.owner.ui.viewport.offset_center_x,
-                     self.owner.ui.viewport.offset_h + self.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0,
+                     self.owner.ui.viewport.offset_h + self.ui_offset_y-1, "[offset=0,0]" + power_msg, 0, 0,
                      blt.TK_ALIGN_CENTER)
         else:
             blt.color("default")
