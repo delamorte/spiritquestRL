@@ -84,6 +84,7 @@ class Menus:
                     output = None
                     continue
                 else:
+                    self.owner.game_state = GameStates.PLAYER_TURN
                     break
             elif output:
                 return output

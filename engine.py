@@ -197,7 +197,6 @@ class Engine:
 
                 if key == blt.TK_ESCAPE:
                     self.menus.main_menu.show()
-                    self.ui.draw()
                     self.fov_recompute = True
 
                 if key == blt.TK_PERIOD or key == blt.TK_KP_5:
