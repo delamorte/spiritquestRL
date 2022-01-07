@@ -175,13 +175,14 @@ class Engine:
                 blt.set("window.fullscreen=true")
 
             if self.game_state == GameStates.PLAYER_DEAD:
-                while True:
+                while self.game_state == GameStates.PLAYER_DEAD:
                     key = blt.read()
                     if key == blt.TK_CLOSE:
                         break
 
                     if key == blt.TK_ESCAPE:
                         self.menus.main_menu.show()
+                        key = None
                         self.fov_recompute = True
 
             if self.player.fighter.paralyzed:
@@ -472,6 +473,7 @@ class Engine:
                 if not self.game_state == GameStates.PLAYER_DEAD:
                     self.game_state = GameStates.PLAYER_TURN
 
+        print(self.game_state)
         blt.close()
 
     class TimeCounter:
