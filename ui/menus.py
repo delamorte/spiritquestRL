@@ -132,6 +132,7 @@ class Menus:
 
         if data.name == "choose_animal":
             if self.choose_animal:
+                self.choose_level.refresh()
                 self.choose_animal.show()
             else:
                 choose_animal_menu = ChooseAnimal(sub_menu=data.sub_menu)
@@ -141,6 +142,7 @@ class Menus:
         elif data.name == "choose_level":
             if self.choose_level:
                 self.choose_level.data = data.params
+                self.choose_level.refresh()
                 self.choose_level.show()
             else:
                 choose_level_menu = ChooseLevel(data=data.params)

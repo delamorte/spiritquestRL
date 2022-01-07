@@ -15,6 +15,12 @@ class ChooseAnimal:
         self.sub_menu = sub_menu
         self.margin = 6
         self.event = event
+        self.refresh()
+
+    def refresh(self):
+        self.items = []
+        self.items_icons = []
+        self.sub_items = {}
         animals = tilemap()["monsters"]
         animals = {x: animals[x] for x in ("crow", "rat", "snake")}
         for (k, v) in animals.items():
@@ -25,9 +31,6 @@ class ChooseAnimal:
             self.items.append(k)
             self.items_icons.append(v)
             self.sub_items[k] = [stats, skills]
-
-    def refresh(self):
-        self.owner.refresh(self.heading)
 
     def show(self):
         output = self.owner.show(self)
