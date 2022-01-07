@@ -36,7 +36,7 @@ class Menus:
         self.center_y = self.owner.ui.viewport.offset_center_y - 5
         self.viewport_w = self.owner.ui.viewport.offset_w
         self.viewport_h = self.owner.ui.viewport.offset_h
-        self.owner.ui.draw()
+        #self.owner.ui.draw()
 
     def show(self, menu):
         self.current_menu = menu
@@ -156,7 +156,7 @@ class Menus:
                 self.avatar_info.owner = self
 
         self.owner.game_state = GameStates.PLAYER_TURN
-        self.owner.ui.draw()
+        #self.owner.ui.draw()
 
 
 class MenuData:

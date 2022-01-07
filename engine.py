@@ -118,7 +118,7 @@ class Engine:
         self.message_log.owner = self
 
         # Initialize game camera
-        game_camera = Camera(1, 1, self.ui.viewport.w, self.ui.viewport.h, self.ui.ui_offset_x, self.ui.ui_offset_y)
+        game_camera = Camera(1, 1, self.ui.viewport.w, self.ui.viewport.h)
         self.game_camera = game_camera
         self.game_camera.owner = self
 

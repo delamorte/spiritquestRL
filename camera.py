@@ -5,12 +5,12 @@ import settings
 
 class Camera:
 
-    def __init__(self, x, y, viewport_w, viewport_h, ui_offset_x, ui_offset_y):
+    def __init__(self, x, y, viewport_w, viewport_h):
         self.owner = None
         self.x = x
         self.y = y
-        self.max_width = int(floor(viewport_w / ui_offset_x + 2))
-        self.max_height = int(floor(viewport_h / ui_offset_y + 2))
+        self.max_width = viewport_w
+        self.max_height = viewport_h
         self.width = self.max_width
         self.height = self.max_height
         self.offset = int(settings.ui_size) / int(settings.tile_height)
