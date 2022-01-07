@@ -150,8 +150,8 @@ class Engine:
             if self.fov_recompute:
                 self.player.light_source.recompute_fov(self.player.x, self.player.y)
                 self.player.player.init_light()
+                self.render_functions.draw_all()
 
-            self.render_functions.draw_all()
             self.render_functions.draw_messages()
 
             self.fov_recompute = False
@@ -200,7 +200,6 @@ class Engine:
 
                 if key == blt.TK_ESCAPE:
                     self.menus.main_menu.show()
-                    key = None
                     self.fov_recompute = True
                     continue
 
@@ -355,7 +354,6 @@ class Engine:
 
                 if key == blt.TK_F1:
                     self.menus.avatar_info.show()
-                    key = None
                     self.fov_recompute = True
                     continue
 
@@ -365,7 +363,6 @@ class Engine:
                         self.message_log.history, "Message history", self.ui.viewport.offset_w-1, self.ui.viewport.offset_h-1)
                     self.ui.side_panel.draw_content()
                     self.ui.draw()
-                    key = None
                     self.fov_recompute = True
                     continue
 
@@ -378,13 +375,11 @@ class Engine:
                         show_items, "Inventory", self.ui.viewport.offset_w-1, self.ui.viewport.offset_h-1)
                     self.ui.side_panel.draw_content()
                     self.ui.draw()
-                    key = None
                     self.fov_recompute = True
                     continue
 
                 if key == blt.TK_TAB:
                     test_dynamic_sprites(self.levels.current_map, self.ui)
-                    key = None
                     self.fov_recompute = True
                     continue
 
@@ -423,7 +418,6 @@ class Engine:
 
             if self.game_state == GameStates.ENEMY_TURN:
                 # Begin enemy turn
-                self.fov_recompute = True
                 self.render_functions.draw_messages()
 
                 for entity in self.levels.current_map.entities["monsters"]:
