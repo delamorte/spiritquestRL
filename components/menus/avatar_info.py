@@ -11,6 +11,12 @@ class AvatarInfo:
         self.sub_items = {}
         self.margin = 6
         self.event = event
+        self.refresh()
+
+    def refresh(self):
+        self.items = []
+        self.items_icons = []
+        self.sub_items = {}
         animals = self.data.player.char
         exclude = {"player"}
         avatars = {x: animals[x] for x in animals if x not in exclude}
@@ -19,9 +25,6 @@ class AvatarInfo:
             self.items_icons.append(v)
             exp = " EXP: " + str(self.data.player.char_exp[k])
             self.sub_items[k] = [exp]
-
-    def refresh(self):
-        self.owner.refresh(self.heading)
 
     def show(self):
         output = self.owner.show(self)

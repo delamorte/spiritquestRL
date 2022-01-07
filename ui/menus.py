@@ -150,11 +150,13 @@ class Menus:
         elif data.name == "avatar_info":
             if self.avatar_info:
                 self.avatar_info.data = data.params
+                self.avatar_info.refresh()
                 self.avatar_info.show()
             else:
                 avatar_info_menu = AvatarInfo(data=data.params)
                 self.avatar_info = avatar_info_menu
                 self.avatar_info.owner = self
+                self.avatar_info.show()
 
         self.owner.game_state = GameStates.PLAYER_TURN
         #self.owner.ui.draw()

@@ -85,6 +85,9 @@ class Engine:
 
     def init_new_game(self, params):
         choice = params
+        self.player = None
+        self.levels = None
+        self.time_counter = None
         # Create player
         inventory_component = Inventory(26)
         fighter_component = get_fighter_data("player")
