@@ -1589,7 +1589,8 @@ class MazeWithRooms:
 
             # clear the sources, they are no longer needed
             for s in sources:
-                openRegions.remove(s)
+                if s in openRegions:
+                    openRegions.remove(s)
 
             # remove the unneeded connectors
             toBeRemoved = set()
