@@ -352,18 +352,22 @@ class Engine:
                     self.fov_recompute = True
 
                 if key == blt.TK_M:
+                    # TODO: Refactor to use menu components
                     show_msg_history(
-                        self.message_log.history, "Message history", self.ui.viewport.offset_w, self.ui.viewport.offset_h)
+                        self.message_log.history, "Message history", self.ui.viewport.offset_w-1, self.ui.viewport.offset_h-1)
                     self.ui.side_panel.draw_content()
+                    self.ui.draw()
                     self.fov_recompute = True
 
                 if key == blt.TK_I:
+                    # TODO: Refactor to use menu components
                     show_items = []
                     for item in self.player.inventory.items:
                         show_items.append(get_article(item.name) + " " + item.name)
                     show_msg_history(
-                        show_items, "Inventory")
+                        show_items, "Inventory", self.ui.viewport.offset_w-1, self.ui.viewport.offset_h-1)
                     self.ui.side_panel.draw_content()
+                    self.ui.draw()
                     self.fov_recompute = True
 
                 if key == blt.TK_TAB:
