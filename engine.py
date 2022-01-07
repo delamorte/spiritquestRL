@@ -425,7 +425,6 @@ class Engine:
                 for entity in self.levels.current_map.entities["monsters"]:
                     visible = self.player.light_source.fov_map.fov[entity.y, entity.x]
                     if visible:
-                        print("debug")
                         if entity.fighter:
                             entity.status_effects.process_effects()
 
