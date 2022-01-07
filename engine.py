@@ -173,6 +173,8 @@ class Engine:
 
             if fullscreen:
                 blt.set("window.fullscreen=true")
+                self.fov_recompute = True
+                continue
 
             if self.game_state == GameStates.PLAYER_DEAD:
                 while self.game_state == GameStates.PLAYER_DEAD:
@@ -245,18 +247,18 @@ class Engine:
 
                         self.game_state = GameStates.ENEMY_TURN
 
-                    else:
-                        if "doors" in self.levels.current_map.entities:
-                            for entity in self.levels.current_map.entities["doors"]:
-                                if destination_x == entity.x and destination_y == entity.y and entity.door.status == "locked":
-                                    self.message_log.send("The door is locked...")
-                                    self.time_counter.take_turn(1)
-                                    self.game_state = GameStates.ENEMY_TURN
-                                elif destination_x == entity.x and destination_y == entity.y and entity.door.status == "closed":
-                                    entity.door.set_status("open", self.levels.current_map)
-                                    self.message_log.send("You open the door.")
-                                    self.time_counter.take_turn(1)
-                                    self.game_state = GameStates.ENEMY_TURN
+                    elif self.levels.current_map.tiles[destination_x][destination_y].is_door:
+                        door = self.levels.current_map.tiles[destination_x][destination_y].door
+                        if door.status == "locked":
+                            self.message_log.send("The door is locked...")
+                            self.time_counter.take_turn(1)
+                            self.game_state = GameStates.ENEMY_TURN
+                        elif door.status == "closed":
+                            door.set_status("open", self.levels.current_map)
+                            self.message_log.send("You open the door.")
+                            self.time_counter.take_turn(1)
+                            self.game_state = GameStates.ENEMY_TURN
+                            self.fov_recompute = True
 
                     self.message_log.old_stack = self.message_log.stack
                     self.message_log.stack = []
@@ -421,58 +423,60 @@ class Engine:
                 self.render_functions.draw_messages()
 
                 for entity in self.levels.current_map.entities["monsters"]:
+                    visible = self.player.light_source.fov_map.fov[entity.y, entity.x]
+                    if visible:
+                        print("debug")
+                        if entity.fighter:
+                            entity.status_effects.process_effects()
 
-                    if entity.fighter:
-                        entity.status_effects.process_effects()
-
-                    if self.player.fighter.dead:
-                        kill_msg, self.game_state = kill_player(self.player)
-                        self.message_log.send(kill_msg)
-                        self.render_functions.draw_stats()
-                        break
-
-                    if entity.fighter and entity.fighter.dead:
-                        level_up_msg = self.player.player.handle_player_exp(entity.fighter)
-                        self.message_log.send(kill_monster(entity))
-                        self.message_log.send("I feel my power returning!")
-                        if level_up_msg:
-                            self.message_log.send(level_up_msg)
-
-                    elif entity.fighter and entity.fighter.paralyzed:
-                        self.message_log.send("The monster is paralyzed!")
-                        self.game_state = GameStates.PLAYER_TURN
-
-                    elif entity.ai:
-                        prev_pos_x, prev_pos_y = entity.x, entity.y
-                        combat_msg = entity.ai.take_turn(
-                            self.player, self.levels.current_map, self.levels.current_map.entities, self.time_counter)
-                        self.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(entity)
-                        self.levels.current_map.tiles[entity.x][entity.y].entities_on_tile.append(entity)
-                        if entity.occupied_tiles is not None:
-                            self.levels.current_map.tiles[prev_pos_x][prev_pos_y + 1].entities_on_tile.remove(entity)
-                            self.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y + 1].entities_on_tile.remove(entity)
-                            self.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y].entities_on_tile.remove(entity)
-
-                            self.levels.current_map.tiles[entity.x][entity.y + 1].entities_on_tile.append(entity)
-                            self.levels.current_map.tiles[entity.x + 1][entity.y + 1].entities_on_tile.append(entity)
-                            self.levels.current_map.tiles[entity.x + 1][entity.y].entities_on_tile.append(entity)
-
-                        self.fov_recompute = True
-                        if combat_msg:
-                            self.message_log.send(combat_msg)
-                            self.render_functions.draw_stats()
                         if self.player.fighter.dead:
                             kill_msg, self.game_state = kill_player(self.player)
                             self.message_log.send(kill_msg)
                             self.render_functions.draw_stats()
                             break
-                        # Functions on monster death
+
                         if entity.fighter and entity.fighter.dead:
                             level_up_msg = self.player.player.handle_player_exp(entity.fighter)
                             self.message_log.send(kill_monster(entity))
                             self.message_log.send("I feel my power returning!")
                             if level_up_msg:
                                 self.message_log.send(level_up_msg)
+
+                        elif entity.fighter and entity.fighter.paralyzed:
+                            self.message_log.send("The monster is paralyzed!")
+                            self.game_state = GameStates.PLAYER_TURN
+
+                        elif entity.ai:
+                            prev_pos_x, prev_pos_y = entity.x, entity.y
+                            combat_msg = entity.ai.take_turn(
+                                self.player, self.levels.current_map, self.levels.current_map.entities, self.time_counter)
+                            self.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(entity)
+                            self.levels.current_map.tiles[entity.x][entity.y].entities_on_tile.append(entity)
+                            if entity.occupied_tiles is not None:
+                                self.levels.current_map.tiles[prev_pos_x][prev_pos_y + 1].entities_on_tile.remove(entity)
+                                self.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y + 1].entities_on_tile.remove(entity)
+                                self.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y].entities_on_tile.remove(entity)
+
+                                self.levels.current_map.tiles[entity.x][entity.y + 1].entities_on_tile.append(entity)
+                                self.levels.current_map.tiles[entity.x + 1][entity.y + 1].entities_on_tile.append(entity)
+                                self.levels.current_map.tiles[entity.x + 1][entity.y].entities_on_tile.append(entity)
+
+                            self.fov_recompute = True
+                            if combat_msg:
+                                self.message_log.send(combat_msg)
+                                self.render_functions.draw_stats()
+                            if self.player.fighter.dead:
+                                kill_msg, self.game_state = kill_player(self.player)
+                                self.message_log.send(kill_msg)
+                                self.render_functions.draw_stats()
+                                break
+                            # Functions on monster death
+                            if entity.fighter and entity.fighter.dead:
+                                level_up_msg = self.player.player.handle_player_exp(entity.fighter)
+                                self.message_log.send(kill_monster(entity))
+                                self.message_log.send("I feel my power returning!")
+                                if level_up_msg:
+                                    self.message_log.send(level_up_msg)
 
                 if not self.game_state == GameStates.PLAYER_DEAD:
                     self.game_state = GameStates.PLAYER_TURN

@@ -100,6 +100,8 @@ class GameMap:
                             door = Entity(x, y, 2, entity,
                                           color, name, door=door_component, stand_on_messages=False)
                             self.tiles[x][y].entities_on_tile.append(door)
+                            self.tiles[x][y].is_door = True
+                            self.tiles[x][y].door = door_component
                             door_component.set_status(door_component.status, self)
                             entities.append(door)
                         elif name in items_names:
@@ -763,6 +765,8 @@ class GameMap:
         door = Entity(x, y, 2, tile, color, name,
                       door=door_component, stand_on_messages=False)
         self.tiles[x][y].entities_on_tile.append(door)
+        self.tiles[x][y].is_door = True
+        self.tiles[x][y].door = door_component
 
         if status == "open":
             self.tiles[x][y].blocked = False
