@@ -233,7 +233,8 @@ class Engine:
                                 self.player.move(dx, dy)
                                 self.time_counter.take_turn(1 / self.player.fighter.mv_spd)
                                 self.fov_recompute = True
-                                self.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(self.player)
+                                if self.player in self.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile:
+                                    self.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(self.player)
                                 self.levels.current_map.tiles[self.player.x][self.player.y].entities_on_tile.append(self.player)
 
                         self.game_state = GameStates.ENEMY_TURN
@@ -318,7 +319,6 @@ class Engine:
                     if "stairs" in self.levels.current_map.entities:
                         for entity in self.levels.current_map.entities["stairs"]:
                             if self.player.x == entity.x and self.player.y == entity.y:
-                                self.levels.current_map.tiles[self.player.x][self.player.y].entities_on_tile.remove(self.player)
                                 self.levels.change(entity.stairs.destination[0])
 
                         self.message_log.old_stack = self.message_log.stack
@@ -391,7 +391,7 @@ class Engine:
                             self.message_log.stack.append(self.levels.current_map.tiles[self.cursor.x][self.cursor.y].name.capitalize())
 
                 elif key == blt.TK_ESCAPE or key == blt.TK_X:
-                    game_state = GameStates.PLAYER_TURN
+                    self.game_state = GameStates.PLAYER_TURN
                     self.message_log.old_stack = self.message_log.stack
                     self.message_log.stack = []
                     self.levels.current_map.tiles[self.cursor.x][self.cursor.y].entities_on_tile.remove(self.cursor)
@@ -414,7 +414,7 @@ class Engine:
                         entity.status_effects.process_effects()
 
                     if self.player.fighter.dead:
-                        kill_msg, game_state = kill_player(self.player)
+                        kill_msg, self.game_state = kill_player(self.player)
                         self.message_log.send(kill_msg)
                         self.render_functions.draw_stats()
                         break
@@ -450,7 +450,7 @@ class Engine:
                             self.message_log.send(combat_msg)
                             self.render_functions.draw_stats()
                         if self.player.fighter.dead:
-                            kill_msg, game_state = kill_player(self.player)
+                            kill_msg, self.game_state = kill_player(self.player)
                             self.message_log.send(kill_msg)
                             self.render_functions.draw_stats()
                             break
