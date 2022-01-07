@@ -136,27 +136,27 @@ class RenderFunctions:
         game_map = self.owner.levels.current_map
         player = self.owner.player
         # Set boundaries where to draw map
-        bound_x = game_camera.bound_x
-        bound_y = game_camera.bound_y
-        bound_x2 = game_camera.bound_x2
-        bound_y2 = game_camera.bound_y2
+        bound_x = game_camera.bound_x * self.owner.ui.offset_x
+        bound_y = game_camera.bound_y * self.owner.ui.offset_y
+        bound_x2 = game_camera.bound_x2 * self.owner.ui.offset_x
+        bound_y2 = game_camera.bound_y2 * self.owner.ui.offset_y
         # Clear what's drawn in camera
         self.clear_camera(5)
         # Set boundaries if map is smaller than viewport
         if game_map.width < game_camera.width:
-            bound_x2 = game_map.width
+            bound_x2 = game_map.width * self.owner.ui.offset_x
         if game_map.height < game_camera.height:
-            bound_y2 = game_map.height
+            bound_y2 = game_map.height * self.owner.ui.offset_y
         # Draw all the tiles within the boundaries of the game camera
         center = np.array([player.y, player.x])
         entities = []
-        for y in range(bound_y, bound_y2):
-            for x in range(bound_x, bound_x2):
-                map_x, map_y = game_camera.x + x, game_camera.y + y
+        for dy, y in enumerate(range(bound_y, bound_y2, self.owner.ui.offset_y), start=1):
+            for dx, x in enumerate(range(bound_x, bound_x2, self.owner.ui.offset_x), start=1):
+                map_x, map_y = game_camera.x + dx, game_camera.y + dy
                 if game_map.width < game_camera.width:
-                    map_x = x
+                    map_x = dx
                 if game_map.height < game_camera.height:
-                    map_y = y
+                    map_y = dy
                 visible = player.light_source.fov_map.fov[map_y, map_x]
 
                 # Draw tiles within fov
@@ -176,8 +176,7 @@ class RenderFunctions:
                     b = min(int(argb[3] * light_level), 255)
                     blt.color(blt.color_from_argb(a, r, g, b))
 
-                    blt.put(x * settings.tile_offset_x, y * settings.tile_offset_y,
-                            game_map.tiles[map_x][map_y].char)
+                    blt.put(x, y, game_map.tiles[map_x][map_y].char)
 
                     if len(game_map.tiles[map_x][map_y].layers) > 0:
                         i = 1
@@ -190,8 +189,7 @@ class RenderFunctions:
                             g = min(int(argb[2] * light_level), 255)
                             b = min(int(argb[3] * light_level), 255)
                             blt.color(blt.color_from_argb(a, r, g, b))
-                            blt.put(x * settings.tile_offset_x, y * settings.tile_offset_y,
-                                    tile[0])
+                            blt.put(x, y, tile[0])
                             i += 1
 
                     # Set everything in fov as explored
@@ -201,14 +199,12 @@ class RenderFunctions:
                 elif game_map.tiles[map_x][map_y].explored:
                     blt.layer(0)
                     blt.color("darkest gray")
-                    blt.put(x * settings.tile_offset_x, y * settings.tile_offset_y,
-                            game_map.tiles[map_x][map_y].char)
+                    blt.put(x, y, game_map.tiles[map_x][map_y].char)
                     if len(game_map.tiles[map_x][map_y].layers) > 0:
                         i = 1
                         for tile in game_map.tiles[map_x][map_y].layers:
                             blt.layer(i)
-                            blt.put(x * settings.tile_offset_x, y * settings.tile_offset_y,
-                                    tile[0])
+                            blt.put(x, y, tile[0])
                             i += 1
 
                 if len(game_map.tiles[map_x][map_y].entities_on_tile) > 0:

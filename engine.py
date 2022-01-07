@@ -68,7 +68,7 @@ class Engine:
         self.ui = UIElements()
         self.ui.owner = self
 
-        self.render_functions = RenderFunctions(self.ui.ui_offset_x, self.ui.ui_offset_y)
+        self.render_functions = RenderFunctions(self.ui.offset_x, self.ui.offset_y)
         self.render_functions.owner = self
         self.ui.render_functions = self.render_functions
         self.ui.draw()
@@ -132,7 +132,7 @@ class Engine:
         self.time_counter = self.TimeCounter()
 
         blt.clear_area(2, self.ui.viewport.offset_h +
-                       self.ui.ui_offset_y + 1, self.ui.viewport.x, 1)
+                       self.ui.offset_y + 1, self.ui.viewport.x, 1)
 
         # if settings.gfx == "ascii":
         #     player.char = tilemap()["player"]
