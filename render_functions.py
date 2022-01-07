@@ -321,20 +321,20 @@ class RenderFunctions:
         player = self.owner.player
         power_msg = "[color=light azure]Spirit power left: " + str(player.player.spirit_power)
         blt.layer(0)
-        blt.clear_area(2, self.owner.ui.viewport.h + self.ui_offset_y + 3,
-                       self.owner.ui.viewport.center_x + int(len(power_msg) / 2 + 5) - 5, 1)
+        blt.clear_area(2, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
+                       self.owner.ui.viewport.offset_center_x + int(len(power_msg) / 2 + 5) - 5, 1)
         blt.color("gray")
 
         # Draw spirit power left and position it depending on window size
-        if self.owner.ui.viewport.w > 90:
+        if self.owner.ui.viewport.offset_w > 90:
             blt.color("default")
-            blt.puts(self.owner.ui.viewport.center_x,
-                     self.owner.ui.viewport.h + self.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0,
+            blt.puts(self.owner.ui.viewport.offset_center_x,
+                     self.owner.ui.viewport.offset_h + self.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0,
                      blt.TK_ALIGN_CENTER)
         else:
             blt.color("default")
-            blt.puts(self.owner.ui.viewport.w - len(power_msg),
-                     self.owner.ui.viewport.h + self.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0,
+            blt.puts(self.owner.ui.viewport.offset_w - len(power_msg),
+                     self.owner.ui.viewport.offset_h + self.ui_offset_y + 1, "[offset=0,-2]" + power_msg, 0, 0,
                      blt.TK_ALIGN_LEFT)
 
         # Draw player stats
@@ -357,7 +357,7 @@ class RenderFunctions:
                             str(player.fighter.max_hp) + "  "
 
         if active_effects:
-            blt.puts(4, self.owner.ui.viewport.h + self.ui_offset_y + 3,
+            blt.puts(4, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
                      "[offset=0,-2]" + "  ".join(active_effects) + "  ",
                      0, 0, blt.TK_ALIGN_LEFT)
 
@@ -368,15 +368,15 @@ class RenderFunctions:
         exp_player = "EXP:" + str(player.player.char_exp["player"]) + "/" + \
                      str(player.player.char_level * player.player.exp_lvl_interval)
 
-        blt.puts(4, self.owner.ui.viewport.h + self.ui_offset_y + 1,
+        blt.puts(4, self.owner.ui.viewport.offset_h + self.ui_offset_y + 1,
                  "[offset=0,-2]" + "[color=lightest green]Player:  " +
                  hp_player + ac_player + ev_player + power_player + lvl_player + exp_player,
                  0, 0, blt.TK_ALIGN_LEFT)
 
         # Draw target stats
         if target:
-            blt.clear_area(self.owner.ui.viewport.center_x - int(len(power_msg) / 2) - 5,
-                           self.owner.ui.viewport.h + self.ui_offset_y + 1, self.owner.ui.viewport.w, 1)
+            blt.clear_area(self.owner.ui.viewport.offset_center_x - int(len(power_msg) / 2) - 5,
+                           self.owner.ui.viewport.offset_h + self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 1)
             if target.fighter.hp / target.fighter.max_hp < 0.34:
                 hp_target = "[color=light red]HP:" + \
                             str(target.fighter.hp) + "/" + \
@@ -389,37 +389,31 @@ class RenderFunctions:
             ev_target = "EV:" + str(target.fighter.ev) + "  "
             power_target = "ATK:" + str(target.fighter.power) + " "
 
-            blt.puts(self.owner.ui.viewport.w, self.owner.ui.viewport.h + self.ui_offset_y + 1,
+            blt.puts(self.owner.ui.viewport.offset_w, self.owner.ui.viewport.offset_h + self.ui_offset_y + 1,
                      "[offset=0,-2]" + "[color=lightest red]" + target.name.capitalize() + ":  " + hp_target + ac_target + ev_target + power_target,
                      0, 0, blt.TK_ALIGN_RIGHT)
 
             if target.fighter.hp <= 0:
-                blt.clear_area(2, self.owner.ui.viewport.h +
-                               self.ui_offset_y + 1, self.owner.ui.viewport.w, 1)
+                blt.clear_area(2, self.owner.ui.viewport.offset_h +
+                               self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 1)
 
     def draw_ui(self, element):
         blt.color(element.color)
         blt.layer(1)
 
-        # Draw borders
-        for y in range(element.offset_y, element.offset_y2):
-            for x in range(element.offset_x, element.offset_x2):
-                if y == element.offset_y:
-                    blt.put(x, y, element.tile_horizontal)
-                elif y == element.offset_y2 - 1:
-                    blt.put(x, y, element.tile_horizontal)
-                elif x == element.offset_x:
-                    blt.put(x, y, element.tile_vertical)
-                elif x == element.offset_x2 - 1:
-                    blt.put(x, y, element.tile_vertical)
-                if x == element.offset_x and y == element.offset_y:
-                    blt.put(x, y, element.tile_nw)
-                if x == element.offset_x2 - 1 and y == element.offset_y:
-                    blt.put(x, y, element.tile_ne)
-                if x == element.offset_x and y == element.offset_y2 - 1:
-                    blt.put(x, y, element.tile_sw)
-                if x == element.offset_x2 - 1 and y == element.offset_y2 - 1:
-                    blt.put(x, y, element.tile_se)
+        for x in range(element.offset_x+1, element.offset_x2):
+            blt.put(x, element.offset_y, element.tile_horizontal)
+            blt.put(x, element.offset_y2, element.tile_horizontal)
+            if x == element.offset_x + 1:
+                blt.put(x, element.offset_y, element.tile_nw)
+                blt.put(x, element.offset_y2, element.tile_sw)
+            elif x == element.offset_x2 - 1:
+                blt.put(x, element.offset_y, element.tile_ne)
+                blt.put(x, element.offset_y2, element.tile_se)
+
+        for y in range(element.offset_y+2, element.offset_y2-1):
+            blt.put(element.offset_x, y, element.tile_vertical)
+            blt.put(element.offset_x2, y, element.tile_vertical)
 
     def draw_indicator(self, entity_x, entity_y, color=None, occupied_tiles=None):
         # Draw player indicator
@@ -598,8 +592,8 @@ class RenderFunctions:
                            settings.tile_offset_y, 2, 2)
 
     def clear_camera(self, n):
-        w = self.owner.ui.viewport.w
-        h = self.owner.ui.viewport.h
+        w = self.owner.ui.viewport.offset_w - self.owner.ui.viewport.border_radius
+        h = self.owner.ui.viewport.offset_h - self.owner.ui.viewport.border_radius
         i = 0
         while i < n:
             blt.layer(i)

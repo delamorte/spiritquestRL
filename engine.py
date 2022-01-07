@@ -128,7 +128,7 @@ class Engine:
 
         self.time_counter = self.TimeCounter()
 
-        blt.clear_area(2, self.ui.viewport.h +
+        blt.clear_area(2, self.ui.viewport.offset_h +
                        self.ui.ui_offset_y + 1, self.ui.viewport.x, 1)
 
         # if settings.gfx == "ascii":
@@ -357,7 +357,7 @@ class Engine:
 
                 if key == blt.TK_M:
                     show_msg_history(
-                        self.message_log.history, "Message history", self.ui.viewport.w, self.ui.viewport.h)
+                        self.message_log.history, "Message history", self.ui.viewport.offset_w, self.ui.viewport.offset_h)
                     self.ui.draw()
                     self.ui.side_panel.draw_content()
                     self.fov_recompute = True

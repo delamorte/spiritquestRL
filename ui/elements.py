@@ -28,32 +28,21 @@ class UIElements:
         # Side panel
         side_panel_w = 10
         side_panel_x = w - side_panel_w
-        if not self.side_panel:
-            self.side_panel = SidePanel(side_panel_x, 0, side_panel_w-1, h)
-            self.side_panel.owner = self
-            self.elements.append(self.side_panel)
-            self.side_panel.update_offset(self.ui_offset_x, self.ui_offset_y)
-        else:
-            self.side_panel.update(side_panel_x, 0, side_panel_w-1, h)
-            self.side_panel.update_offset(self.ui_offset_x, self.ui_offset_y)
 
-        if not self.viewport:
-            self.viewport = Viewport(0, 0, w-side_panel_w, h-5)
-            self.viewport.owner = self
-            self.elements.append(self.viewport)
-            self.viewport.update_offset(self.ui_offset_x, self.ui_offset_y)
-        else:
-            self.viewport.update(w-side_panel_w, h-5)
-            self.viewport.update_offset(self.ui_offset_x, self.ui_offset_y)
+        self.side_panel = SidePanel(side_panel_x, 0, side_panel_w-1, h)
+        self.side_panel.owner = self
+        self.elements.append(self.side_panel)
+        self.side_panel.update_offset(self.ui_offset_x, self.ui_offset_y)
 
-        if not self.msg_panel:
-            self.msg_panel = MessagePanel(0, self.viewport.h, self.viewport.w, h-self.viewport.h+1)
-            self.msg_panel.owner = self
-            self.elements.append(self.msg_panel)
-            self.msg_panel.update_offset(self.ui_offset_x, self.ui_offset_y)
-        else:
-            self.msg_panel.update(0, self.viewport.h + 1, w - side_panel_w, h-self.viewport.h)
-            self.msg_panel.update_offset(self.ui_offset_x, self.ui_offset_y)
+        self.viewport = Viewport(0, 0, w-side_panel_w-1, h-5)
+        self.viewport.owner = self
+        self.elements.append(self.viewport)
+        self.viewport.update_offset(self.ui_offset_x, self.ui_offset_y)
+
+        self.msg_panel = MessagePanel(0, self.viewport.h, self.viewport.w, h-self.viewport.h+1)
+        self.msg_panel.owner = self
+        self.elements.append(self.msg_panel)
+        self.msg_panel.update_offset(self.ui_offset_x, self.ui_offset_y)
 
     def draw(self):
         for element in self.elements:
