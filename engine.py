@@ -184,6 +184,7 @@ class Engine:
                         self.menus.main_menu.show()
                         key = None
                         self.fov_recompute = True
+                        continue
 
             if self.player.fighter.paralyzed:
                 self.message_log.send("You are paralyzed!")
@@ -195,11 +196,13 @@ class Engine:
                 # Non-turn taking UI functions
 
                 if key == blt.TK_CLOSE:
-                    return False
+                    return
 
                 if key == blt.TK_ESCAPE:
                     self.menus.main_menu.show()
+                    key = None
                     self.fov_recompute = True
+                    continue
 
                 if key == blt.TK_PERIOD or key == blt.TK_KP_5:
                     self.time_counter.take_turn(1)
@@ -352,8 +355,9 @@ class Engine:
 
                 if key == blt.TK_F1:
                     self.menus.avatar_info.show()
-                    self.ui.side_panel.draw_content()
+                    key = None
                     self.fov_recompute = True
+                    continue
 
                 if key == blt.TK_M:
                     # TODO: Refactor to use menu components
@@ -361,7 +365,9 @@ class Engine:
                         self.message_log.history, "Message history", self.ui.viewport.offset_w-1, self.ui.viewport.offset_h-1)
                     self.ui.side_panel.draw_content()
                     self.ui.draw()
+                    key = None
                     self.fov_recompute = True
+                    continue
 
                 if key == blt.TK_I:
                     # TODO: Refactor to use menu components
@@ -372,11 +378,15 @@ class Engine:
                         show_items, "Inventory", self.ui.viewport.offset_w-1, self.ui.viewport.offset_h-1)
                     self.ui.side_panel.draw_content()
                     self.ui.draw()
+                    key = None
                     self.fov_recompute = True
+                    continue
 
                 if key == blt.TK_TAB:
                     test_dynamic_sprites(self.levels.current_map, self.ui)
+                    key = None
                     self.fov_recompute = True
+                    continue
 
             elif self.game_state == GameStates.TARGETING:
 
@@ -474,7 +484,6 @@ class Engine:
                     self.game_state = GameStates.PLAYER_TURN
 
         print(self.game_state)
-        blt.close()
 
     class TimeCounter:
         def __init__(self, turn=0):
@@ -495,4 +504,5 @@ class Engine:
 if __name__ == '__main__':
     engine = Engine()
     engine.initialize()
+    blt.close()
 
