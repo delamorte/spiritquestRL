@@ -19,7 +19,7 @@ class Stairs:
         self.floor = floor
 
     def set_attributes(self, game_map):
-        if self.name == "holy syhmbol":
+        if self.name == "holy symbol":
             light_component = LightSource(name=self.name)
             self.owner.light_source = light_component
             self.owner.light_source.owner = self.owner

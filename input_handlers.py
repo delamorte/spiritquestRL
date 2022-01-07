@@ -35,5 +35,27 @@ def handle_keys(key):
     if key == blt.TK_FULLSCREEN:
         return {'fullscreen': True}
 
+    # Close window
+    if key == blt.TK_CLOSE:
+        return {'close': True}
+
+    if key == blt.TK_ESCAPE:
+        return {'main_menu': True}
+
+    if key == blt.TK_F1:
+        return {'avatar_info': True}
+
+    if key == blt.TK_I:
+        return {'inventory': True}
+
+    if key == blt.TK_M:
+        return {'msg_history': True}
+
+    if key == blt.TK_PERIOD or key == blt.TK_KP_5:
+        return {'wait': True}
+
+    if key == blt.TK_X:
+        return {'examine': True}
+
     # No key was pressed
     return {}

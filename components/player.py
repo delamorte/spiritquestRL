@@ -11,6 +11,7 @@ class Player:
         self.char_level = 1
         self.skill_points = 0
         self.exp_lvl_interval = 100
+        self.insights = 0
         self.avatar = {"player": None}
         self.lightmap = None
         self.sel_weapon = None

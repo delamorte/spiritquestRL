@@ -14,8 +14,7 @@ dirt_colors = ["#402316", "#332925", "#4f3a28", "#4f3a28", "#3d342b", "#33221a",
 
 
 def get_dngn_colors(mod=0):
-    if settings.world_tendency != 0:
-        mod = settings.world_tendency
+
     color = dirt_colors[randint(0, len(dirt_colors) - 1)]
     # if mod < 0:
     #     color = "#111111"
@@ -28,8 +27,6 @@ def get_dngn_colors(mod=0):
 
 
 def get_terrain_colors(mod=None):
-    if settings.world_tendency != 0:
-        mod = settings.world_tendency
     colors = [
         "darker green",
         "dark green",
@@ -44,8 +41,6 @@ def get_terrain_colors(mod=None):
 
 
 def get_flower_colors(mod=0):
-    if settings.world_tendency != 0:
-        mod = settings.world_tendency
     colors = []
     if mod > 0:
         colors = ["lightest orange",
@@ -92,8 +87,6 @@ def get_flower_colors(mod=0):
 
 
 def get_forest_colors(mod=0):
-    if settings.world_tendency != 0:
-        mod = settings.world_tendency
     colors = []
     if mod > 0:
         colors = ["lightest orange",
@@ -293,8 +286,12 @@ def get_monster_color(name):
               "serpent": "violet",
               "fairy": "light violet",
               "keeper of dreams": "flame"}
+    if name not in colors:
+        color = "amber"
+    else:
+        color = colors[name]
 
-    return colors[name]
+    return color
 
 
 def name_color_from_ascii(value):

@@ -28,5 +28,7 @@ class Tile:
         self.name = None
         self.spawnable = False
         self.occupied = False
+        self.is_door = False
+        self.door = None
         self.entities_on_tile = []
         self.natural_light_level = 1
