@@ -65,7 +65,8 @@ class Levels:
             level_params = self.generate_level_params()
             level_data = MenuData(name="choose_level", params=level_params)
             self.owner.menus.create_or_show_menu(level_data)
-
+            if not self.owner.menus.choose_level.event:
+                return
             self.world_tendency = self.params["modifier"]
             game_map = GameMap(width=50,
                                height=50,

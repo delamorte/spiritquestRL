@@ -429,8 +429,8 @@ class RenderFunctions:
 
     def draw_minimap(self):
         blt.layer(1)
-        x0 = self.owner.ui.side_panel.x
-        y0 = self.owner.ui.side_panel.y
+        x0 = self.owner.ui.side_panel.offset_x
+        y0 = self.owner.ui.side_panel.offset_y
         game_map = self.owner.levels.current_map
 
         minimap = np.ones_like(game_map.tiles, dtype=int)
@@ -469,7 +469,7 @@ class RenderFunctions:
                 200, 240)
         )
 
-        blt.put(x0 * self.ui_offset_x + 3, y0 * self.ui_offset_y + 3, 0xF900)
+        blt.put(x0 + 3, y0 + 3, 0xF900)
 
     def draw_side_panel_content(self):
         game_map = self.owner.levels.current_map

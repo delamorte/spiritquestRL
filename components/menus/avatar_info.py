@@ -1,5 +1,5 @@
 class AvatarInfo:
-    def __init__(self, name="avatar_info", data=None, sub_menu=False):
+    def __init__(self, name="avatar_info", data=None, sub_menu=False, event=None):
         self.owner = None
         self.title_screen = False
         self.name = name
@@ -10,6 +10,7 @@ class AvatarInfo:
         self.items_icons = []
         self.sub_items = {}
         self.margin = 6
+        self.event = event
         animals = self.data.player.char
         exclude = {"player"}
         avatars = {x: animals[x] for x in animals if x not in exclude}

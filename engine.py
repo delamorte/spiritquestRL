@@ -142,7 +142,6 @@ class Engine:
     def game_loop(self):
 
         game_quit = False
-        self.ui.draw()
 
         while not game_quit:
             if self.fov_recompute:
@@ -180,7 +179,6 @@ class Engine:
 
                     if key == blt.TK_ESCAPE:
                         self.menus.main_menu.show()
-                        self.ui.draw()
                         self.fov_recompute = True
 
             if self.player.fighter.paralyzed:
@@ -350,14 +348,12 @@ class Engine:
 
                 if key == blt.TK_F1:
                     self.menus.avatar_info.show()
-                    self.ui.draw()
                     self.ui.side_panel.draw_content()
                     self.fov_recompute = True
 
                 if key == blt.TK_M:
                     show_msg_history(
                         self.message_log.history, "Message history", self.ui.viewport.offset_w, self.ui.viewport.offset_h)
-                    self.ui.draw()
                     self.ui.side_panel.draw_content()
                     self.fov_recompute = True
 
@@ -367,13 +363,11 @@ class Engine:
                         show_items.append(get_article(item.name) + " " + item.name)
                     show_msg_history(
                         show_items, "Inventory")
-                    self.ui.draw()
                     self.ui.side_panel.draw_content()
                     self.fov_recompute = True
 
                 if key == blt.TK_TAB:
                     test_dynamic_sprites(self.levels.current_map, self.ui)
-                    self.ui.draw()
                     self.fov_recompute = True
 
             elif self.game_state == GameStates.TARGETING:
