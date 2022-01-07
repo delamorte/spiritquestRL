@@ -22,7 +22,7 @@ class Viewport:
         self.center_y = 0
         self.offset_center_x = 0
         self.offset_center_y = 0
-        self.border_radius = 1
+        self.border = 1
         self.tile_horizontal = tilemap_ui()["ui_block_horizontal"]
         self.tile_vertical = tilemap_ui()["ui_block_vertical"]
         self.tile_nw = tilemap_ui()["ui_block_nw"]

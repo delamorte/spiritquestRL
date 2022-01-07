@@ -18,6 +18,8 @@ class MessagePanel:
         self.offset_h = 0
         self.offset_x2 = 0
         self.offset_y2 = 0
+        self.border = 1
+        self.border_offset = 0
         self.tile_horizontal = tilemap_ui()["ui_block_horizontal"]
         self.tile_vertical = tilemap_ui()["ui_block_vertical"]
         self.tile_nw = tilemap_ui()["ui_block_nw"]
@@ -44,3 +46,4 @@ class MessagePanel:
         self.offset_h = self.h * offset_y - (offset_y + 1)
         self.offset_x2 = self.offset_x + self.offset_w
         self.offset_y2 = self.offset_y + self.offset_h
+        self.border_offset = self.border * offset_x + 1

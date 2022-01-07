@@ -298,22 +298,23 @@ class RenderFunctions:
 
         if message_log.new_msgs:
             blt.layer(0)
-            blt.clear_area(msg_panel.x * self.ui_offset_x, msg_panel.y * self.ui_offset_y, msg_panel.w *
-                           self.ui_offset_x, msg_panel.h * self.ui_offset_y)
+            blt.clear_area(msg_panel.offset_x + msg_panel.border,
+                           msg_panel.offset_y + msg_panel.border,
+                           msg_panel.offset_w + msg_panel.border,
+                           msg_panel.offset_h + msg_panel.border)
 
             # Print the game messages, one line at a time. Display newest
             # msg at the bottom and scroll others up
             i = 4
             # if i > message_log.max_length:
             #    i = 0
+
             for idx, msg in enumerate(message_log.buffer):
                 blt.color(message_log.buffer_colors[idx])
                 msg = shorten(msg, msg_panel.w * self.ui_offset_x - 2,
                               placeholder="..(Press 'M' for log)")
-                blt.puts(msg_panel.x * self.ui_offset_x + 1, msg_panel.y *
-                         self.ui_offset_y - 1 + i * 2, "[offset=0,0]" + msg, msg_panel.w * self.ui_offset_x - 2,
-                         1,
-                         align=blt.TK_ALIGN_LEFT)
+                blt.puts(msg_panel.border_offset, msg_panel.offset_y + msg_panel.border_offset + i * 2,
+                        msg, msg_panel.offset_w - 2, 1, align=blt.TK_ALIGN_LEFT)
                 i -= 1
             message_log.new_msgs = False
 
@@ -592,8 +593,8 @@ class RenderFunctions:
                            settings.tile_offset_y, 2, 2)
 
     def clear_camera(self, n):
-        w = self.owner.ui.viewport.offset_w - self.owner.ui.viewport.border_radius
-        h = self.owner.ui.viewport.offset_h - self.owner.ui.viewport.border_radius
+        w = self.owner.ui.viewport.offset_w - self.owner.ui.viewport.border
+        h = self.owner.ui.viewport.offset_h - self.owner.ui.viewport.border
         i = 0
         while i < n:
             blt.layer(i)
