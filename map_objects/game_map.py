@@ -269,7 +269,7 @@ class GameMap:
         if entities is None:
             entities = {}
 
-        generators = {"room_addition": RoomAddition(),
+        generators = {
                       "random_walk": DrunkardsWalk(),
                       "messy_bsp": MessyBSPTree(),
                       "cellular": CellularAutomata(),

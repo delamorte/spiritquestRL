@@ -9,7 +9,7 @@ import settings
 # han, violet, purple, fuchsia, magenta, pink,
 # crimson, transparent
 
-dirt_colors = ["#402316", "#332925", "#4f3a28", "#4f3a28", "#3d342b", "#33221a", "#30170b", "#473c2b", "#332d16",
+dirt_colors = ["#402316", "#4f3a28", "#4f3a28", "#33221a", "#30170b",
                "#361c18"]
 
 

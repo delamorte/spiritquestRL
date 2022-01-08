@@ -300,7 +300,6 @@ class RenderFunctions:
                            msg_panel.offset_h + msg_panel.border)
         if message_log.new_msgs:
 
-
             # Print the game messages, one line at a time. Display newest
             # msg at the bottom and scroll others up
             i = 4
