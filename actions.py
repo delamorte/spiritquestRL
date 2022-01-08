@@ -1,7 +1,7 @@
 from bearlibterminal import terminal as blt
 
 from components.cursor import Cursor
-from components.entity import Entity
+from components.entity import Entity, get_neighbour_entities
 from game_states import GameStates
 from helpers import get_article
 from ui.message_history import show_msg_history
@@ -46,7 +46,8 @@ class Actions:
                         self.owner.time_counter.take_turn(1 / self.owner.player.fighter.mv_spd)
                         self.owner.fov_recompute = True
                         self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(self.owner.player)
-                        self.owner.levels.current_map.tiles[self.owner.player.x][self.owner.player.y].add_entity(self.owner.player)
+                        self.owner.levels.current_map.tiles[self.owner.player.x][self.owner.player.y].add_entity(
+                            self.owner.player)
 
                 self.owner.game_state = GameStates.ENEMY_TURN
 
@@ -67,47 +68,29 @@ class Actions:
             self.owner.message_log.stack = []
 
         elif interact:
-            if "doors" in self.owner.levels.current_map.entities:
-                # TODO: make better function to check neighboring tiles
-                for entity in self.owner.levels.current_map.entities["doors"]:
-                    if ((entity.x, entity.y) == (self.owner.player.x - 1, self.owner.player.y) or
-                            (entity.x, entity.y) == (self.owner.player.x - 1, self.owner.player.y - 1) or
-                            (entity.x, entity.y) == (self.owner.player.x, self.owner.player.y - 1) or
-                            (entity.x, entity.y) == (self.owner.player.x + 1, self.owner.player.y - 1) or
-                            (entity.x, entity.y) == (self.owner.player.x + 1, self.owner.player.y) or
-                            (entity.x, entity.y) == (self.owner.player.x + 1, self.owner.player.y + 1) or
-                            (entity.x, entity.y) == (self.owner.player.x, self.owner.player.y + 1) or
-                            (entity.x, entity.y) == (self.owner.player.x - 1, self.owner.player.y + 1)):
-                        if entity.door.status == "closed":
-                            entity.door.set_status("open", self.owner.levels.current_map)
-                            self.owner.message_log.send("You open the door.")
-                            self.owner.time_counter.take_turn(1)
-                            self.owner.game_state = GameStates.ENEMY_TURN
-                        elif entity.door.status == "open":
-                            entity.door.set_status("closed", self.owner.levels.current_map)
-                            self.owner.message_log.send("You close the door.")
-                            self.owner.time_counter.take_turn(1)
-                            self.owner.game_state = GameStates.ENEMY_TURN
-                        else:
-                            self.owner.message_log.send("The door is locked.")
-                            self.owner.time_counter.take_turn(1)
-                            self.owner.game_state = GameStates.ENEMY_TURN
-            if "items" in self.owner.levels.current_map.entities:
-                for entity in self.owner.levels.current_map.entities["items"]:
-                    if ((entity.x, entity.y) == (self.owner.player.x - 1, self.owner.player.y) or
-                            (entity.x, entity.y) == (self.owner.player.x - 1, self.owner.player.y - 1) or
-                            (entity.x, entity.y) == (self.owner.player.x, self.owner.player.y - 1) or
-                            (entity.x, entity.y) == (self.owner.player.x + 1, self.owner.player.y - 1) or
-                            (entity.x, entity.y) == (self.owner.player.x + 1, self.owner.player.y) or
-                            (entity.x, entity.y) == (self.owner.player.x + 1, self.owner.player.y + 1) or
-                            (entity.x, entity.y) == (self.owner.player.x, self.owner.player.y + 1) or
-                            (entity.x, entity.y) == (self.owner.player.x, self.owner.player.y) or
-                            (entity.x, entity.y) == (self.owner.player.x - 1, self.owner.player.y + 1)):
-
-                        interact_msg = entity.item.interaction(self.owner.levels.current_map)
-                        if interact_msg:
-                            self.owner.message_log.send(interact_msg)
-                            self.owner.fov_recompute = True
+            entities = get_neighbour_entities(self.owner.player.x, self.owner.player.y,
+                                              self.owner.levels.current_map.tiles)
+            for entity in entities:
+                if entity.door:
+                    if entity.door.status == "closed":
+                        entity.door.set_status("open", self.owner.levels.current_map)
+                        self.owner.message_log.send("You open the door.")
+                        self.owner.time_counter.take_turn(1)
+                        self.owner.game_state = GameStates.ENEMY_TURN
+                    elif entity.door.status == "open":
+                        entity.door.set_status("closed", self.owner.levels.current_map)
+                        self.owner.message_log.send("You close the door.")
+                        self.owner.time_counter.take_turn(1)
+                        self.owner.game_state = GameStates.ENEMY_TURN
+                    else:
+                        self.owner.message_log.send("The door is locked.")
+                        self.owner.time_counter.take_turn(1)
+                        self.owner.game_state = GameStates.ENEMY_TURN
+                elif entity.item:
+                    interact_msg = entity.item.interaction(self.owner.levels.current_map)
+                    if interact_msg:
+                        self.owner.message_log.send(interact_msg)
+                        self.owner.fov_recompute = True
 
         elif pickup:
             if "items" in self.owner.levels.current_map.entities:
@@ -176,7 +159,7 @@ class Actions:
             # TODO: Refactor to use menu components
             show_msg_history(
                 self.owner.message_log.history, "Message history", self.owner.ui.viewport.offset_w - 1,
-                                                             self.owner.ui.viewport.offset_h - 1)
+                                                                   self.owner.ui.viewport.offset_h - 1)
             self.owner.ui.draw()
             self.owner.fov_recompute = True
             return True
@@ -227,7 +210,8 @@ class Actions:
                 prev_pos_x, prev_pos_y = self.owner.cursor.x, self.owner.cursor.y
                 self.owner.cursor.move(dx, dy)
                 self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(self.owner.cursor)
-                self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(self.owner.cursor)
+                self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(
+                    self.owner.cursor)
                 self.owner.fov_recompute = True
 
                 self.owner.message_log.old_stack = self.owner.message_log.stack
@@ -240,7 +224,8 @@ class Actions:
             self.owner.game_state = GameStates.PLAYER_TURN
             self.owner.message_log.old_stack = self.owner.message_log.stack
             self.owner.message_log.stack = []
-            self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].remove_entity(self.owner.cursor)
+            self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].remove_entity(
+                self.owner.cursor)
             del self.owner.levels.current_map.entities["cursor"]
             self.owner.cursor = None
             self.owner.fov_recompute = True
@@ -287,7 +272,8 @@ class Actions:
                 elif entity.ai:
                     prev_pos_x, prev_pos_y = entity.x, entity.y
                     combat_msg = entity.ai.take_turn(
-                        self.owner.player, self.owner.levels.current_map, self.owner.levels.current_map.entities, self.owner.time_counter)
+                        self.owner.player, self.owner.levels.current_map, self.owner.levels.current_map.entities,
+                        self.owner.time_counter)
                     self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
                     self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
                     if entity.occupied_tiles is not None:

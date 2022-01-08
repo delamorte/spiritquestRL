@@ -179,3 +179,13 @@ class Entity:
             self.layer = 1
 
         return death_message
+
+
+def get_neighbour_entities(x, y, game_map):
+    entities = []
+    neighbours = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1)]
+    for coords in neighbours:
+        dx, dy = coords[0], coords[1]
+        if game_map[x+dx][y+dy].entities_on_tile:
+            entities.extend(game_map[x+dx][y+dy].entities_on_tile)
+    return entities
