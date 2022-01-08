@@ -12,9 +12,8 @@ class Tile:
     different characters in different layers.
     """
 
-    def __init__(self,
-                 blocked,
-                 block_sight, x, y):
+    def __init__(self, blocked, block_sight, x, y):
+        self.blocking_entity = None
         self.blocked = blocked
         self.block_sight = block_sight
         self.x = x
@@ -32,3 +31,25 @@ class Tile:
         self.door = None
         self.entities_on_tile = []
         self.natural_light_level = 1
+
+    def add_entity(self, entity):
+        if entity.door:
+            self.is_door = True
+            self.door = entity.door
+
+        elif entity.blocks:
+            self.blocking_entity = entity
+            self.occupied = True
+
+        self.entities_on_tile.append(entity)
+
+    def remove_entity(self, entity):
+        if entity in self.entities_on_tile:
+            self.entities_on_tile.remove(entity)
+        if entity == self.blocking_entity:
+            self.blocking_entity = None
+        if entity.door:
+            self.door = None
+            self.is_door = False
+
+

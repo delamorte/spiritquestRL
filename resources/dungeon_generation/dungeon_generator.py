@@ -358,6 +358,7 @@ class BSPTree:
         self.MAX_LEAF_SIZE = 24
         self.ROOM_MAX_SIZE = 15
         self.ROOM_MIN_SIZE = 6
+        self.name = "BSPTree"
 
     def generateLevel(self, mapWidth, mapHeight):
         # Creates an empty 2D array or clears existing array
@@ -425,6 +426,7 @@ class DrunkardsWalk:
         self.walkIterations = 25000 # cut off in case _percentGoal in never reached
         self.weightedTowardCenter = 0.15
         self.weightedTowardPreviousDirection = 0.7
+        self.name = "DrunkardsWalk"
 
     def generateLevel(self, mapWidth, mapHeight):
         # Creates an empty 2D array or clears existing array
@@ -530,7 +532,8 @@ class CellularAutomata:
         self.ROOM_MAX_SIZE = 500 # size in total number of cells, not dimensions
 
         self.smoothEdges = True
-        self.smoothing =  1
+        self.smoothing = 1
+        self.name = "CellularAutomata"
 
     def generateLevel(self, mapWidth, mapHeight):
         # Creates an empty 2D array or clears existing array
@@ -819,6 +822,8 @@ class RoomAddition:
         self.shortcutAttempts = 500
         self.shortcutLength = 5
         self.minPathfindingDistance = 50
+
+        self.name = "RoomAddition"
 
     def generateLevel(self,mapWidth,mapHeight):
 
@@ -1306,6 +1311,7 @@ class CityWalls:
         self.MAX_LEAF_SIZE = 30
         self.ROOM_MAX_SIZE = 16
         self.ROOM_MIN_SIZE = 8
+        self.name = "CityWalls"
 
     def generateLevel(self, mapWidth, mapHeight):
         # Creates an empty 2D array or clears existing array
@@ -1391,11 +1397,12 @@ class MazeWithRooms:
         self.ROOM_MAX_SIZE = 13
         self.ROOM_MIN_SIZE = 6
 
-
         self.buildRoomAttempts = 100
         self.connectionChance = 0.04
         self.windingPercent = 0.1
         self.allowDeadEnds = False
+
+        self.name = "MazeWithRooms"
 
     def generateLevel(self,mapWidth,mapHeight):
         # The level dimensions must be odd
@@ -1693,14 +1700,15 @@ class MessyBSPTree:
     Requires Leaf and Rect classes.
     '''
     def __init__(self):
-            self.level = []
-            self.room = None
-            self.MAX_LEAF_SIZE = 24
-            self.ROOM_MAX_SIZE = 15
-            self.ROOM_MIN_SIZE = 6
-            self.smoothEdges = True
-            self.smoothing = 1
-            self.filling = 3
+        self.level = []
+        self.room = None
+        self.MAX_LEAF_SIZE = 24
+        self.ROOM_MAX_SIZE = 15
+        self.ROOM_MIN_SIZE = 6
+        self.smoothEdges = True
+        self.smoothing = 1
+        self.filling = 3
+        self.name = "MessyBSPTree"
 
     def generateLevel(self, mapWidth, mapHeight):
         # Creates an empty 2D array or clears existing array
