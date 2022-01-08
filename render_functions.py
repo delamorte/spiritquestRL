@@ -292,12 +292,14 @@ class RenderFunctions:
             message_log.send(
                 ". ".join(formatted_stack) + ".")
 
-        if message_log.new_msgs:
+        if message_log.new_msgs or not message_log.buffer:
             blt.layer(0)
             blt.clear_area(msg_panel.offset_x + msg_panel.border,
                            msg_panel.offset_y + msg_panel.border,
                            msg_panel.offset_w + msg_panel.border,
                            msg_panel.offset_h + msg_panel.border)
+        if message_log.new_msgs:
+
 
             # Print the game messages, one line at a time. Display newest
             # msg at the bottom and scroll others up
@@ -310,7 +312,7 @@ class RenderFunctions:
                 msg = shorten(msg, msg_panel.w * self.ui_offset_x - 2,
                               placeholder="..(Press 'M' for log)")
                 blt.puts(msg_panel.border_offset, msg_panel.offset_y + msg_panel.border_offset + i * 2,
-                        msg, msg_panel.offset_w - 2, 1, align=blt.TK_ALIGN_LEFT)
+                        "[offset=0,-35]" + msg, msg_panel.offset_w - 2, 1, align=blt.TK_ALIGN_LEFT)
                 i -= 1
             message_log.new_msgs = False
 

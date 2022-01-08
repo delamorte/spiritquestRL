@@ -1,8 +1,7 @@
 from bearlibterminal import terminal as blt
 
 from components.cursor import Cursor
-from components.entity import blocking_entity, Entity
-from death_functions import kill_player, kill_monster
+from components.entity import Entity
 from game_states import GameStates
 from helpers import get_article
 from ui.message_history import show_msg_history
@@ -28,8 +27,7 @@ class Actions:
 
             # Handle player attack
             if not self.owner.levels.current_map.is_blocked(destination_x, destination_y):
-                target = blocking_entity(
-                    self.owner.levels.current_map.entities, destination_x, destination_y)
+                target = self.owner.levels.current_map.tiles[destination_x][destination_y].blocking_entity
                 if target:
                     combat_msg = self.owner.player.fighter.attack(target, self.owner.player.player.sel_weapon)
 
@@ -47,9 +45,8 @@ class Actions:
                         self.owner.player.move(dx, dy)
                         self.owner.time_counter.take_turn(1 / self.owner.player.fighter.mv_spd)
                         self.owner.fov_recompute = True
-                        if self.owner.player in self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile:
-                            self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(self.owner.player)
-                        self.owner.levels.current_map.tiles[self.owner.player.x][self.owner.player.y].entities_on_tile.append(self.owner.player)
+                        self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(self.owner.player)
+                        self.owner.levels.current_map.tiles[self.owner.player.x][self.owner.player.y].add_entity(self.owner.player)
 
                 self.owner.game_state = GameStates.ENEMY_TURN
 
@@ -121,7 +118,7 @@ class Actions:
                         for item in self.owner.message_log.stack:
                             if entity.name == item.split(" ", 1)[1]:
                                 self.owner.message_log.stack.remove(item)
-                        self.owner.levels.current_map.tiles[entity.x][entity.y].entities_on_tile.remove(entity)
+                        self.owner.levels.current_map.tiles[entity.x][entity.y].remove_entity(entity)
                         self.owner.levels.current_map.entities["items"].remove(entity)
                         self.owner.time_counter.take_turn(1)
                         self.owner.game_state = GameStates.ENEMY_TURN
@@ -160,7 +157,7 @@ class Actions:
             cursor = Entity(self.owner.player.x, self.owner.player.y, 4, 0xE800 + 1746, "light yellow", "cursor",
                             cursor=cursor_component, stand_on_messages=False)
             self.owner.cursor = cursor
-            self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].entities_on_tile.append(self.owner.cursor)
+            self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(self.owner.cursor)
             self.owner.levels.current_map.entities["cursor"] = [self.owner.cursor]
             self.owner.fov_recompute = True
 
@@ -229,8 +226,8 @@ class Actions:
             if 0 < x < self.owner.game_camera.width - 1 and 0 < y < self.owner.game_camera.height - 1:
                 prev_pos_x, prev_pos_y = self.owner.cursor.x, self.owner.cursor.y
                 self.owner.cursor.move(dx, dy)
-                self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(self.owner.cursor)
-                self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].entities_on_tile.append(self.owner.cursor)
+                self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(self.owner.cursor)
+                self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(self.owner.cursor)
                 self.owner.fov_recompute = True
 
                 self.owner.message_log.old_stack = self.owner.message_log.stack
@@ -243,7 +240,7 @@ class Actions:
             self.owner.game_state = GameStates.PLAYER_TURN
             self.owner.message_log.old_stack = self.owner.message_log.stack
             self.owner.message_log.stack = []
-            self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].entities_on_tile.remove(self.owner.cursor)
+            self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].remove_entity(self.owner.cursor)
             del self.owner.levels.current_map.entities["cursor"]
             self.owner.cursor = None
             self.owner.fov_recompute = True
@@ -266,14 +263,18 @@ class Actions:
                     entity.status_effects.process_effects()
 
                 if self.owner.player.fighter.dead:
-                    kill_msg, self.owner.game_state = kill_player(self.owner.player)
+                    kill_msg = self.owner.player.kill()
+                    self.owner.game_state = GameStates.PLAYER_DEAD
                     self.owner.message_log.send(kill_msg)
                     self.owner.render_functions.draw_stats()
+                    self.owner.fov_recompute = True
                     break
 
                 if entity.fighter and entity.fighter.dead:
                     level_up_msg = self.owner.player.player.handle_player_exp(entity.fighter)
-                    self.owner.message_log.send(kill_monster(entity))
+                    kill_msg = entity.kill()
+                    self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
+                    self.owner.message_log.send(kill_msg)
                     self.owner.message_log.send("I feel my power returning!")
                     if level_up_msg:
                         self.owner.message_log.send(level_up_msg)
@@ -287,30 +288,33 @@ class Actions:
                     prev_pos_x, prev_pos_y = entity.x, entity.y
                     combat_msg = entity.ai.take_turn(
                         self.owner.player, self.owner.levels.current_map, self.owner.levels.current_map.entities, self.owner.time_counter)
-                    self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].entities_on_tile.remove(entity)
-                    self.owner.levels.current_map.tiles[entity.x][entity.y].entities_on_tile.append(entity)
+                    self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
+                    self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
                     if entity.occupied_tiles is not None:
-                        self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y + 1].entities_on_tile.remove(entity)
-                        self.owner.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y + 1].entities_on_tile.remove(entity)
-                        self.owner.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y].entities_on_tile.remove(entity)
+                        self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y + 1].remove_entity(entity)
+                        self.owner.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y + 1].remove_entity(entity)
+                        self.owner.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y].remove_entity(entity)
 
-                        self.owner.levels.current_map.tiles[entity.x][entity.y + 1].entities_on_tile.append(entity)
-                        self.owner.levels.current_map.tiles[entity.x + 1][entity.y + 1].entities_on_tile.append(entity)
-                        self.owner.levels.current_map.tiles[entity.x + 1][entity.y].entities_on_tile.append(entity)
+                        self.owner.levels.current_map.tiles[entity.x][entity.y + 1].add_entity(entity)
+                        self.owner.levels.current_map.tiles[entity.x + 1][entity.y + 1].add_entity(entity)
+                        self.owner.levels.current_map.tiles[entity.x + 1][entity.y].add_entity(entity)
 
                     self.owner.fov_recompute = True
                     if combat_msg:
                         self.owner.message_log.send(combat_msg)
                         self.owner.render_functions.draw_stats()
                     if self.owner.player.fighter.dead:
-                        kill_msg, self.owner.game_state = kill_player(self.owner.player)
+                        kill_msg = self.owner.player.kill()
+                        self.owner.game_state = GameStates.PLAYER_DEAD
                         self.owner.message_log.send(kill_msg)
                         self.owner.render_functions.draw_stats()
                         break
                     # Functions on monster death
                     if entity.fighter and entity.fighter.dead:
                         level_up_msg = self.owner.player.player.handle_player_exp(entity.fighter)
-                        self.owner.message_log.send(kill_monster(entity))
+                        kill_msg = entity.kill()
+                        self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
+                        self.owner.message_log.send(kill_msg)
                         self.owner.message_log.send("I feel my power returning!")
                         if level_up_msg:
                             self.owner.message_log.send(level_up_msg)

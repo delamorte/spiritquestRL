@@ -39,7 +39,7 @@ class UIElements:
         self.elements.append(self.viewport)
         self.viewport.update_offset(self.offset_x, self.offset_y)
 
-        self.msg_panel = MessagePanel(0, self.viewport.h, self.viewport.w, h-self.viewport.h+1)
+        self.msg_panel = MessagePanel(0, self.viewport.h+1, self.viewport.w, h-self.viewport.h)
         self.msg_panel.owner = self
         self.elements.append(self.msg_panel)
         self.msg_panel.update_offset(self.offset_x, self.offset_y)

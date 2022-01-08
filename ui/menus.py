@@ -132,7 +132,7 @@ class Menus:
 
         if data.name == "choose_animal":
             if self.choose_animal:
-                self.choose_level.refresh()
+                self.choose_animal.refresh()
                 self.choose_animal.show()
             else:
                 choose_animal_menu = ChooseAnimal(sub_menu=data.sub_menu)

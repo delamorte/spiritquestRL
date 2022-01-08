@@ -10,9 +10,8 @@ from components.cursor import Cursor
 from components.light_source import LightSource
 from components.status_effects import StatusEffects
 from data import json_data
-from death_functions import kill_monster, kill_player
 from render_functions import RenderFunctions
-from components.entity import Entity, blocking_entity
+from components.entity import Entity
 from fighter_stats import get_fighter_data
 from game_states import GameStates
 from helpers import get_article
@@ -21,7 +20,7 @@ from map_objects.levels import Levels
 from map_objects.tilemap import init_tiles, tilemap
 from map_objects.show_map import test_dynamic_sprites
 from ui.elements import UIElements
-from ui.game_messages import MessageLog
+from ui.message_log import MessageLog
 from ui.menus import Menus, MenuData
 from ui.message_history import show_msg_history
 
@@ -187,7 +186,8 @@ class Engine:
                 while self.game_state == GameStates.PLAYER_DEAD:
                     key = blt.read()
                     if self.actions.dead_actions(key):
-                        continue
+                        break
+                continue
 
             if not self.player.fighter.dead:
                 self.player.status_effects.process_effects()

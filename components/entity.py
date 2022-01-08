@@ -1,6 +1,10 @@
 from math import sqrt
 import tcod
 
+from game_states import GameStates
+from helpers import get_article
+from map_objects.tilemap import tilemap
+
 
 class Entity:
     """
@@ -88,7 +92,7 @@ class Entity:
         dy = int(round(dy / distance))
 
         if not (game_map.is_blocked(self.x + dx, self.y + dy) or
-                blocking_entity(entities, self.x + dx, self.y + dy)):
+                game_map.tiles[self.x+dx][self.y+dy].blocking_entity):
             self.move(dx, dy)
 
     def move_astar(self, target, entities, game_map):
@@ -154,15 +158,24 @@ class Entity:
         else:
             return max(abs(other.x - self.x), abs(other.y - self.y))
 
+    def kill(self):
+        if self.player:
+            self.char = tilemap()["player_remains"]
+            death_message = "[color=red]You died!"
 
-def blocking_entity(entities, x, y):
-    # TODO: Must be a better way to check this?
-    for category in entities.values():
-        for entity in category:
-            if entity.blocks and entity.occupied_tiles is not None:
-                if (x, y) in entity.occupied_tiles:
-                    return entity
-            elif entity.blocks and entity.x == x and entity.y == y:
-                return entity
+        else:
+            death_message = [["The {0} is dead!".format(self.name), "red"]]
+            if self.boss:
+                self.char = tilemap()["boss_remains"]
+                self.color = "darkest red"
+            else:
+                self.char = tilemap()["monster_remains"]
+                self.color = "dark gray"
+                self.light_source = None
+            self.blocks = False
+            self.fighter = None
+            self.ai = None
+            self.name = "remains of " + get_article(self.name) + " " + self.name
+            self.layer = 1
 
-    return None
+        return death_message

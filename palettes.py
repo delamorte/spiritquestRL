@@ -1,5 +1,5 @@
 from bearlibterminal import terminal as blt
-from random import randint, random
+from random import randint, random, choice
 import settings
 
 # BLT colors by name:
@@ -43,71 +43,107 @@ def get_terrain_colors(mod=None):
 def get_flower_colors(mod=0):
     colors = []
     if mod > 0:
-        colors = ["lightest orange",
-                  "lighter turquoise",
-                  "light orange",
-                  "light green",
-                  "lighter fuchsia",
-                  "light pink",
-                  "lighter pink",
-                  "lightest violet",
-                  "lighter violet",
-                  "light flame",
-                  "light sky",
-                  "light amber"]
+        brightness = choice(["", "light", "lighter", "lightest"])
+        colors = [(brightness + " ").lstrip(),
+                  "orange",
+                  "red",
+                  "flame",
+                  "amber",
+                  "green",
+                  "yellow",
+                  "lime",
+                  "chartreuse",
+                  "violet",
+                  "purple,"
+                  "pink",
+                  "crimson",
+                  "fuchsia",
+                  "sky"]
 
     if mod == 0 or mod == -1:
-        colors = ["dark orange",
-                  "turquoise",
-                  "darker orange",
-                  "dark green",
-                  "fuchsia",
-                  "pink",
-                  "lighter pink",
-                  "lighter violet",
-                  "dark violet",
+        brightness = choice(["", "light", "dark"])
+        colors = [(brightness + " ").lstrip(),
+                  "orange",
+                  "red",
                   "flame",
-                  "sky",
-                  "dark amber"]
+                  "amber",
+                  "green",
+                  "yellow",
+                  "lime",
+                  "chartreuse",
+                  "violet",
+                  "purple,"
+                  "pink",
+                  "crimson",
+                  "fuchsia",
+                  "sky"]
 
     if mod < -1:
-        colors = ["darker orange",
-                  "darkest turquoise",
-                  "darkest orange",
-                  "darkest green",
-                  "darkest fuchsia",
-                  "darkest pink",
-                  "darkest pink",
-                  "darkest violet",
-                  "darker violet",
-                  "darkest flame",
-                  "darkest sky",
-                  "darkest amber"]
+        brightness = choice(["", "dark", "darker"])
+        colors = [(brightness + " ").lstrip(),
+                  "orange",
+                  "red",
+                  "flame",
+                  "amber",
+                  "green",
+                  "yellow",
+                  "lime",
+                  "chartreuse",
+                  "violet",
+                  "purple,"
+                  "pink",
+                  "crimson",
+                  "fuchsia",
+                  "sky"]
     return colors
 
 
 def get_forest_colors(mod=0):
+    # By name: grey (or gray), red, flame, orange, amber, yellow, lime, chartreuse, green, sea, turquoise, cyan,
+    # sky, azure, blue, han, violet, purple, fuchsia, magenta, pink, crimson, transparent
     colors = []
+
     if mod > 0:
-        colors = ["lightest orange",
-                  "lighter orange",
-                  "light orange",
-                  "light green",
-                  "light amber"]
+        brightness = choice(["light", "lighter", "lightest"])
+        colors = [(brightness + " ").lstrip(),
+                  "orange",
+                  "red",
+                  "flame",
+                  "amber",
+                  "green",
+                  "yellow",
+                  "lime",
+                  "chartreuse",
+                  "violet",
+                  "purple,"
+                  "pink",
+                  "crimson"]
 
     if mod < 0:
-        colors = ["darker amber",
-                  "darker amber",
-                  "dark gray",
+        brightness = choice(["", "dark", "darker", "light"])
+        colors = [(brightness + " ").lstrip(),
+                  "orange",
+                  "red",
+                  "flame",
+                  "amber",
                   "green",
-                  "dark green",
-                  "darker green"]
+                  "yellow",
+                  "lime",
+                  "chartreuse",
+                  "violet",
+                  "purple,"
+                  "pink",
+                  "crimson"]
     if mod == 0:
-        colors = ["lightest green",
-                  "lighter green",
-                  "light green",
+        brightness = choice(["", "dark", "light"])
+        colors = [(brightness + " ").lstrip(),
+                  "orange",
+                  "flame",
+                  "amber",
                   "green",
-                  "dark green"]
+                  "yellow",
+                  "lime",
+                  "chartreuse"]
     return colors
 
 
