@@ -4,11 +4,9 @@ from __future__ import division
 from ctypes import c_uint32, addressof
 from bearlibterminal import terminal as blt
 import numpy as np
-import settings
-from collections import namedtuple
 
 
-def test_dynamic_sprites(game_map, ui_elements):
+def test_dynamic_sprites(game_map, ui_elements, options):
     x0 = y0 = 1
     view_height, view_width = ui_elements.screen_borders.h-1, ui_elements.screen_borders.w-1
 
@@ -50,7 +48,7 @@ def test_dynamic_sprites(game_map, ui_elements):
         make_minimap()
         blt.color("white")
         #blt.put_ext(view_width * 4 + 1, 0, margin, margin, 0xF900)
-        blt.put(x0 * settings.ui_offset_x + 3, y0 * settings.ui_offset_y + 3, 0xF900)
+        blt.put(x0 * options.ui_offset_x + 3, y0 * options.ui_offset_y + 3, 0xF900)
         #blt.puts(1, view_height * 2 + 1, "[color=orange]Tip:[/color] use arrow keys to move viewport over the map")
 
         blt.refresh()

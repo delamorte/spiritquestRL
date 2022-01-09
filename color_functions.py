@@ -1,6 +1,5 @@
 from bearlibterminal import terminal as blt
 from random import randint, random, choice
-import settings
 
 # BLT colors by name:
 # grey (or gray), red, flame, orange,

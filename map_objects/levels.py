@@ -4,8 +4,7 @@ from fighter_stats import get_spawn_rates
 from map_objects.game_map import GameMap
 from map_objects.tilemap import tilemap
 from descriptions import level_biomes, meditate_params
-import settings
-from ui.menus import Menus, MenuData
+from ui.menus import MenuData
 
 
 class Levels:

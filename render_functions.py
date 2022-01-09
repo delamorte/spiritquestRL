@@ -1,13 +1,11 @@
 from bearlibterminal import terminal as blt
 from collections import Counter
 from helpers import get_article
-from math import ceil
 from textwrap import shorten, fill
 import numpy as np
 from map_objects.tilemap import tilemap, tilemap_ui
 from scipy.spatial.distance import cityblock
-import settings
-from palettes import argb_from_color
+from color_functions import argb_from_color
 import random
 from ctypes import c_uint32, addressof
 
@@ -41,16 +39,16 @@ class RenderFunctions:
             blt.color("dark gray")
 
         # Cursor needs some offset in ascii
-        if settings.gfx == "ascii" and entity.name == "cursor":
-            blt.put_ext(x * settings.tile_offset_x, y *
-                        settings.tile_offset_y, -3 * settings.tile_offset_x, -5 * settings.tile_offset_y, entity.char)
+        if self.owner.options.gfx == "ascii" and entity.name == "cursor":
+            blt.put_ext(x * self.owner.options.tile_offset_x, y *
+                        self.owner.options.tile_offset_y, -3 * self.owner.options.tile_offset_x, -5 * self.owner.options.tile_offset_y, entity.char)
         else:
             if entity.boss and not entity.fighter:
-                blt.put((x - 1) * settings.tile_offset_x, (y - 1) *
-                        settings.tile_offset_y, entity.char)
+                blt.put((x - 1) * self.owner.options.tile_offset_x, (y - 1) *
+                        self.owner.options.tile_offset_y, entity.char)
             else:
-                blt.put(x * settings.tile_offset_x, y *
-                        settings.tile_offset_y, entity.char)
+                blt.put(x * self.owner.options.tile_offset_x, y *
+                        self.owner.options.tile_offset_y, entity.char)
 
     def draw_entities(self, entities):
         game_camera = self.owner.game_camera
@@ -127,7 +125,7 @@ class RenderFunctions:
                 else:
                     self.draw(entity, x, y)
 
-            if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and settings.gfx != "ascii":
+            if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and self.owner.options.gfx != "ascii":
                 self.draw_indicator(player.x, player.y, "gray")
                 self.draw_indicator(entity.x, entity.y, "dark red", entity.occupied_tiles)
 
@@ -243,14 +241,14 @@ class RenderFunctions:
             blt.layer(0)
             c = blt.color_from_name(game_map.tiles[x][y].color)
             argb = argb_from_color(c)
-            flicker = random.uniform(0.95, 1.05) if settings.flicker is True else 1
+            flicker = random.uniform(0.95, 1.05) if self.owner.options.flicker is True else 1
             a = argb[0]
             r = min(int(argb[1] * light_map[y][x] * flicker), 255)
             g = min(int(argb[2] * light_map[y][x] * flicker), 255)
             b = min(int(argb[3] * light_map[y][x] * flicker), 255)
 
             blt.color(blt.color_from_argb(a, r, g, b))
-            blt.put(cam_x * settings.tile_offset_x, cam_y * settings.tile_offset_y,
+            blt.put(cam_x * self.owner.options.tile_offset_x, cam_y * self.owner.options.tile_offset_y,
                     game_map.tiles[x][y].char)
 
             if len(game_map.tiles[x][y].layers) > 0:
@@ -264,7 +262,7 @@ class RenderFunctions:
                     g = min(int(argb[2] * light_map[y][x] * flicker), 255)
                     b = min(int(argb[3] * light_map[y][x] * flicker), 255)
                     blt.color(blt.color_from_argb(a, r, g, b))
-                    blt.put(cam_x * settings.tile_offset_x, cam_y * settings.tile_offset_y,
+                    blt.put(cam_x * self.owner.options.tile_offset_x, cam_y * self.owner.options.tile_offset_y,
                             tile[0])
                     i += 1
 
@@ -421,8 +419,8 @@ class RenderFunctions:
         if occupied_tiles is not None:
             return
         else:
-            blt.put(x * settings.tile_offset_x, y *
-                    settings.tile_offset_y, tilemap()["indicator"])
+            blt.put(x * self.owner.options.tile_offset_x, y *
+                    self.owner.options.tile_offset_y, tilemap()["indicator"])
 
     def draw_minimap(self):
         blt.layer(1)
@@ -583,11 +581,11 @@ class RenderFunctions:
     def clear(self, entity, x, y):
         # Clear the entity from the screen
         blt.layer(entity.layer)
-        blt.clear_area(x * settings.tile_offset_x, y *
-                       settings.tile_offset_y, 1, 1)
+        blt.clear_area(x * self.owner.options.tile_offset_x, y *
+                       self.owner.options.tile_offset_y, 1, 1)
         if entity.boss:
-            blt.clear_area(x * settings.tile_offset_x, y *
-                           settings.tile_offset_y, 2, 2)
+            blt.clear_area(x * self.owner.options.tile_offset_x, y *
+                           self.owner.options.tile_offset_y, 2, 2)
 
     def clear_camera(self, n):
         w = self.owner.ui.viewport.offset_w - self.owner.ui.viewport.border

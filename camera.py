@@ -1,11 +1,9 @@
 from math import ceil, floor
 
-import settings
-
 
 class Camera:
 
-    def __init__(self, x, y, viewport_w, viewport_h):
+    def __init__(self, x, y, viewport_w, viewport_h, options):
         self.owner = None
         self.x = x
         self.y = y
@@ -13,7 +11,7 @@ class Camera:
         self.max_height = viewport_h
         self.width = self.max_width
         self.height = self.max_height
-        self.offset = int(settings.ui_size) / int(settings.tile_height)
+        self.offset = int(options.ui_size) / int(options.tile_height)
         self.bound_x = ceil(self.offset)
         self.bound_y = ceil(self.offset)
         self.bound_x2 = self.width - ceil(self.offset)
