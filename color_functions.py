@@ -42,58 +42,52 @@ def get_terrain_colors(mod=None):
 def get_flower_colors(mod=0):
     colors = []
     if mod > 0:
-        brightness = choice(["", "light", "lighter", "lightest"])
-        colors = [(brightness + " ").lstrip(),
-                  "orange",
-                  "red",
-                  "flame",
-                  "amber",
-                  "green",
-                  "yellow",
-                  "lime",
-                  "chartreuse",
-                  "violet",
-                  "purple,"
-                  "pink",
-                  "crimson",
-                  "fuchsia",
-                  "sky"]
+        colors = [(choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "orange",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "red",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "flame",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "amber",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "green",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "yellow",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "lime",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "chartreuse",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "violet",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "purple",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "pink",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "crimson",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "fuchsia",
+                  (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + "sky"]
 
     if mod == 0 or mod == -1:
-        brightness = choice(["", "light", "dark"])
-        colors = [(brightness + " ").lstrip(),
-                  "orange",
-                  "red",
-                  "flame",
-                  "amber",
-                  "green",
-                  "yellow",
-                  "lime",
-                  "chartreuse",
-                  "violet",
-                  "purple,"
-                  "pink",
-                  "crimson",
-                  "fuchsia",
-                  "sky"]
+        colors = [(choice(["", "dark", "light"]) + " ").lstrip() + "orange",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "red",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "flame",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "amber",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "green",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "yellow",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "lime",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "chartreuse",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "violet",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "purple",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "pink",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "crimson",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "fuchsia",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "sky"]
 
     if mod < -1:
-        brightness = choice(["", "dark", "darker"])
-        colors = [(brightness + " ").lstrip(),
-                  "orange",
-                  "red",
-                  "flame",
-                  "amber",
-                  "green",
-                  "yellow",
-                  "lime",
-                  "chartreuse",
-                  "violet",
-                  "purple,"
-                  "pink",
-                  "crimson",
-                  "fuchsia",
-                  "sky"]
+        colors = [(choice(["", "dark", "darker"]) + " ").lstrip() + "orange",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "red",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "flame",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "amber",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "green",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "yellow",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "lime",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "chartreuse",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "violet",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "purple",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "pink",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "crimson",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "fuchsia",
+                  (choice(["", "dark", "darker"]) + " ").lstrip() + "sky"]
     return colors
 
 
@@ -103,46 +97,40 @@ def get_forest_colors(mod=0):
     colors = []
 
     if mod > 0:
-        brightness = choice(["light", "lighter", "lightest"])
-        colors = [(brightness + " ").lstrip(),
-                  "orange",
-                  "red",
-                  "flame",
-                  "amber",
-                  "green",
-                  "yellow",
-                  "lime",
-                  "chartreuse",
-                  "violet",
-                  "purple,"
-                  "pink",
-                  "crimson"]
+        colors = [(choice(["light", "lighter", "lightest"]) + " ").lstrip() + "orange",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "red",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "flame",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "amber",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "green",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "yellow",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "lime",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "chartreuse",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "violet",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "purple",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "pink",
+                  (choice(["light", "lighter", "lightest"]) + " ").lstrip() + "crimson"]
 
     if mod < 0:
-        brightness = choice(["", "dark", "darker", "light"])
-        colors = [(brightness + " ").lstrip(),
-                  "orange",
-                  "red",
-                  "flame",
-                  "amber",
-                  "green",
-                  "yellow",
-                  "lime",
-                  "chartreuse",
-                  "violet",
-                  "purple,"
-                  "pink",
-                  "crimson"]
+        colors = [(choice(["", "dark", "darker", "light"]) + " ").lstrip() + "orange",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "red",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "flame",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "amber",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "green",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "yellow",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "lime",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "chartreuse",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "violet",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "purple",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "pink",
+                  (choice(["", "dark", "darker", "light"]) + " ").lstrip() + "crimson"]
     if mod == 0:
-        brightness = choice(["", "dark", "light"])
-        colors = [(brightness + " ").lstrip(),
-                  "orange",
-                  "flame",
-                  "amber",
-                  "green",
-                  "yellow",
-                  "lime",
-                  "chartreuse"]
+        colors = [(choice(["", "dark", "light"]) + " ").lstrip() + "orange",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "flame",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "amber",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "green",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "yellow",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "lime",
+                  (choice(["", "dark", "light"]) + " ").lstrip() + "chartreuse"]
     return colors
 
 
