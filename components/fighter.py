@@ -14,6 +14,9 @@ class Fighter:
         self.ev = ev
         self.hit_penalty = 0
         self.power = power
+        self.str_bonus = ceil(power / 2 - 1)
+        if self.str_bonus <= 0:
+            self.str_bonus = 0
         self.mv_spd = mv_spd
         self.atk_spd = atk_spd
         self.level = level
@@ -33,7 +36,9 @@ class Fighter:
     def attack(self, target, skill):
         results = []
         hit_chance = randint(1, 100)
-        miss = (target.fighter.ev * 2 - self.hit_penalty) >= hit_chance
+        miss = (target.fighter.ev * 2) >= hit_chance - self.hit_penalty
+        if (skill.skill_type == "attack" or skill.skill_type == "utility") and self.owner.player:
+            miss = False
 
         if skill is not None:
             if skill.skill_type == "attack" or skill.skill_type == "weapon":
@@ -51,7 +56,7 @@ class Fighter:
                             skill.name, target.name), "orange"])
                     else:
                         results.append(["The {0} uses {1} on you!".format(
-                            self.owner.name, skill.name)])
+                            self.owner.name, skill.name), "lighter red"])
 
                     if skill.effect:
                         for effect in skill.effect:
@@ -79,7 +84,7 @@ class Fighter:
 
                             target.status_effects.add_item(effect_component)
                             if self.owner.player:
-                                results.append(["The {0} is inflicted with {1}!".format(target.name, effect)])
+                                results.append(["The {0} is inflicted with {1}!".format(target.name, effect), "orange"])
                             else:
                                 results.append(["You are inflicted with {} !".format(effect), "green"])
 
@@ -103,7 +108,6 @@ class Fighter:
         return results
 
     def calculate_damage(self, skill, target):
-        str_bonus = max(self.power / 2 - 1, 0)
         damage_str = skill.damage[min(self.level - 1, 2)]
-        damage = roll_dice(damage_str) + str_bonus - target.fighter.ac
+        damage = roll_dice(damage_str) + self.str_bonus - target.fighter.ac
         return int(ceil(damage))

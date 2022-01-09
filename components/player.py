@@ -1,3 +1,4 @@
+from components.entity import get_neighbour_entities
 from map_objects.tilemap import tilemap
 import numpy as np
 
@@ -80,5 +81,21 @@ class Player:
             self.sel_utility_idx = 0
         self.sel_utility = self.owner.abilities.utility_skills[idx]
 
-    def use_ability(self):
-        print(self.sel_utility.name)
+    def use_ability(self, game_map, ability, target=None):
+        results = []
+        targeting = False
+        if not target:
+            entities = get_neighbour_entities(self.owner, game_map.tiles, fighters=True)
+            if not entities:
+                results.append("There are no available targets in range.")
+            elif len(entities) == 1:
+                target = entities[0]
+                results = self.owner.fighter.attack(target, ability)
+            else:
+                results.append(["Use '{0}' on which target?".format(ability.name), "yellow"])
+                target = entities[0]
+                targeting = True
+        else:
+            results = self.owner.fighter.attack(target, ability)
+
+        return results, target, targeting

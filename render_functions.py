@@ -139,7 +139,7 @@ class RenderFunctions:
         bound_x2 = game_camera.bound_x2 * self.owner.ui.offset_x
         bound_y2 = game_camera.bound_y2 * self.owner.ui.offset_y
         # Clear what's drawn in camera
-        self.clear_camera(5)
+        self.clear_camera(6)
         # Set boundaries if map is smaller than viewport
         if game_map.width < game_camera.width:
             bound_x2 = game_map.width * self.owner.ui.offset_x
@@ -318,7 +318,7 @@ class RenderFunctions:
         power_msg = "[color=light azure]Spirit power left: " + str(player.player.spirit_power)
         blt.layer(0)
         blt.clear_area(2, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
-                       self.owner.ui.viewport.offset_center_x + int(len(power_msg) / 2 + 5) - 5, 1)
+                       self.owner.ui.viewport.offset_center_x + int(len(power_msg) / 2 + 5) - 5, 3)
         blt.color("gray")
 
         # Draw spirit power left and position it depending on window size
@@ -346,7 +346,7 @@ class RenderFunctions:
 
         active_effects = []
         for x in player.status_effects.items:
-            active_effects.append(x.description + "(" + str(x.duration + 1) + ")")
+            active_effects.append(x.description + "(" + str(x.duration+1) + ")")
             if x.name == "poison":
                 hp_player = "[color=green]HP:" + \
                             str(player.fighter.hp) + "/" + \
@@ -372,7 +372,8 @@ class RenderFunctions:
         # Draw target stats
         if target:
             blt.clear_area(self.owner.ui.viewport.offset_center_x - int(len(power_msg) / 2) - 5,
-                           self.owner.ui.viewport.offset_h + self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 1)
+                           self.owner.ui.viewport.offset_h + self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 3)
+
             if target.fighter.hp / target.fighter.max_hp < 0.34:
                 hp_target = "[color=light red]HP:" + \
                             str(target.fighter.hp) + "/" + \
@@ -381,17 +382,32 @@ class RenderFunctions:
                 hp_target = "[color=default]HP:" + \
                             str(target.fighter.hp) + "/" + \
                             str(target.fighter.max_hp) + "  "
+
+            active_effects = []
+            for x in target.status_effects.items:
+                if x.duration > 0:
+                    active_effects.append(x.description + "(" + str(x.duration) + ")")
+                    if x.name == "poison":
+                        hp_target = "[color=green]HP:" + \
+                                    str(target.fighter.hp) + "/" + \
+                                    str(target.fighter.max_hp) + "  "
+
+            if active_effects:
+                blt.puts(self.owner.ui.viewport.offset_w, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
+                         "[offset=0,-2]" + "  ".join(active_effects) + "  ",
+                         0, 0, blt.TK_ALIGN_RIGHT)
+
             ac_target = "[color=default]AC:" + str(target.fighter.ac) + "  "
             ev_target = "EV:" + str(target.fighter.ev) + "  "
             power_target = "ATK:" + str(target.fighter.power) + " "
 
-            blt.puts(self.owner.ui.viewport.offset_w, self.owner.ui.viewport.offset_h + self.ui_offset_y + 1,
+            blt.puts(self.owner.ui.viewport.offset_w-1, self.owner.ui.viewport.offset_h + self.ui_offset_y + 1,
                      "[offset=0,-2]" + "[color=lightest red]" + target.name.capitalize() + ":  " + hp_target + ac_target + ev_target + power_target,
                      0, 0, blt.TK_ALIGN_RIGHT)
 
             if target.fighter.hp <= 0:
                 blt.clear_area(2, self.owner.ui.viewport.offset_h +
-                               self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 1)
+                               self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 3)
 
     def draw_ui(self, element):
         blt.color(element.color)
@@ -466,6 +482,15 @@ class RenderFunctions:
 
         blt.put(x0 + 3, y0 + 3, 0xF900)
 
+    def draw_turn_count(self):
+        x = self.owner.ui.side_panel.offset_x + self.owner.ui.side_panel.x_margin
+        y = self.owner.ui.side_panel.offset_y + 26
+        blt.layer(1)
+        blt.color(None)
+        blt.clear_area(x, y, self.owner.ui.side_panel.offset_w - self.owner.ui.side_panel.x_margin, 1)
+        blt.puts(x, y, "Turn: " + str(self.owner.time_counter.turn), 0, 0,
+                 blt.TK_ALIGN_LEFT)
+
     def draw_side_panel_content(self):
         game_map = self.owner.levels.current_map
         player = self.owner.player
@@ -473,7 +498,7 @@ class RenderFunctions:
         # Draw side panel content
         blt.layer(1)
         blt.color(None)
-        x_margin = 4
+        x_margin = self.owner.ui.side_panel.x_margin
         map_title = fill(game_map.title, 21)
 
         blt.clear_area(side_panel.offset_x + x_margin,
@@ -517,7 +542,7 @@ class RenderFunctions:
 
                 # name of the selected skill
                 blt.color(None)
-                skill_str = "{0}, {1} dmg".format(wpn.name.capitalize(), wpn.damage[wpn.rank])
+                skill_str = "{0}, {1}+{2} dmg".format(wpn.name.capitalize(), wpn.damage[wpn.rank], player.fighter.str_bonus)
                 blt.puts(side_panel.offset_x + x_margin,
                          side_panel.offset_y + first_heading_y + 2, fill(skill_str, fill_chars), 0, 0,
                          blt.TK_ALIGN_LEFT)
@@ -547,13 +572,15 @@ class RenderFunctions:
                 skill_str = "{0}: ".format(atk.name)
                 chance_str, atk_str, effect_str, duration_str = "", "", "", ""
                 if atk.chance:
-                    chance_str = str(int(1 / atk.chance[atk.rank])) + "% chance of "
+                    # chance_str = str(int(1 / atk.chance[atk.rank])) + "% chance of "
+                    chance_str = "100% chance of "
                 if atk.effect:
                     effect_str = ", ".join(atk.effect) + ", "
                 if atk.duration:
                     duration_str = atk.duration[atk.rank] + " turns"
                 if atk.damage:
-                    atk_str = ", " + atk.damage[atk.rank] + " dmg" if duration_str else atk.damage[atk.rank] + " dmg"
+                    atk_str = ", " + atk.damage[atk.rank] + "+" + str(player.fighter.str_bonus) + " dmg" if duration_str \
+                        else atk.damage[atk.rank] + "+" + str(player.fighter.str_bonus) + " dmg"
                 skill_str += chance_str + effect_str + duration_str + atk_str
 
                 blt.puts(side_panel.offset_x + x_margin,

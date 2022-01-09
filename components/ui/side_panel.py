@@ -19,6 +19,7 @@ class SidePanel:
         self.offset_x2 = 0
         self.offset_y2 = 0
         self.border = 1
+        self.x_margin = 4
         self.tile_horizontal = tilemap_ui()["ui_block_horizontal"]
         self.tile_vertical = tilemap_ui()["ui_block_vertical"]
         self.tile_nw = tilemap_ui()["ui_block_nw"]

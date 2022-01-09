@@ -182,12 +182,13 @@ class Entity:
         return death_message
 
 
-def get_neighbour_entities(entity, game_map, n=3, exclude_self=True):
+def get_neighbour_entities(entity, game_map, n=3, exclude_self=True, fighters=False):
     """
     :param entity:
     :param game_map:
     :param n: radius
     :param exclude_self: exclude self (center) in the list of entities
+    :param fighters: return only fighting entities
     :return: list of entities surrounding the center in radius n
     """
     x, y = entity.x, entity.y
@@ -201,5 +202,12 @@ def get_neighbour_entities(entity, game_map, n=3, exclude_self=True):
                 continue
             else:
                 entities.extend(tile.entities_on_tile)
+
+    if fighters:
+        fighting_entities = []
+        for entity in entities:
+            if entity.fighter:
+                fighting_entities.append(entity)
+        entities = fighting_entities
 
     return entities
