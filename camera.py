@@ -19,11 +19,11 @@ class Camera:
 
     def move_camera(self, target_x, target_y, map_width, map_height):
         
-        if map_width <= self.width:
+        if map_width <= self.max_width:
             self.width = map_width
         else:
             self.width = self.max_width
-        if map_height <= self.height:
+        if map_height <= self.max_height:
             self.height = map_height
         else:
             self.height = self.max_height
