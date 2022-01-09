@@ -62,7 +62,7 @@ class GameMap:
 
                     if ground != 0:
                         name, color = name_color_from_value(ground, self.owner.world_tendency)
-                        if self.owner.options.gfx == "oryx":
+                        if self.owner.tileset == "oryx":
                             ground += 0xE400
                         else:
                             ground = tilemap()[name]
@@ -72,7 +72,7 @@ class GameMap:
 
                     if ground_top != 0:
                         name, color = name_color_from_value(ground_top, self.owner.world_tendency)
-                        if self.owner.options.gfx == "oryx":
+                        if self.owner.tileset == "oryx":
                             ground_top += 0xE400
                         else:
                             ground_top = tilemap()[name]
@@ -80,7 +80,7 @@ class GameMap:
 
                     if entity != 0:
                         name, color = name_color_from_value(entity, self.owner.world_tendency)
-                        if self.owner.options.gfx == "oryx":
+                        if self.owner.tileset == "oryx":
                             entity += 0xE400
                         else:
                             if isinstance(tilemap()[name], tuple):
@@ -795,7 +795,7 @@ class GameMap:
 
     def create_decor(self):
 
-        if self.owner.options.gfx == "ascii":
+        if self.owner.tileset == "ascii":
             return
         # Generate rocks & rubble on floor tiles
         decor_odds = 0.1

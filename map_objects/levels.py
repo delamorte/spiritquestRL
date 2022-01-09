@@ -8,8 +8,9 @@ from ui.menus import MenuData
 
 
 class Levels:
-    def __init__(self):
+    def __init__(self, tileset):
         self.owner = None
+        self.tileset = tileset
         self.player = None
         self.items = {}
         self.params = None

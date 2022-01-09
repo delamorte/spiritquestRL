@@ -129,7 +129,7 @@ class Engine:
         self.game_camera = game_camera
         self.game_camera.owner = self
 
-        levels = Levels()
+        levels = Levels(tileset=self.options.gfx)
         self.levels = levels
         self.levels.owner = self
 
