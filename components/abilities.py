@@ -8,6 +8,9 @@ class Abilities:
         self.name = name
         self.capacity = capacity
         self.items = []
+        self.weapon_skills = []
+        self.attack_skills = []
+        self.utility_skills = []
 
         if name != "player":
             self.initialize_abilities()
@@ -22,8 +25,8 @@ class Abilities:
         for n in initial_abilities:
             item = json_data.data.abilities[n]
             skill_type = item["skill_type"]
-            if self.owner and self.owner.player and skill_type != "weapon":
-                continue
+            # if self.owner and self.owner.player and skill_type != "weapon":
+            #     continue
             name = item["name"]
             description = item["description"]
             damage = item["damage"] if "damage" in item.keys() else []
@@ -45,16 +48,27 @@ class Abilities:
                         player_only=player_only)
 
             self.add_item(a)
-            if self.owner and self.owner.player:
-                if skill_type == "weapon" and not self.owner.player.sel_weapon:
-                    self.owner.player.sel_weapon = a
-                if skill_type == "attack" and not self.owner.player.sel_attack:
-                    self.owner.player.sel_attack = a
-                if skill_type == "utility" and not self.owner.player.sel_utility:
-                    self.owner.player.sel_utility = a
 
     def add_item(self, item):
         """Used when adding initial abilities"""
+        if item.skill_type == "weapon":
+            self.weapon_skills.append(item)
+        elif item.skill_type == "attack":
+            self.attack_skills.append(item)
+        elif item.skill_type == "utility":
+            self.utility_skills.append(item)
+
+        if self.owner and self.owner.player:
+            if item.skill_type == "weapon" and not self.owner.player.sel_weapon:
+                self.owner.player.sel_weapon = item
+            if item.skill_type == "attack" and not self.owner.player.sel_attack:
+                self.owner.player.sel_attack = item
+            if item.skill_type == "utility":
+                if not self.owner.player.sel_utility:
+                    self.owner.player.sel_utility = item
+                # blt.TK_1 == 30, map first ability to blt.TK_1
+                item.blt_input = len(self.utility_skills) - 1 + 30
+
         self.items.append(item)
 
     def learn(self, item):

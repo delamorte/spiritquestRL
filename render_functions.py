@@ -504,25 +504,46 @@ class RenderFunctions:
 
         # Weapon skills
         y_margin = 0
+        first_heading_y = 30
         fill_chars = 32
         for i, wpn in enumerate(weapon):
             if wpn.name == player.player.sel_weapon.name:
-                # name of the selected skill
-                skill_str = "Atk: {0}, {1} dmg".format(wpn.name.capitalize(), wpn.damage[wpn.rank])
+                # heading
+                title = "Weapon (Switch: 'W')"
+                blt.color("lighter yellow")
                 blt.puts(side_panel.offset_x + x_margin,
-                         side_panel.offset_y + 30, fill(skill_str, fill_chars), 0, 0,
+                         side_panel.offset_y + first_heading_y, fill(title, fill_chars), 0, 0,
                          blt.TK_ALIGN_LEFT)
+
+                # name of the selected skill
+                blt.color(None)
+                skill_str = "{0}, {1} dmg".format(wpn.name.capitalize(), wpn.damage[wpn.rank])
+                blt.puts(side_panel.offset_x + x_margin,
+                         side_panel.offset_y + first_heading_y + 2, fill(skill_str, fill_chars), 0, 0,
+                         blt.TK_ALIGN_LEFT)
+
                 # highlight icon of the selected skill
                 blt.color("dark amber")
                 y_margin += skill_str.count('\n')
 
-            blt.put(side_panel.offset_x + x_margin + i * 6,
-                    side_panel.offset_y + 32, wpn.icon)
+            blt.put(side_panel.offset_x + x_margin + 1 + i * 6,
+                    side_panel.offset_y + first_heading_y + 4, wpn.icon)
             blt.color(None)
+
+        second_heading_y = first_heading_y + 9
 
         # Attack skills
         for i, atk in enumerate(attack):
             if player.player.sel_attack and atk.name == player.player.sel_attack.name:
+                # heading
+                title = "Skills (Switch: 'A', Use: 'TAB')"
+                blt.color("lighter green")
+                blt.puts(side_panel.offset_x + x_margin,
+                         side_panel.offset_y + second_heading_y + y_margin,
+                         fill(title, fill_chars), 0, 0,
+                         blt.TK_ALIGN_LEFT)
+
+                blt.color(None)
                 skill_str = "{0}: ".format(atk.name)
                 chance_str, atk_str, effect_str, duration_str = "", "", "", ""
                 if atk.chance:
@@ -536,36 +557,50 @@ class RenderFunctions:
                 skill_str += chance_str + effect_str + duration_str + atk_str
 
                 blt.puts(side_panel.offset_x + x_margin,
-                         side_panel.offset_y + 35 + y_margin,
+                         side_panel.offset_y + second_heading_y + 2 + y_margin,
                          fill(skill_str.capitalize(), fill_chars), 0, 0,
                          blt.TK_ALIGN_LEFT)
                 # highlight icon of the selected skill
                 blt.color("dark amber")
                 y_margin += skill_str.count('\n')
 
-            blt.put(side_panel.offset_x + x_margin + i * 6,
-                    side_panel.offset_y + 38 + y_margin, atk.icon)
+            blt.put(side_panel.offset_x + x_margin + 1 + i * 6,
+                    side_panel.offset_y + second_heading_y + 5 + y_margin, atk.icon)
             blt.color(None)
+
+        third_heading_y = second_heading_y + 10
 
         # Utility skills
         for i, utl in enumerate(utility):
             if player.player.sel_utility and utl.name == player.player.sel_utility.name:
+                title = "Utility (Use: 'Z')"
+                blt.color("lighter blue")
+                blt.puts(side_panel.offset_x + x_margin,
+                         side_panel.offset_y + third_heading_y + y_margin,
+                         fill(title, fill_chars),
+                         0, 0, blt.TK_ALIGN_LEFT)
+
                 # name of the selected skill
+                blt.color(None)
                 skill_str = utl.name
                 blt.puts(side_panel.offset_x + x_margin,
-                         side_panel.offset_y + 41 + y_margin,
+                         side_panel.offset_y + third_heading_y + 2 + y_margin,
                          fill(skill_str.capitalize(), fill_chars),
                          0, 0, blt.TK_ALIGN_LEFT)
                 y_margin += skill_str.count('\n')
                 blt.puts(side_panel.offset_x + x_margin,
-                         side_panel.offset_y + 46 + y_margin,
+                         side_panel.offset_y + third_heading_y + 8 + y_margin,
                          fill(utl.description.capitalize(), fill_chars), 46 + y_margin, 0,
                          blt.TK_ALIGN_LEFT)
                 # highlight icon of the selected skill
                 blt.color("dark amber")
 
-            blt.put(side_panel.offset_x + x_margin + i * 6,
-                    side_panel.offset_y + 43 + y_margin, utl.icon)
+            blt.put(side_panel.offset_x + x_margin + 1 + i * 6,
+                    side_panel.offset_y + third_heading_y + 5 + y_margin, utl.icon)
+            blt.layer(0)
+            blt.put_ext(side_panel.offset_x + x_margin + i * 6,
+                    side_panel.offset_y + third_heading_y + 5 + y_margin, -2, -14, str(i+1))
+            blt.layer(1)
             blt.color(None)
 
     def draw_all(self):

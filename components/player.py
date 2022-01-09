@@ -17,6 +17,9 @@ class Player:
         self.sel_weapon = None
         self.sel_attack = None
         self.sel_utility = None
+        self.sel_weapon_idx = 0
+        self.sel_attack_idx = 0
+        self.sel_utility_idx = 0
 
     def init_light(self):
         self.lightmap = np.ones_like(self.owner.light_source.fov_map.fov, dtype=float)
@@ -52,3 +55,30 @@ class Player:
     def level_up(self, levels_gained):
         self.char_level += levels_gained
         self.skill_points += 1
+
+    def switch_weapon(self):
+        idx = self.sel_weapon_idx + 1
+        self.sel_weapon_idx += 1
+        if idx >= len(self.owner.abilities.weapon_skills):
+            idx = 0
+            self.sel_weapon_idx = 0
+        self.sel_weapon = self.owner.abilities.weapon_skills[idx]
+
+    def switch_attack(self):
+        idx = self.sel_attack_idx + 1
+        self.sel_attack_idx += 1
+        if idx >= len(self.owner.abilities.attack_skills):
+            idx = 0
+            self.sel_attack_idx = 0
+        self.sel_attack = self.owner.abilities.attack_skills[idx]
+
+    def switch_utility(self):
+        idx = self.sel_utility_idx + 1
+        self.sel_utility_idx += 1
+        if idx >= len(self.owner.abilities.utility_skills):
+            idx = 0
+            self.sel_utility_idx = 0
+        self.sel_utility = self.owner.abilities.utility_skills[idx]
+
+    def use_ability(self):
+        print(self.sel_utility.name)

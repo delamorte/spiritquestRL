@@ -11,7 +11,8 @@ class Actions:
     def __init__(self):
         self.owner = None
 
-    def turn_taking_actions(self, wait=None, move=None, interact=None, pickup=None, stairs=None, examine=None):
+    def turn_taking_actions(self, wait=None, move=None, interact=None, pickup=None, stairs=None, examine=None,
+                            ability=None):
 
         if wait:
             self.owner.time_counter.take_turn(1)
@@ -106,6 +107,11 @@ class Actions:
             self.owner.levels.current_map.entities["cursor"] = [self.owner.cursor]
             self.owner.fov_recompute = True
 
+        elif ability:
+            self.owner.player.player.use_ability()
+            self.owner.time_counter.take_turn(1)
+            self.owner.fov_recompute = True
+
     def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False):
         if main_menu:
             self.owner.menus.main_menu.show()
@@ -137,6 +143,22 @@ class Actions:
             self.owner.fov_recompute = True
             return True
 
+        return False
+
+    def ability_actions(self, switch=None, key=None):
+        if switch and key:
+            if key == blt.TK_W:
+                self.owner.player.player.switch_weapon()
+            elif key == blt.TK_A:
+                self.owner.player.player.switch_attack()
+            else:
+                for ability in self.owner.player.abilities.utility_skills:
+                    if key == ability.blt_input:
+                        self.owner.player.player.sel_utility = ability
+                        self.owner.player.player.sel_utility_idx = ability.blt_input - 30  # get list index, 30 == blt.TK_1
+                        break
+            self.owner.ui.side_panel.draw_content()
+            return True
         return False
 
     def window_actions(self, fullscreen=False, close=False):

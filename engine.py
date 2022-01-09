@@ -171,13 +171,15 @@ class Engine:
             interact = action.get("interact")
             stairs = action.get('stairs')
             examine = action.get('examine')
-            minimap = action.get('map')
+            # minimap = action.get('map')
             fullscreen = action.get('fullscreen')
             close = action.get('close')
             main_menu = action.get('main_menu')
             avatar_info = action.get('avatar_info')
             inventory = action.get('inventory')
             msg_history = action.get('msg_history')
+            switch_ability = action.get('switch_ability')
+            use_ability = action.get('use_ability')
 
             if self.actions.window_actions(fullscreen=fullscreen, close=close):
                 continue
@@ -207,6 +209,9 @@ class Engine:
                                              msg_history=msg_history):
                     continue
 
+                elif self.actions.ability_actions(switch=switch_ability, key=key):
+                    continue
+
                 # Turn taking functions
 
                 self.actions.turn_taking_actions(wait=wait,
@@ -214,7 +219,8 @@ class Engine:
                                                  interact=interact,
                                                  pickup=pickup,
                                                  stairs=stairs,
-                                                 examine=examine)
+                                                 examine=examine,
+                                                 ability=use_ability)
 
             elif self.game_state == GameStates.TARGETING:
 

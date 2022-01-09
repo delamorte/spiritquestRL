@@ -57,5 +57,12 @@ def handle_keys(key):
     if key == blt.TK_X:
         return {'examine': True}
 
+    if key in [blt.TK_1, blt.TK_2, blt.TK_3, blt.TK_4, blt.TK_5, blt.TK_6, blt.TK_7, blt.TK_8, blt.TK_9, blt.TK_0,
+               blt.TK_W, blt.TK_A, blt.TK_TAB]:
+        return {'switch_ability': True}
+
+    if key == blt.TK_Z:
+        return {'use_ability': True}
+
     # No key was pressed
     return {}
