@@ -89,24 +89,9 @@ class Actions:
                 self.owner.message_log.send("There is nothing here to pick up.")
 
         elif stairs:
-            if "stairs" in self.owner.levels.current_map.entities:
-                for entity in self.owner.levels.current_map.entities["stairs"]:
-                    if self.owner.player.x == entity.x and self.owner.player.y == entity.y:
-                        self.owner.levels.change(entity.stairs.destination[0])
-
-                self.owner.message_log.old_stack = self.owner.message_log.stack
-
-                if self.owner.levels.current_map.name == "cavern" and self.owner.levels.current_map.dungeon_level == 1:
-                    self.owner.message_log.clear()
-                    self.owner.message_log.send(
-                        "A sense of impending doom fills you as you delve into the cavern.")
-                    self.owner.message_log.send("RIBBIT!")
-
-                elif self.owner.levels.current_map.name == "dream":
-                    self.owner.message_log.clear()
-                    self.owner.message_log.send(
-                        "I'm dreaming... I feel my spirit power draining.")
-                    self.owner.message_log.send("I'm hungry..")
+            stairs_component = self.owner.levels.current_map.tiles[self.owner.player.x][self.owner.player.y].stairs
+            if stairs_component:
+                stairs_component.interaction(self.owner.levels, self.owner.message_log)
                 self.owner.render_functions.draw_messages()
                 self.owner.fov_recompute = True
 

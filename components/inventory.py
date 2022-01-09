@@ -6,7 +6,13 @@ class Inventory:
         
     def add_item(self, game_map, msg_log, item=None):
         results = []
-        entities = game_map.tiles[self.owner.x][self.owner.y].entities_on_tile
+
+        if item:
+            self.items.append(item)
+            results.append("{0} was added to your inventory.".format(item.name))
+            return results
+
+        entities = game_map.tiles[self.owner.x][self.owner.y].items_on_tile
         if entities:
             for entity in entities:
                 if entity.item and entity.item.pickable:
