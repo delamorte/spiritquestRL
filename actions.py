@@ -53,84 +53,45 @@ class Actions:
 
             elif self.owner.levels.current_map.tiles[destination_x][destination_y].is_door:
                 door = self.owner.levels.current_map.tiles[destination_x][destination_y].door
-                if door.status == "locked":
-                    self.owner.message_log.send("The door is locked...")
-                    self.owner.time_counter.take_turn(1)
-                    self.owner.game_state = GameStates.ENEMY_TURN
-                elif door.status == "closed":
-                    door.set_status("open", self.owner.levels.current_map)
-                    self.owner.message_log.send("You open the door.")
-                    self.owner.time_counter.take_turn(1)
-                    self.owner.game_state = GameStates.ENEMY_TURN
-                    self.owner.fov_recompute = True
+                interact_msg = door.interaction(self.owner.levels.current_map)
+                self.owner.message_log.send(interact_msg)
+                self.owner.time_counter.take_turn(1)
+                self.owner.game_state = GameStates.ENEMY_TURN
+                self.owner.fov_recompute = True
 
             self.owner.message_log.old_stack = self.owner.message_log.stack
             self.owner.message_log.stack = []
 
         elif interact:
-            entities = get_neighbour_entities(self.owner.player.x, self.owner.player.y,
-                                              self.owner.levels.current_map.tiles)
+            entities = get_neighbour_entities(self.owner.player, self.owner.levels.current_map.tiles)
+            interact_msg = None
             for entity in entities:
                 if entity.door:
-                    if entity.door.status == "closed":
-                        entity.door.set_status("open", self.owner.levels.current_map)
-                        self.owner.message_log.send("You open the door.")
-                        self.owner.time_counter.take_turn(1)
-                        self.owner.game_state = GameStates.ENEMY_TURN
-                    elif entity.door.status == "open":
-                        entity.door.set_status("closed", self.owner.levels.current_map)
-                        self.owner.message_log.send("You close the door.")
-                        self.owner.time_counter.take_turn(1)
-                        self.owner.game_state = GameStates.ENEMY_TURN
-                    else:
-                        self.owner.message_log.send("The door is locked.")
-                        self.owner.time_counter.take_turn(1)
-                        self.owner.game_state = GameStates.ENEMY_TURN
+                    interact_msg = entity.door.interaction(self.owner.levels.current_map)
+                    self.owner.message_log.send(interact_msg)
                 elif entity.item:
                     interact_msg = entity.item.interaction(self.owner.levels.current_map)
-                    if interact_msg:
-                        self.owner.message_log.send(interact_msg)
-                        self.owner.fov_recompute = True
+                    self.owner.message_log.send(interact_msg)
+            if interact_msg:
+                self.owner.time_counter.take_turn(1)
+                self.owner.game_state = GameStates.ENEMY_TURN
+                self.owner.fov_recompute = True
 
         elif pickup:
-            if "items" in self.owner.levels.current_map.entities:
-                for entity in self.owner.levels.current_map.entities["items"]:
-                    if entity.x == self.owner.player.x and entity.y == self.owner.player.y and entity.item.pickable:
-                        pickup_msg = self.owner.player.inventory.add_item(entity)
-                        self.owner.message_log.send(pickup_msg)
-                        for item in self.owner.message_log.stack:
-                            if entity.name == item.split(" ", 1)[1]:
-                                self.owner.message_log.stack.remove(item)
-                        self.owner.levels.current_map.tiles[entity.x][entity.y].remove_entity(entity)
-                        self.owner.levels.current_map.entities["items"].remove(entity)
-                        self.owner.time_counter.take_turn(1)
-                        self.owner.game_state = GameStates.ENEMY_TURN
-                        self.owner.fov_recompute = True
-                        break
-                    # else:
-                    #     message_log.send("There is nothing here to pick up.")
+            pickup_msg = self.owner.player.inventory.add_item(self.owner.levels.current_map, self.owner.message_log)
+
+            if pickup_msg:
+                self.owner.message_log.send(pickup_msg)
+                self.owner.time_counter.take_turn(1)
+                self.owner.game_state = GameStates.ENEMY_TURN
+                self.owner.fov_recompute = True
             else:
                 self.owner.message_log.send("There is nothing here to pick up.")
 
         elif stairs:
-            if "stairs" in self.owner.levels.current_map.entities:
-                for entity in self.owner.levels.current_map.entities["stairs"]:
-                    if self.owner.player.x == entity.x and self.owner.player.y == entity.y:
-                        self.owner.levels.change(entity.stairs.destination[0])
-
-                self.owner.message_log.old_stack = self.owner.message_log.stack
-
-                if self.owner.levels.current_map.name == "cavern" and self.owner.levels.current_map.dungeon_level == 1:
-                    self.owner.message_log.clear()
-                    self.owner.message_log.send(
-                        "A sense of impending doom fills you as you delve into the cavern.")
-                    self.owner.message_log.send("RIBBIT!")
-
-                elif self.owner.levels.current_map.name == "dream":
-                    self.owner.message_log.clear()
-                    self.owner.message_log.send(
-                        "I'm dreaming... I feel my spirit power draining.")
-                    self.owner.message_log.send("I'm hungry..")
+            stairs_component = self.owner.levels.current_map.tiles[self.owner.player.x][self.owner.player.y].stairs
+            if stairs_component:
+                stairs_component.interaction(self.owner.levels, self.owner.message_log)
                 self.owner.render_functions.draw_messages()
                 self.owner.fov_recompute = True
 

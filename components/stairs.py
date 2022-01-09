@@ -25,3 +25,18 @@ class Stairs:
             self.owner.light_source.owner = self.owner
             self.owner.light_source.initialize_fov(game_map)
             self.owner.light_source.recompute_fov(self.owner.x, self.owner.y)
+
+    def interaction(self, levels, msg_log):
+        levels.change(self.destination[0])
+        msg_log.old_stack = msg_log.stack
+
+        if levels.current_map.name == "cavern" and levels.current_map.dungeon_level == 1:
+            msg_log.clear()
+            msg_log.send(
+                "A sense of impending doom fills you as you delve into the cavern.")
+            msg_log.send("RIBBIT!")
+
+        elif levels.current_map.name == "dream":
+            msg_log.clear()
+            msg_log.send("I'm dreaming... I feel my spirit power draining.")
+            msg_log.send("I'm hungry..")

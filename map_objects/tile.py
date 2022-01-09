@@ -30,6 +30,8 @@ class Tile:
         self.is_door = False
         self.door = None
         self.entities_on_tile = []
+        self.items_on_tile = []
+        self.stairs = None
         self.natural_light_level = 1
 
     def add_entity(self, entity):
@@ -41,15 +43,24 @@ class Tile:
             self.blocking_entity = entity
             self.occupied = True
 
+        elif entity.stairs:
+            self.stairs = entity.stairs
+
+        elif entity.item:
+            self.items_on_tile.append(entity)
+
         self.entities_on_tile.append(entity)
 
     def remove_entity(self, entity):
         if entity in self.entities_on_tile:
             self.entities_on_tile.remove(entity)
+        if entity in self.items_on_tile:
+            self.items_on_tile.remove(entity)
         if entity == self.blocking_entity:
             self.blocking_entity = None
         if entity.door:
             self.door = None
             self.is_door = False
+
 
 

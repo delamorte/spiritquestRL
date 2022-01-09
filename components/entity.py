@@ -1,4 +1,5 @@
 from math import sqrt
+import numpy as np
 import tcod
 
 from game_states import GameStates
@@ -181,11 +182,24 @@ class Entity:
         return death_message
 
 
-def get_neighbour_entities(x, y, game_map):
+def get_neighbour_entities(entity, game_map, n=3, exclude_self=True):
+    """
+    :param entity:
+    :param game_map:
+    :param n: radius
+    :param exclude_self: exclude self (center) in the list of entities
+    :return: list of entities surrounding the center in radius n
+    """
+    x, y = entity.x, entity.y
+    arr = np.roll(np.roll(game_map, shift=-x + 1, axis=0), shift=-y + 1, axis=1)
+    neighbours = arr[:n, :n].flatten()
     entities = []
-    neighbours = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1)]
-    for coords in neighbours:
-        dx, dy = coords[0], coords[1]
-        if game_map[x+dx][y+dy].entities_on_tile:
-            entities.extend(game_map[x+dx][y+dy].entities_on_tile)
+
+    for tile in neighbours:
+        if tile.entities_on_tile:
+            if exclude_self and tile.blocking_entity == entity:
+                continue
+            else:
+                entities.extend(tile.entities_on_tile)
+
     return entities
