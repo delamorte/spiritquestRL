@@ -133,8 +133,6 @@ class Engine:
         self.levels = levels
         self.levels.owner = self
 
-        self.time_counter = self.TimeCounter()
-
         blt.clear_area(2, self.ui.viewport.offset_h +
                        self.ui.offset_y + 1, self.ui.viewport.x, 1)
 
@@ -145,6 +143,7 @@ class Engine:
         self.levels.change("hub")
         self.fov_recompute = True
         self.game_state = GameStates.PLAYER_TURN
+        self.time_counter = self.TimeCounter(owner=self)
 
     def game_loop(self):
 
@@ -157,6 +156,7 @@ class Engine:
                 self.render_functions.draw_all()
 
             self.render_functions.draw_messages()
+            self.render_functions.draw_turn_count()
 
             self.fov_recompute = False
             blt.refresh()
@@ -171,13 +171,15 @@ class Engine:
             interact = action.get("interact")
             stairs = action.get('stairs')
             examine = action.get('examine')
-            minimap = action.get('map')
+            # minimap = action.get('map')
             fullscreen = action.get('fullscreen')
             close = action.get('close')
             main_menu = action.get('main_menu')
             avatar_info = action.get('avatar_info')
             inventory = action.get('inventory')
             msg_history = action.get('msg_history')
+            switch_ability = action.get('switch_ability')
+            use_ability = action.get('use_ability')
 
             if self.actions.window_actions(fullscreen=fullscreen, close=close):
                 continue
@@ -207,6 +209,9 @@ class Engine:
                                              msg_history=msg_history):
                     continue
 
+                elif self.actions.ability_actions(switch=switch_ability, key=key):
+                    continue
+
                 # Turn taking functions
 
                 self.actions.turn_taking_actions(wait=wait,
@@ -214,13 +219,17 @@ class Engine:
                                                  interact=interact,
                                                  pickup=pickup,
                                                  stairs=stairs,
-                                                 examine=examine)
+                                                 examine=examine,
+                                                 use_ability=use_ability,
+                                                 key=key)
 
             elif self.game_state == GameStates.TARGETING:
 
                 if self.actions.targeting_actions(move=move,
                                                   examine=examine,
-                                                  main_menu=main_menu):
+                                                  main_menu=main_menu,
+                                                  use_ability=use_ability,
+                                                  interact=interact):
                     continue
 
             if self.game_state == GameStates.ENEMY_TURN:
@@ -228,7 +237,8 @@ class Engine:
                 self.actions.enemy_actions()
 
     class TimeCounter:
-        def __init__(self, turn=0):
+        def __init__(self, turn=0, owner=None):
+            self.owner = owner
             self.turn = turn
             self.last_turn = 0
 

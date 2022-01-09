@@ -32,7 +32,7 @@ class Tile:
         self.entities_on_tile = []
         self.items_on_tile = []
         self.stairs = None
-        self.natural_light_level = 1
+        self.natural_light_level = 1.5
 
     def add_entity(self, entity):
         if entity.door:

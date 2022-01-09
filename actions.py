@@ -11,7 +11,8 @@ class Actions:
     def __init__(self):
         self.owner = None
 
-    def turn_taking_actions(self, wait=None, move=None, interact=None, pickup=None, stairs=None, examine=None):
+    def turn_taking_actions(self, wait=None, move=None, interact=None, pickup=None, stairs=None, examine=None,
+                            use_ability=None, key=None):
 
         if wait:
             self.owner.time_counter.take_turn(1)
@@ -99,11 +100,35 @@ class Actions:
         elif examine:
             self.owner.game_state = GameStates.TARGETING
             cursor_component = Cursor()
-            cursor = Entity(self.owner.player.x, self.owner.player.y, 4, 0xE800 + 1746, "light yellow", "cursor",
+            cursor = Entity(self.owner.player.x, self.owner.player.y, 5, 0xE800 + 1746, "light yellow", "cursor",
                             cursor=cursor_component, stand_on_messages=False)
             self.owner.cursor = cursor
             self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(self.owner.cursor)
             self.owner.levels.current_map.entities["cursor"] = [self.owner.cursor]
+            self.owner.fov_recompute = True
+
+        elif use_ability:
+            if key == blt.TK_Z:
+                ability = self.owner.player.player.sel_utility
+            else:
+                ability = self.owner.player.player.sel_attack
+            result, target, targeting = self.owner.player.player.use_ability(self.owner.levels.current_map, ability)
+            if target:
+                self.owner.render_functions.draw_stats(target)
+            if targeting:
+                self.owner.game_state = GameStates.TARGETING
+                cursor_component = Cursor(targeting_ability=ability)
+                cursor = Entity(target.x, target.y, 5, 0xE800 + 1746, "light yellow", "cursor",
+                                cursor=cursor_component, stand_on_messages=False)
+                self.owner.cursor = cursor
+                self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(
+                    self.owner.cursor)
+                self.owner.levels.current_map.entities["cursor"] = [self.owner.cursor]
+            else:
+                self.owner.time_counter.take_turn(1)
+                self.owner.game_state = GameStates.ENEMY_TURN
+
+            self.owner.message_log.send(result)
             self.owner.fov_recompute = True
 
     def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False):
@@ -139,6 +164,22 @@ class Actions:
 
         return False
 
+    def ability_actions(self, switch=None, key=None):
+        if switch and key:
+            if key == blt.TK_W:
+                self.owner.player.player.switch_weapon()
+            elif key == blt.TK_A:
+                self.owner.player.player.switch_attack()
+            else:
+                for ability in self.owner.player.abilities.utility_skills:
+                    if key == ability.blt_input:
+                        self.owner.player.player.sel_utility = ability
+                        self.owner.player.player.sel_utility_idx = ability.blt_input - 30  # get list index, 30 == blt.TK_1
+                        break
+            self.owner.ui.side_panel.draw_content()
+            return True
+        return False
+
     def window_actions(self, fullscreen=False, close=False):
         if fullscreen:
             blt.set("window.fullscreen=true")
@@ -161,7 +202,8 @@ class Actions:
 
         return False
 
-    def targeting_actions(self, move=False, examine=False, main_menu=False):
+    def targeting_actions(self, move=False, examine=False, main_menu=False, use_ability=False,
+                          interact=False):
         if move:
             dx, dy = move
             destination_x = self.owner.cursor.x + dx
@@ -192,6 +234,23 @@ class Actions:
             self.owner.cursor = None
             self.owner.fov_recompute = True
             return True
+
+        elif (use_ability or interact) and self.owner.cursor.cursor.targeting_ability:
+            target = self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].blocking_entity
+            result, target, _ = self.owner.player.player.use_ability(self.owner.levels.current_map,
+                                                             self.owner.cursor.cursor.targeting_ability, target)
+            if target:
+                self.owner.render_functions.draw_stats(target)
+            self.owner.time_counter.take_turn(1)
+            self.owner.game_state = GameStates.ENEMY_TURN
+            self.owner.message_log.send(result)
+            self.owner.message_log.old_stack = self.owner.message_log.stack
+            self.owner.message_log.stack = []
+            self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].remove_entity(
+                self.owner.cursor)
+            del self.owner.levels.current_map.entities["cursor"]
+            self.owner.cursor = None
+            self.owner.fov_recompute = True
 
         # if self.owner.player.fighter.paralyzed:
         #     self.owner.message_log.send("You are paralyzed!")

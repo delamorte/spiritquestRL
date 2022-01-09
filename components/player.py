@@ -1,3 +1,4 @@
+from components.entity import get_neighbour_entities
 from map_objects.tilemap import tilemap
 import numpy as np
 
@@ -17,6 +18,9 @@ class Player:
         self.sel_weapon = None
         self.sel_attack = None
         self.sel_utility = None
+        self.sel_weapon_idx = 0
+        self.sel_attack_idx = 0
+        self.sel_utility_idx = 0
 
     def init_light(self):
         self.lightmap = np.ones_like(self.owner.light_source.fov_map.fov, dtype=float)
@@ -52,3 +56,46 @@ class Player:
     def level_up(self, levels_gained):
         self.char_level += levels_gained
         self.skill_points += 1
+
+    def switch_weapon(self):
+        idx = self.sel_weapon_idx + 1
+        self.sel_weapon_idx += 1
+        if idx >= len(self.owner.abilities.weapon_skills):
+            idx = 0
+            self.sel_weapon_idx = 0
+        self.sel_weapon = self.owner.abilities.weapon_skills[idx]
+
+    def switch_attack(self):
+        idx = self.sel_attack_idx + 1
+        self.sel_attack_idx += 1
+        if idx >= len(self.owner.abilities.attack_skills):
+            idx = 0
+            self.sel_attack_idx = 0
+        self.sel_attack = self.owner.abilities.attack_skills[idx]
+
+    def switch_utility(self):
+        idx = self.sel_utility_idx + 1
+        self.sel_utility_idx += 1
+        if idx >= len(self.owner.abilities.utility_skills):
+            idx = 0
+            self.sel_utility_idx = 0
+        self.sel_utility = self.owner.abilities.utility_skills[idx]
+
+    def use_ability(self, game_map, ability, target=None):
+        results = []
+        targeting = False
+        if not target:
+            entities = get_neighbour_entities(self.owner, game_map.tiles, fighters=True)
+            if not entities:
+                results.append("There are no available targets in range.")
+            elif len(entities) == 1:
+                target = entities[0]
+                results = self.owner.fighter.attack(target, ability)
+            else:
+                results.append(["Use '{0}' on which target?".format(ability.name), "yellow"])
+                target = entities[0]
+                targeting = True
+        else:
+            results = self.owner.fighter.attack(target, ability)
+
+        return results, target, targeting
