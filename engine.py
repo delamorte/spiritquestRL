@@ -3,26 +3,23 @@ from bearlibterminal import terminal as blt
 from actions import Actions
 from camera import Camera
 from components.abilities import Abilities
+from components.entity import Entity
 from components.inventory import Inventory
+from components.light_source import LightSource
 from components.menus.main_menu import MainMenu
 from components.player import Player
-from components.cursor import Cursor
-from components.light_source import LightSource
 from components.status_effects import StatusEffects
 from data import json_data
-from render_functions import RenderFunctions
-from components.entity import Entity
 from fighter_stats import get_fighter_data
 from game_states import GameStates
-from helpers import get_article
 from input_handlers import handle_keys
 from map_objects.levels import Levels
 from map_objects.tilemap import init_tiles, tilemap
-from map_objects.show_map import test_dynamic_sprites
+from options import Options
+from render_functions import RenderFunctions
 from ui.elements import UIElements
-from ui.message_log import MessageLog
 from ui.menus import Menus, MenuData
-from ui.message_history import show_msg_history
+from ui.message_log import MessageLog
 
 
 class Engine:
@@ -39,6 +36,7 @@ class Engine:
         self.menus = None
         self.levels = None
         self.player = None
+        self.options = None
 
     def initialize(self):
         # Initialize game data from external files
@@ -62,8 +60,10 @@ class Engine:
         blt.refresh()
         blt.read()
 
+        self.options = Options()
+
         # Load tiles
-        init_tiles()
+        init_tiles(self.options)
 
         # Init UI
         self.ui = UIElements()
@@ -125,11 +125,11 @@ class Engine:
         self.message_log.owner = self
 
         # Initialize game camera
-        game_camera = Camera(1, 1, self.ui.viewport.w, self.ui.viewport.h)
+        game_camera = Camera(1, 1, self.ui.viewport.w, self.ui.viewport.h, self.options)
         self.game_camera = game_camera
         self.game_camera.owner = self
 
-        levels = Levels()
+        levels = Levels(tileset=self.options.gfx)
         self.levels = levels
         self.levels.owner = self
 

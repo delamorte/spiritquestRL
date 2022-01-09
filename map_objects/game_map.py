@@ -5,7 +5,7 @@ from components.entity import Entity
 from fighter_stats import get_fighter_ai, get_spawn_rates, get_fighter_data
 from map_objects.tile import Tile
 from map_objects.tilemap import tilemap, openables_names, items_names, stairs_names
-from palettes import get_dngn_colors, get_forest_colors, get_monster_color, name_color_from_value
+from color_functions import get_dngn_colors, get_forest_colors, get_monster_color, name_color_from_value
 from random import choice, choices, randint
 from components.stairs import Stairs
 from components.door import Door
@@ -14,7 +14,6 @@ from components.light_source import LightSource
 from resources.dungeon_generation.dungeon_generator import DrunkardsWalk, RoomAddition, MessyBSPTree, CellularAutomata, \
     MazeWithRooms
 import xml.etree.ElementTree as ET
-import settings
 import numpy as np
 
 
@@ -63,7 +62,7 @@ class GameMap:
 
                     if ground != 0:
                         name, color = name_color_from_value(ground, self.owner.world_tendency)
-                        if settings.gfx == "oryx":
+                        if self.owner.tileset == "oryx":
                             ground += 0xE400
                         else:
                             ground = tilemap()[name]
@@ -73,7 +72,7 @@ class GameMap:
 
                     if ground_top != 0:
                         name, color = name_color_from_value(ground_top, self.owner.world_tendency)
-                        if settings.gfx == "oryx":
+                        if self.owner.tileset == "oryx":
                             ground_top += 0xE400
                         else:
                             ground_top = tilemap()[name]
@@ -81,7 +80,7 @@ class GameMap:
 
                     if entity != 0:
                         name, color = name_color_from_value(entity, self.owner.world_tendency)
-                        if settings.gfx == "oryx":
+                        if self.owner.tileset == "oryx":
                             entity += 0xE400
                         else:
                             if isinstance(tilemap()[name], tuple):
@@ -796,7 +795,7 @@ class GameMap:
 
     def create_decor(self):
 
-        if settings.gfx == "ascii":
+        if self.owner.tileset == "ascii":
             return
         # Generate rocks & rubble on floor tiles
         decor_odds = 0.1

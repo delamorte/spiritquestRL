@@ -4,13 +4,13 @@ from fighter_stats import get_spawn_rates
 from map_objects.game_map import GameMap
 from map_objects.tilemap import tilemap
 from descriptions import level_biomes, meditate_params
-import settings
-from ui.menus import Menus, MenuData
+from ui.menus import MenuData
 
 
 class Levels:
-    def __init__(self):
+    def __init__(self, tileset):
         self.owner = None
+        self.tileset = tileset
         self.player = None
         self.items = {}
         self.params = None

@@ -92,6 +92,7 @@ class Actions:
             stairs_component = self.owner.levels.current_map.tiles[self.owner.player.x][self.owner.player.y].stairs
             if stairs_component:
                 stairs_component.interaction(self.owner.levels, self.owner.message_log)
+                self.owner.time_counter.take_turn(1)
                 self.owner.render_functions.draw_messages()
                 self.owner.fov_recompute = True
 

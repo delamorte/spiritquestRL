@@ -1,8 +1,5 @@
 from ctypes import c_uint32, addressof
 from bearlibterminal import terminal as blt
-from palettes import name_color_from_value
-import settings
-from os import path
 import pickle
 
 # TODO: REFACTOR THESE NAMES?? WTF, PUT THEM UNDER A CLASS OR SOMETHING
@@ -27,8 +24,8 @@ def init_gfx(f):
     return arr
 
 
-def init_tiles():
-    tilesize = settings.tile_width + 'x' + settings.tile_height
+def init_tiles(options):
+    tilesize = options.tile_width + 'x' + options.tile_height
 
     gfx1 = init_gfx('./gfx/gfx1')
     gfx2 = init_gfx('./gfx/gfx2')
@@ -63,10 +60,10 @@ def init_tiles():
         size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx6), 144, 48) +
             "64x96" + ", resize-filter=nearest, spacing=4x4, align=top-left")
 
-    settings.tile_offset_x = int(
-        int(settings.tile_width) / blt.state(blt.TK_CELL_WIDTH))
-    settings.tile_offset_y = int(
-        int(settings.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
+    options.tile_offset_x = int(
+        int(options.tile_width) / blt.state(blt.TK_CELL_WIDTH))
+    options.tile_offset_y = int(
+        int(options.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
 
     blt.clear()
 
@@ -83,97 +80,10 @@ def tilemap_ui():
     return tiles
 
 
-def tilemap(tileset=None):
+def tilemap(tileset="oryx"):
     tiles = {}
-    if tileset is None:
-        tileset = settings.gfx
-    if tileset == "adambolt":
-        tiles = {"tree": (0xE800 + 87, 0xE800 + 88, 0xE800 + 89, 0xE800 + 93, 0xE800 + 94, 0xE800 + 95),
-                 "dead_tree": (0xE800 + 112, 0xE800 + 144),
-                 "rocks": (0xE800 + 388, 0xE800 + 119),
-                 "coffin (open)": 0xE800 + 158,
-                 "coffin (closed)": 0xE800 + 158,
-                 "shrine": 0xE800 + 107,
-                 "candle": 0xE800 + 458,
-                 "gate": {"open": 0xE800 + 68, "closed": 0xE800 + 67, "locked": 0xE800 + 78},
-                 "gate (open)": 0xE800 + 68,
-                 "gate (closed)": 0xE800 + 67,
-                 "fence, vertical": 0xE800 + 440,
-                 "fence, horizontal": 0xE800 + 441,
-                 "statue": 0xE800 + 945,
-                 "shrubs": 0xE800 + 93,
-                 "plants": (0xE800 + 93, 0xE800 + 94, 0xE800 + 95),
-                 "flowers": (0xE800 + 93, 0xE800 + 94, 0xE800 + 95),
-                 "mushrooms": (0xE800 + 118),
-                 "ground_dot": (0xE800 + 1748),
-                 "ground_soil": (0xE800 + 1748, 0xE800 + 1750),
-                 "ground_moss": (0xE800 + 1751, 0xE800 + 1752, 0xE800 + 1753),
-                 "floor": 0xE800 + 20,
-                 "floor_wood": 0xE800 + 21,
-                 "pavement": (0xE800 + 20),
-                 "bones": (0xE800 + 468, 0xE800 + 469, 0xE800 + 470, 0xE800 + 471, 0xE800 + 475),
-                 "player": 0xE800 + 704,
-                 "player_remains": 0xE800 + 468,
-                 "monsters": {"rat": 0xE800 + 1416,
-                              "bear": 0xE800 + 1780,
-                              "crow": 0xE800 + 1587,
-                              "felid": 0xE800 + 1252,
-                              "snake": 0xE800 + 1097,
-                              "frog": 0xE800 + 1095,
-                              "mosquito": 0xE800 + 1554},
-                 "monsters_chaos": {"rat": 0xE800 + 1416,
-                                    "crow": 0xE800 + 1587,
-                                    "chaos cat": 0xE800 + 1255,
-                                    "chaos bear": 0xE800 + 1553,
-                                    "chaos spirit": 0xE800 + 1029,
-                                    "cockroach": 0xE800 + 1473,
-                                    "bone snake": 0xE800 + 1093,
-                                    "chaos dog": 0xE800 + 960,
-                                    "bat": 0xE800 + 1200,
-                                    "imp": 0xE800 + 1047,
-                                    "leech": 0xE800 + 1204},
-                 "monsters_light": {"bear": 0xE800 + 1780,
-                                    "crow": 0xE800 + 1587,
-                                    "spirit": 0xE800 + 1017,
-                                    "ghost dog": 0xE800 + 959,
-                                    "snake": 0xE800 + 1100,
-                                    "gecko": 0xE800 + 1104,
-                                    "serpent": 0xE800 + 1323,
-                                    "frog": 0xE800 + 1095,
-                                    "mosquito": 0xE800 + 1554,
-                                    "fairy": 0xE800 + 1032},
 
-                 "unique_monsters": {"king kobra": 0xE800 + 1105, "albino rat": 0xE800 + 1414,
-                                     "keeper of dreams": 0xE800 + 974},
-                 "monster_remains": 0xE800 + 513,
-                 "boss_remains": 0xE800 + 513,
-                 "door": {"open": 0xE800 + 68, "closed": 0xE800 + 67, "locked": 0xE800 + 78},
-                 "door (open)": 0xE800 + 68,
-                 "door (closed)": 0xE800 + 67,
-                 "campfire": 0xE800 + 427,
-                 "holy symbol": 0xE800 + 439,
-                 "cross": 0xE800 + 438,
-                 "stairs": {"up": 0xE800 + 22, "down": 0xE800 + 27},
-                 "brick": {"horizontal": 0xE800 + 83, "vertical": 0xE800 + 83},
-                 "wall": 0xE800 + 83,
-                 "window": 0xE800 + 82,
-                 "throne": 0xE800 + 107,
-                 "table": 0xE800 + 107,
-                 "book": 0xE800 + 409,
-                 "skull": 0xE800 + 468,
-                 "flask": 0xE800 + 160,
-                 "moss": (0xE800 + 90, 0xE800 + 91, 0xE800 + 92),
-                 "weapons": {"club": 0xE800 + 242},
-                 "ui_block_horizontal": 0xE800 + 472,
-                 "ui_block_vertical": 0xE800 + 440,
-                 "ui_block_nw": 0xE800 + 468,
-                 "ui_block_ne": 0xE800 + 468,
-                 "ui_block_sw": 0xE800 + 468,
-                 "ui_block_se": 0xE800 + 468,
-                 "indicator": 0xE800 + 1746
-                 }
-
-    elif tileset == "oryx":
+    if tileset == "oryx":
         tiles = {"tree": (0xE000 + 399, 0xE000 + 400, 0xE000 + 401, 0xE000 + 402, 0xE000 + 405),
                  "dead_tree": (0xE000 + 403, 0xE000 + 404),
                  "coffin": {"open": 0xE000 + 50, "closed": 0xE800 + 151},

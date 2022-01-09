@@ -1,4 +1,3 @@
-import settings
 from data import json_data
 from components.ai import BasicMonster
 from components.fighter import Fighter

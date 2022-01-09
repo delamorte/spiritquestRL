@@ -4,7 +4,7 @@ from components.menus.avatar_info import AvatarInfo
 from components.menus.choose_animal import ChooseAnimal
 from components.menus.choose_level import ChooseLevel
 from game_states import GameStates
-from palettes import get_monster_color
+from color_functions import get_monster_color
 
 
 class Menus:
