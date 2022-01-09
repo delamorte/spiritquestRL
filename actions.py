@@ -68,8 +68,7 @@ class Actions:
             self.owner.message_log.stack = []
 
         elif interact:
-            entities = get_neighbour_entities(self.owner.player.x, self.owner.player.y,
-                                              self.owner.levels.current_map.tiles)
+            entities = get_neighbour_entities(self.owner.player, self.owner.levels.current_map.tiles)
             for entity in entities:
                 if entity.door:
                     if entity.door.status == "closed":
