@@ -69,27 +69,18 @@ class Actions:
 
         elif interact:
             entities = get_neighbour_entities(self.owner.player, self.owner.levels.current_map.tiles)
+            interact_msg = None
             for entity in entities:
                 if entity.door:
-                    if entity.door.status == "closed":
-                        entity.door.set_status("open", self.owner.levels.current_map)
-                        self.owner.message_log.send("You open the door.")
-                        self.owner.time_counter.take_turn(1)
-                        self.owner.game_state = GameStates.ENEMY_TURN
-                    elif entity.door.status == "open":
-                        entity.door.set_status("closed", self.owner.levels.current_map)
-                        self.owner.message_log.send("You close the door.")
-                        self.owner.time_counter.take_turn(1)
-                        self.owner.game_state = GameStates.ENEMY_TURN
-                    else:
-                        self.owner.message_log.send("The door is locked.")
-                        self.owner.time_counter.take_turn(1)
-                        self.owner.game_state = GameStates.ENEMY_TURN
+                    interact_msg = entity.door.interaction(self.owner.levels.current_map)
+                    self.owner.message_log.send(interact_msg)
                 elif entity.item:
                     interact_msg = entity.item.interaction(self.owner.levels.current_map)
-                    if interact_msg:
-                        self.owner.message_log.send(interact_msg)
-                        self.owner.fov_recompute = True
+                    self.owner.message_log.send(interact_msg)
+            if interact_msg:
+                self.owner.time_counter.take_turn(1)
+                self.owner.game_state = GameStates.ENEMY_TURN
+                self.owner.fov_recompute = True
 
         elif pickup:
             if "items" in self.owner.levels.current_map.entities:

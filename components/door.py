@@ -29,3 +29,15 @@ class Door:
             game_map.tiles[self.owner.x][self.owner.y].blocked = True
             game_map.tiles[self.owner.x][self.owner.y].block_sight = True    
             self.owner.char = tilemap()["door"]["locked"]
+
+    def interaction(self, game_map):
+        if self.status == "closed":
+            self.set_status("open", game_map)
+            msg = "You open the door."
+        elif self.status == "open":
+            self.set_status("closed", game_map)
+            msg = "You close the door."
+        else:
+            msg = "The door is locked."
+
+        return msg
