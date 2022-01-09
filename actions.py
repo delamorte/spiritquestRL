@@ -53,16 +53,11 @@ class Actions:
 
             elif self.owner.levels.current_map.tiles[destination_x][destination_y].is_door:
                 door = self.owner.levels.current_map.tiles[destination_x][destination_y].door
-                if door.status == "locked":
-                    self.owner.message_log.send("The door is locked...")
-                    self.owner.time_counter.take_turn(1)
-                    self.owner.game_state = GameStates.ENEMY_TURN
-                elif door.status == "closed":
-                    door.set_status("open", self.owner.levels.current_map)
-                    self.owner.message_log.send("You open the door.")
-                    self.owner.time_counter.take_turn(1)
-                    self.owner.game_state = GameStates.ENEMY_TURN
-                    self.owner.fov_recompute = True
+                interact_msg = door.interaction(self.owner.levels.current_map)
+                self.owner.message_log.send(interact_msg)
+                self.owner.time_counter.take_turn(1)
+                self.owner.game_state = GameStates.ENEMY_TURN
+                self.owner.fov_recompute = True
 
             self.owner.message_log.old_stack = self.owner.message_log.stack
             self.owner.message_log.stack = []
@@ -83,22 +78,13 @@ class Actions:
                 self.owner.fov_recompute = True
 
         elif pickup:
-            if "items" in self.owner.levels.current_map.entities:
-                for entity in self.owner.levels.current_map.entities["items"]:
-                    if entity.x == self.owner.player.x and entity.y == self.owner.player.y and entity.item.pickable:
-                        pickup_msg = self.owner.player.inventory.add_item(entity)
-                        self.owner.message_log.send(pickup_msg)
-                        for item in self.owner.message_log.stack:
-                            if entity.name == item.split(" ", 1)[1]:
-                                self.owner.message_log.stack.remove(item)
-                        self.owner.levels.current_map.tiles[entity.x][entity.y].remove_entity(entity)
-                        self.owner.levels.current_map.entities["items"].remove(entity)
-                        self.owner.time_counter.take_turn(1)
-                        self.owner.game_state = GameStates.ENEMY_TURN
-                        self.owner.fov_recompute = True
-                        break
-                    # else:
-                    #     message_log.send("There is nothing here to pick up.")
+            pickup_msg = self.owner.player.inventory.add_item(self.owner.levels.current_map, self.owner.message_log)
+
+            if pickup_msg:
+                self.owner.message_log.send(pickup_msg)
+                self.owner.time_counter.take_turn(1)
+                self.owner.game_state = GameStates.ENEMY_TURN
+                self.owner.fov_recompute = True
             else:
                 self.owner.message_log.send("There is nothing here to pick up.")
 
