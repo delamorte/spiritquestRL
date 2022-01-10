@@ -101,8 +101,8 @@ def show_msg_history(message_log, name, viewport_w, viewport_h):
     frame = FrameWithScrollbar(messages)
     message_log.reverse()
 
-    for msg in message_log:
-        messages.append(msg)
+    for message in message_log:
+        messages.append(message.msg)
 
     # Initial update
     frame.update_geometry(

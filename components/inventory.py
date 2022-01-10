@@ -1,3 +1,6 @@
+from ui.message import Message
+
+
 class Inventory:
     def __init__(self, capacity):
         self.owner = None
@@ -9,7 +12,8 @@ class Inventory:
 
         if item:
             self.items.append(item)
-            results.append("{0} was added to your inventory.".format(item.name))
+            msg = Message("{0} was added to your inventory.".format(item.name))
+            results.append(msg)
             return results
 
         entities = game_map.tiles[self.owner.x][self.owner.y].items_on_tile
@@ -17,15 +21,13 @@ class Inventory:
             for entity in entities:
                 if entity.item and entity.item.pickable:
                     if len(self.items) >= self.capacity:
-                        results.append("Your inventory is full.")
+                        msg = Message("Your inventory is full.")
+                        results.append(msg)
                     else:
-                        results.append("You pick up the {0}.".format(entity.name))
+                        msg = Message("You pick up the {0}.".format(entity.name))
+                        results.append(msg)
                         self.items.append(entity)
                         game_map.tiles[self.owner.x][self.owner.y].remove_entity(entity)
                         game_map.entities["items"].remove(entity)
-
-                    for msg in msg_log.stack:
-                        if entity.name == msg.split(" ", 1)[1]:
-                            msg_log.stack.remove(msg)
 
         return results

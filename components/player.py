@@ -2,6 +2,8 @@ from components.entity import get_neighbour_entities
 from map_objects.tilemap import tilemap
 import numpy as np
 
+from ui.message import Message
+
 
 class Player:
     def __init__(self, spirit_power):
@@ -49,7 +51,7 @@ class Player:
 
         if levels_gained >= 1:
             self.level_up(levels_gained)
-            return "You have gained a level!"
+            return Message("You have gained a level!", style="level_up")
 
         return None
 
@@ -87,12 +89,14 @@ class Player:
         if not target:
             entities = get_neighbour_entities(self.owner, game_map.tiles, fighters=True)
             if not entities:
-                results.append("There are no available targets in range.")
+                msg = Message("There are no available targets in range.")
+                results.append(msg)
             elif len(entities) == 1:
                 target = entities[0]
                 results = self.owner.fighter.attack(target, ability)
             else:
-                results.append(["Use '{0}' on which target?".format(ability.name), "yellow"])
+                msg = Message(msg="Use '{0}' on which target?".format(ability.name), style="question")
+                results.append(msg)
                 target = entities[0]
                 targeting = True
         else:

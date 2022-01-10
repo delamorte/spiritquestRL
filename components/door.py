@@ -1,4 +1,5 @@
 from map_objects.tilemap import tilemap
+from ui.message import Message
 
 
 class Door:
@@ -40,4 +41,4 @@ class Door:
         else:
             msg = "The door is locked."
 
-        return msg
+        return Message(msg)

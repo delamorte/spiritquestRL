@@ -3,6 +3,7 @@ from math import ceil
 from random import randint
 from components.status_effect import StatusEffect
 from data import json_data
+from ui.message import Message
 
 
 class Fighter:
@@ -27,11 +28,9 @@ class Fighter:
         self.effects = []
 
     def take_damage(self, amount):
-        results = []
         self.hp -= amount
         if self.hp <= 0:
             self.dead = True
-        return results
 
     def attack(self, target, skill):
         results = []
@@ -45,18 +44,43 @@ class Fighter:
                 damage = self.calculate_damage(skill, target)
                 if miss:
                     if self.owner.player:
-                        results.append([
-                            "You attack the {0} with {1}, but miss.".format(target.name, skill.name), "gray"])
+                        msg = Message(msg="You attack the {0} with {1}, but miss.".format(
+                            target.name, skill.name),
+                                      style="miss")
+                        results.append(msg)
                     else:
-                        results.append([
-                            "The {0} attacks you with {1}, but misses.".format(self.owner.name, skill.name), "gray"])
+                        msg = Message(msg="The {0} attacks you with {1}, but misses.".format(
+                            self.owner.name, skill.name),
+                                      style="miss")
+                        results.append(msg)
                 else:
                     if self.owner.player:
-                        results.append(["You use {0} on {1}!".format(
-                            skill.name, target.name), "orange"])
+                        if skill.skill_type == "attack":
+                            msg = Message(msg="You use {0} on {1}!".format(
+                                skill.name, target.name), style="skill_use")
+                            results.append(msg)
+                            if damage > 0:
+                                msg = Message(msg="You attack the {0} for {1} damage.".format(
+                                    target.name, str(damage)), style="attack", extend_line=True)
+                                results.append(msg)
+                        else:
+                            msg = Message(msg="You attack the {0} with {1} for {2} damage.".format(
+                                target.name, skill.name, damage))
+                            results.append(msg)
+
                     else:
-                        results.append(["The {0} uses {1} on you!".format(
-                            self.owner.name, skill.name), "lighter red"])
+                        if skill.skill_type == "attack":
+                            msg = Message(msg="The {0} uses {1} on you!".format(
+                                self.owner.name, skill.name), style="skill_use")
+                            results.append(msg)
+                            if damage > 0:
+                                msg = Message(msg="The {0} attacks you for {1} damage.".format(
+                                    self.owner.name, str(damage)), style="attack", extend_line=True)
+                                results.append(msg)
+                        else:
+                            msg = Message(msg="The {0} attacks you with {1} for {2} damage.".format(
+                                self.owner.name, skill.name, damage))
+                            results.append(msg)
 
                     if skill.effect:
                         for effect in skill.effect:
@@ -84,27 +108,27 @@ class Fighter:
 
                             target.status_effects.add_item(effect_component)
                             if self.owner.player:
-                                results.append(["The {0} is inflicted with {1}!".format(target.name, effect), "orange"])
+                                msg = Message(msg="The {0} is inflicted with {1}!".format(
+                                    target.name, effect), style="status_effect")
+                                results.append(msg)
                             else:
-                                results.append(["You are inflicted with {} !".format(effect), "green"])
+                                msg = Message(msg="You are inflicted with {} !".format(
+                                    effect), style="status_effect")
+                                results.append(msg)
 
                     if damage > 0:
-                        if self.owner.player:
-                            results[-1][0] += (" You attack the {0} for {1} hit points.".format(
-                                target.name, str(damage)))
-                        else:
-                            results[-1][0] += (" The {0} attacks you for {1} hit points.".format(
-                                self.owner.name, str(damage)))
-
-                        results.extend(target.fighter.take_damage(damage))
+                        target.fighter.take_damage(damage)
 
                     else:
                         if self.owner.player:
-                            results[-1][0] += (
-                                " You attack the {0} with {1} but do no damage.".format(target.name, skill.name))
+                            msg = Message(msg="You attack the {0} with {1} but do no damage.".format(
+                                target.name, skill.name), style="miss", extend_line=True)
+                            results.append(msg)
                         else:
-                            results[-1][0] += (
-                                "The {0} attacks you  with {1} but does no damage.".format(self.owner.name, skill.name))
+                            msg = Message(msg="The {0} attacks you  with {1} but does no damage.".format(
+                                self.owner.name, skill.name), style="miss", extend_line=True)
+                            results.append(msg)
+
         return results
 
     def calculate_damage(self, skill, target):

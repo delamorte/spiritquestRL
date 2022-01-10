@@ -9,6 +9,8 @@ from color_functions import argb_from_color
 import random
 from ctypes import c_uint32, addressof
 
+from ui.message import Message
+
 
 class RenderFunctions:
     def __init__(self, ui_offset_x=0, ui_offset_y=0):
@@ -55,7 +57,7 @@ class RenderFunctions:
         player = self.owner.player
         game_map = self.owner.levels.current_map
         cursor = self.owner.cursor
-        stack = self.owner.message_log.stack
+        results = []
         self.light_sources = []
         for entity in entities:
 
@@ -63,21 +65,21 @@ class RenderFunctions:
 
             if entity.x == player.x and entity.y == player.y and entity.stand_on_messages:
 
-                stack.append(get_article(
-                    entity.name).capitalize() + " " + entity.name)
+                results.append(Message(get_article(
+                    entity.name).capitalize() + " " + entity.name + "."))
                 if entity.xtra_info:
-                    stack.append(entity.xtra_info)
+                    results.append(Message(msg=entity.xtra_info + ".", style="xtra"))
 
             if cursor:
                 if entity.occupied_tiles is not None:
                     if (game_map.tiles[entity.x][entity.y].explored and not entity.cursor and
                             (cursor.x, cursor.y) in entity.occupied_tiles):
 
-                        stack.append(get_article(entity.name).capitalize() + " " + entity.name)
-                        stack.append(str("x: " + (str(cursor.x) + ", y: " + str(cursor.y))))
+                        results.append(Message(get_article(entity.name).capitalize() + " " + entity.name + "."))
+                        results.append(Message(str("x: " + (str(cursor.x) + ", y: " + str(cursor.y)))))
 
                         if entity.xtra_info:
-                            stack.append(entity.xtra_info)
+                            results.append(Message(msg=entity.xtra_info + ".", style="xtra"))
 
                         if entity.fighter:
                             self.draw_stats(entity)
@@ -85,11 +87,11 @@ class RenderFunctions:
                 elif (entity.x == cursor.x and entity.y == cursor.y and not
                 entity.cursor and game_map.tiles[entity.x][entity.y].explored):
 
-                    stack.append(get_article(entity.name).capitalize() + " " + entity.name)
-                    stack.append(str("x: " + (str(cursor.x) + ", y: " + str(cursor.y))))
+                    results.append(Message(get_article(entity.name).capitalize() + " " + entity.name + "."))
+                    results.append(Message(str("x: " + (str(cursor.x) + ", y: " + str(cursor.y)))))
 
                     if entity.xtra_info:
-                        stack.append(entity.xtra_info)
+                        results.append(Message(msg=entity.xtra_info + ".", style="xtra"))
 
                     if entity.fighter:
                         self.draw_stats(entity)
@@ -128,6 +130,8 @@ class RenderFunctions:
             if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and self.owner.options.gfx != "ascii":
                 self.draw_indicator(player.x, player.y, "gray")
                 self.draw_indicator(entity.x, entity.y, "dark red", entity.occupied_tiles)
+            
+        self.owner.message_log.send(results)
 
     def draw_map(self):
         game_camera = self.owner.game_camera
@@ -275,20 +279,7 @@ class RenderFunctions:
 
     def draw_messages(self):
         message_log = self.owner.message_log
-        stack = message_log.stack
-        old_stack = message_log.old_stack
         msg_panel = self.owner.ui.msg_panel
-        if len(stack) > 0 and not stack == old_stack:
-
-            d = dict(Counter(stack))
-            formatted_stack = []
-            for i in d:
-                if d[i] > 1:
-                    formatted_stack.append(i + " x" + str(d[i]))
-                else:
-                    formatted_stack.append(i)
-            message_log.send(
-                ". ".join(formatted_stack) + ".")
 
         if message_log.new_msgs or not message_log.buffer:
             blt.layer(0)
@@ -304,10 +295,12 @@ class RenderFunctions:
             # if i > message_log.max_length:
             #    i = 0
 
-            for idx, msg in enumerate(message_log.buffer):
-                blt.color(message_log.buffer_colors[idx])
-                msg = shorten(msg, msg_panel.w * self.ui_offset_x - 2,
+            for idx, message in enumerate(message_log.buffer):
+
+                msg = shorten(message.msg, msg_panel.offset_w,
                               placeholder="..(Press 'M' for log)")
+                if message.stacked > 1:
+                    msg = msg + " x{0}".format(str(message.stacked))
                 blt.puts(msg_panel.border_offset, msg_panel.offset_y + msg_panel.border_offset + i * 2,
                         "[offset=0,-35]" + msg, msg_panel.offset_w - 2, 1, align=blt.TK_ALIGN_LEFT)
                 i -= 1

@@ -4,6 +4,7 @@ from components.cursor import Cursor
 from components.entity import Entity, get_neighbour_entities
 from game_states import GameStates
 from helpers import get_article
+from ui.message import Message
 from ui.message_history import show_msg_history
 
 
@@ -17,8 +18,8 @@ class Actions:
         if wait:
             self.owner.time_counter.take_turn(1)
             # player.player.spirit_power -= 1
-            self.owner.message_log.send("You wait a turn.")
-            self.owner.message_log.old_stack = self.owner.message_log.stack
+            msg = Message("You wait a turn.")
+            self.owner.message_log.send(msg)
             self.owner.game_state = GameStates.ENEMY_TURN
 
         elif move:
@@ -30,16 +31,16 @@ class Actions:
             if not self.owner.levels.current_map.is_blocked(destination_x, destination_y):
                 target = self.owner.levels.current_map.tiles[destination_x][destination_y].blocking_entity
                 if target:
-                    combat_msg = self.owner.player.fighter.attack(target, self.owner.player.player.sel_weapon)
-
-                    self.owner.message_log.send(combat_msg)
+                    results = self.owner.player.fighter.attack(target, self.owner.player.player.sel_weapon)
+                    self.owner.message_log.send(results)
                     # player.player.spirit_power -= 0.5
                     self.owner.time_counter.take_turn(1)
                     self.owner.render_functions.draw_stats(target)
 
                 else:
                     if self.owner.player.fighter.mv_spd <= 0:
-                        self.owner.message_log.send("You are unable to move!")
+                        msg = Message("You are unable to move!")
+                        self.owner.message_log.send(msg)
                         self.owner.time_counter.take_turn(1)
                     else:
                         prev_pos_x, prev_pos_y = self.owner.player.x, self.owner.player.y
@@ -59,9 +60,6 @@ class Actions:
                 self.owner.time_counter.take_turn(1)
                 self.owner.game_state = GameStates.ENEMY_TURN
                 self.owner.fov_recompute = True
-
-            self.owner.message_log.old_stack = self.owner.message_log.stack
-            self.owner.message_log.stack = []
 
         elif interact:
             entities = get_neighbour_entities(self.owner.player, self.owner.levels.current_map.tiles)
@@ -87,12 +85,14 @@ class Actions:
                 self.owner.game_state = GameStates.ENEMY_TURN
                 self.owner.fov_recompute = True
             else:
-                self.owner.message_log.send("There is nothing here to pick up.")
+                msg = Message("There is nothing here to pick up.")
+                self.owner.message_log.send(msg)
 
         elif stairs:
             stairs_component = self.owner.levels.current_map.tiles[self.owner.player.x][self.owner.player.y].stairs
             if stairs_component:
-                stairs_component.interaction(self.owner.levels, self.owner.message_log)
+                results = stairs_component.interaction(self.owner.levels)
+                self.owner.message_log.send(results)
                 self.owner.time_counter.take_turn(1)
                 self.owner.render_functions.draw_messages()
                 self.owner.fov_recompute = True
@@ -218,16 +218,12 @@ class Actions:
                     self.owner.cursor)
                 self.owner.fov_recompute = True
 
-                self.owner.message_log.old_stack = self.owner.message_log.stack
-                self.owner.message_log.stack = []
                 if self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].name is not None:
-                    self.owner.message_log.stack.append(
-                        self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].name.capitalize())
+                    self.owner.message_log.send(Message(
+                        self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].name.capitalize()))
 
         elif main_menu or examine:
             self.owner.game_state = GameStates.PLAYER_TURN
-            self.owner.message_log.old_stack = self.owner.message_log.stack
-            self.owner.message_log.stack = []
             self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].remove_entity(
                 self.owner.cursor)
             del self.owner.levels.current_map.entities["cursor"]
@@ -244,8 +240,6 @@ class Actions:
             self.owner.time_counter.take_turn(1)
             self.owner.game_state = GameStates.ENEMY_TURN
             self.owner.message_log.send(result)
-            self.owner.message_log.old_stack = self.owner.message_log.stack
-            self.owner.message_log.stack = []
             self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].remove_entity(
                 self.owner.cursor)
             del self.owner.levels.current_map.entities["cursor"]
@@ -281,13 +275,13 @@ class Actions:
                     kill_msg = entity.kill()
                     self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
                     self.owner.message_log.send(kill_msg)
-                    self.owner.message_log.send("I feel my power returning!")
+                    self.owner.message_log.send(Message("I feel my power returning!"))
                     if level_up_msg:
                         self.owner.message_log.send(level_up_msg)
                     self.owner.fov_recompute = True
 
                 elif entity.fighter and entity.fighter.paralyzed:
-                    self.owner.message_log.send("The monster is paralyzed!")
+                    self.owner.message_log.send(Message("The monster is paralyzed!"))
                     self.owner.game_state = GameStates.PLAYER_TURN
 
                 elif entity.ai:
@@ -322,7 +316,7 @@ class Actions:
                         kill_msg = entity.kill()
                         self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
                         self.owner.message_log.send(kill_msg)
-                        self.owner.message_log.send("I feel my power returning!")
+                        self.owner.message_log.send(Message("I feel my power returning!"))
                         if level_up_msg:
                             self.owner.message_log.send(level_up_msg)
                         self.owner.fov_recompute = True
