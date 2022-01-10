@@ -19,6 +19,7 @@ from options import Options
 from render_functions import RenderFunctions
 from ui.elements import UIElements
 from ui.menus import Menus, MenuData
+from ui.message import Message
 from ui.message_log import MessageLog
 
 
@@ -195,7 +196,8 @@ class Engine:
                 self.player.status_effects.process_effects()
 
             if self.player.fighter.paralyzed:
-                self.message_log.send("You are paralyzed!")
+                msg = Message("You are paralyzed!")
+                self.message_log.send(msg)
                 self.time_counter.take_turn(1)
                 self.game_state = GameStates.ENEMY_TURN
 

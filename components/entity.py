@@ -5,6 +5,7 @@ import tcod
 from game_states import GameStates
 from helpers import get_article
 from map_objects.tilemap import tilemap
+from ui.message import Message
 
 
 class Entity:
@@ -162,10 +163,11 @@ class Entity:
     def kill(self):
         if self.player:
             self.char = tilemap()["player_remains"]
-            death_message = "[color=red]You died!"
+            death_message = Message(msg="You died!", style="death")
 
         else:
-            death_message = [["The {0} is dead!".format(self.name), "red"]]
+            death_message = Message("The {0} is dead!".format(self.name), style="death")
+
             if self.boss:
                 self.char = tilemap()["boss_remains"]
                 self.color = "darkest red"

@@ -12,44 +12,51 @@
         "description": "Take a nasty bite",
         "skill_type": "weapon",
         "player_only": true,
-        "damage": ["1d4", "1d6", "1d8"]
+        "damage": ["1d4", "1d6", "1d8"],
+        "icon": 6
     },
     "snaketail whip": {
         "name": "snaketail whip",
         "description": "Lash your enemy with a whip resembling a living snake",
         "skill_type": "weapon",
         "player_only": true,
-        "damage": ["1d8", "1d10", "1d12"]
+        "damage": ["1d8", "1d10", "1d12"],
+        "icon": 7
     },
     "talons": {
         "name": "talons",
         "description": "Attack with sharp talons",
         "skill_type": "weapon",
-        "damage": ["2d3", "2d4", "2d5"]
+        "damage": ["2d3", "2d4", "2d5"],
+        "icon": 29
     },
     "bite": {
         "name": "bite",
         "description": "Ferocious bite with sharp teeth",
         "skill_type": "weapon",
-        "damage": ["1d3", "1d6", "1d8"]
+        "damage": ["1d3", "1d6", "1d8"],
+        "icon": 6
     },
     "claws": {
         "name": "claw",
         "description": "Rends the enemy with sharp claws",
         "skill_type": "weapon",
-        "damage": ["1d4", "1d6", "1d8"]
+        "damage": ["1d4", "1d6", "1d8"],
+        "icon": 29
     },
     "maul": {
         "name": "maul",
         "description": "Mauls the enemy with massive strength",
         "skill_type": "weapon",
-        "damage": ["1d8", "1d10", "1d12"]
+        "damage": ["1d8", "1d10", "1d12"],
+        "icon": 54
     },
     "strike": {
         "name": "strike",
         "description": "Strikes the enemy with a forceful blow",
         "skill_type": "weapon",
-        "damage": ["1d4", "1d6", "1d8"]
+        "damage": ["1d4", "1d6", "1d8"],
+        "icon": 22
     },
     "poison bite": {
         "name": "poison bite",
@@ -63,7 +70,8 @@
             0.1,
             0.2,
             0.3
-        ]
+        ],
+        "icon": 4
     },
     "leeching bite": {
         "name": "leeching bite",
@@ -75,7 +83,8 @@
             0.1,
             0.2,
             0.3
-        ]
+        ],
+        "icon": 19
     },
     "paralyzing bite": {
         "name": "paralyzing bite",
@@ -88,7 +97,8 @@
             0.1,
             0.2,
             0.3
-        ]
+        ],
+        "icon": 18
     },
     "diseasing bite": {
         "name": "diseasing bite",
@@ -101,7 +111,8 @@
             0.1,
             0.2,
             0.3
-        ]
+        ],
+        "icon": 19
     },
     "peck eyes": {
         "name": "peck eyes",
@@ -114,7 +125,8 @@
             0.1,
             0.2,
             0.3
-        ]
+        ],
+        "icon": 14
     },
     "swoop": {
         "name": "swoop",
@@ -126,7 +138,8 @@
             0.5,
             0.66
         ],
-        "needs_ai": true
+        "needs_ai": true,
+        "icon": 13
     },
     "lacerate": {
         "name": "lacerate",
@@ -138,7 +151,8 @@
             0.1,
             0.2,
             0.3
-        ]
+        ],
+        "icon": 10
     },
     "leap": {
         "name": "leap",
@@ -150,14 +164,16 @@
             0.1,
             0.1
         ],
-        "needs_ai": true
+        "needs_ai": true,
+        "icon": 41
     },
     "reveal": {
         "name": "reveal",
         "description": "reveal an area around you, may reveal secrets.",
         "skill_type": "utility",
         "radius": [8, 10, 12],
-        "needs_ai": true
+        "needs_ai": true,
+        "icon": 48
     },
     "stunning roar": {
         "name": "stunning roar",
@@ -166,20 +182,23 @@
         "effect": ["stun"],
         "radius": [2, 3, 4],
         "chance": [0.1, 0.15, 0.2],
-        "needs_ai": true
+        "needs_ai": true,
+        "icon": 33
     },
     "call allies": {
         "name": "call allies",
         "description": "make a loud beckoning noise calling friends",
         "skill_type": "utility",
         "chance": [0.05, 0.07, 0.1],
-        "needs_ai": true
+        "needs_ai": true,
+        "icon": 34
     },
     "summon crow": {
         "name": "summon crow",
         "description": "Beckon to the skies and summon a friend to attack from above",
         "skill_type": "utility",
-        "player_only": true
+        "player_only": true,
+        "icon": 51
     },
     "heal": {
         "name": "heal",
@@ -189,7 +208,8 @@
         "chance": [0.1, 0.15, 0.2],
         "target_self": true,
         "target_other": true,
-        "needs_ai": true
+        "needs_ai": true,
+        "icon": 36
     },
     "give power": {
         "name": "give power",
@@ -201,7 +221,8 @@
         "chance": [0.1, 0.15, 0.2],
         "target_self": true,
         "target_other": true,
-        "needs_ai": true
+        "needs_ai": true,
+        "icon": 37
     },
     "drain power": {
         "name": "drain power",
@@ -210,7 +231,8 @@
         "damage": ["1d4"],
         "effect": ["strength"],
         "duration": ["1d4"],
-        "chance": [0.1, 0.15, 0.2]
+        "chance": [0.1, 0.15, 0.2],
+        "icon": 40
     },
     "harm": {
         "name": "harm",
@@ -218,7 +240,8 @@
         "skill_type": "utility",
         "damage": ["1d4", "1d6", "1d8"],
         "radius": [3, 4, 5],
-        "chance": [0.1, 0.15, 0.2]
+        "chance": [0.1, 0.15, 0.2],
+        "icon": 19
     },
     "fire breath": {
         "name": "fire breath",
@@ -226,7 +249,8 @@
         "skill_type": "utility",
         "damage": ["1d8", "1d10", "1d12"],
         "radius": [2, 3, 5],
-        "chance": [0.1, 0.15, 0.2]
+        "chance": [0.1, 0.15, 0.2],
+        "icon": 9
     },
     "spit poison": {
         "name": "spit poison",
@@ -237,7 +261,8 @@
         "radius": [3, 4, 6],
         "chance": [0.1, 0.15, 0.2],
         "needs_ai": true,
-        "target_other": true
+        "target_other": true,
+        "icon": 4
     },
     "invisibility": {
         "name": "invisibility",
@@ -246,7 +271,8 @@
         "effect": ["invisibility"],
         "duration": ["1d8"],
         "chance": [0.1, 0.15, 0.2],
-        "target_self": true
+        "target_self": true,
+        "icon": 35
     },
     "sneak": {
         "name": "sneak",
@@ -254,7 +280,8 @@
         "skill_type": "utility",
         "effect": ["sneak"],
         "duration": ["1d8", "1d10", "1d12"],
-        "player_only": true
+        "player_only": true,
+        "icon": 21
     },
     "fly": {
         "name": "fly",
@@ -262,7 +289,8 @@
         "skill_type": "utility",
         "effect": ["fly"],
         "duration": ["1d8", "1d10", "1d12"],
-        "player_only": true
+        "player_only": true,
+        "icon": 58
     },
     "strangle": {
         "name": "strangle",
@@ -271,6 +299,7 @@
         "damage": ["1d4", "1d6", "1d8"],
         "effect": ["strangle"],
         "duration": ["1d3", "1d4", "1d6"],
-        "chance": [0.1, 0.15, 0.2]
+        "chance": [0.1, 0.15, 0.2],
+        "icon": 19
     }
 }

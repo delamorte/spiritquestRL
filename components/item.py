@@ -1,4 +1,5 @@
 from components.light_source import LightSource
+from ui.message import Message
 
 misc_decor = ["grass", "rubble", "rocks", "shrub", "bones"]
 light_sources = ["candle", "lantern"]
@@ -30,4 +31,4 @@ class Item:
             self.set_attributes(game_map)
             msg = "You light the candle."
 
-        return msg
+        return Message(msg)
