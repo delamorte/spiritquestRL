@@ -198,7 +198,7 @@
         "description": "Beckon to the skies and summon a friend to attack from above",
         "skill_type": "utility",
         "player_only": true,
-        "icon": 15
+        "icon": 51
     },
     "heal": {
         "name": "heal",

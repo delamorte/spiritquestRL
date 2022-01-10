@@ -544,6 +544,10 @@ class RenderFunctions:
                 blt.color("dark amber")
                 y_margin += skill_str.count('\n')
 
+            if i > 4:
+                y_margin += 3
+                i = 0
+
             blt.put(side_panel.offset_x + x_margin + 1 + i * 6,
                     side_panel.offset_y + first_heading_y + 4, wpn.icon)
             blt.color(None)
@@ -552,6 +556,7 @@ class RenderFunctions:
 
         # Attack skills
         for i, atk in enumerate(attack):
+
             if player.player.sel_attack and atk.name == player.player.sel_attack.name:
                 # heading
                 title = "Skills (Switch: 'A', Use: 'TAB')"
@@ -584,9 +589,14 @@ class RenderFunctions:
                 blt.color("dark amber")
                 y_margin += skill_str.count('\n')
 
+            if i > 4:
+                y_margin += 3
+                i = 0
+
             blt.put(side_panel.offset_x + x_margin + 1 + i * 6,
                     side_panel.offset_y + second_heading_y + 5 + y_margin, atk.icon)
             blt.color(None)
+
 
         third_heading_y = second_heading_y + 10
 
@@ -614,6 +624,10 @@ class RenderFunctions:
                          blt.TK_ALIGN_LEFT)
                 # highlight icon of the selected skill
                 blt.color("dark amber")
+
+            if i > 4:
+                y_margin += 3
+                i = 0
 
             blt.put(side_panel.offset_x + x_margin + 1 + i * 6,
                     side_panel.offset_y + third_heading_y + 5 + y_margin, utl.icon)
