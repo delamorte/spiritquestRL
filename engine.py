@@ -1,3 +1,5 @@
+from math import floor
+
 from bearlibterminal import terminal as blt
 
 from actions import Actions
@@ -75,7 +77,7 @@ class Engine:
 
         self.render_functions = RenderFunctions(self.ui.offset_x, self.ui.offset_y)
         self.render_functions.owner = self
-        self.ui.render_functions = self.render_functions
+
         self.ui.draw()
 
         # Call main menu and start game loop
@@ -151,6 +153,17 @@ class Engine:
         game_quit = False
 
         while not game_quit:
+
+            if (blt.state(floor(blt.TK_WIDTH)) != self.ui.screen_w or
+                    blt.state(floor(blt.TK_HEIGHT)) != self.ui.screen_h):
+
+                init_tiles(self.options)
+                self.ui = UIElements()
+                self.ui.owner = self
+                self.ui.draw()
+                blt.refresh()
+                self.fov_recompute = True
+
             if self.fov_recompute:
                 self.player.light_source.recompute_fov(self.player.x, self.player.y)
                 self.player.player.init_light()

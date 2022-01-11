@@ -32,7 +32,7 @@ class Viewport:
         self.color = "gray"
 
     def draw(self):
-        self.owner.render_functions.draw_ui(self)
+        self.owner.owner.render_functions.draw_ui(self)
 
     def update(self, w, h):
         self.w = w

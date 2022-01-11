@@ -1,3 +1,5 @@
+from math import floor
+
 from bearlibterminal import terminal as blt
 
 from components.menus.avatar_info import AvatarInfo
@@ -5,6 +7,8 @@ from components.menus.choose_animal import ChooseAnimal
 from components.menus.choose_level import ChooseLevel
 from game_states import GameStates
 from color_functions import get_monster_color
+from map_objects.tilemap import init_tiles
+from ui.elements import UIElements
 
 
 class Menus:
@@ -46,6 +50,17 @@ class Menus:
         self.refresh(menu.heading)
 
         while not output:
+            if (blt.state(floor(blt.TK_WIDTH)) != self.owner.ui.screen_w or
+                    blt.state(floor(blt.TK_HEIGHT)) != self.owner.ui.screen_h):
+
+                init_tiles(self.owner.options)
+                self.owner.ui = UIElements()
+                self.owner.ui.owner = self.owner
+                self.refresh(menu.heading)
+                self.owner.ui.draw()
+                blt.refresh()
+                self.owner.fov_recompute = True
+
             blt.layer(0)
             self.owner.render_functions.clear_camera(5)
             blt.puts(self.center_x, self.center_y - 5,

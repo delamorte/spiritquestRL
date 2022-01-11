@@ -19,3 +19,10 @@ class Ability:
         self.target_other = target_other
         self.player_only = player_only
         self.blt_input = blt_input
+
+    def get_range(self):
+        if self.radius:
+            radius = self.radius[self.rank]
+        else:
+            radius = 1
+        return radius

@@ -9,7 +9,8 @@ from components.ui.viewport import Viewport
 class UIElements:
     def __init__(self):
         self.owner = None
-        self.render_functions = None
+        self.screen_w = blt.state(floor(blt.TK_WIDTH))
+        self.screen_h = blt.state(floor(blt.TK_HEIGHT))
         self.elements = []
         self.offset_y = 3
         self.offset_x = 4
@@ -20,10 +21,8 @@ class UIElements:
         self.init_ui()
 
     def init_ui(self):
-        screen_w = blt.state(floor(blt.TK_WIDTH))
-        screen_h = blt.state(floor(blt.TK_HEIGHT))
-        w = floor(screen_w / self.offset_x)
-        h = floor(screen_h / self.offset_y)
+        w = floor(self.screen_w / self.offset_x)
+        h = floor(self.screen_h / self.offset_y)
 
         # Side panel
         side_panel_w = 10
@@ -46,4 +45,4 @@ class UIElements:
 
     def draw(self):
         for element in self.elements:
-            self.render_functions.draw_ui(element)
+            self.owner.render_functions.draw_ui(element)

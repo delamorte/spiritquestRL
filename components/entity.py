@@ -184,15 +184,16 @@ class Entity:
         return death_message
 
 
-def get_neighbour_entities(entity, game_map, n=3, exclude_self=True, fighters=False):
+def get_neighbour_entities(entity, game_map, radius=1, include_self=False, fighters=False):
     """
     :param entity:
     :param game_map:
-    :param n: radius
-    :param exclude_self: exclude self (center) in the list of entities
+    :param radius: radius
+    :param include_self: include self (center) in the list of entities
     :param fighters: return only fighting entities
     :return: list of entities surrounding the center in radius n
     """
+    n = radius * 2 + 1
     x, y = entity.x, entity.y
     arr = np.roll(np.roll(game_map, shift=-x + 1, axis=0), shift=-y + 1, axis=1)
     neighbours = arr[:n, :n].flatten()
@@ -200,7 +201,7 @@ def get_neighbour_entities(entity, game_map, n=3, exclude_self=True, fighters=Fa
 
     for tile in neighbours:
         if tile.entities_on_tile:
-            if exclude_self and tile.blocking_entity == entity:
+            if not include_self and tile.blocking_entity == entity:
                 continue
             else:
                 entities.extend(tile.entities_on_tile)

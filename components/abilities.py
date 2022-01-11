@@ -42,6 +42,7 @@ class Abilities:
             target_other = item["target_other"] if "target_other" in item.keys() else None
             player_only = item["player_only"] if "player_only" in item.keys() else False
 
+
             a = Ability(name=name, description=description, skill_type=skill_type, damage=damage, rank=rank,
                         icon=icon, dps=dps, effect=effect, duration=duration, radius=radius, chance=chance,
                         needs_ai=needs_ai, target_self=target_self, target_other=target_other,

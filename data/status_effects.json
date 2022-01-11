@@ -2,6 +2,7 @@
     "poison": {
         "name": "poison",
         "description": "poisoned",
+        "color": "green",
         "dps": [1],
         "duration": ["1d4"],
         "chance": [
@@ -12,6 +13,7 @@
         "name": "paralyze",
         "paralyze": true,
         "description": "paralyzed",
+        "color": "red",
         "duration": ["1d3", "1d4", "1d6"],
         "chance": [
             0.5,
@@ -22,6 +24,7 @@
     "disease": {
         "name": "disease",
         "description": "diseased",
+        "color": "yellow",
         "drain_stats": [2, 4, 6],
         "duration": ["1d4", "1d6", "1d8"],
         "chance": [
@@ -31,6 +34,7 @@
     "bleed": {
         "name": "bleed",
         "description": "bleeding",
+        "color": "light red",
         "delayed_damage": ["1d4"],
         "duration": ["1d4"],
         "chance": [
@@ -64,5 +68,45 @@
         "chance": [
             1.0
         ]
+    },
+    "boost_ev": {
+        "name": "boost EV",
+        "description": "EV+",
+        "power": [1.1, 1.2, 1.33]
+    },
+    "boost_ac": {
+        "name": "boost AC",
+        "description": "AC+",
+        "power": [1.1, 1.2, 1.33]
+    },
+    "boost_hp": {
+        "name": "boost HP",
+        "description": "AC++",
+        "power": [1.1, 1.2, 1.33]
+    },
+    "invisibility": {
+        "name": "invisibility",
+        "description": "invisible (sneak, EV+)",
+        "color": "lighter blue",
+        "duration": ["4d2", "5d2", "6d2"]
+    },
+    "sneak": {
+        "name": "sneak",
+        "description": "sneaking",
+        "color": "lighter blue",
+        "duration": [10, 20, 99]
+    },
+    "fly": {
+        "name": "fly",
+        "description": "flying (EV+)",
+        "color": "lighter blue",
+        "duration": [10, 15, 99],
+        "power": [1.2, 1.33, 1.5]
+    },
+    "reveal": {
+        "name": "reveal",
+        "description": "revealing hidden tiles",
+        "color": "amber",
+        "duration": [10, 15, 99]
     }
 }

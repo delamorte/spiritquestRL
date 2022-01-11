@@ -27,8 +27,12 @@ def roll_dice(dice_str):
         return dice_str
     result = 0
     dice_arr = dice_str.split("d")
-    dice_rolls = int(dice_arr[0])
+    if int(dice_arr[0]) < 0:
+        modifier = -1
+    else:
+        modifier = 1
+    dice_rolls = abs(int(dice_arr[0]))
     die = int(dice_arr[1])
     for x in range(dice_rolls):
-        result += randint(1, die)
+        result += randint(1, die) * modifier
     return result

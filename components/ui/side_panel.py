@@ -29,10 +29,10 @@ class SidePanel:
         self.color = "gray"
 
     def draw(self):
-        self.owner.render_functions.draw_ui(self)
+        self.owner.owner.render_functions.draw_ui(self)
 
     def draw_content(self):
-        self.owner.render_functions.draw_side_panel_content()
+        self.owner.owner.render_functions.draw_side_panel_content()
 
     def update(self, x, y, w, h):
         self.x = x

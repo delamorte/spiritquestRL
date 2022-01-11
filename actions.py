@@ -21,6 +21,7 @@ class Actions:
             msg = Message("You wait a turn.")
             self.owner.message_log.send(msg)
             self.owner.game_state = GameStates.ENEMY_TURN
+            self.owner.fov_recompute = True
 
         elif move:
             dx, dy = move
@@ -204,23 +205,49 @@ class Actions:
 
     def targeting_actions(self, move=False, examine=False, main_menu=False, use_ability=False,
                           interact=False):
-        if move:
-            dx, dy = move
-            destination_x = self.owner.cursor.x + dx
-            destination_y = self.owner.cursor.y + dy
-            x, y = self.owner.game_camera.get_coordinates(destination_x, destination_y)
 
-            if 0 < x < self.owner.game_camera.width - 1 and 0 < y < self.owner.game_camera.height - 1:
+        if move:
+            if self.owner.cursor.cursor.targeting_ability:
+                include_self = self.owner.cursor.cursor.targeting_ability.target_self
+                radius = self.owner.cursor.cursor.targeting_ability.get_range()
+                entities = get_neighbour_entities(self.owner.player, self.owner.levels.current_map, radius,
+                                                  include_self=include_self, fighters=True)
+                entities_in_range = list(filter(
+                    lambda entity: self.owner.player.light_source.fov_map.fov[entity.y, entity.x], entities))
+                if not self.owner.cursor.cursor.sel_index:
+                    self.owner.cursor.cursor.sel_index = 0
+                else:
+                    self.owner.cursor.cursor.sel_index += 1
                 prev_pos_x, prev_pos_y = self.owner.cursor.x, self.owner.cursor.y
+                dx = entities_in_range[self.owner.cursor.cursor.sel_index].x
+                dy = entities_in_range[self.owner.cursor.cursor.sel_index].y
                 self.owner.cursor.move(dx, dy)
                 self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(self.owner.cursor)
                 self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(
                     self.owner.cursor)
                 self.owner.fov_recompute = True
-
                 if self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].name is not None:
                     self.owner.message_log.send(Message(
-                        self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].name.capitalize()))
+                        self.owner.levels.current_map.tiles[self.owner.cursor.x][
+                            self.owner.cursor.y].name.capitalize()))
+
+            else:
+                dx, dy = move
+                destination_x = self.owner.cursor.x + dx
+                destination_y = self.owner.cursor.y + dy
+                x, y = self.owner.game_camera.get_coordinates(destination_x, destination_y)
+
+                if 0 < x < self.owner.game_camera.width - 1 and 0 < y < self.owner.game_camera.height - 1:
+                    prev_pos_x, prev_pos_y = self.owner.cursor.x, self.owner.cursor.y
+                    self.owner.cursor.move(dx, dy)
+                    self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(self.owner.cursor)
+                    self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(
+                        self.owner.cursor)
+                    self.owner.fov_recompute = True
+
+                    if self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].name is not None:
+                        self.owner.message_log.send(Message(
+                            self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].name.capitalize()))
 
         elif main_menu or examine:
             self.owner.game_state = GameStates.PLAYER_TURN
@@ -233,7 +260,8 @@ class Actions:
 
         elif (use_ability or interact) and self.owner.cursor.cursor.targeting_ability:
             target = self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].blocking_entity
-            result, target, _ = self.owner.player.player.use_ability(self.owner.levels.current_map,
+
+            result, target, targeting = self.owner.player.player.use_ability(self.owner.levels.current_map,
                                                              self.owner.cursor.cursor.targeting_ability, target)
             if target:
                 self.owner.render_functions.draw_stats(target)

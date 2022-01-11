@@ -29,7 +29,7 @@ class MessagePanel:
         self.color = "gray"
 
     def draw(self):
-        self.owner.render_functions.draw_ui(self)
+        self.owner.owner.render_functions.draw_ui(self)
 
     def update(self, x, y, w, h):
         self.x = x

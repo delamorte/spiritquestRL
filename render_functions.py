@@ -307,6 +307,7 @@ class RenderFunctions:
             message_log.new_msgs = False
 
     def draw_stats(self, target=None):
+        # TODO: Clean up this function
         player = self.owner.player
         power_msg = "[color=light azure]Spirit power left: " + str(player.player.spirit_power)
         blt.layer(0)
@@ -337,13 +338,15 @@ class RenderFunctions:
                         str(player.fighter.hp) + "/" + \
                         str(player.fighter.max_hp) + "  "
 
+        ev_player = "EV:" + str(player.fighter.ev) + "  "
+
         active_effects = []
         for x in player.status_effects.items:
-            active_effects.append(x.description + "(" + str(x.duration+1) + ")")
+            active_effects.append("[color={0}]{1} (Lasts {2} turns)".format(x.color, x.description, str(x.duration+1)))
             if x.name == "poison":
-                hp_player = "[color=green]HP:" + \
-                            str(player.fighter.hp) + "/" + \
-                            str(player.fighter.max_hp) + "  "
+                hp_player = "[color={0}]HP:{1}/{2}  ".format(x.color, str(player.fighter.hp), str(player.fighter.max_hp))
+            elif x.name == "fly":
+                ev_player = "[color={0}]EV:{1}  ".format(x.color, str(player.fighter.ev))
 
         if active_effects:
             blt.puts(4, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
@@ -351,8 +354,8 @@ class RenderFunctions:
                      0, 0, blt.TK_ALIGN_LEFT)
 
         ac_player = "[color=default]AC:" + str(player.fighter.ac) + "  "
-        ev_player = "EV:" + str(player.fighter.ev) + "  "
-        power_player = "ATK:" + str(player.fighter.power) + "  "
+
+        power_player = "[color=default]ATK:" + str(player.fighter.power) + "  "
         lvl_player = "LVL:" + str(player.player.char_level) + "  "
         exp_player = "EXP:" + str(player.player.char_exp["player"]) + "/" + \
                      str(player.player.char_level * player.player.exp_lvl_interval)
@@ -363,7 +366,7 @@ class RenderFunctions:
                  0, 0, blt.TK_ALIGN_LEFT)
 
         # Draw target stats
-        if target:
+        if target and not target == player:
             blt.clear_area(self.owner.ui.viewport.offset_center_x - int(len(power_msg) / 2) - 5,
                            self.owner.ui.viewport.offset_h + self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 3)
 
@@ -376,14 +379,15 @@ class RenderFunctions:
                             str(target.fighter.hp) + "/" + \
                             str(target.fighter.max_hp) + "  "
 
+            ev_target = "EV:" + str(target.fighter.ev) + "  "
             active_effects = []
             for x in target.status_effects.items:
                 if x.duration > 0:
-                    active_effects.append(x.description + "(" + str(x.duration) + ")")
+                    active_effects.append("[color={0}]{1} (Lasts {2} turns)".format(x.color, x.description, str(x.duration+1)))
                     if x.name == "poison":
-                        hp_target = "[color=green]HP:" + \
-                                    str(target.fighter.hp) + "/" + \
-                                    str(target.fighter.max_hp) + "  "
+                        hp_target = "[color={0}]HP:{1}/{2}  ".format(x.color, str(target.fighter.hp), str(target.fighter.max_hp))
+                    elif x.name == "fly":
+                        ev_target = "[color={0}]EV:{1}  ".format(x.color, str(target.fighter.ev))
 
             if active_effects:
                 blt.puts(self.owner.ui.viewport.offset_w, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
@@ -391,7 +395,6 @@ class RenderFunctions:
                          0, 0, blt.TK_ALIGN_RIGHT)
 
             ac_target = "[color=default]AC:" + str(target.fighter.ac) + "  "
-            ev_target = "EV:" + str(target.fighter.ev) + "  "
             power_target = "ATK:" + str(target.fighter.power) + " "
 
             blt.puts(self.owner.ui.viewport.offset_w-1, self.owner.ui.viewport.offset_h + self.ui_offset_y + 1,
@@ -403,6 +406,7 @@ class RenderFunctions:
                                self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 3)
 
     def draw_ui(self, element):
+        self.clear_camera(element.w, element.h, 5)
         blt.color(element.color)
         blt.layer(1)
 
@@ -656,9 +660,11 @@ class RenderFunctions:
             blt.clear_area(x * self.owner.options.tile_offset_x, y *
                            self.owner.options.tile_offset_y, 2, 2)
 
-    def clear_camera(self, n):
-        w = self.owner.ui.viewport.offset_w - self.owner.ui.viewport.border
-        h = self.owner.ui.viewport.offset_h - self.owner.ui.viewport.border
+    def clear_camera(self, n, w=None, h=None):
+        if not w:
+            w = self.owner.ui.viewport.offset_w - self.owner.ui.viewport.border
+        if not h:
+            h = self.owner.ui.viewport.offset_h - self.owner.ui.viewport.border
         i = 0
         while i < n:
             blt.layer(i)
