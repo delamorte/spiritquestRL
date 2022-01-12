@@ -103,6 +103,8 @@ class GameMap:
                             item_component = Item(name)
                             item = Entity(x, y, 2, entity,
                                           color, name, item=item_component)
+                            if item.name == "flask":
+                                item.hidden = True
                             self.tiles[x][y].add_entity(item)
                             item_component.set_attributes(self)
                             entities.append(item)
@@ -919,6 +921,16 @@ class TiledRoom(Room):
         tree = ET.parse("./maps/" + name + ".tmx")
         root = tree.getroot()
         layers = [None, None, None]
+
+        # Parse custom properties, not used atm
+        # custom_properties = {}
+        # for tile in root.iter("tile"):
+        #     tile_id = tile.get("id")
+        #     for tile_property in tile.findall("property"):
+        #         property_name = tile_property.get("name")
+        #         property_value = tile_property.get("value")
+        #         custom_properties[tile_id] = [property_name, property_value]
+
         for layer in root.iter("layer"):
 
             data = layer.find("data").text[1:-1].splitlines()

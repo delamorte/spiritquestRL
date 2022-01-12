@@ -171,11 +171,14 @@
         "name": "reveal",
         "description": "reveal an area around you, may reveal secrets.",
         "skill_type": "utility",
-        "duration": [10, 15, 20],
-        "radius": [8, 10, 12],
+        "target_area": "square",
+        "effect": ["reveal"],
+        "duration": [10, 15, 99],
+        "radius": [7, 9, 13],
         "needs_ai": true,
         "player_only": true,
         "target_self": true,
+        "targets_fighters_only": false,
         "icon": 48
     },
     "stunning roar": {

@@ -22,6 +22,8 @@ class RenderFunctions:
         self.ui_offset_y = ui_offset_y
 
     def draw(self, entity, x, y):
+        if entity.hidden:
+            return
         player = self.owner.player
         game_map = self.owner.levels.current_map
         # Draw the entity to the screen
@@ -65,7 +67,7 @@ class RenderFunctions:
 
             x, y = game_camera.get_coordinates(entity.x, entity.y)
 
-            if entity.x == player.x and entity.y == player.y and entity.stand_on_messages:
+            if entity.x == player.x and entity.y == player.y and entity.stand_on_messages and not entity.hidden:
 
                 results.append(Message(get_article(
                     entity.name).capitalize() + " " + entity.name + "."))
@@ -168,6 +170,8 @@ class RenderFunctions:
                     blt.layer(0)
                     if self.owner.game_state == GameStates.TARGETING and not game_map.tiles[map_x][map_y].targeting_zone:
                         light_level = 0.5
+                    elif player.fighter.revealing and game_map.tiles[map_x][map_y].targeting_zone:
+                        light_level = 1.5
                     else:
                         dist = float(cityblock(center, np.array([map_y, map_x])))
                         light_level = game_map.tiles[map_x][map_y].natural_light_level * \

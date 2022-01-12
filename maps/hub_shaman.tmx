@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.3" orientation="orthogonal" renderorder="right-down" width="9" height="8" tilewidth="16" tileheight="24" infinite="0" nextlayerid="6" nextobjectid="1">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="9" height="8" tilewidth="16" tileheight="24" infinite="0" nextlayerid="6" nextobjectid="1">
  <editorsettings>
   <export target="hub_shaman.tmx" format="tmx"/>
  </editorsettings>
  <tileset firstgid="1" name="terrain_objects_items_comb_2" tilewidth="16" tileheight="24" tilecount="900" columns="20">
-  <image source="terrain_objects_items_comb.png" width="320" height="1080"/>
+  <image source="../tilesets/terrain_objects_items_comb.png" width="320" height="1080"/>
+  <tile id="502">
+   <properties>
+    <property name="hidden" type="bool" value="true"/>
+   </properties>
+  </tile>
  </tileset>
  <layer id="4" name="2" width="9" height="8">
   <data encoding="csv">

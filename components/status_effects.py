@@ -15,12 +15,12 @@ class StatusEffects:
     def remove_item(self, item):
         self.items.remove(item)
 
-    def process_effects(self, effect=None):
+    def process_effects(self, effect=None, game_map=None):
         results = []
         msgs = []
 
         if effect:
-            processed_effect, msg = effect.process()
+            processed_effect, msg = effect.process(game_map=game_map)
             if processed_effect is not None:
                 self.items.remove(processed_effect)
             if msg:
@@ -28,7 +28,7 @@ class StatusEffects:
                 return msgs
         else:
             for effect in self.items:
-                processed_effect, msg = effect.process()
+                processed_effect, msg = effect.process(game_map=game_map)
                 if processed_effect is not None:
                     results.append(processed_effect)
                 if msg:

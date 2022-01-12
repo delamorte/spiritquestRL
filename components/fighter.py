@@ -26,6 +26,7 @@ class Fighter:
         self.dead = False
         self.paralyzed = False
         self.flying = False
+        self.revealing = False
         self.effects = []
 
     def take_damage(self, amount):
@@ -46,7 +47,7 @@ class Fighter:
                 self.hp += amount
         return result
 
-    def attack(self, target, skill):
+    def attack(self, target, skill, game_map=None):
         results = []
         hit_chance = randint(1, 100)
         miss = (target.fighter.ev * 2) >= hit_chance - self.hit_penalty
@@ -156,7 +157,7 @@ class Fighter:
                             target.status_effects.add_item(effect_component)
                             msgs = None
                             if target == self.owner:
-                                msgs = self.owner.status_effects.process_effects(effect_component)
+                                msgs = self.owner.status_effects.process_effects(effect_component, game_map)
 
                             results.extend(self.hit_messages(skill, target, damage))
                             if msgs:

@@ -16,7 +16,7 @@ class Entity:
     def __init__(self, x, y, layer, char, color, name, blocks=False, player=None,
                  fighter=None, ai=None, item=None, inventory=None, stairs=None,
                  wall=None, door=None, cursor=None, light_source=None, abilities=None,
-                 status_effects=None, stand_on_messages=True, boss=False):
+                 status_effects=None, stand_on_messages=True, boss=False, hidden=False):
         self.x = x
         self.y = y
         self.layer = layer
@@ -42,6 +42,7 @@ class Entity:
         self.stand_on_messages = stand_on_messages
         self.occupied_tiles = None  # For entities bigger than 1 tile
         self.boss = boss
+        self.hidden = hidden
 
         # Set entity as component owner, so components can call their owner
         if self.player:
@@ -202,18 +203,18 @@ def get_neighbour_entities(entity, game_map, radius=1, include_self=False, fight
     def n_closest(x, n, d=1):
         return x[n[0] - d:n[0] + d + 1, n[1] - d:n[1] + d + 1]
 
-    def n_disc(array, x, y):
-
+    def n_disc(array):
+        a, b = entity.x, entity.y
         n = game_map.shape[0]
         r = radius
 
-        y, x = np.ogrid[-x:n - x, -y:n - y]
+        y, x = np.ogrid[-a:n - a, -b:n - b]
         mask = x * x + y * y <= r * r
 
         return array[mask]
 
     if algorithm == "disc":
-        neighbours = n_disc(game_map, entity.x, entity.y).flatten()
+        neighbours = n_disc(game_map).flatten()
     elif algorithm == "square":
         neighbours = n_closest(game_map, (entity.x, entity.y), d=radius).flatten()
     else:
@@ -224,7 +225,7 @@ def get_neighbour_entities(entity, game_map, radius=1, include_self=False, fight
             tile.targeting_zone = True
         else:
             tile.targeting_zone = False
-        if tile.entities_on_tile and tile.blocking_entity:
+        if tile.entities_on_tile:
             if not include_self and tile.blocking_entity == entity:
                 continue
             elif fighters:

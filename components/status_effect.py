@@ -1,6 +1,7 @@
 from math import ceil
 from random import random
 
+from components.entity import get_neighbour_entities
 from game_states import GameStates
 from helpers import roll_dice
 
@@ -33,7 +34,7 @@ class StatusEffect:
         self.heal = heal
         self.slow_amount = None
 
-    def process(self):
+    def process(self, game_map=None):
         msg = None
         if self.source.dead and self.name == "strangle":
             self.duration = 0
@@ -58,6 +59,8 @@ class StatusEffect:
             if self.fly:
                 self.owner.ev -= self.fly_ev_boost
                 self.owner.flying = False
+            if self.reveal:
+                self.owner.revealing = False
             self.owner.effects.remove(self.description)
             return self, msg
 
@@ -90,6 +93,16 @@ class StatusEffect:
                 self.fly_ev_boost = ceil(self.owner.ev * self.power[self.rank] - self.owner.ev)
                 self.owner.ev += self.fly_ev_boost
                 self.owner.flying = True
+
+        if self.reveal:
+            neighbours = get_neighbour_entities(self.owner.owner, game_map, include_self=False,
+                                                fighters=False, mark_area=True,
+                                                radius=self.reveal.radius[self.rank], algorithm="square")
+            for entity in neighbours:
+                if entity.hidden:
+                    entity.hidden = False
+            if self.description not in self.owner.effects:
+                self.owner.revealing = True
 
         if self.description not in self.owner.effects:
             self.owner.effects.append(self.description)

@@ -16,7 +16,7 @@ class Actions:
                             use_ability=None, key=None):
 
         if wait or move or interact or pickup or stairs or use_ability and not self.owner.player.fighter.dead:
-            self.owner.player.status_effects.process_effects()
+            self.owner.player.status_effects.process_effects(game_map=self.owner.levels.current_map.tiles)
 
         if wait:
             self.owner.time_counter.take_turn(1)
@@ -81,7 +81,7 @@ class Actions:
                 self.owner.fov_recompute = True
 
         elif pickup:
-            pickup_msg = self.owner.player.inventory.add_item(self.owner.levels.current_map, self.owner.message_log)
+            pickup_msg = self.owner.player.inventory.add_item(self.owner.levels.current_map)
 
             if pickup_msg:
                 self.owner.message_log.send(pickup_msg)

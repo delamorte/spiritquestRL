@@ -43,12 +43,14 @@ class Abilities:
             target_other = item["target_other"] if "target_other" in item.keys() else False
             requires_targeting = item["requires_targeting"] if "requires_targeting" in item.keys() else False
             player_only = item["player_only"] if "player_only" in item.keys() else False
-
+            targets_fighters_only = item["targets_fighters_only"] if "targets_fighters_only" in item.keys() else True
+            target_area = item["target_area"] if "target_area" in item.keys() else "disc"
 
             a = Ability(name=name, description=description, skill_type=skill_type, damage=damage, rank=rank,
                         icon=icon, dps=dps, effect=effect, duration=duration, radius=radius, chance=chance,
                         needs_ai=needs_ai, target_self=target_self, target_other=target_other,
-                        player_only=player_only, power=power, requires_targeting=requires_targeting)
+                        player_only=player_only, power=power, requires_targeting=requires_targeting,
+                        targets_fighters_only=targets_fighters_only, target_area=target_area)
 
             self.add_item(a)
 
