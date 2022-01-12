@@ -15,6 +15,9 @@ class Actions:
     def turn_taking_actions(self, wait=None, move=None, interact=None, pickup=None, stairs=None, examine=None,
                             use_ability=None, key=None):
 
+        if wait or move or interact or pickup or stairs or use_ability and not self.owner.player.fighter.dead:
+            self.owner.player.status_effects.process_effects()
+
         if wait:
             self.owner.time_counter.take_turn(1)
             # player.player.spirit_power -= 1
@@ -118,6 +121,7 @@ class Actions:
                 self.owner.render_functions.draw_stats(target)
             if targeting:
                 self.owner.game_state = GameStates.TARGETING
+
                 cursor_component = Cursor(targeting_ability=ability)
                 cursor = Entity(target.x, target.y, 5, 0xE800 + 1746, "light yellow", "cursor",
                                 cursor=cursor_component, stand_on_messages=False)
@@ -210,26 +214,15 @@ class Actions:
             if self.owner.cursor.cursor.targeting_ability:
                 include_self = self.owner.cursor.cursor.targeting_ability.target_self
                 radius = self.owner.cursor.cursor.targeting_ability.get_range()
-                entities = get_neighbour_entities(self.owner.player, self.owner.levels.current_map, radius,
-                                                  include_self=include_self, fighters=True)
+                entities = get_neighbour_entities(self.owner.player, self.owner.levels.current_map.tiles, radius,
+                                                  include_self=include_self, fighters=True, mark_area=True)
                 entities_in_range = list(filter(
                     lambda entity: self.owner.player.light_source.fov_map.fov[entity.y, entity.x], entities))
-                if not self.owner.cursor.cursor.sel_index:
-                    self.owner.cursor.cursor.sel_index = 0
-                else:
-                    self.owner.cursor.cursor.sel_index += 1
-                prev_pos_x, prev_pos_y = self.owner.cursor.x, self.owner.cursor.y
-                dx = entities_in_range[self.owner.cursor.cursor.sel_index].x
-                dy = entities_in_range[self.owner.cursor.cursor.sel_index].y
-                self.owner.cursor.move(dx, dy)
-                self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(self.owner.cursor)
-                self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(
-                    self.owner.cursor)
+
+                msg = self.owner.cursor.cursor.select_next(entities_in_range, self.owner.levels.current_map.tiles)
+                if msg:
+                    self.owner.message_log.send(msg)
                 self.owner.fov_recompute = True
-                if self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].name is not None:
-                    self.owner.message_log.send(Message(
-                        self.owner.levels.current_map.tiles[self.owner.cursor.x][
-                            self.owner.cursor.y].name.capitalize()))
 
             else:
                 dx, dy = move
@@ -289,6 +282,7 @@ class Actions:
             if visible:
                 if entity.fighter:
                     entity.status_effects.process_effects()
+                    self.owner.render_functions.draw_stats(entity)
 
                 if self.owner.player.fighter.dead:
                     kill_msg = self.owner.player.kill()
@@ -331,7 +325,7 @@ class Actions:
                     self.owner.fov_recompute = True
                     if combat_msg:
                         self.owner.message_log.send(combat_msg)
-                        self.owner.render_functions.draw_stats()
+                        self.owner.render_functions.draw_stats(entity)
                     if self.owner.player.fighter.dead:
                         kill_msg = self.owner.player.kill()
                         self.owner.game_state = GameStates.PLAYER_DEAD

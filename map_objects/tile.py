@@ -33,6 +33,7 @@ class Tile:
         self.items_on_tile = []
         self.stairs = None
         self.natural_light_level = 1.5
+        self.targeting_zone = False
 
     def add_entity(self, entity):
         if entity.door:

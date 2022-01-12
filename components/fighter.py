@@ -29,13 +29,21 @@ class Fighter:
         self.effects = []
 
     def take_damage(self, amount):
-        result = None
-        if self.hp + -1*amount >= self.max_hp:
-            result = Message("{0} is already at max health.".format(self.owner.name.capitalize()), extend_line=True)
-            return result
         self.hp -= amount
         if self.hp <= 0:
             self.dead = True
+
+    def heal(self, power):
+        result = None
+        amount = roll_dice(power)
+        if self.hp >= self.max_hp:
+            result = Message("{0} is already at max health.".format(self.owner.name.capitalize()), extend_line=True)
+            return result
+        else:
+            if self.hp + amount > self.max_hp:
+                self.hp = self.max_hp
+            else:
+                self.hp += amount
         return result
 
     def attack(self, target, skill):
@@ -66,12 +74,12 @@ class Fighter:
                         for effect in skill.effect:
                             json_efx = json_data.data.status_effects[effect]
                             if skill.duration:
-                                duration = roll_dice(skill.duration[min(self.level-1, 2)])
+                                duration = roll_dice(skill.duration[skill.rank])
                             else:
-                                duration = roll_dice(json_efx["duration"][min(self.level - 1, 2)])
+                                duration = roll_dice(json_efx["duration"][skill.rank])
                             hit_penalty = json_efx["hit_penalty"] if "hit_penalty" in json_efx.keys() else []
                             if "delayed_damage" in json_efx.keys():
-                                delayed_damage = roll_dice(json_efx["delayed_damage"][min(self.level - 1, 2)])
+                                delayed_damage = roll_dice(json_efx["delayed_damage"][skill.rank])
                             else:
                                 delayed_damage = []
                             rank = skill.rank
@@ -91,17 +99,15 @@ class Fighter:
                             target.status_effects.add_item(effect_component)
                             if self.owner.player:
                                 msg = Message(msg="The {0} is inflicted with {1}!".format(
-                                    target.name, effect), style="status_effect")
+                                    target.name, effect), color=color)
                                 results.append(msg)
                             else:
                                 msg = Message(msg="You are inflicted with {} !".format(
-                                    effect), style="status_effect")
+                                    effect), color=color)
                                 results.append(msg)
 
-                    if abs(damage) > 0:
-                        result = target.fighter.take_damage(damage)
-                        if result:
-                            results.append(result)
+                    if damage > 0:
+                        target.fighter.take_damage(damage)
 
                     else:
                         if self.owner.player:
@@ -129,38 +135,37 @@ class Fighter:
                                 results.append(Message("Target is already {0}!".format(description)))
                                 continue
 
-                            duration = roll_dice(skill.duration[min(self.level-1, 2)])
+                            duration = roll_dice(skill.duration[skill.rank])
                             fly = skill if skill.name == "fly" else None
                             sneak = skill if skill.name == "sneak" else None
                             reveal = skill if skill.name == "reveal" else None
+                            heal = skill if skill.name == "heal" else None
                             invisibility = skill if skill.name == "invisibility" else None
                             color = json_efx["color"] if "color" in json_efx.keys() else None
-                            power = json_efx["power"] if "power" in json_efx.keys() else None
+                            if skill.power:
+                                power = skill.power
+                            else:
+                                power = json_efx["power"] if "power" in json_efx.keys() else None
                             rank = skill.rank
 
                             effect_component = StatusEffect(owner=target.fighter, source=self, name=effect,
                                                             duration=duration, fly=fly, sneak=sneak, reveal=reveal,
                                                             invisibility=invisibility, description=description,
-                                                            color=color, power=power, rank=rank)
+                                                            color=color, power=power, rank=rank, heal=heal)
 
                             target.status_effects.add_item(effect_component)
+                            msgs = None
                             if target == self.owner:
-                                self.owner.status_effects.process_effects()
+                                msgs = self.owner.status_effects.process_effects(effect_component)
+
                             results.extend(self.hit_messages(skill, target, damage))
+                            if msgs:
+                                results.extend(msgs)
 
                     else:
-                        result = None
-                        if abs(damage) > 0:
-                            result = target.fighter.take_damage(damage)
-                            if result:
-                                damage = 0
-                        results.extend(self.hit_messages(skill, target, damage))
-                        if result:
-                            results.append(result)
-
-
-
-
+                        if damage > 0:
+                            target.fighter.take_damage(damage)
+                            results.extend(self.hit_messages(skill, target, damage))
 
         return results
 
@@ -187,7 +192,7 @@ class Fighter:
                     msg = Message(msg="You use {0} on {1}!".format(
                         skill.name, target.name), style="skill_use")
                 results.append(msg)
-                if abs(damage) > 0:
+                if damage > 0:
                     if skill.name == "heal" and target == self.owner:
                         msg = Message(msg="You heal yourself for {0} hit points.".format(
                             str(-1*damage)), extend_line=True)
@@ -214,7 +219,7 @@ class Fighter:
                     msg = Message(msg="The {0} uses {1} on you!".format(
                         self.owner.name, skill.name), style="skill_use")
                 results.append(msg)
-                if abs(damage) > 0:
+                if damage > 0:
                     if skill.name == "heal" and target == self.owner:
                         msg = Message(msg="The {0} heals itself for {1} hit points.".format(
                             self.owner.name, str(-1*damage)), style="attack", extend_line=True)

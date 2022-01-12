@@ -86,15 +86,16 @@ class Player:
     def use_ability(self, game_map, ability, target=None):
         results = []
         targeting = False
+
         if not target:
             radius = ability.get_range()
             include_self = ability.target_self
             entities = get_neighbour_entities(self.owner, game_map.tiles, radius,
-                                              include_self=include_self, fighters=True)
+                                              include_self=include_self, fighters=True, mark_area=True)
             if not entities:
                 msg = Message("There are no available targets in range.")
                 results.append(msg)
-            elif len(entities) == 1:
+            elif len(entities) == 1 and not ability.requires_targeting:
                 target = entities[0]
                 results = self.owner.fighter.attack(target, ability)
             else:
@@ -104,6 +105,6 @@ class Player:
                 target = entities[0]
                 targeting = True
         else:
-            results, failed = self.owner.fighter.attack(target, ability)
+            results = self.owner.fighter.attack(target, ability)
 
         return results, target, targeting

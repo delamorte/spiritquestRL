@@ -205,9 +205,6 @@ class Engine:
                         break
                 continue
 
-            if not self.player.fighter.dead:
-                self.player.status_effects.process_effects()
-
             if self.player.fighter.paralyzed:
                 msg = Message("You are paralyzed!")
                 self.message_log.send(msg)

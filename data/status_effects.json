@@ -4,7 +4,7 @@
         "description": "poisoned",
         "color": "green",
         "dps": [1],
-        "duration": ["1d4"],
+        "duration": ["2d2"],
         "chance": [
             1.0
         ]
@@ -44,6 +44,7 @@
     "blind": {
         "name": "blind",
         "description": "blinded",
+        "color": "yellow",
         "duration": ["1d4", "1d6", "1d8"],
         "hit_penalty": [25, 50, 75],
         "chance": [
@@ -108,5 +109,9 @@
         "description": "revealing hidden tiles",
         "color": "amber",
         "duration": [10, 15, 99]
+    },
+    "heal": {
+        "name": "heal",
+        "description": "heal"
     }
 }

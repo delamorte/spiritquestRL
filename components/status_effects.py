@@ -15,13 +15,26 @@ class StatusEffects:
     def remove_item(self, item):
         self.items.remove(item)
 
-    def process_effects(self):
+    def process_effects(self, effect=None):
         results = []
+        msgs = []
 
-        for effect in self.items:
-            processed_effect = effect.process()
+        if effect:
+            processed_effect, msg = effect.process()
             if processed_effect is not None:
-                results.append(processed_effect)
-        if results:
-            for x in results:
-                self.items.remove(x)
+                self.items.remove(processed_effect)
+            if msg:
+                msgs.append(msg)
+                return msgs
+        else:
+            for effect in self.items:
+                processed_effect, msg = effect.process()
+                if processed_effect is not None:
+                    results.append(processed_effect)
+                if msg:
+                    msgs.append(msg)
+            if results:
+                for x in results:
+                    self.items.remove(x)
+            if msgs:
+                return msgs

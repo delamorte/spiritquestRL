@@ -1,5 +1,7 @@
 from bearlibterminal import terminal as blt
 from collections import Counter
+
+from game_states import GameStates
 from helpers import get_article
 from textwrap import shorten, fill
 import numpy as np
@@ -164,9 +166,12 @@ class RenderFunctions:
                 # Draw tiles within fov
                 if visible:
                     blt.layer(0)
-                    dist = float(cityblock(center, np.array([map_y, map_x])))
-                    light_level = game_map.tiles[map_x][map_y].natural_light_level * \
-                                  (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
+                    if self.owner.game_state == GameStates.TARGETING and not game_map.tiles[map_x][map_y].targeting_zone:
+                        light_level = 0.5
+                    else:
+                        dist = float(cityblock(center, np.array([map_y, map_x])))
+                        light_level = game_map.tiles[map_x][map_y].natural_light_level * \
+                                      (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
                     player.player.lightmap[map_y][map_x] = light_level
 
                     c = blt.color_from_name(game_map.tiles[map_x][map_y].color)
@@ -342,7 +347,7 @@ class RenderFunctions:
 
         active_effects = []
         for x in player.status_effects.items:
-            active_effects.append("[color={0}]{1} (Lasts {2} turns)".format(x.color, x.description, str(x.duration+1)))
+            active_effects.append("[color={0}]{1} ({2} turns)".format(x.color, x.description, str(x.duration+1)))
             if x.name == "poison":
                 hp_player = "[color={0}]HP:{1}/{2}  ".format(x.color, str(player.fighter.hp), str(player.fighter.max_hp))
             elif x.name == "fly":
@@ -383,7 +388,7 @@ class RenderFunctions:
             active_effects = []
             for x in target.status_effects.items:
                 if x.duration > 0:
-                    active_effects.append("[color={0}]{1} (Lasts {2} turns)".format(x.color, x.description, str(x.duration+1)))
+                    active_effects.append("[color={0}]{1} ({2} turns)".format(x.color, x.description, str(x.duration+1)))
                     if x.name == "poison":
                         hp_target = "[color={0}]HP:{1}/{2}  ".format(x.color, str(target.fighter.hp), str(target.fighter.max_hp))
                     elif x.name == "fly":

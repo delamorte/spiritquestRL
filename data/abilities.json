@@ -209,7 +209,9 @@
         "name": "heal",
         "description": "cast a magical spell to heal one's wounds",
         "skill_type": "utility",
-        "damage": ["-1d4", "-1d6", "-1d8"],
+        "power": ["1d4", "1d6", "1d8"],
+        "duration": [0],
+        "effect": ["heal"],
         "chance": [0.1, 0.15, 0.2],
         "target_self": true,
         "target_other": true,
@@ -255,18 +257,21 @@
         "damage": ["1d8", "1d10", "1d12"],
         "radius": [2, 3, 5],
         "chance": [0.1, 0.15, 0.2],
+        "requires_targeting": true,
         "icon": 9
     },
     "spit poison": {
         "name": "spit poison",
         "description": "spit slimy poison at the enemy. Yuck!",
         "skill_type": "attack",
-        "damage": ["1d8", "1d10", "1d12"],
+        "damage": ["1d3", "1d6", "1d8"],
+        "duration": ["2d2", "2d3", "2d4"],
         "effect": ["poison"],
         "radius": [3, 4, 6],
         "chance": [0.1, 0.15, 0.2],
         "needs_ai": true,
         "target_other": true,
+        "requires_targeting": true,
         "icon": 4
     },
     "invisibility": {

@@ -8,7 +8,8 @@ from helpers import roll_dice
 class StatusEffect:
     def __init__(self, owner, source, name, description=None, dps=None, delayed_damage=None, rank=None,
                  fly=None, sneak=None, reveal=None, invisibility=None, slow=None, drain_stats=None,
-                 hit_penalty=None, paralyze=None, duration=None, chance=None, color=None, power=None):
+                 hit_penalty=None, paralyze=None, duration=None, chance=None, color=None, power=None,
+                 heal=None):
         self.owner = owner
         self.source = source
         self.name = name
@@ -29,14 +30,20 @@ class StatusEffect:
         self.duration = duration
         self.chance = chance
         self.power = power
+        self.heal = heal
         self.slow_amount = None
 
     def process(self):
-
+        msg = None
         if self.source.dead and self.name == "strangle":
             self.duration = 0
 
+        if self.heal:
+            msg = self.owner.heal(self.power[self.rank])
+            return self, msg
+
         if self.duration <= 0:
+
             if self.hit_penalty:
                 self.owner.hit_penalty -= self.hit_penalty[self.rank]
             if self.drain_stats:
@@ -52,7 +59,7 @@ class StatusEffect:
                 self.owner.ev -= self.fly_ev_boost
                 self.owner.flying = False
             self.owner.effects.remove(self.description)
-            return self
+            return self, msg
 
         if self.dps:
             self.owner.take_damage(self.dps[self.rank])
@@ -88,4 +95,4 @@ class StatusEffect:
             self.owner.effects.append(self.description)
         self.duration -= 1
 
-        return None
+        return None, msg

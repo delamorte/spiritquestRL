@@ -184,8 +184,11 @@ class Entity:
         return death_message
 
 
-def get_neighbour_entities(entity, game_map, radius=1, include_self=False, fighters=False):
+def get_neighbour_entities(entity, game_map, radius=1, include_self=False, fighters=False, mark_area=False,
+                           algorithm="disc"):
     """
+    :param algorithm: the shape of the targeting area
+    :param mark_area: flags the neighbour area so draw_map can highlight it
     :param entity:
     :param game_map:
     :param radius: radius
@@ -193,24 +196,41 @@ def get_neighbour_entities(entity, game_map, radius=1, include_self=False, fight
     :param fighters: return only fighting entities
     :return: list of entities surrounding the center in radius n
     """
-    n = radius * 2 + 1
-    x, y = entity.x, entity.y
-    arr = np.roll(np.roll(game_map, shift=-x + 1, axis=0), shift=-y + 1, axis=1)
-    neighbours = arr[:n, :n].flatten()
+
     entities = []
 
+    def n_closest(x, n, d=1):
+        return x[n[0] - d:n[0] + d + 1, n[1] - d:n[1] + d + 1]
+
+    def n_disc(array, x, y):
+
+        n = game_map.shape[0]
+        r = radius
+
+        y, x = np.ogrid[-x:n - x, -y:n - y]
+        mask = x * x + y * y <= r * r
+
+        return array[mask]
+
+    if algorithm == "disc":
+        neighbours = n_disc(game_map, entity.x, entity.y).flatten()
+    elif algorithm == "square":
+        neighbours = n_closest(game_map, (entity.x, entity.y), d=radius).flatten()
+    else:
+        neighbours = n_closest(game_map, (entity.x, entity.y), d=radius).flatten()
+
     for tile in neighbours:
-        if tile.entities_on_tile:
+        if mark_area:
+            tile.targeting_zone = True
+        else:
+            tile.targeting_zone = False
+        if tile.entities_on_tile and tile.blocking_entity:
             if not include_self and tile.blocking_entity == entity:
                 continue
+            elif fighters:
+                fighting_entities = [entity for entity in tile.entities_on_tile if entity.fighter]
+                entities.extend(fighting_entities)
             else:
                 entities.extend(tile.entities_on_tile)
-
-    if fighters:
-        fighting_entities = []
-        for entity in entities:
-            if entity.fighter:
-                fighting_entities.append(entity)
-        entities = fighting_entities
 
     return entities
