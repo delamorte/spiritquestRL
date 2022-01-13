@@ -47,7 +47,7 @@ class Fighter:
                 self.hp += amount
         return result
 
-    def attack(self, target, skill, game_map=None):
+    def attack(self, target, skill):
         results = []
         hit_chance = randint(1, 100)
         miss = (target.fighter.ev * 2) >= hit_chance - self.hit_penalty
@@ -143,6 +143,7 @@ class Fighter:
                             heal = skill if skill.name == "heal" else None
                             invisibility = skill if skill.name == "invisibility" else None
                             color = json_efx["color"] if "color" in json_efx.keys() else None
+
                             if skill.power:
                                 power = skill.power
                             else:
@@ -155,13 +156,7 @@ class Fighter:
                                                             color=color, power=power, rank=rank, heal=heal)
 
                             target.status_effects.add_item(effect_component)
-                            msgs = None
-                            if target == self.owner:
-                                msgs = self.owner.status_effects.process_effects(effect_component, game_map)
-
                             results.extend(self.hit_messages(skill, target, damage))
-                            if msgs:
-                                results.extend(msgs)
 
                     else:
                         if damage > 0:

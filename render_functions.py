@@ -392,7 +392,7 @@ class RenderFunctions:
             active_effects = []
             for x in target.status_effects.items:
                 if x.duration > 0:
-                    active_effects.append("[color={0}]{1} ({2} turns)".format(x.color, x.description, str(x.duration+1)))
+                    active_effects.append("[color={0}]{1} ({2})".format(x.color, x.description, str(x.duration+1)))
                     if x.name == "poison":
                         hp_target = "[color={0}]HP:{1}/{2}  ".format(x.color, str(target.fighter.hp), str(target.fighter.max_hp))
                     elif x.name == "fly":

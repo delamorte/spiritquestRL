@@ -91,8 +91,12 @@ class Player:
 
         if include_self:
             target = self.owner
+            results = self.owner.fighter.attack(target, ability)
+            msgs = self.owner.status_effects.process_effects(game_map=game_map.tiles, self_targeting=True)
+            if msgs:
+                results.extend(msgs)
 
-        if not target:
+        elif not target:
             radius = ability.get_range()
 
             entities = get_neighbour_entities(self.owner, game_map.tiles, radius, fighters=True,
@@ -103,7 +107,7 @@ class Player:
                 results.append(msg)
             elif len(entities) == 1 and not ability.requires_targeting:
                 target = entities[0]
-                results = self.owner.fighter.attack(target, ability, game_map=game_map.tiles)
+                results = self.owner.fighter.attack(target, ability)
             else:
                 msg = Message(msg="Use '{0}' on which target? Range: {1}".format(
                     ability.name, radius), style="question")
@@ -111,6 +115,6 @@ class Player:
                 target = entities[0]
                 targeting = True
         else:
-            results = self.owner.fighter.attack(target, ability, game_map=game_map.tiles)
+            results = self.owner.fighter.attack(target, ability)
 
         return results, target, targeting

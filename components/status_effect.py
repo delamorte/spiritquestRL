@@ -10,7 +10,7 @@ class StatusEffect:
     def __init__(self, owner, source, name, description=None, dps=None, delayed_damage=None, rank=None,
                  fly=None, sneak=None, reveal=None, invisibility=None, slow=None, drain_stats=None,
                  hit_penalty=None, paralyze=None, duration=None, chance=None, color=None, power=None,
-                 heal=None):
+                 heal=None, target_self=None):
         self.owner = owner
         self.source = source
         self.name = name
@@ -32,10 +32,20 @@ class StatusEffect:
         self.chance = chance
         self.power = power
         self.heal = heal
+        self.target_self = target_self
         self.slow_amount = None
+        self.process_instantly = False
+
+        # Process buffs etc. instantly after casting
+        if self.fly or self.heal or self.reveal or self.invisibility or self.sneak:
+            self.process_instantly = True
 
     def process(self, game_map=None):
         msg = None
+
+        if self.process_instantly:
+            self.process_instantly = False
+
         if self.source.dead and self.name == "strangle":
             self.duration = 0
 
