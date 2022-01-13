@@ -1,16 +1,14 @@
 from math import ceil
 from random import random
-
-from components.entity import get_neighbour_entities
-from game_states import GameStates
-from helpers import roll_dice
+from components.entity import get_neighbours
+from ui.message import Message
 
 
 class StatusEffect:
     def __init__(self, owner, source, name, description=None, dps=None, delayed_damage=None, rank=None,
                  fly=None, sneak=None, reveal=None, invisibility=None, slow=None, drain_stats=None,
                  hit_penalty=None, paralyze=None, duration=None, chance=None, color=None, power=None,
-                 heal=None, target_self=None):
+                 heal=None, summoning=None, target_self=None):
         self.owner = owner
         self.source = source
         self.name = name
@@ -32,12 +30,13 @@ class StatusEffect:
         self.chance = chance
         self.power = power
         self.heal = heal
+        self.summoning = summoning
         self.target_self = target_self
         self.slow_amount = None
         self.process_instantly = False
 
         # Process buffs etc. instantly after casting
-        if self.fly or self.heal or self.reveal or self.invisibility or self.sneak:
+        if self.fly or self.heal or self.reveal or self.invisibility or self.sneak or self.summoning:
             self.process_instantly = True
 
     def process(self, game_map=None):
@@ -71,8 +70,17 @@ class StatusEffect:
                 self.owner.flying = False
             if self.reveal:
                 self.owner.revealing = False
+            if self.summoning:
+                self.summoning = None
+                self.owner.owner.summoner.summoning = None
+                self.owner.owner.summoner.rank = self.rank
             self.owner.effects.remove(self.description)
             return self, msg
+
+        if self.summoning:
+            self.owner.summoning = True
+            self.owner.owner.summoner.summoning = self.summoning
+            self.owner.owner.summoner.rank = self.rank
 
         if self.dps:
             self.owner.take_damage(self.dps[self.rank])
@@ -105,9 +113,9 @@ class StatusEffect:
                 self.owner.flying = True
 
         if self.reveal:
-            neighbours = get_neighbour_entities(self.owner.owner, game_map, include_self=False,
-                                                fighters=False, mark_area=True,
-                                                radius=self.reveal.radius[self.rank], algorithm="square")
+            neighbours = get_neighbours(self.owner.owner, game_map.tiles, include_self=False,
+                                        fighters=False, mark_area=True,
+                                        radius=self.reveal.radius[self.rank], algorithm="square")
             for entity in neighbours:
                 if entity.hidden:
                     entity.hidden = False

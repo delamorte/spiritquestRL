@@ -2,7 +2,7 @@ class Ability:
     def __init__(self, name, description, skill_type, damage=None, dps=None, effect=None, duration=None,
                  radius=None, chance=None, rank=None, icon=None, needs_ai=None, target_self=None,
                  target_other=None, player_only=None, blt_input=None, power=None, requires_targeting=None,
-                 targets_fighters_only=None, target_area=None):
+                 targets_fighters_only=None, target_area=None, summoned_entities=None):
         self.owner = None
         self.name = name
         self.description = description
@@ -24,6 +24,7 @@ class Ability:
         self.requires_targeting = requires_targeting
         self.targets_fighters_only = targets_fighters_only
         self.target_area = target_area
+        self.summoned_entities = summoned_entities
 
     def get_range(self):
         if self.radius:

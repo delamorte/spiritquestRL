@@ -27,6 +27,8 @@ class Fighter:
         self.paralyzed = False
         self.flying = False
         self.revealing = False
+        self.summoning = False
+        self.sneaking = False
         self.effects = []
 
     def take_damage(self, amount):
@@ -63,8 +65,8 @@ class Fighter:
                                       style="miss")
                         results.append(msg)
                     else:
-                        msg = Message(msg="The {0} attacks you with {1}, but misses.".format(
-                            self.owner.name, skill.name),
+                        msg = Message(msg="The {0} attacks the {1} with {2}, but misses.".format(
+                            self.owner.name, target.name, skill.name),
                                       style="miss")
                         results.append(msg)
                 else:
@@ -98,14 +100,9 @@ class Fighter:
                                                             chance=chance, color=color, power=power)
 
                             target.status_effects.add_item(effect_component)
-                            if self.owner.player:
-                                msg = Message(msg="The {0} is inflicted with {1}!".format(
-                                    target.name, effect), color=color)
-                                results.append(msg)
-                            else:
-                                msg = Message(msg="You are inflicted with {} !".format(
-                                    effect), color=color)
-                                results.append(msg)
+                            msg = Message(msg="The {0} is inflicted with {1}!".format(
+                                target.name, effect), color=color)
+                            results.append(msg)
 
                     if damage > 0:
                         target.fighter.take_damage(damage)
@@ -116,8 +113,8 @@ class Fighter:
                                 target.name, skill.name), style="miss", extend_line=True)
                             results.append(msg)
                         else:
-                            msg = Message(msg="The {0} attacks you  with {1} but does no damage.".format(
-                                self.owner.name, skill.name), style="miss", extend_line=True)
+                            msg = Message(msg="The {0} attacks the {1} with {2} but does no damage.".format(
+                                self.owner.name, target.name, skill.name), style="miss", extend_line=True)
                             results.append(msg)
 
             elif skill.skill_type == "utility":
@@ -133,14 +130,15 @@ class Fighter:
                             description = json_efx["description"]
 
                             if description in self.effects:
-                                results.append(Message("Target is already {0}!".format(description)))
+                                results.append(Message("The {0} is already {1}!".format(self.owner.name, description)))
                                 continue
 
                             duration = roll_dice(skill.duration[skill.rank])
-                            fly = skill if skill.name == "fly" else None
-                            sneak = skill if skill.name == "sneak" else None
-                            reveal = skill if skill.name == "reveal" else None
-                            heal = skill if skill.name == "heal" else None
+                            fly = skill if effect == "fly" else None
+                            sneak = skill if effect == "sneak" else None
+                            reveal = skill if effect == "reveal" else None
+                            heal = skill if effect == "heal" else None
+                            summoning = skill.summoned_entities if skill.summoned_entities else None
                             invisibility = skill if skill.name == "invisibility" else None
                             color = json_efx["color"] if "color" in json_efx.keys() else None
 
@@ -153,7 +151,8 @@ class Fighter:
                             effect_component = StatusEffect(owner=target.fighter, source=self, name=effect,
                                                             duration=duration, fly=fly, sneak=sneak, reveal=reveal,
                                                             invisibility=invisibility, description=description,
-                                                            color=color, power=power, rank=rank, heal=heal)
+                                                            color=color, power=power, rank=rank, heal=heal,
+                                                            summoning=summoning)
 
                             target.status_effects.add_item(effect_component)
                             results.extend(self.hit_messages(skill, target, damage))
@@ -182,7 +181,7 @@ class Fighter:
         if self.owner.player:
             if skill.skill_type != "weapon":
                 if target == self.owner:
-                    msg = Message(msg="You use {0} on yourself!".format(
+                    msg = Message(msg="You use {0}!".format(
                         skill.name), style="skill_use")
                 else:
                     msg = Message(msg="You use {0} on {1}!".format(
@@ -212,8 +211,8 @@ class Fighter:
                     msg = Message(msg="The {0} uses {1} on itself!".format(
                         self.owner.name, skill.name), style="skill_use")
                 else:
-                    msg = Message(msg="The {0} uses {1} on you!".format(
-                        self.owner.name, skill.name), style="skill_use")
+                    msg = Message(msg="The {0} uses {1} on {2}!".format(
+                        self.owner.name, skill.name, target.name), style="skill_use")
                 results.append(msg)
                 if damage > 0:
                     if skill.name == "heal" and target == self.owner:
@@ -221,15 +220,15 @@ class Fighter:
                             self.owner.name, str(-1*damage)), style="attack", extend_line=True)
 
                     elif skill.name == "heal":
-                        msg = Message(msg="The {0} heals for {1} for {2} hit points.".format(
+                        msg = Message(msg="The {0} heals {1} for {2} hit points.".format(
                             self.owner.name, target.name, str(-1*damage)), style="attack", extend_line=True)
                     else:
-                        msg = Message(msg="The {0} attacks you for {1} damage.".format(
-                            self.owner.name, str(damage)), style="attack", extend_line=True)
+                        msg = Message(msg="The {0} attacks the {1} for {2} damage.".format(
+                            self.owner.name, target.name, str(damage)), style="attack", extend_line=True)
                     results.append(msg)
             else:
-                msg = Message(msg="The {0} attacks you with {1} for {2} damage.".format(
-                    self.owner.name, skill.name, damage))
+                msg = Message(msg="The {0} attacks the {1} with {2} for {3} damage.".format(
+                    self.owner.name, target.name, skill.name, damage))
                 results.append(msg)
 
         return results

@@ -1,4 +1,4 @@
-from components.entity import get_neighbour_entities
+from components.entity import get_neighbours
 from map_objects.tilemap import tilemap
 import numpy as np
 
@@ -92,16 +92,16 @@ class Player:
         if include_self:
             target = self.owner
             results = self.owner.fighter.attack(target, ability)
-            msgs = self.owner.status_effects.process_effects(game_map=game_map.tiles, self_targeting=True)
+            msgs = self.owner.status_effects.process_effects(game_map=game_map, self_targeting=True)
             if msgs:
                 results.extend(msgs)
 
         elif not target:
             radius = ability.get_range()
 
-            entities = get_neighbour_entities(self.owner, game_map.tiles, radius, fighters=True,
-                                              include_self=include_self, algorithm=area,
-                                              mark_area=True)
+            entities = get_neighbours(self.owner, game_map.tiles, radius, fighters=True,
+                                      include_self=include_self, algorithm=area,
+                                      mark_area=True)
             if not entities and not include_self:
                 msg = Message("There are no available targets in range.")
                 results.append(msg)

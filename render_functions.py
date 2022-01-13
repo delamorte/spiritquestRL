@@ -132,8 +132,8 @@ class RenderFunctions:
                     self.draw(entity, x, y)
 
             if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and self.owner.options.gfx != "ascii":
-                self.draw_indicator(player.x, player.y, "gray")
-                self.draw_indicator(entity.x, entity.y, "dark red", entity.occupied_tiles)
+                self.draw_indicator(player.x, player.y, player.indicator_color)
+                self.draw_indicator(entity.x, entity.y, entity.indicator_color, entity.occupied_tiles)
             
         self.owner.message_log.send(results)
 
@@ -306,8 +306,7 @@ class RenderFunctions:
 
             for idx, message in enumerate(message_log.buffer):
 
-                msg = shorten(message.msg, msg_panel.offset_w,
-                              placeholder="..(Press 'M' for log)")
+                msg = message.msg
                 if message.stacked > 1:
                     msg = msg + " x{0}".format(str(message.stacked))
                 blt.puts(msg_panel.border_offset, msg_panel.offset_y + msg_panel.border_offset + i * 2,

@@ -1,6 +1,5 @@
 import random
 
-from fighter_stats import get_spawn_rates
 from map_objects.game_map import GameMap
 from map_objects.tilemap import tilemap
 from descriptions import level_biomes, meditate_params
@@ -107,7 +106,7 @@ class Levels:
                     for x, y in tilemap()["monsters"].items():
                         monsters.append((x, y))
                 monsters.sort()
-                spawn_rates = get_spawn_rates(monsters)
+                spawn_rates = self.get_spawn_rates(monsters)
                 monster_prefix = random.choice(random.choices(monsters, spawn_rates, k=5))[0]
                 level["title"] = "The " + monster_prefix.capitalize() + " " + biome.capitalize() + " of " + biome_desc
                 level["freq_monster"] = monster_prefix
@@ -116,3 +115,32 @@ class Levels:
             level_params.append(level)
 
         return level_params
+
+    def get_spawn_rates(self, monsters):
+        rates = {"rat": 0.2,
+                 "crow": 0.2,
+                 "snake": 0.2,
+                 "frog": 0.15,
+                 "bear": 0.10,
+                 "felid": 0.20,
+                 "mosquito": 0.10,
+                 "chaos cat": 0.05,
+                 "chaos bear": 0.03,
+                 "cockroach": 0.20,
+                 "bone snake": 0.10,
+                 "chaos dog": 0.15,
+                 "bat": 0.2,
+                 "imp": 0.15,
+                 "leech": 0.15,
+                 "spirit": 0.15,
+                 "chaos spirit": 0.10,
+                 "ghost dog": 0.15,
+                 "gecko": 0.10,
+                 "serpent": 0.05,
+                 "fairy": 0.07}
+
+        spawn_rates = []
+        for mon in monsters:
+            spawn_rates.append(rates[mon[0]])
+
+        return spawn_rates

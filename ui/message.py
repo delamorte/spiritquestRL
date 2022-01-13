@@ -18,7 +18,8 @@ class Message:
                 "question": "yellow",
                 "death": "red",
                 "level_up": "lighter blue",
-                "xtra": "amber"
+                "xtra": "amber",
+                "dialog": "light azure"
             }
             self.color = colors[self.style]
 

@@ -6,13 +6,14 @@ from actions import Actions
 from camera import Camera
 from components.abilities import Abilities
 from components.entity import Entity
+from components.fighter import Fighter
 from components.inventory import Inventory
 from components.light_source import LightSource
 from components.menus.main_menu import MainMenu
 from components.player import Player
 from components.status_effects import StatusEffects
+from components.summoner import Summoner
 from data import json_data
-from fighter_stats import get_fighter_data
 from game_states import GameStates
 from input_handlers import handle_keys
 from map_objects.levels import Levels
@@ -40,11 +41,13 @@ class Engine:
         self.levels = None
         self.player = None
         self.options = None
+        self.data = None
 
     def initialize(self):
         # Initialize game data from external files
         game_data = json_data.JsonData()
         json_data.data = game_data
+        self.data = game_data
 
         window_title = 'SpiritQuestRL'
         size = 'size=200x80'
@@ -97,17 +100,28 @@ class Engine:
         self.time_counter = None
         # Create player
         inventory_component = Inventory(26)
-        fighter_component = get_fighter_data("player")
+        f_data = self.data.fighters["player"]
+        fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
+                                    power=f_data["power"], mv_spd=f_data["mv_spd"],
+                                    atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
+
         light_component = LightSource(radius=fighter_component.fov)
         player_component = Player(50)
         abilities_component = Abilities("player")
         status_effects_component = StatusEffects("player")
+        summoner_component = Summoner()
         player = Entity(
             1, 1, 3, player_component.char["player"], None, "player", blocks=True, player=player_component,
             fighter=fighter_component, inventory=inventory_component, light_source=light_component,
+            summoner=summoner_component, indicator_color="gray",
             abilities=abilities_component, status_effects=status_effects_component, stand_on_messages=False)
         player.player.avatar["player"] = fighter_component
-        player.player.avatar[choice] = get_fighter_data(choice)
+        avatar_f_data = self.data.fighters[choice]
+        a_fighter_component = Fighter(hp=avatar_f_data["hp"], ac=avatar_f_data["ac"], ev=avatar_f_data["ev"],
+                                      power=avatar_f_data["power"], mv_spd=avatar_f_data["mv_spd"],
+                                      atk_spd=avatar_f_data["atk_spd"], size=avatar_f_data["size"],
+                                      fov=avatar_f_data["fov"])
+        player.player.avatar[choice] = a_fighter_component
         player.player.avatar[choice].owner = player
         player.abilities.initialize_abilities(choice)
         player.player.char[choice] = tilemap()["monsters"][choice]
@@ -204,6 +218,8 @@ class Engine:
                     if self.actions.dead_actions(key):
                         break
                 continue
+
+            self.actions.ally_actions()
 
             if self.player.fighter.paralyzed:
                 msg = Message("You are paralyzed!")

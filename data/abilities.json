@@ -174,7 +174,7 @@
         "target_area": "square",
         "effect": ["reveal"],
         "duration": [10, 15, 99],
-        "radius": [7, 9, 13],
+        "radius": [3, 7, 9],
         "needs_ai": true,
         "player_only": true,
         "target_self": true,
@@ -194,6 +194,7 @@
     "call allies": {
         "name": "call allies",
         "description": "make a loud beckoning noise calling friends",
+        "effect": ["summon"],
         "duration": ["5d2", "10d2", "15d2"],
         "skill_type": "utility",
         "chance": [0.05, 0.07, 0.1],
@@ -203,8 +204,11 @@
     "summon crow": {
         "name": "summon crow",
         "description": "Beckon to the skies and summon a friend to attack from above",
+        "effect": ["summon"],
+        "summoned_entities": ["crow"],
         "duration": [10, 20, 99],
         "skill_type": "utility",
+        "target_self": true,
         "player_only": true,
         "icon": 51
     },
