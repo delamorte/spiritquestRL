@@ -1,3 +1,5 @@
+from copy import copy
+from textwrap import wrap
 
 
 class MessageLog:
@@ -15,6 +17,11 @@ class MessageLog:
             messages = [messages]
 
         for message in messages:
+            message.msg = message.msg.strip()
+            if len(message.msg) > self.owner.ui.msg_panel.offset_w - 5:
+                self.split_long(message)
+                continue
+
             if self.buffer and self.buffer[0].msg == message.msg:
                 self.buffer[0].stacked += 1
                 self.new_msgs = True
@@ -36,3 +43,10 @@ class MessageLog:
 
         self.buffer = []
         self.new_msgs = True
+
+    def split_long(self, message):
+        results = wrap(message.msg, self.owner.ui.msg_panel.offset_w - 5)
+        for msg_str in results:
+            temp = copy(message)
+            temp.msg = msg_str
+            self.send(temp)
