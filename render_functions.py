@@ -132,8 +132,10 @@ class RenderFunctions:
                     self.draw(entity, x, y)
 
             if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and self.owner.options.gfx != "ascii":
-                self.draw_indicator(player.x, player.y, player.indicator_color)
-                self.draw_indicator(entity.x, entity.y, entity.indicator_color, entity.occupied_tiles)
+                #self.draw_indicator(player.x, player.y, player.indicator_color)
+                #self.draw_indicator(entity.x, entity.y, entity.indicator_color, entity.occupied_tiles)
+                self.draw_health_bar(entity)
+                self.draw_health_bar(player)
             
         self.owner.message_log.send(results)
 
@@ -442,6 +444,25 @@ class RenderFunctions:
         else:
             blt.put(x * self.owner.options.tile_offset_x, y *
                     self.owner.options.tile_offset_y, tilemap()["indicator"])
+
+    def draw_health_bar(self, entity):
+        blt.layer(4)
+        x, y = self.owner.game_camera.get_coordinates(entity.x, entity.y)
+        full_hp = "[color=green].[color=green].[color=green].[color=green]."
+        three_q_hp = "[color=green].[color=green].[color=green].[color=red]."
+        half_hp = "[color=green].[color=green].[color=red].[color=red]."
+        one_q_hp = "[color=green].[color=red].[color=red].[color=red]."
+
+        if entity.fighter.hp / entity.fighter.max_hp <= 0.25:
+            hp_bar = one_q_hp
+        elif entity.fighter.hp / entity.fighter.max_hp <= 0.5:
+            hp_bar = half_hp
+        elif entity.fighter.hp / entity.fighter.max_hp <= 0.75:
+            hp_bar = three_q_hp
+        else:
+            hp_bar = full_hp
+
+        blt.puts(x * self.owner.options.tile_offset_x, y * self.owner.options.tile_offset_y + 2, hp_bar)
 
     def draw_minimap(self):
         blt.layer(1)
