@@ -1,5 +1,7 @@
 from bearlibterminal import terminal as blt
 from collections import Counter
+
+from game_states import GameStates
 from helpers import get_article
 from textwrap import shorten, fill
 import numpy as np
@@ -20,6 +22,8 @@ class RenderFunctions:
         self.ui_offset_y = ui_offset_y
 
     def draw(self, entity, x, y):
+        if entity.hidden:
+            return
         player = self.owner.player
         game_map = self.owner.levels.current_map
         # Draw the entity to the screen
@@ -63,10 +67,10 @@ class RenderFunctions:
 
             x, y = game_camera.get_coordinates(entity.x, entity.y)
 
-            if entity.x == player.x and entity.y == player.y and entity.stand_on_messages:
+            if entity.x == player.x and entity.y == player.y and entity.stand_on_messages and not entity.hidden:
 
                 results.append(Message(get_article(
-                    entity.name).capitalize() + " " + entity.name + "."))
+                    entity.name).capitalize() + " " + entity.colored_name + "."))
                 if entity.xtra_info:
                     results.append(Message(msg=entity.xtra_info + ".", style="xtra"))
 
@@ -85,20 +89,20 @@ class RenderFunctions:
                             self.draw_stats(entity)
 
                 elif (entity.x == cursor.x and entity.y == cursor.y and not
-                entity.cursor and game_map.tiles[entity.x][entity.y].explored):
+                      entity.cursor and game_map.tiles[entity.x][entity.y].explored and not entity.hidden):
 
                     results.append(Message(get_article(entity.name).capitalize() + " " + entity.name + "."))
-                    results.append(Message(str("x: " + (str(cursor.x) + ", y: " + str(cursor.y)))))
+                    results.append(Message(msg=str("x: " + (str(cursor.x) + ", y: " + str(cursor.y))), extend_line=True))
 
                     if entity.xtra_info:
-                        results.append(Message(msg=entity.xtra_info + ".", style="xtra"))
+                        results.append(Message(msg=entity.xtra_info + ".", style="xtra", extend_line=True))
 
                     if entity.fighter:
                         self.draw_stats(entity)
 
-                if entity.name == "cursor":
-                    self.clear(entity, entity.last_seen_x, entity.last_seen_y)
-                    self.draw(entity, x, y)
+            if entity.name == "cursor":
+                self.clear(entity, entity.last_seen_x, entity.last_seen_y)
+                self.draw(entity, x, y)
 
             if not entity.cursor and player.light_source.fov_map.fov[entity.y, entity.x]:
                 # why is this here? causes rendering bugs!!!
@@ -128,8 +132,10 @@ class RenderFunctions:
                     self.draw(entity, x, y)
 
             if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and self.owner.options.gfx != "ascii":
-                self.draw_indicator(player.x, player.y, "gray")
-                self.draw_indicator(entity.x, entity.y, "dark red", entity.occupied_tiles)
+                self.draw_indicator(player.x, player.y, player.indicator_color)
+                self.draw_indicator(entity.x, entity.y, entity.indicator_color, entity.occupied_tiles)
+                self.draw_health_bar(entity)
+                self.draw_health_bar(player)
             
         self.owner.message_log.send(results)
 
@@ -164,9 +170,14 @@ class RenderFunctions:
                 # Draw tiles within fov
                 if visible:
                     blt.layer(0)
-                    dist = float(cityblock(center, np.array([map_y, map_x])))
-                    light_level = game_map.tiles[map_x][map_y].natural_light_level * \
-                                  (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
+                    if self.owner.game_state == GameStates.TARGETING and not game_map.tiles[map_x][map_y].targeting_zone:
+                        light_level = 0.5
+                    elif player.fighter.revealing and game_map.tiles[map_x][map_y].targeting_zone:
+                        light_level = 1.5
+                    else:
+                        dist = float(cityblock(center, np.array([map_y, map_x])))
+                        light_level = game_map.tiles[map_x][map_y].natural_light_level * \
+                                      (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
                     player.player.lightmap[map_y][map_x] = light_level
 
                     c = blt.color_from_name(game_map.tiles[map_x][map_y].color)
@@ -297,8 +308,7 @@ class RenderFunctions:
 
             for idx, message in enumerate(message_log.buffer):
 
-                msg = shorten(message.msg, msg_panel.offset_w,
-                              placeholder="..(Press 'M' for log)")
+                msg = message.msg
                 if message.stacked > 1:
                     msg = msg + " x{0}".format(str(message.stacked))
                 blt.puts(msg_panel.border_offset, msg_panel.offset_y + msg_panel.border_offset + i * 2,
@@ -307,6 +317,7 @@ class RenderFunctions:
             message_log.new_msgs = False
 
     def draw_stats(self, target=None):
+        # TODO: Clean up this function
         player = self.owner.player
         power_msg = "[color=light azure]Spirit power left: " + str(player.player.spirit_power)
         blt.layer(0)
@@ -337,13 +348,15 @@ class RenderFunctions:
                         str(player.fighter.hp) + "/" + \
                         str(player.fighter.max_hp) + "  "
 
+        ev_player = "EV:" + str(player.fighter.ev) + "  "
+
         active_effects = []
         for x in player.status_effects.items:
-            active_effects.append(x.description + "(" + str(x.duration+1) + ")")
+            active_effects.append("[color={0}]{1} ({2} turns)".format(x.color, x.description, str(x.duration+1)))
             if x.name == "poison":
-                hp_player = "[color=green]HP:" + \
-                            str(player.fighter.hp) + "/" + \
-                            str(player.fighter.max_hp) + "  "
+                hp_player = "[color={0}]HP:{1}/{2}  ".format(x.color, str(player.fighter.hp), str(player.fighter.max_hp))
+            elif x.name == "fly":
+                ev_player = "[color={0}]EV:{1}  ".format(x.color, str(player.fighter.ev))
 
         if active_effects:
             blt.puts(4, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
@@ -351,8 +364,8 @@ class RenderFunctions:
                      0, 0, blt.TK_ALIGN_LEFT)
 
         ac_player = "[color=default]AC:" + str(player.fighter.ac) + "  "
-        ev_player = "EV:" + str(player.fighter.ev) + "  "
-        power_player = "ATK:" + str(player.fighter.power) + "  "
+
+        power_player = "[color=default]ATK:" + str(player.fighter.power) + "  "
         lvl_player = "LVL:" + str(player.player.char_level) + "  "
         exp_player = "EXP:" + str(player.player.char_exp["player"]) + "/" + \
                      str(player.player.char_level * player.player.exp_lvl_interval)
@@ -363,7 +376,7 @@ class RenderFunctions:
                  0, 0, blt.TK_ALIGN_LEFT)
 
         # Draw target stats
-        if target:
+        if target and not target == player:
             blt.clear_area(self.owner.ui.viewport.offset_center_x - int(len(power_msg) / 2) - 5,
                            self.owner.ui.viewport.offset_h + self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 3)
 
@@ -376,14 +389,15 @@ class RenderFunctions:
                             str(target.fighter.hp) + "/" + \
                             str(target.fighter.max_hp) + "  "
 
+            ev_target = "EV:" + str(target.fighter.ev) + "  "
             active_effects = []
             for x in target.status_effects.items:
                 if x.duration > 0:
-                    active_effects.append(x.description + "(" + str(x.duration) + ")")
+                    active_effects.append("[color={0}]{1} ({2})".format(x.color, x.description, str(x.duration+1)))
                     if x.name == "poison":
-                        hp_target = "[color=green]HP:" + \
-                                    str(target.fighter.hp) + "/" + \
-                                    str(target.fighter.max_hp) + "  "
+                        hp_target = "[color={0}]HP:{1}/{2}  ".format(x.color, str(target.fighter.hp), str(target.fighter.max_hp))
+                    elif x.name == "fly":
+                        ev_target = "[color={0}]EV:{1}  ".format(x.color, str(target.fighter.ev))
 
             if active_effects:
                 blt.puts(self.owner.ui.viewport.offset_w, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
@@ -391,11 +405,10 @@ class RenderFunctions:
                          0, 0, blt.TK_ALIGN_RIGHT)
 
             ac_target = "[color=default]AC:" + str(target.fighter.ac) + "  "
-            ev_target = "EV:" + str(target.fighter.ev) + "  "
             power_target = "ATK:" + str(target.fighter.power) + " "
 
             blt.puts(self.owner.ui.viewport.offset_w-1, self.owner.ui.viewport.offset_h + self.ui_offset_y + 1,
-                     "[offset=0,-2]" + "[color=lightest red]" + target.name.capitalize() + ":  " + hp_target + ac_target + ev_target + power_target,
+                     "[offset=0,-2]" + target.colored_name + ":  " + hp_target + ac_target + ev_target + power_target,
                      0, 0, blt.TK_ALIGN_RIGHT)
 
             if target.fighter.hp <= 0:
@@ -403,6 +416,7 @@ class RenderFunctions:
                                self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 3)
 
     def draw_ui(self, element):
+        self.clear_camera(element.w, element.h, 5)
         blt.color(element.color)
         blt.layer(1)
 
@@ -430,6 +444,25 @@ class RenderFunctions:
         else:
             blt.put(x * self.owner.options.tile_offset_x, y *
                     self.owner.options.tile_offset_y, tilemap()["indicator"])
+
+    def draw_health_bar(self, entity):
+        blt.layer(4)
+        x, y = self.owner.game_camera.get_coordinates(entity.x, entity.y)
+        full_hp = "[color=green].[color=green].[color=green].[color=green]."
+        three_q_hp = "[color=green].[color=green].[color=green].[color=red]."
+        half_hp = "[color=green].[color=green].[color=red].[color=red]."
+        one_q_hp = "[color=green].[color=red].[color=red].[color=red]."
+
+        if entity.fighter.hp / entity.fighter.max_hp <= 0.25:
+            hp_bar = one_q_hp
+        elif entity.fighter.hp / entity.fighter.max_hp <= 0.5:
+            hp_bar = half_hp
+        elif entity.fighter.hp / entity.fighter.max_hp <= 0.75:
+            hp_bar = three_q_hp
+        else:
+            hp_bar = full_hp
+
+        blt.puts(x * self.owner.options.tile_offset_x, y * self.owner.options.tile_offset_y + 2, hp_bar)
 
     def draw_minimap(self):
         blt.layer(1)
@@ -656,9 +689,11 @@ class RenderFunctions:
             blt.clear_area(x * self.owner.options.tile_offset_x, y *
                            self.owner.options.tile_offset_y, 2, 2)
 
-    def clear_camera(self, n):
-        w = self.owner.ui.viewport.offset_w - self.owner.ui.viewport.border
-        h = self.owner.ui.viewport.offset_h - self.owner.ui.viewport.border
+    def clear_camera(self, n, w=None, h=None):
+        if not w:
+            w = self.owner.ui.viewport.offset_w - self.owner.ui.viewport.border
+        if not h:
+            h = self.owner.ui.viewport.offset_h - self.owner.ui.viewport.border
         i = 0
         while i < n:
             blt.layer(i)

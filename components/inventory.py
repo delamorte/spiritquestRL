@@ -7,7 +7,7 @@ class Inventory:
         self.capacity = capacity
         self.items = []
         
-    def add_item(self, game_map, msg_log, item=None):
+    def add_item(self, game_map, item=None):
         results = []
 
         if item:
@@ -19,7 +19,7 @@ class Inventory:
         entities = game_map.tiles[self.owner.x][self.owner.y].items_on_tile
         if entities:
             for entity in entities:
-                if entity.item and entity.item.pickable:
+                if entity.item and entity.item.pickable and not entity.hidden:
                     if len(self.items) >= self.capacity:
                         msg = Message("Your inventory is full.")
                         results.append(msg)

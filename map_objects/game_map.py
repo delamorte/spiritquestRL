@@ -1,8 +1,10 @@
 from components.abilities import Abilities
+from components.ai import BasicMonster
+from components.fighter import Fighter
 from components.item import Item
 from components.status_effects import StatusEffects
 from components.entity import Entity
-from fighter_stats import get_fighter_ai, get_spawn_rates, get_fighter_data
+from data import json_data
 from map_objects.tile import Tile
 from map_objects.tilemap import tilemap, openables_names, items_names, stairs_names
 from color_functions import get_dngn_colors, get_forest_colors, get_monster_color, name_color_from_value
@@ -22,6 +24,7 @@ class GameMap:
         self.algorithm = None
         self.owner = None
         self.entities = None
+        self.entities
         self.width = width
         self.height = height
         self.name = name
@@ -103,6 +106,8 @@ class GameMap:
                             item_component = Item(name)
                             item = Entity(x, y, 2, entity,
                                           color, name, item=item_component)
+                            if item.name == "flask":
+                                item.hidden = True
                             self.tiles[x][y].add_entity(item)
                             item_component.set_attributes(self)
                             entities.append(item)
@@ -612,6 +617,7 @@ class GameMap:
 
         # Player spawning point has been set in all scenarios, now place rest of the entities
         self.entities["monsters"] = []
+        self.entities["allies"] = []
 
         if self.name == "debug":
             player.x, player.y = 2, 2
@@ -638,15 +644,19 @@ class GameMap:
                     # r = randint(0, 2)
                     name, char = monsters[0]
                     color = get_monster_color(name)
-                    fighter_component = get_fighter_data(name)
-                    ai_component = get_fighter_ai(name)
+                    f_data = self.owner.owner.data.fighters[name]
+                    remarks = f_data["remarks"]
+                    fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
+                                                power=f_data["power"], mv_spd=f_data["mv_spd"],
+                                                atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
+                    ai_component = BasicMonster()
                     light_component = LightSource(radius=fighter_component.fov)
                     abilities_component = Abilities(name)
                     status_effects_component = StatusEffects(name)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
                                      light_source=light_component, abilities=abilities_component,
-                                     status_effects=status_effects_component, boss=True)
+                                     status_effects=status_effects_component, boss=True, remarks=remarks)
                     monster.xtra_info = "It appears to be a terrifying red dragon."
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].add_entity(monster)
@@ -676,15 +686,19 @@ class GameMap:
                     # r = randint(0, 2)
                     name, char = monsters[0]
                     color = get_monster_color(name)
-                    fighter_component = get_fighter_data(name)
-                    ai_component = get_fighter_ai(name)
+                    f_data = self.owner.owner.data.fighters[name]
+                    remarks = f_data["remarks"]
+                    fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
+                                                power=f_data["power"], mv_spd=f_data["mv_spd"],
+                                                atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
+                    ai_component = BasicMonster()
                     light_component = LightSource(radius=fighter_component.fov)
                     abilities_component = Abilities(name)
                     status_effects_component = StatusEffects(name)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
                                      light_source=light_component, abilities=abilities_component,
-                                     status_effects=status_effects_component)
+                                     status_effects=status_effects_component, remarks=remarks)
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].add_entity(monster)
                     self.entities["monsters"].append(monster)
@@ -707,7 +721,7 @@ class GameMap:
                 for x, y in tilemap()["monsters"].items():
                     monsters.append((x, y))
             monsters.sort()
-            spawn_rates = get_spawn_rates(monsters)
+            spawn_rates = self.owner.get_spawn_rates(monsters)
 
             monster_pool = choices(monsters, spawn_rates, k=number_of_monsters)
 
@@ -722,15 +736,19 @@ class GameMap:
                     name = mon[0]
                     char = mon[1]
                     color = get_monster_color(name)
-                    fighter_component = get_fighter_data(name)
-                    ai_component = get_fighter_ai(name)
+                    f_data = self.owner.owner.data.fighters[name]
+                    remarks = f_data["remarks"]
+                    fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
+                                                power=f_data["power"], mv_spd=f_data["mv_spd"],
+                                                atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
+                    ai_component = BasicMonster()
                     light_component = LightSource(radius=fighter_component.fov)
                     abilities_component = Abilities(name)
                     status_effects_component = StatusEffects(name)
                     monster = Entity(x, y, 3, char,
                                      color, name, blocks=True, fighter=fighter_component, ai=ai_component,
                                      light_source=light_component, abilities=abilities_component,
-                                     status_effects=status_effects_component)
+                                     status_effects=status_effects_component, remarks=remarks)
                     monster.light_source.initialize_fov(self)
                     self.tiles[x][y].add_entity(monster)
                     self.entities["monsters"].append(monster)
@@ -919,6 +937,16 @@ class TiledRoom(Room):
         tree = ET.parse("./maps/" + name + ".tmx")
         root = tree.getroot()
         layers = [None, None, None]
+
+        # Parse custom properties, not used atm
+        # custom_properties = {}
+        # for tile in root.iter("tile"):
+        #     tile_id = tile.get("id")
+        #     for tile_property in tile.findall("property"):
+        #         property_name = tile_property.get("name")
+        #         property_value = tile_property.get("value")
+        #         custom_properties[tile_id] = [property_name, property_value]
+
         for layer in root.iter("layer"):
 
             data = layer.find("data").text[1:-1].splitlines()

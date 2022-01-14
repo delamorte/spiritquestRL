@@ -1,16 +1,19 @@
+from math import floor
+
 from bearlibterminal import terminal as blt
 
 from actions import Actions
 from camera import Camera
 from components.abilities import Abilities
 from components.entity import Entity
+from components.fighter import Fighter
 from components.inventory import Inventory
 from components.light_source import LightSource
 from components.menus.main_menu import MainMenu
 from components.player import Player
 from components.status_effects import StatusEffects
+from components.summoner import Summoner
 from data import json_data
-from fighter_stats import get_fighter_data
 from game_states import GameStates
 from input_handlers import handle_keys
 from map_objects.levels import Levels
@@ -38,11 +41,13 @@ class Engine:
         self.levels = None
         self.player = None
         self.options = None
+        self.data = None
 
     def initialize(self):
         # Initialize game data from external files
         game_data = json_data.JsonData()
         json_data.data = game_data
+        self.data = game_data
 
         window_title = 'SpiritQuestRL'
         size = 'size=200x80'
@@ -75,7 +80,7 @@ class Engine:
 
         self.render_functions = RenderFunctions(self.ui.offset_x, self.ui.offset_y)
         self.render_functions.owner = self
-        self.ui.render_functions = self.render_functions
+
         self.ui.draw()
 
         # Call main menu and start game loop
@@ -95,17 +100,28 @@ class Engine:
         self.time_counter = None
         # Create player
         inventory_component = Inventory(26)
-        fighter_component = get_fighter_data("player")
+        f_data = self.data.fighters["player"]
+        fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
+                                    power=f_data["power"], mv_spd=f_data["mv_spd"],
+                                    atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
+
         light_component = LightSource(radius=fighter_component.fov)
         player_component = Player(50)
         abilities_component = Abilities("player")
         status_effects_component = StatusEffects("player")
+        summoner_component = Summoner()
         player = Entity(
-            1, 1, 3, player_component.char["player"], None, "player", blocks=True, player=player_component,
+            1, 1, 3, player_component.char["player"], "default", "player", blocks=True, player=player_component,
             fighter=fighter_component, inventory=inventory_component, light_source=light_component,
+            summoner=summoner_component, indicator_color="gray",
             abilities=abilities_component, status_effects=status_effects_component, stand_on_messages=False)
         player.player.avatar["player"] = fighter_component
-        player.player.avatar[choice] = get_fighter_data(choice)
+        avatar_f_data = self.data.fighters[choice]
+        a_fighter_component = Fighter(hp=avatar_f_data["hp"], ac=avatar_f_data["ac"], ev=avatar_f_data["ev"],
+                                      power=avatar_f_data["power"], mv_spd=avatar_f_data["mv_spd"],
+                                      atk_spd=avatar_f_data["atk_spd"], size=avatar_f_data["size"],
+                                      fov=avatar_f_data["fov"])
+        player.player.avatar[choice] = a_fighter_component
         player.player.avatar[choice].owner = player
         player.abilities.initialize_abilities(choice)
         player.player.char[choice] = tilemap()["monsters"][choice]
@@ -151,6 +167,17 @@ class Engine:
         game_quit = False
 
         while not game_quit:
+
+            if (blt.state(floor(blt.TK_WIDTH)) != self.ui.screen_w or
+                    blt.state(floor(blt.TK_HEIGHT)) != self.ui.screen_h):
+
+                init_tiles(self.options)
+                self.ui = UIElements()
+                self.ui.owner = self
+                self.ui.draw()
+                blt.refresh()
+                self.fov_recompute = True
+
             if self.fov_recompute:
                 self.player.light_source.recompute_fov(self.player.x, self.player.y)
                 self.player.player.init_light()
@@ -187,19 +214,12 @@ class Engine:
 
             if self.game_state == GameStates.PLAYER_DEAD:
                 while self.game_state == GameStates.PLAYER_DEAD:
-                    key = blt.read()
                     if self.actions.dead_actions(key):
                         break
+                    key = blt.read()
                 continue
 
-            if not self.player.fighter.dead:
-                self.player.status_effects.process_effects()
-
-            if self.player.fighter.paralyzed:
-                msg = Message("You are paralyzed!")
-                self.message_log.send(msg)
-                self.time_counter.take_turn(1)
-                self.game_state = GameStates.ENEMY_TURN
+            self.actions.ally_actions()
 
             if self.game_state == GameStates.PLAYER_TURN:
                 # Begin player turn

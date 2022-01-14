@@ -36,16 +36,23 @@ class Abilities:
             effect = item["effect"] if "effect" in item.keys() else []
             duration = item["duration"] if "duration" in item.keys() else []
             radius = item["radius"] if "radius" in item.keys() else []
+            power = item["power"] if "power" in item.keys() else None
             chance = item["chance"] if "chance" in item.keys() else [1.0]
             needs_ai = item["needs_ai"] if "needs_ai" in item.keys() else None
-            target_self = item["target_self"] if "target_self" in item.keys() else None
-            target_other = item["target_other"] if "target_other" in item.keys() else None
+            target_self = item["target_self"] if "target_self" in item.keys() else False
+            target_other = item["target_other"] if "target_other" in item.keys() else False
+            requires_targeting = item["requires_targeting"] if "requires_targeting" in item.keys() else False
             player_only = item["player_only"] if "player_only" in item.keys() else False
+            targets_fighters_only = item["targets_fighters_only"] if "targets_fighters_only" in item.keys() else True
+            target_area = item["target_area"] if "target_area" in item.keys() else "disc"
+            summoned_entities = item["summoned_entities"] if "summoned_entities" in item.keys() else None
 
             a = Ability(name=name, description=description, skill_type=skill_type, damage=damage, rank=rank,
                         icon=icon, dps=dps, effect=effect, duration=duration, radius=radius, chance=chance,
                         needs_ai=needs_ai, target_self=target_self, target_other=target_other,
-                        player_only=player_only)
+                        player_only=player_only, power=power, requires_targeting=requires_targeting,
+                        targets_fighters_only=targets_fighters_only, target_area=target_area,
+                        summoned_entities=summoned_entities)
 
             self.add_item(a)
 

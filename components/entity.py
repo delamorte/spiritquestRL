@@ -14,17 +14,22 @@ class Entity:
     """
 
     def __init__(self, x, y, layer, char, color, name, blocks=False, player=None,
-                 fighter=None, ai=None, item=None, inventory=None, stairs=None,
+                 fighter=None, ai=None, item=None, inventory=None, stairs=None, summoner=None,
                  wall=None, door=None, cursor=None, light_source=None, abilities=None,
-                 status_effects=None, stand_on_messages=True, boss=False):
+                 status_effects=None, stand_on_messages=True, boss=False, hidden=False, remarks=None,
+                 indicator_color="dark red"):
         self.x = x
         self.y = y
         self.layer = layer
         self.char = char
+        if color is None:
+            color = "default"
         self.color = color
         self.name = name
+        self.colored_name = "[color={0}]{1}[color=default]".format(color, name.capitalize())
         self.blocks = blocks
         self.fighter = fighter
+        self.summoner = summoner
         self.player = player
         self.ai = ai
         self.item = item
@@ -42,6 +47,9 @@ class Entity:
         self.stand_on_messages = stand_on_messages
         self.occupied_tiles = None  # For entities bigger than 1 tile
         self.boss = boss
+        self.hidden = hidden
+        self.remarks = remarks
+        self.indicator_color = indicator_color
 
         # Set entity as component owner, so components can call their owner
         if self.player:
@@ -80,12 +88,15 @@ class Entity:
         if self.status_effects:
             self.status_effects.owner = self
 
+        if self.summoner:
+            self.summoner.owner = self
+
     def move(self, dx, dy):
         # Move the entity by a given amount
         self.x += dx
         self.y += dy
 
-    def move_towards(self, target_x, target_y, game_map, entities):
+    def move_towards(self, target_x, target_y, game_map):
         dx = target_x - self.x
         dy = target_y - self.y
         distance = sqrt(dx ** 2 + dy ** 2)
@@ -97,6 +108,10 @@ class Entity:
                 game_map.tiles[self.x+dx][self.y+dy].blocking_entity):
             self.move(dx, dy)
 
+    def move_to_tile(self, x, y):
+        self.x = x
+        self.y = y
+
     def move_astar(self, target, entities, game_map):
 
         fov_map = tcod.map.Map(game_map.width, game_map.height)
@@ -105,12 +120,21 @@ class Entity:
 
         for y1 in range(game_map.height):
             for x1 in range(game_map.width):
-                if game_map.tiles[x1][y1].blocked:
+                if game_map.tiles[x1][y1].blocked or game_map.tiles[x1][y1].blocking_entity:
                     fov_map.walkable[y1, x1] = False
                 if game_map.tiles[x1][y1].block_sight:
                     fov_map.transparent[y1, x1] = False
 
         for entity in entities["monsters"]:
+            if entity.blocks and entity != self and entity != target:
+                fov_map.walkable[entity.y, entity.x] = False
+                if entity.occupied_tiles is not None:
+                    fov_map.walkable[entity.y + 1, entity.x + 1] = False
+                    fov_map.walkable[entity.y, entity.x + 1] = False
+                    fov_map.walkable[entity.y + 1, entity.x] = False
+                fov_map.transparent[entity.y, entity.x] = True
+
+        for entity in entities["allies"]:
             if entity.blocks and entity != self and entity != target:
                 fov_map.walkable[entity.y, entity.x] = False
                 if entity.occupied_tiles is not None:
@@ -148,7 +172,7 @@ class Entity:
             # (for example another monster blocks a corridor)
             # it will still try to move towards the player (closer to the
             # corridor opening)
-            self.move_towards(target.x, target.y, game_map, entities)
+            self.move_towards(target.x, target.y, game_map)
 
     def distance_to(self, other):
         # Use Chebysev distance
@@ -184,32 +208,70 @@ class Entity:
         return death_message
 
 
-def get_neighbour_entities(entity, game_map, n=3, exclude_self=True, fighters=False):
+def get_neighbours(entity, game_map, radius=1, include_self=False, fighters=False, mark_area=False,
+                   algorithm="disc", empty_tiles=False, exclude_player=False):
     """
+    :param exclude_player: excludes the player from the entities
+    :param empty_tiles: return empty tiles around entity
+    :param algorithm: the shape of the targeting area
+    :param mark_area: flags the neighbour area so draw_map can highlight it
     :param entity:
     :param game_map:
-    :param n: radius
-    :param exclude_self: exclude self (center) in the list of entities
+    :param radius: radius
+    :param include_self: include self (center) in the list of entities
     :param fighters: return only fighting entities
     :return: list of entities surrounding the center in radius n
     """
-    x, y = entity.x, entity.y
-    arr = np.roll(np.roll(game_map, shift=-x + 1, axis=0), shift=-y + 1, axis=1)
-    neighbours = arr[:n, :n].flatten()
+
+    if algorithm == "melee":
+        algorithm = "square"
+        radius = 1
+
     entities = []
 
+    def n_closest(x, n, d=1):
+        return x[n[0] - d:n[0] + d + 1, n[1] - d:n[1] + d + 1]
+
+    def n_disc(array):
+        a, b = entity.x, entity.y
+        n = game_map.shape[0]
+        r = radius
+
+        y, x = np.ogrid[-a:n - a, -b:n - b]
+        mask = x * x + y * y <= r * r
+
+        return array[mask]
+
+    if algorithm == "disc":
+        neighbours = n_disc(game_map).flatten()
+    elif algorithm == "square":
+        neighbours = n_closest(game_map, (entity.x, entity.y), d=radius).flatten()
+    else:
+        neighbours = n_closest(game_map, (entity.x, entity.y), d=radius).flatten()
+
+    tiles = []
+
     for tile in neighbours:
-        if tile.entities_on_tile:
-            if exclude_self and tile.blocking_entity == entity:
-                continue
+        if empty_tiles:
+            if not tile.blocked and not tile.blocking_entity:
+                tiles.append(tile)
+        else:
+            if mark_area:
+                tile.targeting_zone = True
             else:
-                entities.extend(tile.entities_on_tile)
-
-    if fighters:
-        fighting_entities = []
-        for entity in entities:
-            if entity.fighter:
-                fighting_entities.append(entity)
-        entities = fighting_entities
-
-    return entities
+                tile.targeting_zone = False
+            if tile.entities_on_tile:
+                if not include_self and tile.blocking_entity == entity:
+                    continue
+                elif fighters and exclude_player:
+                    fighting_entities = [entity for entity in tile.entities_on_tile if entity.fighter and not entity.player]
+                    entities.extend(fighting_entities)
+                elif fighters:
+                    fighting_entities = [entity for entity in tile.entities_on_tile if entity.fighter]
+                    entities.extend(fighting_entities)
+                else:
+                    entities.extend(tile.entities_on_tile)
+    if empty_tiles:
+        return tiles
+    else:
+        return entities
