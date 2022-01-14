@@ -123,6 +123,15 @@ class Actions:
             result, target, targeting = self.owner.player.player.use_ability(self.owner.levels.current_map, ability)
             if target:
                 self.owner.render_functions.draw_stats(target)
+                self.owner.animations_buffer.append((ability.icon, 20))
+                self.owner.animations_buffer.append((ability.icon, 100))
+                self.owner.animations_buffer.append((ability.icon, 180))
+                self.owner.animations_buffer.append((ability.icon, 255))
+                self.owner.animations_buffer.append((ability.icon, 255))
+                self.owner.animations_buffer.append((ability.icon, 180))
+                self.owner.animations_buffer.append((ability.icon, 100))
+                self.owner.animations_buffer.append((ability.icon, 20))
+
             if targeting:
                 self.owner.game_state = GameStates.TARGETING
 

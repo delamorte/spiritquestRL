@@ -4,6 +4,7 @@ from bearlibterminal import terminal as blt
 
 from actions import Actions
 from camera import Camera
+from color_functions import argb_from_color
 from components.abilities import Abilities
 from components.entity import Entity
 from components.fighter import Fighter
@@ -22,7 +23,6 @@ from options import Options
 from render_functions import RenderFunctions
 from ui.elements import UIElements
 from ui.menus import Menus, MenuData
-from ui.message import Message
 from ui.message_log import MessageLog
 
 
@@ -42,6 +42,7 @@ class Engine:
         self.player = None
         self.options = None
         self.data = None
+        self.animations_buffer = []
 
     def initialize(self):
         # Initialize game data from external files
@@ -162,6 +163,8 @@ class Engine:
         self.game_state = GameStates.PLAYER_TURN
         self.time_counter = self.TimeCounter(owner=self)
 
+
+
     def game_loop(self):
 
         game_quit = False
@@ -185,6 +188,26 @@ class Engine:
 
             self.render_functions.draw_messages()
             self.render_functions.draw_turn_count()
+
+            for icon, alpha in self.animations_buffer:
+                blt.layer(4)
+                x, y = self.game_camera.get_coordinates(self.player.x, self.player.y)
+                c = blt.color_from_name("amber")
+                argb = argb_from_color(c)
+                a = alpha
+                r = argb[1]
+                g = argb[2]
+                b = argb[3]
+
+                blt.color(blt.color_from_argb(a, r, g, b))
+                blt.put_ext(x * self.options.tile_offset_x-2, y *
+                        self.options.tile_offset_y-2, -5, 5, icon)
+                blt.delay(100)
+                blt.refresh()
+                blt.clear_area(x * self.options.tile_offset_x, y *
+                        self.options.tile_offset_y, 1, 1)
+
+            self.animations_buffer = []
 
             self.fov_recompute = False
             blt.refresh()
