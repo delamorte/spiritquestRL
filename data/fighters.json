@@ -257,7 +257,7 @@
             "claws",
             "call allies"
         ],
-        "remarks": "You are stupid and ugly. Loser"
+        "remarks": ["You are stupid and ugly. Loser."]
     },
     "leech": {
         "hp": 13,
