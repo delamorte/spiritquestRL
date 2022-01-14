@@ -183,8 +183,6 @@ class Engine:
                 self.player.player.init_light()
                 self.render_functions.draw_all()
 
-            self.message_log.send(Message("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porta nec velit non condimentum. Mauris ac consectetur nibh, a feugiat turpis. Suspendisse potenti. Sed pretium malesuada vehicula. Cras nec nisi vitae erat tempor egestas vitae bibendum nisi. Sed venenatis, purus non sodales interdum, augue tortor efficitur ligula, at congue nisl sapien ut sapien. Integer nec massa nec lorem elementum fermentum. Quisque massa tellus, faucibus et cursus a, mattis nec est. Donec efficitur diam felis. Vivamus ac mattis augue. Aliquam malesuada est vel tempus cursus. Morbi ullamcorper vestibulum tortor, id consectetur velit dapibus in."))
-
             self.render_functions.draw_messages()
             self.render_functions.draw_turn_count()
 
