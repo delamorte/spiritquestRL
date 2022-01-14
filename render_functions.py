@@ -70,7 +70,7 @@ class RenderFunctions:
             if entity.x == player.x and entity.y == player.y and entity.stand_on_messages and not entity.hidden:
 
                 results.append(Message(get_article(
-                    entity.name).capitalize() + " " + entity.name + "."))
+                    entity.name).capitalize() + " " + entity.colored_name + "."))
                 if entity.xtra_info:
                     results.append(Message(msg=entity.xtra_info + ".", style="xtra"))
 
@@ -89,20 +89,20 @@ class RenderFunctions:
                             self.draw_stats(entity)
 
                 elif (entity.x == cursor.x and entity.y == cursor.y and not
-                entity.cursor and game_map.tiles[entity.x][entity.y].explored):
+                      entity.cursor and game_map.tiles[entity.x][entity.y].explored and not entity.hidden):
 
                     results.append(Message(get_article(entity.name).capitalize() + " " + entity.name + "."))
-                    results.append(Message(str("x: " + (str(cursor.x) + ", y: " + str(cursor.y)))))
+                    results.append(Message(msg=str("x: " + (str(cursor.x) + ", y: " + str(cursor.y))), extend_line=True))
 
                     if entity.xtra_info:
-                        results.append(Message(msg=entity.xtra_info + ".", style="xtra"))
+                        results.append(Message(msg=entity.xtra_info + ".", style="xtra", extend_line=True))
 
                     if entity.fighter:
                         self.draw_stats(entity)
 
-                if entity.name == "cursor":
-                    self.clear(entity, entity.last_seen_x, entity.last_seen_y)
-                    self.draw(entity, x, y)
+            if entity.name == "cursor":
+                self.clear(entity, entity.last_seen_x, entity.last_seen_y)
+                self.draw(entity, x, y)
 
             if not entity.cursor and player.light_source.fov_map.fov[entity.y, entity.x]:
                 # why is this here? causes rendering bugs!!!
@@ -132,8 +132,8 @@ class RenderFunctions:
                     self.draw(entity, x, y)
 
             if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and self.owner.options.gfx != "ascii":
-                #self.draw_indicator(player.x, player.y, player.indicator_color)
-                #self.draw_indicator(entity.x, entity.y, entity.indicator_color, entity.occupied_tiles)
+                self.draw_indicator(player.x, player.y, player.indicator_color)
+                self.draw_indicator(entity.x, entity.y, entity.indicator_color, entity.occupied_tiles)
                 self.draw_health_bar(entity)
                 self.draw_health_bar(player)
             
@@ -408,7 +408,7 @@ class RenderFunctions:
             power_target = "ATK:" + str(target.fighter.power) + " "
 
             blt.puts(self.owner.ui.viewport.offset_w-1, self.owner.ui.viewport.offset_h + self.ui_offset_y + 1,
-                     "[offset=0,-2]" + "[color=lightest red]" + target.name.capitalize() + ":  " + hp_target + ac_target + ev_target + power_target,
+                     "[offset=0,-2]" + target.colored_name + ":  " + hp_target + ac_target + ev_target + power_target,
                      0, 0, blt.TK_ALIGN_RIGHT)
 
             if target.fighter.hp <= 0:

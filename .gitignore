@@ -123,3 +123,4 @@ dmypy.json
 .pyre/
 /tilesets/
 /docs/
+/dump_tiles.py

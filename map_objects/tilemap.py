@@ -154,7 +154,7 @@ def tilemap(tileset="oryx"):
                  "ui_block_ne": 0xE000 + 685,
                  "ui_block_sw": 0xE000 + 686,
                  "ui_block_se": 0xE000 + 687,
-                 "indicator": 0xE000 + 671,
+                 "indicator": 0xE000 + 672,
                  "indicator_2x2": 0xF300 + 10
                  }
 

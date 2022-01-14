@@ -22,8 +22,11 @@ class Entity:
         self.y = y
         self.layer = layer
         self.char = char
+        if color is None:
+            color = "default"
         self.color = color
         self.name = name
+        self.colored_name = "[color={0}]{1}[color=default]".format(color, name.capitalize())
         self.blocks = blocks
         self.fighter = fighter
         self.summoner = summoner
@@ -219,6 +222,10 @@ def get_neighbours(entity, game_map, radius=1, include_self=False, fighters=Fals
     :param fighters: return only fighting entities
     :return: list of entities surrounding the center in radius n
     """
+
+    if algorithm == "melee":
+        algorithm = "square"
+        radius = 1
 
     entities = []
 

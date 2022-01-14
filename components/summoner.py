@@ -20,7 +20,7 @@ class Summoner:
         self.summoned_entities = []
 
     def process(self, game_map):
-        msg = None
+        msgs = []
         if not self.summoning and self.summoned_entities:
             summons = []
             for entity in self.summoned_entities:
@@ -35,7 +35,8 @@ class Summoner:
                 msg = Message("Your trusty companions {0} return back to the spirit plane!".format(", ".join(summons)))
             else:
                 msg = Message("Your trusty companion {0} returns back to the spirit plane!".format(summons[0]))
-            return msg
+            msgs.append(msg)
+            return msgs
 
         elif self.summoning and not self.summoned_entities:
             if len(self.summoning) <= self.rank:
@@ -55,7 +56,7 @@ class Summoner:
             status_effects_component = StatusEffects(name)
             neighbours = get_neighbours(self.owner, game_map=game_map.tiles, radius=3, algorithm="square", empty_tiles=True)
             summon_tile = choice(neighbours)
-            entity_name = "[color=amber]"+name + " (ally)" + "[color=default]"
+            entity_name = name
             monster = Entity(summon_tile.x, summon_tile.y, 3, char,
                              color, entity_name, blocks=True, fighter=fighter_component, ai=ai_component,
                              light_source=light_component, abilities=abilities_component,
@@ -64,7 +65,11 @@ class Summoner:
             game_map.tiles[summon_tile.x][summon_tile.y].add_entity(monster)
             game_map.entities["allies"].append(monster)
             self.summoned_entities.append(monster)
-            msg = Message("A friendly {0} appears!".format(monster.name))
-            return msg
+            msg = Message("A friendly {0} appears!".format(entity_name))
+            msgs.append(msg)
+            remark_str = "{0}: {1}".format(monster.colored_name, choice(monster.remarks))
+            remark_msg = Message(msg=remark_str, style="dialog")
+            msgs.append(remark_msg)
+            return msgs
 
-        return msg
+        return msgs

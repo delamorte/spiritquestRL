@@ -17,6 +17,10 @@ class Actions:
 
         if wait or move or interact or pickup or stairs or use_ability and not self.owner.player.fighter.dead:
             self.owner.player.status_effects.process_effects(game_map=self.owner.levels.current_map)
+            if self.owner.player.fighter.paralyzed:
+                msg = Message("You are paralyzed!")
+                self.owner.message_log.send(msg)
+                self.owner.time_counter.take_turn(1)
 
         if wait:
             self.owner.time_counter.take_turn(1)
@@ -159,6 +163,7 @@ class Actions:
                 self.owner.message_log.history, "Message history", self.owner.ui.viewport.offset_w - 1,
                                                                    self.owner.ui.viewport.offset_h - 1)
             self.owner.ui.draw()
+            self.owner.ui.side_panel.draw_content()
             self.owner.fov_recompute = True
             return True
 
@@ -170,6 +175,7 @@ class Actions:
             show_msg_history(
                 show_items, "Inventory", self.owner.ui.viewport.offset_w - 1, self.owner.ui.viewport.offset_h - 1)
             self.owner.ui.draw()
+            self.owner.ui.side_panel.draw_content()
             self.owner.fov_recompute = True
             return True
 
@@ -209,6 +215,7 @@ class Actions:
         if key == blt.TK_ESCAPE:
             self.owner.menus.main_menu.show()
             self.owner.fov_recompute = True
+            self.owner.game_state = GameStates.PLAYER_DEAD
             return True
 
         return False
@@ -243,11 +250,6 @@ class Actions:
                     self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(
                         self.owner.cursor)
                     self.owner.fov_recompute = True
-
-                    entity_under_cursor = self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y]
-                    if entity_under_cursor.name is not None and not entity_under_cursor.hidden:
-                        self.owner.message_log.send(Message(
-                            self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].name.capitalize()))
 
         elif main_menu or examine:
             self.owner.game_state = GameStates.PLAYER_TURN
@@ -354,7 +356,7 @@ class Actions:
             self.owner.game_state = GameStates.PLAYER_TURN
 
     def ally_actions(self):
-        self.owner.game_state = GameStates.ALLY_TURN
+
         for entity in self.owner.levels.current_map.entities["allies"]:
             visible = self.owner.player.light_source.fov_map.fov[entity.y, entity.x]
             if visible:
@@ -422,6 +424,3 @@ class Actions:
                         if level_up_msg:
                             self.owner.message_log.send(level_up_msg)
                         self.owner.fov_recompute = True
-
-        if not self.owner.game_state == GameStates.PLAYER_DEAD:
-            self.owner.game_state = GameStates.PLAYER_TURN

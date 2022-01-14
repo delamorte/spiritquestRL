@@ -27,7 +27,7 @@
         ],
         "remarks": ["Squeek!", "Nobody near me here, but rats, and they are fine stealthy secret fellows.",
         "I'm not a theater rat, so I never got a theatrical agent and did a play. I came really close though.",
-        "Squirrels are just rats with good publicity",
+        "Squirrels are just rats with good publicity.",
         "It's so different to be a sparrow. But nobody asked this rat if he wanted to be a rat when he was made. Nobody said, 'Wouldn't you rather be a sparrow?",
         "To a rat, a small hole is like a door.",
         "I loved to party with the Rat Pack, they were so much fun."]
@@ -209,8 +209,8 @@
             "strike",
             "strangle"
         ],
-        "remarks": ["*rattles*", "The foot bone's connected to the leg bone", "The leg bone's connected to the knee bone",
-        "The knee bone's connected to the thigh bone"]
+        "remarks": ["*rattles*", "*The foot bone's connected to the leg bone*", "*The leg bone's connected to the knee bone*",
+        "*The knee bone's connected to the thigh bone*"]
     },
     "chaos dog": {
         "hp": 14,

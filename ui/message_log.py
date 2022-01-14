@@ -1,5 +1,6 @@
 from copy import copy
 from textwrap import wrap
+import re
 
 
 class MessageLog:
@@ -18,7 +19,9 @@ class MessageLog:
 
         for message in messages:
             message.msg = message.msg.strip()
-            if len(message.msg) > self.owner.ui.msg_panel.offset_w - 5:
+            regexed_msg = re.sub(r'\[.*?\]', '', message.msg)
+            true_length = len(message.msg) - len(regexed_msg)
+            if len(message.msg) > self.owner.ui.msg_panel.offset_w + true_length:
                 self.split_long(message)
                 continue
 
@@ -45,7 +48,7 @@ class MessageLog:
         self.new_msgs = True
 
     def split_long(self, message):
-        results = wrap(message.msg, self.owner.ui.msg_panel.offset_w - 5)
+        results = wrap(message.msg, self.owner.ui.msg_panel.offset_w)
         for msg_str in results:
             temp = copy(message)
             temp.msg = msg_str

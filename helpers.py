@@ -9,6 +9,8 @@ def get_article(s):
         return "an"
     elif s.lower().split(" ", 1)[0] in def_articles:
         return "the"
+    elif s.lower() == "player":
+        return ""
     else:
         return "a"
 

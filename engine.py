@@ -111,7 +111,7 @@ class Engine:
         status_effects_component = StatusEffects("player")
         summoner_component = Summoner()
         player = Entity(
-            1, 1, 3, player_component.char["player"], None, "player", blocks=True, player=player_component,
+            1, 1, 3, player_component.char["player"], "default", "player", blocks=True, player=player_component,
             fighter=fighter_component, inventory=inventory_component, light_source=light_component,
             summoner=summoner_component, indicator_color="gray",
             abilities=abilities_component, status_effects=status_effects_component, stand_on_messages=False)
@@ -214,18 +214,12 @@ class Engine:
 
             if self.game_state == GameStates.PLAYER_DEAD:
                 while self.game_state == GameStates.PLAYER_DEAD:
-                    key = blt.read()
                     if self.actions.dead_actions(key):
                         break
+                    key = blt.read()
                 continue
 
             self.actions.ally_actions()
-
-            if self.player.fighter.paralyzed:
-                msg = Message("You are paralyzed!")
-                self.message_log.send(msg)
-                self.time_counter.take_turn(1)
-                self.game_state = GameStates.ENEMY_TURN
 
             if self.game_state == GameStates.PLAYER_TURN:
                 # Begin player turn

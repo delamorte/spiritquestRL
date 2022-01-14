@@ -32,7 +32,7 @@ class BasicMonster:
                 self.owner.move_to_tile(target_tile.x, target_tile.y)
                 if self.owner.remarks:
                     remark = choice(self.owner.remarks)
-                    combat_msgs.append(Message("{0}: {1}".format(self.owner.name.capitalize(), remark),
+                    combat_msgs.append(Message("{0}: {1}".format(self.owner.colored_name, remark),
                                                style="dialog"))
 
         elif self.owner.light_source.fov_map.fov[target.y, target.x]:
@@ -63,7 +63,7 @@ class BasicMonster:
                         if self.owner.remarks:
                             remark = choice(self.owner.remarks)
                             combat_msgs.append(
-                                Message(msg="{0}: {1}".format(self.owner.name.capitalize(), remark),
+                                Message(msg="{0}: {1}".format(self.owner.colored_name, remark),
                                         style="dialog"))
                     monster.move_astar(target, entities, game_map)
                     action_cost += 1 / monster.fighter.mv_spd

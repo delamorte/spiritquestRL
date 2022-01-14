@@ -40,7 +40,7 @@ class Fighter:
         result = None
         amount = roll_dice(power)
         if self.hp >= self.max_hp:
-            result = Message("{0} is already at max health.".format(self.owner.name.capitalize()), extend_line=True)
+            result = Message("{0} is already at max health.".format(self.owner.colored_name), extend_line=True)
             return result
         else:
             if self.hp + amount > self.max_hp:
@@ -61,12 +61,12 @@ class Fighter:
                 if miss:
                     if self.owner.player:
                         msg = Message(msg="You attack the {0} with {1}, but miss.".format(
-                            target.name, skill.name),
+                            target.name.lower(), skill.name),
                                       style="miss")
                         results.append(msg)
                     else:
                         msg = Message(msg="The {0} attacks the {1} with {2}, but misses.".format(
-                            self.owner.name, target.name, skill.name),
+                            self.owner.name, target.colored_name.lower(), skill.name),
                                       style="miss")
                         results.append(msg)
                 else:
@@ -101,7 +101,7 @@ class Fighter:
 
                             target.status_effects.add_item(effect_component)
                             msg = Message(msg="The {0} is inflicted with {1}!".format(
-                                target.name, effect), color=color)
+                                target.colored_name.lower(), effect), color=color)
                             results.append(msg)
 
                     if damage > 0:
@@ -110,11 +110,11 @@ class Fighter:
                     else:
                         if self.owner.player:
                             msg = Message(msg="You attack the {0} with {1} but do no damage.".format(
-                                target.name, skill.name), style="miss", extend_line=True)
+                                target.colored_name.lower(), skill.name), style="miss", extend_line=True)
                             results.append(msg)
                         else:
                             msg = Message(msg="The {0} attacks the {1} with {2} but does no damage.".format(
-                                self.owner.name, target.name, skill.name), style="miss", extend_line=True)
+                                self.owner.colored_name, target.colored_name.lower(), skill.name), style="miss", extend_line=True)
                             results.append(msg)
 
             elif skill.skill_type == "utility":
@@ -130,7 +130,7 @@ class Fighter:
                             description = json_efx["description"]
 
                             if description in self.effects:
-                                results.append(Message("The {0} is already {1}!".format(self.owner.name, description)))
+                                results.append(Message("The {0} is already {1}!".format(self.owner.colored_name.lower(), description)))
                                 continue
 
                             duration = roll_dice(skill.duration[skill.rank])
@@ -185,7 +185,7 @@ class Fighter:
                         skill.name), style="skill_use")
                 else:
                     msg = Message(msg="You use {0} on {1}!".format(
-                        skill.name, target.name), style="skill_use")
+                        skill.name, target.colored_name.lower()), style="skill_use")
                 results.append(msg)
                 if damage > 0:
                     if skill.name == "heal" and target == self.owner:
@@ -194,41 +194,41 @@ class Fighter:
 
                     elif skill.name == "heal":
                         msg = Message(msg="You heal the {0} for {1} hit points.".format(
-                            target.name, str(-1*damage)), extend_line=True)
+                            target.colored_name.lower(), str(-1*damage)), extend_line=True)
 
                     else:
                         msg = Message(msg="You attack the {0} for {1} damage.".format(
-                            target.name, str(damage)), style="attack", extend_line=True)
+                            target.colored_name.lower(), str(damage)), extend_line=True)
                     results.append(msg)
             else:
                 msg = Message(msg="You attack the {0} with {1} for {2} damage.".format(
-                    target.name, skill.name, damage))
+                    target.colored_name.lower(), skill.name, damage))
                 results.append(msg)
 
         else:
             if skill.skill_type != "weapon":
                 if target == self.owner:
                     msg = Message(msg="The {0} uses {1} on itself!".format(
-                        self.owner.name, skill.name), style="skill_use")
+                        self.owner.colored_name.lower(), skill.name), style="skill_use")
                 else:
                     msg = Message(msg="The {0} uses {1} on {2}!".format(
-                        self.owner.name, skill.name, target.name), style="skill_use")
+                        self.owner.colored_name.lower(), skill.name, target.colored_name.lower()), style="skill_use")
                 results.append(msg)
                 if damage > 0:
                     if skill.name == "heal" and target == self.owner:
                         msg = Message(msg="The {0} heals itself for {1} hit points.".format(
-                            self.owner.name, str(-1*damage)), style="attack", extend_line=True)
+                            self.owner.colored_name.lower(), str(-1*damage)), extend_line=True)
 
                     elif skill.name == "heal":
                         msg = Message(msg="The {0} heals {1} for {2} hit points.".format(
-                            self.owner.name, target.name, str(-1*damage)), style="attack", extend_line=True)
+                            self.owner.colored_name.lower(), target.colored_name.lower(), str(-1*damage)), extend_line=True)
                     else:
                         msg = Message(msg="The {0} attacks the {1} for {2} damage.".format(
-                            self.owner.name, target.name, str(damage)), style="attack", extend_line=True)
+                            self.owner.colored_name.lower(), target.colored_name.lower(), str(damage)), extend_line=True)
                     results.append(msg)
             else:
                 msg = Message(msg="The {0} attacks the {1} with {2} for {3} damage.".format(
-                    self.owner.name, target.name, skill.name, damage))
+                    self.owner.colored_name.lower(), target.colored_name.lower(), skill.name, damage))
                 results.append(msg)
 
         return results
