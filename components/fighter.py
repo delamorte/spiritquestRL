@@ -1,3 +1,4 @@
+from components.animation import Animation
 from helpers import roll_dice
 from math import ceil
 from random import randint
@@ -51,6 +52,7 @@ class Fighter:
 
     def attack(self, target, skill):
         results = []
+        animations = []
         hit_chance = randint(1, 100)
         miss = (target.fighter.ev * 2) >= hit_chance - self.hit_penalty
         if (skill.skill_type == "attack" or skill.skill_type == "utility") and self.owner.player:
@@ -69,6 +71,7 @@ class Fighter:
                             self.owner.name, target.colored_name.lower(), skill.name),
                                       style="miss")
                         results.append(msg)
+
                 else:
                     damage = self.calculate_damage(skill, target)
                     results = self.hit_messages(skill, target, damage)
@@ -116,6 +119,8 @@ class Fighter:
                             msg = Message(msg="The {0} attacks the {1} with {2} but does no damage.".format(
                                 self.owner.colored_name, target.colored_name.lower(), skill.name), style="miss", extend_line=True)
                             results.append(msg)
+                self.owner.animations.buffer.append(
+                    Animation(target.x, target.y, skill, target_self=skill.target_self))
 
             elif skill.skill_type == "utility":
                 if skill.player_only and not self.owner.player:
@@ -156,11 +161,15 @@ class Fighter:
 
                             target.status_effects.add_item(effect_component)
                             results.extend(self.hit_messages(skill, target, damage))
+                            self.owner.animations.buffer.append(
+                                Animation(target.x, target.y, skill, target_self=skill.target_self))
 
                     else:
                         if damage > 0:
                             target.fighter.take_damage(damage)
                             results.extend(self.hit_messages(skill, target, damage))
+                            self.owner.animations.buffer.append(
+                                Animation(target.x, target.y, skill, target_self=skill.target_self))
 
         return results
 

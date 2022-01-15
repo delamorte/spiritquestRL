@@ -1,3 +1,5 @@
+import threading
+import time
 from math import floor
 
 from bearlibterminal import terminal as blt
@@ -6,6 +8,7 @@ from actions import Actions
 from camera import Camera
 from color_functions import argb_from_color
 from components.abilities import Abilities
+from components.animations import Animations
 from components.entity import Entity
 from components.fighter import Fighter
 from components.inventory import Inventory
@@ -111,10 +114,12 @@ class Engine:
         abilities_component = Abilities("player")
         status_effects_component = StatusEffects("player")
         summoner_component = Summoner()
+        animations_component = Animations()
+
         player = Entity(
             1, 1, 3, player_component.char["player"], "default", "player", blocks=True, player=player_component,
             fighter=fighter_component, inventory=inventory_component, light_source=light_component,
-            summoner=summoner_component, indicator_color="gray",
+            summoner=summoner_component, indicator_color="gray", animations=animations_component,
             abilities=abilities_component, status_effects=status_effects_component, stand_on_messages=False)
         player.player.avatar["player"] = fighter_component
         avatar_f_data = self.data.fighters[choice]
@@ -163,8 +168,6 @@ class Engine:
         self.game_state = GameStates.PLAYER_TURN
         self.time_counter = self.TimeCounter(owner=self)
 
-
-
     def game_loop(self):
 
         game_quit = False
@@ -188,26 +191,7 @@ class Engine:
 
             self.render_functions.draw_messages()
             self.render_functions.draw_turn_count()
-
-            for icon, alpha in self.animations_buffer:
-                blt.layer(4)
-                x, y = self.game_camera.get_coordinates(self.player.x, self.player.y)
-                c = blt.color_from_name("amber")
-                argb = argb_from_color(c)
-                a = alpha
-                r = argb[1]
-                g = argb[2]
-                b = argb[3]
-
-                blt.color(blt.color_from_argb(a, r, g, b))
-                blt.put_ext(x * self.options.tile_offset_x-2, y *
-                        self.options.tile_offset_y-2, -5, 5, icon)
-                blt.delay(100)
-                blt.refresh()
-                blt.clear_area(x * self.options.tile_offset_x, y *
-                        self.options.tile_offset_y, 1, 1)
-
-            self.animations_buffer = []
+            self.render_functions.draw_animations()
 
             self.fov_recompute = False
             blt.refresh()

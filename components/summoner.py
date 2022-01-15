@@ -3,6 +3,7 @@ from random import choice
 from color_functions import get_monster_color
 from components.abilities import Abilities
 from components.ai import BasicMonster
+from components.animations import Animations
 from components.entity import get_neighbours, Entity
 from components.fighter import Fighter
 from components.light_source import LightSource
@@ -54,13 +55,15 @@ class Summoner:
             light_component = LightSource(radius=fighter_component.fov)
             abilities_component = Abilities(name)
             status_effects_component = StatusEffects(name)
+            animations_component = Animations()
             neighbours = get_neighbours(self.owner, game_map=game_map.tiles, radius=3, algorithm="square", empty_tiles=True)
             summon_tile = choice(neighbours)
             entity_name = name
             monster = Entity(summon_tile.x, summon_tile.y, 3, char,
                              color, entity_name, blocks=True, fighter=fighter_component, ai=ai_component,
                              light_source=light_component, abilities=abilities_component,
-                             status_effects=status_effects_component, remarks=remarks, indicator_color="light green")
+                             status_effects=status_effects_component, remarks=remarks, indicator_color="light green",
+                             animations=animations_component)
             monster.light_source.initialize_fov(game_map)
             game_map.tiles[summon_tile.x][summon_tile.y].add_entity(monster)
             game_map.entities["allies"].append(monster)

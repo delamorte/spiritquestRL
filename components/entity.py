@@ -17,7 +17,7 @@ class Entity:
                  fighter=None, ai=None, item=None, inventory=None, stairs=None, summoner=None,
                  wall=None, door=None, cursor=None, light_source=None, abilities=None,
                  status_effects=None, stand_on_messages=True, boss=False, hidden=False, remarks=None,
-                 indicator_color="dark red"):
+                 indicator_color="dark red", animations=None):
         self.x = x
         self.y = y
         self.layer = layer
@@ -50,6 +50,7 @@ class Entity:
         self.hidden = hidden
         self.remarks = remarks
         self.indicator_color = indicator_color
+        self.animations = animations
 
         # Set entity as component owner, so components can call their owner
         if self.player:
@@ -90,6 +91,9 @@ class Entity:
 
         if self.summoner:
             self.summoner.owner = self
+
+        if self.animations:
+            self.animations.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount

@@ -123,15 +123,6 @@ class Actions:
             result, target, targeting = self.owner.player.player.use_ability(self.owner.levels.current_map, ability)
             if target:
                 self.owner.render_functions.draw_stats(target)
-                self.owner.animations_buffer.append((ability.icon, 20))
-                self.owner.animations_buffer.append((ability.icon, 100))
-                self.owner.animations_buffer.append((ability.icon, 180))
-                self.owner.animations_buffer.append((ability.icon, 255))
-                self.owner.animations_buffer.append((ability.icon, 255))
-                self.owner.animations_buffer.append((ability.icon, 180))
-                self.owner.animations_buffer.append((ability.icon, 100))
-                self.owner.animations_buffer.append((ability.icon, 20))
-
             if targeting:
                 self.owner.game_state = GameStates.TARGETING
 
@@ -154,6 +145,10 @@ class Actions:
             if msg:
                 self.owner.message_log.send(msg)
             self.owner.fov_recompute = True
+
+        #self.owner.player.animations.render()
+        self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
+        self.owner.player.animations.buffer = []
 
     def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False):
         if main_menu:
@@ -329,6 +324,8 @@ class Actions:
                     combat_msg = entity.ai.take_turn(
                         self.owner.player, self.owner.levels.current_map, self.owner.levels.current_map.entities,
                         self.owner.time_counter)
+                    self.owner.animations_buffer.extend(entity.animations.buffer)
+                    entity.animations.buffer = []
                     self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
                     self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
                     if entity.occupied_tiles is not None:
