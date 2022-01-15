@@ -174,7 +174,6 @@ class Engine:
         game_quit = False
 
         while not game_quit:
-            key = None
             if (blt.state(floor(blt.TK_WIDTH)) != self.ui.screen_w or
                     blt.state(floor(blt.TK_HEIGHT)) != self.ui.screen_h):
 
@@ -192,7 +191,6 @@ class Engine:
 
             self.render_functions.draw_messages()
             self.render_functions.draw_turn_count()
-            self.render_functions.draw_animations()
 
             self.fov_recompute = False
             blt.refresh()

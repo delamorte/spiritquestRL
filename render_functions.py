@@ -510,18 +510,18 @@ class RenderFunctions:
 
     def draw_animations(self):
         for animation in self.owner.animations_buffer:
-            half_split = int(animation.frames / 2)
-            a = np.linspace(20, 255, half_split, dtype=int)
-            # if animation interrupted by key press, cache rest of the frames
-            if animation.cached_arr is not None:
-                alpha_arr = animation.cached_arr
-            else:
-                alpha_arr = np.concatenate((a, np.flip(a)))
-            for i, alpha in enumerate(alpha_arr):
+
+            if animation.cached_alpha is None:
+                self.owner.animations_buffer.remove(animation)
+                return None
+
+            for i, alpha in enumerate(animation.cached_alpha):
                 # avoid blocking animation rendering with blt.read
                 if blt.has_input():
                     key = blt.read()
-                    animation.cached_arr = alpha_arr[i:]
+                    # if animation interrupted by key press, cache rest of the frames
+                    animation.cached_alpha = animation.cached_alpha[i:]
+                    animation.cached_frames = animation.cached_frames[i:]
                     return key
                 blt.layer(4)
                 x, y = self.owner.game_camera.get_coordinates(animation.target.x, animation.target.y)
@@ -531,13 +531,14 @@ class RenderFunctions:
                 blt.color(blt.color_from_argb(a, r, g, b))
                 blt.put_ext(x * self.owner.options.tile_offset_x, y *
                             self.owner.options.tile_offset_y, animation.offset_x, animation.offset_y,
-                            animation.icon)
+                            animation.cached_frames[i].item())
                 blt.refresh()
                 # remove cache if animation finished
-                if i == alpha_arr.size - 1:
-                    animation.cached_arr = None
+                if i == animation.cached_alpha.size - 1:
+                    animation.cached_alpha = None
+                    animation.cached_frames = None
 
-            if animation.cached_arr is None:
+            if animation.cached_alpha is None:
                 # remove from buffer after all frames rendered
                 self.owner.animations_buffer.remove(animation)
 
