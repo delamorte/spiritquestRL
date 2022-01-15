@@ -509,27 +509,37 @@ class RenderFunctions:
         blt.put(x0 + 3, y0 + 3, 0xF900)
 
     def draw_animations(self):
-
-        if self.owner.animations_buffer:
-            for animation in self.owner.animations_buffer:
-                half_split = int(animation.frames / 2)
-                a = np.linspace(20, 255, half_split, dtype=int)
+        for animation in self.owner.animations_buffer:
+            half_split = int(animation.frames / 2)
+            a = np.linspace(20, 255, half_split, dtype=int)
+            # if animation interrupted by key press, cache rest of the frames
+            if animation.cached_arr is not None:
+                alpha_arr = animation.cached_arr
+            else:
                 alpha_arr = np.concatenate((a, np.flip(a)))
-                for alpha in alpha_arr:
+            for i, alpha in enumerate(alpha_arr):
+                # avoid blocking animation rendering with blt.read
+                if blt.has_input():
+                    key = blt.read()
+                    animation.cached_arr = alpha_arr[i:]
+                    return key
+                blt.layer(4)
+                x, y = self.owner.game_camera.get_coordinates(animation.target.x, animation.target.y)
+                c = blt.color_from_name(animation.color)
+                argb = argb_from_color(c)
+                a, r, g, b = alpha.item(), argb[1], argb[2], argb[3]
+                blt.color(blt.color_from_argb(a, r, g, b))
+                blt.put_ext(x * self.owner.options.tile_offset_x, y *
+                            self.owner.options.tile_offset_y, animation.offset_x, animation.offset_y,
+                            animation.icon)
+                blt.refresh()
+                # remove cache if animation finished
+                if i == alpha_arr.size - 1:
+                    animation.cached_arr = None
 
-                    blt.layer(4)
-                    x, y = self.owner.game_camera.get_coordinates(animation.x, animation.y)
-                    c = blt.color_from_name(animation.color)
-                    argb = argb_from_color(c)
-                    a, r, g, b = alpha.item(), argb[1], argb[2], argb[3]
-                    blt.color(blt.color_from_argb(a, r, g, b))
-                    blt.put_ext(x * self.owner.options.tile_offset_x, y *
-                                self.owner.options.tile_offset_y, animation.offset_x, animation.offset_y, animation.icon)
-                    blt.delay(50)
-                    blt.refresh()
-                    # blt.clear_area(x * self.owner.options.tile_offset_x, y *
-                    #                self.owner.options.tile_offset_y, 1, 1)
-        self.owner.animations_buffer = []
+            if animation.cached_arr is None:
+                # remove from buffer after all frames rendered
+                self.owner.animations_buffer.remove(animation)
 
     def draw_turn_count(self):
         x = self.owner.ui.side_panel.offset_x + self.owner.ui.side_panel.x_margin

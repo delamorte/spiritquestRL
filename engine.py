@@ -2,6 +2,7 @@ import threading
 import time
 from math import floor
 
+import numpy as np
 from bearlibterminal import terminal as blt
 
 from actions import Actions
@@ -173,7 +174,7 @@ class Engine:
         game_quit = False
 
         while not game_quit:
-
+            key = None
             if (blt.state(floor(blt.TK_WIDTH)) != self.ui.screen_w or
                     blt.state(floor(blt.TK_HEIGHT)) != self.ui.screen_h):
 
@@ -196,7 +197,11 @@ class Engine:
             self.fov_recompute = False
             blt.refresh()
 
-            key = blt.read()
+            if self.animations_buffer:
+                key = self.render_functions.draw_animations()
+
+            else:
+                key = blt.read()
 
             action = handle_keys(key)
 

@@ -146,9 +146,9 @@ class Actions:
                 self.owner.message_log.send(msg)
             self.owner.fov_recompute = True
 
-        #self.owner.player.animations.render()
-        self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
-        self.owner.player.animations.buffer = []
+        if not self.owner.cursor:
+            self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
+            self.owner.player.animations.buffer = []
 
     def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False):
         if main_menu:
@@ -279,6 +279,8 @@ class Actions:
             del self.owner.levels.current_map.entities["cursor"]
             self.owner.cursor = None
             self.owner.fov_recompute = True
+            self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
+            self.owner.player.animations.buffer = []
 
         # if self.owner.player.fighter.paralyzed:
         #     self.owner.message_log.send("You are paralyzed!")
