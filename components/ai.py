@@ -13,9 +13,15 @@ class BasicMonster:
         self.ally = ally
         self.target_last_seen_x = 0
         self.target_last_seen_y = 0
+        self.wait_first_turn = False
+        if ally:
+            self.wait_first_turn = True
 
     def take_turn(self, target, game_map, entities, time):
         monster = self.owner
+        if self.wait_first_turn:
+            self.wait_first_turn = False
+            return None
         if not self.action_begin:
             self.last_action = time.get_last_turn()
         time_to_act = time.get_turn() - self.last_action

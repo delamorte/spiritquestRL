@@ -18,12 +18,11 @@ class Animation:
         else:
             # Draw skill usage animation to top left of entity tile
             self.offset_x = 1
-            self.offset_y = 4
+            self.offset_y = -4
 
         if skill.efx_icons:
             self.frames = [0xE800 + x for x in skill.efx_icons]
         else:
-            print(str(skill.icon))
             self.frames = [skill.icon]
 
         half_split = int(self.num_of_frames / 2)
@@ -44,6 +43,6 @@ class Animation:
         elif self.skill.skill_type == "utility":
             color = "amber"
         else:
-            color = "amber"
+            color = "light amber"
 
         return color

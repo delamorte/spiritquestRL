@@ -181,6 +181,7 @@ class Engine:
                 self.ui = UIElements()
                 self.ui.owner = self
                 self.ui.draw()
+                self.render_functions.draw_side_panel_content()
                 blt.refresh()
                 self.fov_recompute = True
 
@@ -229,8 +230,6 @@ class Engine:
                     key = blt.read()
                 continue
 
-            self.actions.ally_actions()
-
             if self.game_state == GameStates.PLAYER_TURN:
                 # Begin player turn
                 # Non-turn taking UI functions
@@ -245,7 +244,6 @@ class Engine:
                     continue
 
                 # Turn taking functions
-
                 self.actions.turn_taking_actions(wait=wait,
                                                  move=move,
                                                  interact=interact,
@@ -267,6 +265,7 @@ class Engine:
             if self.game_state == GameStates.ENEMY_TURN:
                 # Begin enemy turn
                 self.actions.enemy_actions()
+                self.actions.ally_actions()
 
     class TimeCounter:
         def __init__(self, turn=0, owner=None):

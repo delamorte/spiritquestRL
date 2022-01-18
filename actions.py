@@ -15,6 +15,11 @@ class Actions:
     def turn_taking_actions(self, wait=None, move=None, interact=None, pickup=None, stairs=None, examine=None,
                             use_ability=None, key=None):
 
+        msg = self.owner.player.summoner.process(game_map=self.owner.levels.current_map)
+        if msg:
+            self.owner.message_log.send(msg)
+        self.owner.fov_recompute = True
+
         if wait or move or interact or pickup or stairs or use_ability and not self.owner.player.fighter.dead:
             self.owner.player.status_effects.process_effects(game_map=self.owner.levels.current_map)
             if self.owner.player.fighter.paralyzed:
@@ -219,7 +224,7 @@ class Actions:
         if key == blt.TK_ESCAPE:
             self.owner.menus.main_menu.show()
             self.owner.fov_recompute = True
-            self.owner.game_state = GameStates.PLAYER_DEAD
+            #self.owner.game_state = GameStates.PLAYER_DEAD
             return True
 
         return False
@@ -231,8 +236,9 @@ class Actions:
             if self.owner.cursor.cursor.targeting_ability:
                 include_self = self.owner.cursor.cursor.targeting_ability.target_self
                 radius = self.owner.cursor.cursor.targeting_ability.get_range()
+                area = self.owner.cursor.cursor.targeting_ability.target_area
                 entities = get_neighbours(self.owner.player, self.owner.levels.current_map.tiles, radius,
-                                          include_self=include_self, fighters=True, mark_area=True)
+                                          include_self=include_self, fighters=True, mark_area=True, algorithm=area)
                 entities_in_range = list(filter(
                     lambda entity: self.owner.player.light_source.fov_map.fov[entity.y, entity.x], entities))
 
@@ -381,10 +387,12 @@ class Actions:
                     break
 
                 if entity.fighter and entity.fighter.dead:
-                    kill_msg = entity.kill()
+                    entity.kill()
+                    self.owner.player.summoner.summoning = None
                     self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
-                    self.owner.message_log.send(kill_msg)
                     self.owner.fov_recompute = True
+                    del entity
+                    return
 
                 elif entity.fighter and entity.fighter.paralyzed:
                     self.owner.message_log.send(Message("Your {0} friend is paralyzed!".format(entity.name)))
