@@ -1,4 +1,5 @@
 from math import sqrt
+
 import numpy as np
 import tcod
 
@@ -177,6 +178,38 @@ class Entity:
             # it will still try to move towards the player (closer to the
             # corridor opening)
             self.move_towards(target.x, target.y, game_map)
+
+    def get_path_to(self, target, entities, game_map):
+        """Compute and return a path to the target position.
+
+        If there is no valid path then returns an empty list.
+        """
+        # Copy the walkable array.
+        walkable = np.frompyfunc(lambda tile: not tile.blocked, 1, 1)
+        cost = np.array(walkable(game_map.tiles), dtype=np.int8)
+
+        blocking_entities = entities["monsters"] + entities["allies"]
+
+        for entity in blocking_entities:
+            # Check that an entity blocks movement and the cost isn't zero (blocking.)
+            if entity.blocks and cost[entity.x, entity.y]:
+                # Add to the cost of a blocked position.
+                # A lower number means more enemies will crowd behind each other in
+                # hallways.  A higher number means enemies will take longer paths in
+                # order to surround the player.
+                cost[entity.x, entity.y] += 10
+
+        # Create a graph from the cost array and pass that graph to a new pathfinder.
+        graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=3)
+        pathfinder = tcod.path.Pathfinder(graph)
+
+        pathfinder.add_root((self.x, self.y))  # Start position.
+
+        # Compute the path to the destination and remove the starting point.
+        path = list(pathfinder.path_to((target.x, target.y))[1:])
+
+        # Convert from List[List[int]] to List[Tuple[int, int]].
+        return [(int(index[0]), int(index[1])) for index in path]
 
     def distance_to(self, other):
         # Use Chebysev distance

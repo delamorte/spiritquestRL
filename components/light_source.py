@@ -1,4 +1,6 @@
+import numpy as np
 from tcod import map
+from tcod.map import compute_fov
 
 
 class LightSource:
@@ -9,13 +11,24 @@ class LightSource:
         self.algorithm = 0
         self.light_walls = True
         self.name = name
+        self.visible = None
         if self.name == "candle":
             self.radius = 0
 
     def initialize_fov(self, game_map):
+
         fov_map = map.Map(game_map.width, game_map.height)
         fov_map.walkable[:] = True
         fov_map.transparent[:] = True
+
+        # explored = np.zeros((3, 5), dtype=bool, order="F")
+        # transparency = np.ones((3, 5), dtype=bool, order="F")
+        #
+        # visible = tcod.map.compute_fov(transparency, (0, 0))
+        #
+        # explored |= visible  # Keep track of an explored area.
+        #
+        # self.visible = np.full((game_map.width, game_map.height), fill_value=False)
 
         for y in range(game_map.height):
             for x in range(game_map.width):
@@ -27,4 +40,5 @@ class LightSource:
         self.fov_map = fov_map
 
     def recompute_fov(self, x, y):
+
         self.fov_map.compute_fov(x, y, self.radius, self.light_walls, self.algorithm)

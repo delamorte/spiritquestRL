@@ -22,13 +22,15 @@ class Item:
             self.owner.light_source.recompute_fov(self.owner.x, self.owner.y)
 
     def interaction(self, game_map):
-        msg = None
+        results = []
         if self.name == "candle" and self.owner.light_source:
-            msg = "You blow out the candle."
+            msg = Message(msg="You blow out the candle.")
+            results.append(msg)
             self.owner.light_source = None
 
         elif self.name == "candle" and not self.owner.light_source:
             self.set_attributes(game_map)
-            msg = "You light the candle."
+            msg = Message(msg="You light the candle.")
+            results.append(msg)
 
-        return Message(msg)
+        return results

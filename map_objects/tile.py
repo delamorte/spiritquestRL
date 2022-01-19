@@ -12,7 +12,7 @@ class Tile:
     different characters in different layers.
     """
 
-    def __init__(self, blocked, block_sight, x, y):
+    def __init__(self, blocked, block_sight, x=None, y=None):
         self.blocking_entity = None
         self.blocked = blocked
         self.block_sight = block_sight

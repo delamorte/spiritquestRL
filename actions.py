@@ -80,10 +80,12 @@ class Actions:
             for entity in entities:
                 if entity.door:
                     interact_msg = entity.door.interaction(self.owner.levels.current_map)
-                    self.owner.message_log.send(interact_msg)
+                    if interact_msg:
+                        self.owner.message_log.send(interact_msg)
                 elif entity.item:
                     interact_msg = entity.item.interaction(self.owner.levels.current_map)
-                    self.owner.message_log.send(interact_msg)
+                    if interact_msg:
+                        self.owner.message_log.send(interact_msg)
             if interact_msg:
                 self.owner.time_counter.take_turn(1)
                 self.owner.game_state = GameStates.ENEMY_TURN
@@ -299,7 +301,7 @@ class Actions:
         self.owner.render_functions.draw_messages()
 
         for entity in self.owner.levels.current_map.entities["monsters"]:
-            visible = self.owner.player.light_source.fov_map.fov[entity.y, entity.x]
+            visible = self.owner.levels.current_map.visible[entity.x, entity.y]
             if visible:
                 if entity.fighter:
                     entity.status_effects.process_effects()
@@ -372,7 +374,7 @@ class Actions:
     def ally_actions(self):
 
         for entity in self.owner.levels.current_map.entities["allies"]:
-            visible = self.owner.player.light_source.fov_map.fov[entity.y, entity.x]
+            visible = self.owner.levels.current_map.visible[entity.x, entity.y]
             if visible:
                 if entity.fighter:
                     entity.status_effects.process_effects()
