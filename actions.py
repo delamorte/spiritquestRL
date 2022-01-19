@@ -15,6 +15,11 @@ class Actions:
     def turn_taking_actions(self, wait=None, move=None, interact=None, pickup=None, stairs=None, examine=None,
                             use_ability=None, key=None):
 
+        msg = self.owner.player.summoner.process(game_map=self.owner.levels.current_map)
+        if msg:
+            self.owner.message_log.send(msg)
+        self.owner.fov_recompute = True
+
         if wait or move or interact or pickup or stairs or use_ability and not self.owner.player.fighter.dead:
             self.owner.player.status_effects.process_effects(game_map=self.owner.levels.current_map)
             if self.owner.player.fighter.paralyzed:
@@ -108,7 +113,7 @@ class Actions:
         elif examine:
             self.owner.game_state = GameStates.TARGETING
             cursor_component = Cursor()
-            cursor = Entity(self.owner.player.x, self.owner.player.y, 5, 0xE800 + 1746, "light yellow", "cursor",
+            cursor = Entity(self.owner.player.x, self.owner.player.y, 5, 0xF000 + 9, "light yellow", "cursor",
                             cursor=cursor_component, stand_on_messages=False)
             self.owner.cursor = cursor
             self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(self.owner.cursor)
@@ -127,7 +132,7 @@ class Actions:
                 self.owner.game_state = GameStates.TARGETING
 
                 cursor_component = Cursor(targeting_ability=ability)
-                cursor = Entity(target.x, target.y, 5, 0xE800 + 1746, "light yellow", "cursor",
+                cursor = Entity(target.x, target.y, 5, 0xF000 + 9, "light yellow", "cursor",
                                 cursor=cursor_component, stand_on_messages=False)
                 self.owner.cursor = cursor
                 self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(
@@ -145,6 +150,10 @@ class Actions:
             if msg:
                 self.owner.message_log.send(msg)
             self.owner.fov_recompute = True
+
+        if not self.owner.cursor:
+            self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
+            self.owner.player.animations.buffer = []
 
     def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False):
         if main_menu:
@@ -215,7 +224,7 @@ class Actions:
         if key == blt.TK_ESCAPE:
             self.owner.menus.main_menu.show()
             self.owner.fov_recompute = True
-            self.owner.game_state = GameStates.PLAYER_DEAD
+            #self.owner.game_state = GameStates.PLAYER_DEAD
             return True
 
         return False
@@ -227,8 +236,9 @@ class Actions:
             if self.owner.cursor.cursor.targeting_ability:
                 include_self = self.owner.cursor.cursor.targeting_ability.target_self
                 radius = self.owner.cursor.cursor.targeting_ability.get_range()
+                area = self.owner.cursor.cursor.targeting_ability.target_area
                 entities = get_neighbours(self.owner.player, self.owner.levels.current_map.tiles, radius,
-                                          include_self=include_self, fighters=True, mark_area=True)
+                                          include_self=include_self, fighters=True, mark_area=True, algorithm=area)
                 entities_in_range = list(filter(
                     lambda entity: self.owner.player.light_source.fov_map.fov[entity.y, entity.x], entities))
 
@@ -275,6 +285,8 @@ class Actions:
             del self.owner.levels.current_map.entities["cursor"]
             self.owner.cursor = None
             self.owner.fov_recompute = True
+            self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
+            self.owner.player.animations.buffer = []
 
         # if self.owner.player.fighter.paralyzed:
         #     self.owner.message_log.send("You are paralyzed!")
@@ -320,6 +332,8 @@ class Actions:
                     combat_msg = entity.ai.take_turn(
                         self.owner.player, self.owner.levels.current_map, self.owner.levels.current_map.entities,
                         self.owner.time_counter)
+                    self.owner.animations_buffer.extend(entity.animations.buffer)
+                    entity.animations.buffer = []
                     self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
                     self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
                     if entity.occupied_tiles is not None:
@@ -373,10 +387,12 @@ class Actions:
                     break
 
                 if entity.fighter and entity.fighter.dead:
-                    kill_msg = entity.kill()
+                    entity.kill()
+                    self.owner.player.summoner.summoning = None
                     self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
-                    self.owner.message_log.send(kill_msg)
                     self.owner.fov_recompute = True
+                    del entity
+                    return
 
                 elif entity.fighter and entity.fighter.paralyzed:
                     self.owner.message_log.send(Message("Your {0} friend is paralyzed!".format(entity.name)))

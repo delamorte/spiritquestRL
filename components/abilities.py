@@ -38,6 +38,8 @@ class Abilities:
             radius = item["radius"] if "radius" in item.keys() else []
             power = item["power"] if "power" in item.keys() else None
             chance = item["chance"] if "chance" in item.keys() else [1.0]
+            color = item["color"] if "color" in item.keys() else None
+            efx_icons = item["efx_icons"] if "efx_icons" in item.keys() else None
             needs_ai = item["needs_ai"] if "needs_ai" in item.keys() else None
             target_self = item["target_self"] if "target_self" in item.keys() else False
             target_other = item["target_other"] if "target_other" in item.keys() else False
@@ -52,7 +54,7 @@ class Abilities:
                         needs_ai=needs_ai, target_self=target_self, target_other=target_other,
                         player_only=player_only, power=power, requires_targeting=requires_targeting,
                         targets_fighters_only=targets_fighters_only, target_area=target_area,
-                        summoned_entities=summoned_entities)
+                        summoned_entities=summoned_entities, color=color, efx_icons=efx_icons)
 
             self.add_item(a)
 

@@ -17,7 +17,7 @@ class Entity:
                  fighter=None, ai=None, item=None, inventory=None, stairs=None, summoner=None,
                  wall=None, door=None, cursor=None, light_source=None, abilities=None,
                  status_effects=None, stand_on_messages=True, boss=False, hidden=False, remarks=None,
-                 indicator_color="dark red"):
+                 indicator_color="dark red", animations=None):
         self.x = x
         self.y = y
         self.layer = layer
@@ -50,6 +50,7 @@ class Entity:
         self.hidden = hidden
         self.remarks = remarks
         self.indicator_color = indicator_color
+        self.animations = animations
 
         # Set entity as component owner, so components can call their owner
         if self.player:
@@ -90,6 +91,9 @@ class Entity:
 
         if self.summoner:
             self.summoner.owner = self
+
+        if self.animations:
+            self.animations.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount
@@ -189,6 +193,13 @@ class Entity:
             self.char = tilemap()["player_remains"]
             death_message = Message(msg="You died!", style="death")
 
+        elif self.ai.ally:
+            self.light_source = None
+            self.blocks = False
+            self.fighter = None
+            self.ai = None
+            return None
+
         else:
             death_message = Message("The {0} is dead!".format(self.name), style="death")
 
@@ -209,7 +220,7 @@ class Entity:
 
 
 def get_neighbours(entity, game_map, radius=1, include_self=False, fighters=False, mark_area=False,
-                   algorithm="disc", empty_tiles=False, exclude_player=False):
+                   algorithm="square", empty_tiles=False, exclude_player=False):
     """
     :param exclude_player: excludes the player from the entities
     :param empty_tiles: return empty tiles around entity

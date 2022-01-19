@@ -5,7 +5,8 @@
         "skill_type": "weapon",
         "player_only": true,
         "damage": ["2d3", "2d4", "2d5"],
-        "icon": 29
+        "icon": 29,
+        "efx_icons": [2, 1, 0, 0, 1, 2]
     },
     "nasty bite": {
         "name": "nasty bite",
@@ -13,7 +14,8 @@
         "skill_type": "weapon",
         "player_only": true,
         "damage": ["1d4", "1d6", "1d8"],
-        "icon": 6
+        "icon": 6,
+        "efx_icons": [1]
     },
     "snaketail whip": {
         "name": "snaketail whip",
@@ -21,42 +23,49 @@
         "skill_type": "weapon",
         "player_only": true,
         "damage": ["1d8", "1d10", "1d12"],
-        "icon": 7
+        "icon": 7,
+        "efx_icons": [12],
+        "color": "yellow"
     },
     "talons": {
         "name": "talons",
         "description": "Attack with sharp talons",
         "skill_type": "weapon",
         "damage": ["2d3", "2d4", "2d5"],
-        "icon": 29
+        "icon": 29,
+        "efx_icons": [0]
     },
     "bite": {
         "name": "bite",
         "description": "Ferocious bite with sharp teeth",
         "skill_type": "weapon",
         "damage": ["1d3", "1d6", "1d8"],
-        "icon": 6
+        "icon": 6,
+        "efx_icons": [1]
     },
     "claws": {
         "name": "claw",
         "description": "Rends the enemy with sharp claws",
         "skill_type": "weapon",
         "damage": ["1d4", "1d6", "1d8"],
-        "icon": 29
+        "icon": 29,
+        "efx_icons": [38]
     },
     "maul": {
         "name": "maul",
         "description": "Mauls the enemy with massive strength",
         "skill_type": "weapon",
         "damage": ["1d8", "1d10", "1d12"],
-        "icon": 54
+        "icon": 54,
+        "efx_icons": [6]
     },
     "strike": {
         "name": "strike",
         "description": "Strikes the enemy with a forceful blow",
         "skill_type": "weapon",
         "damage": ["1d4", "1d6", "1d8"],
-        "icon": 22
+        "icon": 22,
+        "efx_icons": [9]
     },
     "poison bite": {
         "name": "poison bite",
@@ -72,7 +81,9 @@
             0.2,
             0.3
         ],
-        "icon": 4
+        "icon": 4,
+        "efx_icons": [1],
+        "color": "green"
     },
     "leeching bite": {
         "name": "leeching bite",
@@ -86,7 +97,9 @@
             0.2,
             0.3
         ],
-        "icon": 19
+        "icon": 19,
+        "efx_icons": [1],
+        "color": "light red"
     },
     "paralyzing bite": {
         "name": "paralyzing bite",
@@ -101,7 +114,8 @@
             0.2,
             0.3
         ],
-        "icon": 18
+        "icon": 18,
+        "efx_icons": [1]
     },
     "diseasing bite": {
         "name": "diseasing bite",
@@ -116,7 +130,9 @@
             0.2,
             0.3
         ],
-        "icon": 19
+        "icon": 19,
+        "efx_icons": [1],
+        "color": "yellow"
     },
     "peck eyes": {
         "name": "peck eyes",
@@ -131,7 +147,8 @@
             0.2,
             0.3
         ],
-        "icon": 14
+        "icon": 14,
+        "efx_icons": [90]
     },
     "swoop": {
         "name": "swoop",
@@ -145,7 +162,8 @@
             0.66
         ],
         "needs_ai": true,
-        "icon": 13
+        "icon": 13,
+        "efx_icons": [41]
     },
     "lacerate": {
         "name": "lacerate",
@@ -159,7 +177,24 @@
             0.2,
             0.3
         ],
-        "icon": 10
+        "icon": 10,
+        "efx_icons": [10]
+    },
+    "spit poison": {
+        "name": "spit poison",
+        "description": "spit slimy poison at the enemy. Yuck!",
+        "skill_type": "attack",
+        "damage": ["1d3", "1d6", "1d8"],
+        "duration": ["2d2", "2d3", "2d4"],
+        "effect": ["poison"],
+        "radius": [3, 4, 6],
+        "chance": [0.1, 0.15, 0.2],
+        "needs_ai": true,
+        "target_other": true,
+        "requires_targeting": true,
+        "icon": 4,
+        "efx_icons": [57],
+        "color": "green"
     },
     "leap": {
         "name": "leap",
@@ -186,7 +221,8 @@
         "player_only": true,
         "target_self": true,
         "targets_fighters_only": false,
-        "icon": 48
+        "icon": 48,
+        "efx_icons": [50]
     },
     "stunning roar": {
         "name": "stunning roar",
@@ -279,20 +315,6 @@
         "requires_targeting": true,
         "icon": 9
     },
-    "spit poison": {
-        "name": "spit poison",
-        "description": "spit slimy poison at the enemy. Yuck!",
-        "skill_type": "attack",
-        "damage": ["1d3", "1d6", "1d8"],
-        "duration": ["2d2", "2d3", "2d4"],
-        "effect": ["poison"],
-        "radius": [3, 4, 6],
-        "chance": [0.1, 0.15, 0.2],
-        "needs_ai": true,
-        "target_other": true,
-        "requires_targeting": true,
-        "icon": 4
-    },
     "invisibility": {
         "name": "invisibility",
         "description": "cast a magical spell to make yourself invisible",
@@ -332,6 +354,7 @@
         "effect": ["strangle"],
         "duration": ["1d3", "1d4", "1d6"],
         "chance": [0.1, 0.15, 0.2],
-        "icon": 19
+        "icon": 19,
+        "efx_icons": [47]
     }
 }

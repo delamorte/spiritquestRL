@@ -43,10 +43,9 @@ def init_tiles(options):
             tilesize + ", resize-filter=nearest, spacing=4x4, align=top-left")
 
     blt.set("U+E800: %d, \
-        size=16x16, raw-size=%dx%d, resize=" % (addressof(gfx3), 512, 960) +
-            tilesize + ", resize-filter=nearest, align=top-left")
+         size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx3), 288, 168) +
+            tilesize + ", resize-filter=nearest, spacing=4x4 align=top-left")
 
-    # Interface
     blt.set("U+F000: %d, \
         size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx4), 176, 240) +
             "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
@@ -155,7 +154,7 @@ def tilemap(tileset="oryx"):
                  "ui_block_sw": 0xE000 + 686,
                  "ui_block_se": 0xE000 + 687,
                  "indicator": 0xE000 + 672,
-                 "indicator_2x2": 0xF300 + 10
+                 "cursor": 0xF000 + 9
                  }
 
     elif tileset == "ascii":

@@ -508,6 +508,40 @@ class RenderFunctions:
 
         blt.put(x0 + 3, y0 + 3, 0xF900)
 
+    def draw_animations(self):
+        for animation in self.owner.animations_buffer:
+
+            if animation.cached_alpha is None:
+                self.owner.animations_buffer.remove(animation)
+                return None
+
+            for i, alpha in enumerate(animation.cached_alpha):
+                # avoid blocking animation rendering with blt.read
+                if blt.has_input():
+                    key = blt.read()
+                    # if animation interrupted by key press, cache rest of the frames
+                    animation.cached_alpha = animation.cached_alpha[i:]
+                    animation.cached_frames = animation.cached_frames[i:]
+                    return key
+                blt.layer(4)
+                x, y = self.owner.game_camera.get_coordinates(animation.target.x, animation.target.y)
+                c = blt.color_from_name(animation.color)
+                argb = argb_from_color(c)
+                a, r, g, b = alpha.item(), argb[1], argb[2], argb[3]
+                blt.color(blt.color_from_argb(a, r, g, b))
+                blt.put_ext(x * self.owner.options.tile_offset_x, y *
+                            self.owner.options.tile_offset_y, animation.offset_x, animation.offset_y,
+                            animation.cached_frames[i].item())
+                blt.refresh()
+                # remove cache if animation finished
+                if i == animation.cached_alpha.size - 1:
+                    animation.cached_alpha = None
+                    animation.cached_frames = None
+
+            if animation.cached_alpha is None:
+                # remove from buffer after all frames rendered
+                self.owner.animations_buffer.remove(animation)
+
     def draw_turn_count(self):
         x = self.owner.ui.side_panel.offset_x + self.owner.ui.side_panel.x_margin
         y = self.owner.ui.side_panel.offset_y + 26

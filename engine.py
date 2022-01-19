@@ -1,10 +1,15 @@
+import threading
+import time
 from math import floor
 
+import numpy as np
 from bearlibterminal import terminal as blt
 
 from actions import Actions
 from camera import Camera
+from color_functions import argb_from_color
 from components.abilities import Abilities
+from components.animations import Animations
 from components.entity import Entity
 from components.fighter import Fighter
 from components.inventory import Inventory
@@ -22,7 +27,6 @@ from options import Options
 from render_functions import RenderFunctions
 from ui.elements import UIElements
 from ui.menus import Menus, MenuData
-from ui.message import Message
 from ui.message_log import MessageLog
 
 
@@ -42,6 +46,7 @@ class Engine:
         self.player = None
         self.options = None
         self.data = None
+        self.animations_buffer = []
 
     def initialize(self):
         # Initialize game data from external files
@@ -110,10 +115,12 @@ class Engine:
         abilities_component = Abilities("player")
         status_effects_component = StatusEffects("player")
         summoner_component = Summoner()
+        animations_component = Animations()
+
         player = Entity(
             1, 1, 3, player_component.char["player"], "default", "player", blocks=True, player=player_component,
             fighter=fighter_component, inventory=inventory_component, light_source=light_component,
-            summoner=summoner_component, indicator_color="gray",
+            summoner=summoner_component, indicator_color="gray", animations=animations_component,
             abilities=abilities_component, status_effects=status_effects_component, stand_on_messages=False)
         player.player.avatar["player"] = fighter_component
         avatar_f_data = self.data.fighters[choice]
@@ -167,7 +174,6 @@ class Engine:
         game_quit = False
 
         while not game_quit:
-
             if (blt.state(floor(blt.TK_WIDTH)) != self.ui.screen_w or
                     blt.state(floor(blt.TK_HEIGHT)) != self.ui.screen_h):
 
@@ -175,6 +181,7 @@ class Engine:
                 self.ui = UIElements()
                 self.ui.owner = self
                 self.ui.draw()
+                self.render_functions.draw_side_panel_content()
                 blt.refresh()
                 self.fov_recompute = True
 
@@ -189,7 +196,11 @@ class Engine:
             self.fov_recompute = False
             blt.refresh()
 
-            key = blt.read()
+            if self.animations_buffer:
+                key = self.render_functions.draw_animations()
+
+            else:
+                key = blt.read()
 
             action = handle_keys(key)
 
@@ -219,8 +230,6 @@ class Engine:
                     key = blt.read()
                 continue
 
-            self.actions.ally_actions()
-
             if self.game_state == GameStates.PLAYER_TURN:
                 # Begin player turn
                 # Non-turn taking UI functions
@@ -235,7 +244,6 @@ class Engine:
                     continue
 
                 # Turn taking functions
-
                 self.actions.turn_taking_actions(wait=wait,
                                                  move=move,
                                                  interact=interact,
@@ -257,6 +265,7 @@ class Engine:
             if self.game_state == GameStates.ENEMY_TURN:
                 # Begin enemy turn
                 self.actions.enemy_actions()
+                self.actions.ally_actions()
 
     class TimeCounter:
         def __init__(self, turn=0, owner=None):
