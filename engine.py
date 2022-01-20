@@ -186,8 +186,7 @@ class Engine:
                 self.fov_recompute = True
 
             if self.fov_recompute:
-                self.player.light_source.recompute_fov(self.player.x, self.player.y)
-                self.player.player.init_light()
+                self.levels.current_map.recompute_fov(self.player)
                 self.render_functions.draw_all()
 
             self.render_functions.draw_messages()

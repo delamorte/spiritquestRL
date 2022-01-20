@@ -1,3 +1,5 @@
+from tcod.map import compute_fov
+
 from components.abilities import Abilities
 from components.ai import BasicMonster
 from components.animations import Animations
@@ -25,13 +27,16 @@ class GameMap:
         self.algorithm = None
         self.owner = None
         self.entities = None
-        self.entities
         self.width = width
         self.height = height
         self.name = name
         self.title = title if title is not None else name
         self.dungeon_level = dungeon_level
         self.rooms = {}
+        self.transparent = None
+        self.visible = None
+        self.explored = None
+        self.light_map = None
         self.tiles = self.initialize_tiles()
 
     def initialize_tiles(self):
@@ -49,7 +54,30 @@ class GameMap:
                     tiles[x][y].block_sight = True
                     tiles[x][y].char = " "
 
+        self.visible = np.full((self.width, self.height), fill_value=False)
+        self.explored = np.full((self.width, self.height), fill_value=False)
+        self.light_map = np.ones_like(self.visible, dtype=float)
+
         return tiles
+
+    def recompute_fov(self, entity):
+
+        x, y = entity.x, entity.y
+        radius = entity.light_source.radius
+
+        # Update transparency map
+        transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
+        self.transparent = transparency(self.tiles)
+
+        # Update visible tiles
+        self.visible[:] = compute_fov(
+            self.transparent,
+            (x, y),
+            radius=radius,
+        )
+        self.light_map = np.ones_like(self.visible, dtype=float)
+        # If a tile is "visible" it should be added to "explored".
+        self.explored |= self.visible
 
     def create_room(self, room):
         # TODO: REFACTOR THIS FUNCTION
@@ -268,6 +296,8 @@ class GameMap:
                 map_objects.append(obj)
 
         self.entities = {"objects": objects, "stairs": map_stairs, "doors": doors, "items": map_items}
+        transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
+        self.transparent = transparency(self.tiles)
 
     def generate_map(self, entities=None, name=None):
 
@@ -329,6 +359,8 @@ class GameMap:
         entities["objects"] = objects
 
         self.entities = entities
+        transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
+        self.transparent = transparency(self.tiles)
 
     def generate_forest(self):
 

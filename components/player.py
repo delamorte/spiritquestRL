@@ -16,19 +16,12 @@ class Player:
         self.exp_lvl_interval = 100
         self.insights = 0
         self.avatar = {"player": None}
-        self.lightmap = None
         self.sel_weapon = None
         self.sel_attack = None
         self.sel_utility = None
         self.sel_weapon_idx = 0
         self.sel_attack_idx = 0
         self.sel_utility_idx = 0
-
-    def init_light(self):
-        self.lightmap = np.ones_like(self.owner.light_source.fov_map.fov, dtype=float)
-
-    def calculate_light(self):
-        pass
 
     def handle_player_exp(self, killed_fighter):
         self.spirit_power += killed_fighter.max_hp

@@ -1,4 +1,5 @@
 from math import sqrt
+
 import numpy as np
 import tcod
 
@@ -116,67 +117,37 @@ class Entity:
         self.x = x
         self.y = y
 
-    def move_astar(self, target, entities, game_map):
+    def get_path_to(self, target, entities, game_map):
+        """Compute and return a path to the target position.
 
-        fov_map = tcod.map.Map(game_map.width, game_map.height)
-        fov_map.walkable[:] = True
-        fov_map.transparent[:] = True
+        If there is no valid path then returns an empty list.
+        """
+        # Copy the walkable array.
+        walkable = np.frompyfunc(lambda tile: not tile.blocked, 1, 1)
+        cost = np.array(walkable(game_map.tiles), dtype=np.int8)
 
-        for y1 in range(game_map.height):
-            for x1 in range(game_map.width):
-                if game_map.tiles[x1][y1].blocked or game_map.tiles[x1][y1].blocking_entity:
-                    fov_map.walkable[y1, x1] = False
-                if game_map.tiles[x1][y1].block_sight:
-                    fov_map.transparent[y1, x1] = False
+        blocking_entities = entities["monsters"] + entities["allies"]
 
-        for entity in entities["monsters"]:
-            if entity.blocks and entity != self and entity != target:
-                fov_map.walkable[entity.y, entity.x] = False
-                if entity.occupied_tiles is not None:
-                    fov_map.walkable[entity.y + 1, entity.x + 1] = False
-                    fov_map.walkable[entity.y, entity.x + 1] = False
-                    fov_map.walkable[entity.y + 1, entity.x] = False
-                fov_map.transparent[entity.y, entity.x] = True
+        for entity in blocking_entities:
+            # Check that an entity blocks movement and the cost isn't zero (blocking.)
+            if entity.blocks and cost[entity.x, entity.y]:
+                # Add to the cost of a blocked position.
+                # A lower number means more enemies will crowd behind each other in
+                # hallways.  A higher number means enemies will take longer paths in
+                # order to surround the player.
+                cost[entity.x, entity.y] += 10
 
-        for entity in entities["allies"]:
-            if entity.blocks and entity != self and entity != target:
-                fov_map.walkable[entity.y, entity.x] = False
-                if entity.occupied_tiles is not None:
-                    fov_map.walkable[entity.y + 1, entity.x + 1] = False
-                    fov_map.walkable[entity.y, entity.x + 1] = False
-                    fov_map.walkable[entity.y + 1, entity.x] = False
-                fov_map.transparent[entity.y, entity.x] = True
+        # Create a graph from the cost array and pass that graph to a new pathfinder.
+        graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=3)
+        pathfinder = tcod.path.Pathfinder(graph)
 
-        # Allocate a A* path
-        # The 1.41 is the normal diagonal cost of moving, it can be set as 0.0
-        # if diagonal moves are prohibited
-        astar = tcod.path.AStar(fov_map)
+        pathfinder.add_root((self.x, self.y))  # Start position.
 
-        # Compute the path between self's coordinates and the target's
-        # coordinates
-        tcod.path_compute(astar, self.x, self.y, target.x, target.y)
+        # Compute the path to the destination and remove the starting point.
+        path = list(pathfinder.path_to((target.x, target.y))[1:])
 
-        # Check if the path exists, and in this case, also the path is shorter than 25 tiles
-        # The path size matters if you want the monster to use alternative longer paths
-        # (for example through other rooms) if for example the player is in a corridor
-        # It makes sense to keep path size relatively low to keep the monsters
-        # from running around the map if there's an alternative path really far
-        # away
-        if not tcod.path_is_empty(astar) and tcod.path_size(astar) < 25:
-            # Find the next coordinates in the computed full path
-            x, y = tcod.path_walk(astar, True)
-            if x or y:
-                # Set self's coordinates to the next path tile
-                self.x = x
-                self.y = y
-                if self.occupied_tiles is not None:
-                    self.occupied_tiles = [(x, y), (x, y + 1), (x + 1, y + 1), (x + 1, y)]
-        else:
-            # Keep the old move function as a backup so that if there are no paths
-            # (for example another monster blocks a corridor)
-            # it will still try to move towards the player (closer to the
-            # corridor opening)
-            self.move_towards(target.x, target.y, game_map)
+        # Convert from List[List[int]] to List[Tuple[int, int]].
+        return [(int(index[0]), int(index[1])) for index in path]
 
     def distance_to(self, other):
         # Use Chebysev distance

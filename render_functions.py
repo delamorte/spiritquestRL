@@ -24,24 +24,22 @@ class RenderFunctions:
     def draw(self, entity, x, y):
         if entity.hidden:
             return
-        player = self.owner.player
         game_map = self.owner.levels.current_map
         # Draw the entity to the screen
         blt.layer(entity.layer)
         blt.color(entity.color)
         c = blt.color_from_name(entity.color)
         if not entity.cursor:
-            light_map = player.player.lightmap
             argb = argb_from_color(c)
             a = argb[0]
-            r = min(int(argb[1] * light_map[entity.y][entity.x]), 255)
-            g = min(int(argb[2] * light_map[entity.y][entity.x]), 255)
-            b = min(int(argb[3] * light_map[entity.y][entity.x]), 255)
+            r = min(int(argb[1] * game_map.light_map[entity.x, entity.y]), 255)
+            g = min(int(argb[2] * game_map.light_map[entity.x, entity.y]), 255)
+            b = min(int(argb[3] * game_map.light_map[entity.x, entity.y]), 255)
 
             blt.color(blt.color_from_argb(a, r, g, b))
 
-        if not (player.light_source.fov_map.fov[entity.y, entity.x] and
-                game_map.tiles[entity.x][entity.y].explored):
+        if not (game_map.visible[entity.x, entity.y] and
+                game_map.explored[entity.x, entity.y]):
             blt.color("dark gray")
 
         # Cursor needs some offset in ascii
@@ -76,7 +74,7 @@ class RenderFunctions:
 
             if cursor:
                 if entity.occupied_tiles is not None:
-                    if (game_map.tiles[entity.x][entity.y].explored and not entity.cursor and
+                    if (game_map.explored[entity.x, entity.y] and not entity.cursor and
                             (cursor.x, cursor.y) in entity.occupied_tiles):
 
                         results.append(Message(get_article(entity.name).capitalize() + " " + entity.name + "."))
@@ -89,7 +87,7 @@ class RenderFunctions:
                             self.draw_stats(entity)
 
                 elif (entity.x == cursor.x and entity.y == cursor.y and not
-                      entity.cursor and game_map.tiles[entity.x][entity.y].explored and not entity.hidden):
+                      entity.cursor and game_map.explored[entity.x, entity.y] and not entity.hidden):
 
                     results.append(Message(get_article(entity.name).capitalize() + " " + entity.name + "."))
                     results.append(Message(msg=str("x: " + (str(cursor.x) + ", y: " + str(cursor.y))), extend_line=True))
@@ -104,7 +102,7 @@ class RenderFunctions:
                 self.clear(entity, entity.last_seen_x, entity.last_seen_y)
                 self.draw(entity, x, y)
 
-            if not entity.cursor and player.light_source.fov_map.fov[entity.y, entity.x]:
+            if not entity.cursor and game_map.visible[entity.x, entity.y]:
                 # why is this here? causes rendering bugs!!!
                 # clear(entity, entity.last_seen_x, entity.last_seen_y)
 
@@ -120,9 +118,9 @@ class RenderFunctions:
                     self.light_sources.append(entity.light_source)
                     continue
 
-            elif (not player.light_source.fov_map.fov[entity.y, entity.x] and
-                  game_map.tiles[entity.last_seen_x][entity.last_seen_y].explored and not
-                  player.light_source.fov_map.fov[entity.last_seen_y, entity.last_seen_x]):
+            elif (not game_map.visible[entity.x, entity.y] and
+                  game_map.explored[entity.last_seen_x, entity.last_seen_y] and not
+                  game_map.visible[entity.last_seen_x, entity.last_seen_y]):
 
                 x, y = game_camera.get_coordinates(entity.last_seen_x, entity.last_seen_y)
 
@@ -131,7 +129,7 @@ class RenderFunctions:
                 else:
                     self.draw(entity, x, y)
 
-            if player.light_source.fov_map.fov[entity.y, entity.x] and entity.ai and self.owner.options.gfx != "ascii":
+            if game_map.visible[entity.x, entity.y] and entity.ai and self.owner.options.gfx != "ascii":
                 self.draw_indicator(player.x, player.y, player.indicator_color)
                 self.draw_indicator(entity.x, entity.y, entity.indicator_color, entity.occupied_tiles)
                 self.draw_health_bar(entity)
@@ -165,7 +163,7 @@ class RenderFunctions:
                     map_x = dx
                 if game_map.height < game_camera.height:
                     map_y = dy
-                visible = player.light_source.fov_map.fov[map_y, map_x]
+                visible = game_map.visible[map_x, map_y]
 
                 # Draw tiles within fov
                 if visible:
@@ -178,7 +176,7 @@ class RenderFunctions:
                         dist = float(cityblock(center, np.array([map_y, map_x])))
                         light_level = game_map.tiles[map_x][map_y].natural_light_level * \
                                       (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
-                    player.player.lightmap[map_y][map_x] = light_level
+                    game_map.light_map[map_x, map_y] = light_level
 
                     c = blt.color_from_name(game_map.tiles[map_x][map_y].color)
 
@@ -205,11 +203,8 @@ class RenderFunctions:
                             blt.put(x, y, tile[0])
                             i += 1
 
-                    # Set everything in fov as explored
-                    game_map.tiles[map_x][map_y].explored = True
-
                 # Gray out explored tiles
-                elif game_map.tiles[map_x][map_y].explored:
+                elif game_map.explored[map_x, map_y]:
                     blt.layer(0)
                     blt.color("darkest gray")
                     blt.put(x, y, game_map.tiles[map_x][map_y].char)
@@ -230,8 +225,6 @@ class RenderFunctions:
             self.draw_light_sources()
 
     def draw_light_sources(self):
-        player = self.owner.player
-        light_map = player.player.lightmap
         game_map = self.owner.levels.current_map
         game_camera = self.owner.game_camera
         for light in self.light_sources:
@@ -240,27 +233,27 @@ class RenderFunctions:
 
             for i in range(light_fov[0].size):
                 y, x = int(light_fov[0][i]), int(light_fov[1][i])
-                if player.light_source.fov_map.fov[y, x]:
+                if game_map.visible[x, y]:
                     v = np.array([y, x])
                     dist = float(cityblock(center, v))
                     light_level = game_map.tiles[x][y].natural_light_level * \
                                   (1.0 / (0.2 + 0.1 * dist + 0.025 * dist * dist))
 
-                    if light_map[y][x] < light_level:
-                        light_map[y][x] = light_level
+                    if game_map.light_map[x, y] < light_level:
+                        game_map.light_map[x, y] = light_level
 
-        player_fov = np.where(player.light_source.fov_map.fov)
+        player_fov = np.where(game_map.visible)
         for j in range(player_fov[0].size):
-            y, x = int(player_fov[0][j]), int(player_fov[1][j])
+            x, y = int(player_fov[0][j]), int(player_fov[1][j])
             cam_x, cam_y = game_camera.get_coordinates(x, y)
             blt.layer(0)
             c = blt.color_from_name(game_map.tiles[x][y].color)
             argb = argb_from_color(c)
             flicker = random.uniform(0.95, 1.05) if self.owner.options.flicker is True else 1
             a = argb[0]
-            r = min(int(argb[1] * light_map[y][x] * flicker), 255)
-            g = min(int(argb[2] * light_map[y][x] * flicker), 255)
-            b = min(int(argb[3] * light_map[y][x] * flicker), 255)
+            r = min(int(argb[1] * game_map.light_map[x, y] * flicker), 255)
+            g = min(int(argb[2] * game_map.light_map[x, y] * flicker), 255)
+            b = min(int(argb[3] * game_map.light_map[x, y] * flicker), 255)
 
             blt.color(blt.color_from_argb(a, r, g, b))
             blt.put(cam_x * self.owner.options.tile_offset_x, cam_y * self.owner.options.tile_offset_y,
@@ -273,9 +266,9 @@ class RenderFunctions:
                     c = blt.color_from_name(tile[1])
                     argb = argb_from_color(c)
                     a = argb[0]
-                    r = min(int(argb[1] * light_map[y][x] * flicker), 255)
-                    g = min(int(argb[2] * light_map[y][x] * flicker), 255)
-                    b = min(int(argb[3] * light_map[y][x] * flicker), 255)
+                    r = min(int(argb[1] * game_map.light_map[x, y] * flicker), 255)
+                    g = min(int(argb[2] * game_map.light_map[x, y] * flicker), 255)
+                    b = min(int(argb[3] * game_map.light_map[x, y] * flicker), 255)
                     blt.color(blt.color_from_argb(a, r, g, b))
                     blt.put(cam_x * self.owner.options.tile_offset_x, cam_y * self.owner.options.tile_offset_y,
                             tile[0])
@@ -473,7 +466,7 @@ class RenderFunctions:
         minimap = np.ones_like(game_map.tiles, dtype=int)
         for x in range(game_map.width):
             for y in range(game_map.height):
-                visible = self.owner.player.light_source.fov_map.fov[y, x]
+                visible = game_map.visible[x, y]
                 if visible:
                     minimap[y][x] = blt.color_from_name("dark gray")
                     if len(game_map.tiles[x][y].entities_on_tile) > 0:
@@ -490,7 +483,7 @@ class RenderFunctions:
                             minimap[y][x] = blt.color_from_name("light gray")
                     elif game_map.tiles[x][y].blocked:
                         minimap[y][x] = blt.color_from_name("light gray")
-                elif game_map.tiles[x][y].explored:
+                elif game_map.explored[x, y]:
                     if len(game_map.tiles[x][y].entities_on_tile) > 0:
                         minimap[y][x] = blt.color_from_name("light gray")
                     else:

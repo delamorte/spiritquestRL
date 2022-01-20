@@ -26,6 +26,7 @@ class Actions:
                 msg = Message("You are paralyzed!")
                 self.owner.message_log.send(msg)
                 self.owner.time_counter.take_turn(1)
+                return
 
         if wait:
             self.owner.time_counter.take_turn(1)
@@ -80,10 +81,12 @@ class Actions:
             for entity in entities:
                 if entity.door:
                     interact_msg = entity.door.interaction(self.owner.levels.current_map)
-                    self.owner.message_log.send(interact_msg)
+                    if interact_msg:
+                        self.owner.message_log.send(interact_msg)
                 elif entity.item:
                     interact_msg = entity.item.interaction(self.owner.levels.current_map)
-                    self.owner.message_log.send(interact_msg)
+                    if interact_msg:
+                        self.owner.message_log.send(interact_msg)
             if interact_msg:
                 self.owner.time_counter.take_turn(1)
                 self.owner.game_state = GameStates.ENEMY_TURN
@@ -154,6 +157,8 @@ class Actions:
         if not self.owner.cursor:
             self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
             self.owner.player.animations.buffer = []
+
+        return False
 
     def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False):
         if main_menu:
@@ -240,7 +245,7 @@ class Actions:
                 entities = get_neighbours(self.owner.player, self.owner.levels.current_map.tiles, radius,
                                           include_self=include_self, fighters=True, mark_area=True, algorithm=area)
                 entities_in_range = list(filter(
-                    lambda entity: self.owner.player.light_source.fov_map.fov[entity.y, entity.x], entities))
+                    lambda entity: self.owner.levels.current_map.visible[entity.x, entity.y], entities))
 
                 msg = self.owner.cursor.cursor.select_next(entities_in_range, self.owner.levels.current_map.tiles)
                 if msg:
@@ -299,7 +304,7 @@ class Actions:
         self.owner.render_functions.draw_messages()
 
         for entity in self.owner.levels.current_map.entities["monsters"]:
-            visible = self.owner.player.light_source.fov_map.fov[entity.y, entity.x]
+            visible = self.owner.levels.current_map.visible[entity.x, entity.y]
             if visible:
                 if entity.fighter:
                     entity.status_effects.process_effects()
@@ -372,7 +377,7 @@ class Actions:
     def ally_actions(self):
 
         for entity in self.owner.levels.current_map.entities["allies"]:
-            visible = self.owner.player.light_source.fov_map.fov[entity.y, entity.x]
+            visible = self.owner.levels.current_map.visible[entity.x, entity.y]
             if visible:
                 if entity.fighter:
                     entity.status_effects.process_effects()
