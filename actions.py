@@ -242,7 +242,7 @@ class Actions:
                 entities = get_neighbours(self.owner.player, self.owner.levels.current_map.tiles, radius,
                                           include_self=include_self, fighters=True, mark_area=True, algorithm=area)
                 entities_in_range = list(filter(
-                    lambda entity: self.owner.player.light_source.fov_map.fov[entity.y, entity.x], entities))
+                    lambda entity: self.owner.levels.current_map.visible[entity.x, entity.y], entities))
 
                 msg = self.owner.cursor.cursor.select_next(entities_in_range, self.owner.levels.current_map.tiles)
                 if msg:
