@@ -1,7 +1,5 @@
 from math import ceil
 from random import random
-from components.entity import get_neighbours
-from ui.message import Message
 
 
 class StatusEffect:
@@ -113,7 +111,7 @@ class StatusEffect:
                 self.owner.flying = True
 
         if self.reveal:
-            neighbours = get_neighbours(self.owner.owner, game_map.tiles, include_self=False,
+            neighbours = game_map.get_neighbours(self.owner.owner, include_self=False,
                                         fighters=False, mark_area=True,
                                         radius=self.reveal.radius[self.rank], algorithm="square")
             for entity in neighbours:

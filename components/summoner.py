@@ -4,7 +4,7 @@ from color_functions import get_monster_color
 from components.abilities import Abilities
 from components.ai import BasicMonster
 from components.animations import Animations
-from components.entity import get_neighbours, Entity
+from components.entity import Entity
 from components.fighter import Fighter
 from components.light_source import LightSource
 from components.status_effects import StatusEffects
@@ -42,7 +42,7 @@ class Summoner:
             abilities_component = Abilities(name)
             status_effects_component = StatusEffects(name)
             animations_component = Animations()
-            neighbours = get_neighbours(self.owner, game_map=game_map.tiles, radius=1, algorithm="square", empty_tiles=True)
+            neighbours = game_map.get_neighbours(self.owner, radius=1, algorithm="square", empty_tiles=True)
             summon_tile = choice(neighbours)
             entity_name = name + " (ally)"
             monster = Entity(summon_tile.x, summon_tile.y, 3, char,

@@ -1,4 +1,3 @@
-from components.entity import get_neighbours
 from map_objects.tilemap import tilemap
 import numpy as np
 
@@ -92,7 +91,7 @@ class Player:
         elif not target:
             radius = ability.get_range()
 
-            entities = get_neighbours(self.owner, game_map.tiles, radius, fighters=True,
+            entities = game_map.get_neighbours(self.owner, radius, fighters=True,
                                       include_self=include_self, algorithm=area,
                                       mark_area=True)
             if not entities and not include_self:

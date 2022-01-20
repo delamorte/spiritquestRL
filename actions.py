@@ -1,7 +1,7 @@
 from bearlibterminal import terminal as blt
 
 from components.cursor import Cursor
-from components.entity import Entity, get_neighbours
+from components.entity import Entity
 from game_states import GameStates
 from helpers import get_article
 from ui.message import Message
@@ -77,7 +77,7 @@ class Actions:
                 self.owner.fov_recompute = True
 
         elif interact:
-            entities = get_neighbours(self.owner.player, self.owner.levels.current_map.tiles)
+            entities = self.owner.levels.current_map.get_neighbours(self.owner.player)
             interact_msg = None
             for entity in entities:
                 if entity.door:
@@ -243,12 +243,9 @@ class Actions:
                 include_self = self.owner.cursor.cursor.targeting_ability.target_self
                 radius = self.owner.cursor.cursor.targeting_ability.get_range()
                 area = self.owner.cursor.cursor.targeting_ability.target_area
-                entities = get_neighbours(self.owner.player, self.owner.levels.current_map.tiles, radius,
+                entities = self.owner.levels.current_map.get_neighbours(self.owner.player, radius,
                                           include_self=include_self, fighters=True, mark_area=True, algorithm=area)
-                entities_in_range = list(filter(
-                    lambda entity: self.owner.levels.current_map.visible[entity.x, entity.y], entities))
-
-                msg = self.owner.cursor.cursor.select_next(entities_in_range, self.owner.levels.current_map.tiles)
+                msg = self.owner.cursor.cursor.select_next(entities, self.owner.levels.current_map.tiles)
                 if msg:
                     self.owner.message_log.send(msg)
                 self.owner.fov_recompute = True
@@ -407,7 +404,7 @@ class Actions:
                 elif entity.ai:
                     target = self.owner.player
                     prev_pos_x, prev_pos_y = entity.x, entity.y
-                    targets = get_neighbours(entity, self.owner.levels.current_map.tiles, radius=3, fighters=True,
+                    targets = self.owner.levels.current_map.get_neighbours(entity, radius=3, fighters=True,
                                              exclude_player=True)
                     if targets:
                         target = targets[0]

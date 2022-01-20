@@ -1,6 +1,4 @@
 from random import choices, randint, choice
-
-from components.entity import get_neighbours
 from ui.message import Message
 
 
@@ -37,7 +35,7 @@ class BasicMonster:
                     if self.path:
                         self.owner.x, self.owner.y = self.path.pop(0)
             elif randint(0, 4) == 0:
-                tiles = get_neighbours(self.owner, game_map.tiles, algorithm="square", empty_tiles=True)
+                tiles = game_map.get_neighbours(self.owner, algorithm="square", empty_tiles=True)
                 target_tile = choice(tiles)
                 self.owner.move_to_tile(target_tile.x, target_tile.y)
                 if self.owner.remarks:

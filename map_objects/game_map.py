@@ -79,6 +79,74 @@ class GameMap:
         # If a tile is "visible" it should be added to "explored".
         self.explored |= self.visible
 
+    def get_neighbours(self, entity, radius=1, include_self=False, fighters=False, mark_area=False,
+                       algorithm="square", empty_tiles=False, exclude_player=False):
+        """
+        :param exclude_player: excludes the player from the entities
+        :param empty_tiles: return empty tiles around entity
+        :param algorithm: the shape of the targeting area
+        :param mark_area: flags the neighbour area so draw_map can highlight it
+        :param entity:
+        :param radius: radius
+        :param include_self: include self (center) in the list of entities
+        :param fighters: return only fighting entities
+        :return: list of entities surrounding the center in radius n
+        """
+
+        if algorithm == "melee":
+            algorithm = "square"
+            radius = 1
+
+        entities = []
+
+        def n_closest(x, n, d=1):
+            return x[n[0] - d:n[0] + d + 1, n[1] - d:n[1] + d + 1]
+
+        def n_disc(array):
+            a, b = entity.x, entity.y
+            n = self.tiles.shape[0]
+            r = radius
+
+            y, x = np.ogrid[-a:n - a, -b:n - b]
+            mask = x * x + y * y <= r * r
+
+            return array[mask]
+
+        if algorithm == "disc":
+            neighbours = n_disc(self.tiles).flatten()
+        elif algorithm == "square":
+            neighbours = n_closest(self.tiles, (entity.x, entity.y), d=radius).flatten()
+        else:
+            neighbours = n_closest(self.tiles, (entity.x, entity.y), d=radius).flatten()
+
+        tiles = []
+
+        for tile in neighbours:
+            if empty_tiles:
+                if not tile.blocked and not tile.blocking_entity:
+                    tiles.append(tile)
+            else:
+                if mark_area:
+                    tile.targeting_zone = True
+                else:
+                    tile.targeting_zone = False
+                if tile.entities_on_tile:
+                    if not include_self and tile.blocking_entity == entity:
+                        continue
+                    elif fighters and exclude_player:
+                        fighting_entities = [entity for entity in tile.entities_on_tile if
+                                             entity.fighter and not entity.player]
+                        entities.extend(fighting_entities)
+                    elif fighters:
+                        fighting_entities = [entity for entity in tile.entities_on_tile if entity.fighter]
+                        entities.extend(fighting_entities)
+                    else:
+                        entities.extend(tile.entities_on_tile)
+        if empty_tiles:
+            return list(filter(lambda tile: self.visible[tile.x, tile.y], tiles))
+        else:
+            return list(filter(lambda entity: self.visible[entity.x, entity.y], entities))
+
     def create_room(self, room):
         # TODO: REFACTOR THIS FUNCTION
         entities = []
