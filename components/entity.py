@@ -117,68 +117,6 @@ class Entity:
         self.x = x
         self.y = y
 
-    def move_astar(self, target, entities, game_map):
-
-        fov_map = tcod.map.Map(game_map.width, game_map.height)
-        fov_map.walkable[:] = True
-        fov_map.transparent[:] = True
-
-        for y1 in range(game_map.height):
-            for x1 in range(game_map.width):
-                if game_map.tiles[x1][y1].blocked or game_map.tiles[x1][y1].blocking_entity:
-                    fov_map.walkable[y1, x1] = False
-                if game_map.tiles[x1][y1].block_sight:
-                    fov_map.transparent[y1, x1] = False
-
-        for entity in entities["monsters"]:
-            if entity.blocks and entity != self and entity != target:
-                fov_map.walkable[entity.y, entity.x] = False
-                if entity.occupied_tiles is not None:
-                    fov_map.walkable[entity.y + 1, entity.x + 1] = False
-                    fov_map.walkable[entity.y, entity.x + 1] = False
-                    fov_map.walkable[entity.y + 1, entity.x] = False
-                fov_map.transparent[entity.y, entity.x] = True
-
-        for entity in entities["allies"]:
-            if entity.blocks and entity != self and entity != target:
-                fov_map.walkable[entity.y, entity.x] = False
-                if entity.occupied_tiles is not None:
-                    fov_map.walkable[entity.y + 1, entity.x + 1] = False
-                    fov_map.walkable[entity.y, entity.x + 1] = False
-                    fov_map.walkable[entity.y + 1, entity.x] = False
-                fov_map.transparent[entity.y, entity.x] = True
-
-        # Allocate a A* path
-        # The 1.41 is the normal diagonal cost of moving, it can be set as 0.0
-        # if diagonal moves are prohibited
-        astar = tcod.path.AStar(fov_map)
-
-        # Compute the path between self's coordinates and the target's
-        # coordinates
-        tcod.path_compute(astar, self.x, self.y, target.x, target.y)
-
-        # Check if the path exists, and in this case, also the path is shorter than 25 tiles
-        # The path size matters if you want the monster to use alternative longer paths
-        # (for example through other rooms) if for example the player is in a corridor
-        # It makes sense to keep path size relatively low to keep the monsters
-        # from running around the map if there's an alternative path really far
-        # away
-        if not tcod.path_is_empty(astar) and tcod.path_size(astar) < 25:
-            # Find the next coordinates in the computed full path
-            x, y = tcod.path_walk(astar, True)
-            if x or y:
-                # Set self's coordinates to the next path tile
-                self.x = x
-                self.y = y
-                if self.occupied_tiles is not None:
-                    self.occupied_tiles = [(x, y), (x, y + 1), (x + 1, y + 1), (x + 1, y)]
-        else:
-            # Keep the old move function as a backup so that if there are no paths
-            # (for example another monster blocks a corridor)
-            # it will still try to move towards the player (closer to the
-            # corridor opening)
-            self.move_towards(target.x, target.y, game_map)
-
     def get_path_to(self, target, entities, game_map):
         """Compute and return a path to the target position.
 
