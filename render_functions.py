@@ -504,9 +504,13 @@ class RenderFunctions:
     def draw_animations(self):
         for animation in self.owner.animations_buffer:
 
+            if animation.target.fighter is None or animation.target.fighter.dead:
+                self.owner.animations_buffer.remove(animation)
+                continue
+
             if animation.cached_alpha is None:
                 self.owner.animations_buffer.remove(animation)
-                return None
+                continue
 
             for i, alpha in enumerate(animation.cached_alpha):
                 # avoid blocking animation rendering with blt.read
@@ -534,6 +538,7 @@ class RenderFunctions:
             if animation.cached_alpha is None:
                 # remove from buffer after all frames rendered
                 self.owner.animations_buffer.remove(animation)
+        return None
 
     def draw_turn_count(self):
         x = self.owner.ui.side_panel.offset_x + self.owner.ui.side_panel.x_margin

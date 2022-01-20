@@ -26,6 +26,7 @@ class Actions:
                 msg = Message("You are paralyzed!")
                 self.owner.message_log.send(msg)
                 self.owner.time_counter.take_turn(1)
+                self.owner.fov_recompute = True
                 return
 
         if wait:
