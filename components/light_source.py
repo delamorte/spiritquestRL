@@ -21,15 +21,6 @@ class LightSource:
         fov_map.walkable[:] = True
         fov_map.transparent[:] = True
 
-        # explored = np.zeros((3, 5), dtype=bool, order="F")
-        # transparency = np.ones((3, 5), dtype=bool, order="F")
-        #
-        # visible = tcod.map.compute_fov(transparency, (0, 0))
-        #
-        # explored |= visible  # Keep track of an explored area.
-        #
-        # self.visible = np.full((game_map.width, game_map.height), fill_value=False)
-
         for y in range(game_map.height):
             for x in range(game_map.width):
                 if game_map.tiles[x][y].blocked:

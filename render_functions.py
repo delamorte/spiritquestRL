@@ -203,9 +203,6 @@ class RenderFunctions:
                             blt.put(x, y, tile[0])
                             i += 1
 
-                    # Set everything in fov as explored
-                    # game_map.tiles[map_x][map_y].explored = True
-
                 # Gray out explored tiles
                 elif game_map.explored[map_x, map_y]:
                     blt.layer(0)

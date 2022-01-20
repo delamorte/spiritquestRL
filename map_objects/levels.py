@@ -32,9 +32,6 @@ class Levels:
             game_map.place_entities()
             self.current_map = game_map
             self.player.fighter = self.player.player.avatar["player"]
-            self.player.light_source.initialize_fov(game_map)
-            self.player.light_source.radius = self.player.fighter.fov
-            self.player.light_source.recompute_fov(self.player.x, self.player.y)
             self.current_map.recompute_fov(self.player)
 
             if destination == "hub":
@@ -78,9 +75,6 @@ class Levels:
             self.current_map = game_map
             game_map.place_entities()
             # Initialize field of view
-            self.player.light_source.initialize_fov(game_map)
-            self.player.light_source.radius = self.player.fighter.fov
-            self.player.light_source.recompute_fov(self.player.x, self.player.y)
             self.current_map.recompute_fov(self.player)
 
     def generate_level_params(self):

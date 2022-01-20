@@ -26,6 +26,7 @@ class Actions:
                 msg = Message("You are paralyzed!")
                 self.owner.message_log.send(msg)
                 self.owner.time_counter.take_turn(1)
+                return
 
         if wait:
             self.owner.time_counter.take_turn(1)
@@ -156,6 +157,8 @@ class Actions:
         if not self.owner.cursor:
             self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
             self.owner.player.animations.buffer = []
+
+        return False
 
     def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False):
         if main_menu:
