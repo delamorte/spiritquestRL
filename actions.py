@@ -142,9 +142,6 @@ class Actions:
                 self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(
                     self.owner.cursor)
                 self.owner.levels.current_map.entities["cursor"] = [self.owner.cursor]
-            else:
-                self.owner.time_counter.take_turn(1)
-                self.owner.game_state = GameStates.ENEMY_TURN
 
             self.owner.message_log.send(result)
             self.owner.fov_recompute = True
@@ -368,6 +365,10 @@ class Actions:
                         if level_up_msg:
                             self.owner.message_log.send(level_up_msg)
                         self.owner.fov_recompute = True
+            elif entity.ai and entity.ai.target_seen:
+                entity.ai.move_to_last_known_location(self.owner.player,
+                                                      self.owner.levels.current_map,
+                                                      self.owner.levels.current_map.entities)
 
         if not self.owner.game_state == GameStates.PLAYER_DEAD:
             self.owner.game_state = GameStates.PLAYER_TURN

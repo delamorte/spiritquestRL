@@ -68,6 +68,8 @@ class StatusEffect:
                 self.owner.flying = False
             if self.reveal:
                 self.owner.revealing = False
+            if self.sneak:
+                self.owner.sneaking = False
             if self.summoning:
                 self.summoning = None
                 self.owner.owner.summoner.summoning = None
@@ -119,6 +121,27 @@ class StatusEffect:
                     entity.hidden = False
             if self.description not in self.owner.effects:
                 self.owner.revealing = True
+
+        if self.sneak:
+            neighbours = game_map.get_neighbours(self.owner.owner, include_self=False,
+                                        fighters=False, mark_area=True,
+                                        radius=self.sneak.radius[self.rank], algorithm="square")
+
+            for entity in neighbours:
+                if entity.ai:
+                    if entity.ai.cant_see_player:
+                        # If player has already passed the initial sneak check, have a constant chance of passing
+                        # again
+                        if random() > 0.66:
+                            entity.ai.cant_see_player = False
+                    elif random() <= self.power[self.rank]:
+                        # Initial sneak check
+                        entity.ai.cant_see_player = True
+                    else:
+                        entity.ai.cant_see_player = False
+
+            if self.description not in self.owner.effects:
+                self.owner.sneaking = True
 
         if self.description not in self.owner.effects:
             self.owner.effects.append(self.description)

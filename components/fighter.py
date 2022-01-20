@@ -118,7 +118,7 @@ class Fighter:
                             msg = Message(msg="The {0} attacks the {1} with {2} but does no damage.".format(
                                 self.owner.colored_name, target.colored_name.lower(), skill.name), style="miss", extend_line=True)
                             results.append(msg)
-                self.owner.animations.buffer.append(Animation(target, skill, target_self=skill.target_self))
+                self.owner.animations.buffer.append(Animation(self.owner, target, skill, target_self=skill.target_self))
 
             elif skill.skill_type == "utility":
                 if skill.player_only and not self.owner.player:
@@ -160,14 +160,14 @@ class Fighter:
                             target.status_effects.add_item(effect_component)
                             results.extend(self.hit_messages(skill, target, damage))
                             self.owner.animations.buffer.append(
-                                Animation(target, skill, target_self=skill.target_self))
+                                Animation(self.owner, target, skill, target_self=skill.target_self))
 
                     else:
                         if damage > 0:
                             target.fighter.take_damage(damage)
                             results.extend(self.hit_messages(skill, target, damage))
                             self.owner.animations.buffer.append(
-                                Animation(target, skill, target_self=skill.target_self))
+                                Animation(self.owner, target, skill, target_self=skill.target_self))
 
         return results
 

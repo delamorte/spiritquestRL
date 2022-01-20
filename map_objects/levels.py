@@ -19,6 +19,8 @@ class Levels:
     def change(self, destination=None):
 
         self.player = self.owner.player
+        # Clear status effects on level change
+        self.player.status_effects.remove_all()
 
         if not self.items:
             game_map = GameMap(40, 40, "hub")

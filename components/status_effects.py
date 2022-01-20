@@ -15,6 +15,10 @@ class StatusEffects:
     def remove_item(self, item):
         self.items.remove(item)
 
+    def remove_all(self):
+        self.items = []
+        self.owner.fighter.effects = []
+
     def process_effects(self, effect=None, game_map=None, self_targeting=False):
         results = []
         msgs = []

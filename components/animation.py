@@ -4,8 +4,8 @@ import numpy as np
 
 
 class Animation:
-    def __init__(self, target, skill, num_of_frames=30, target_self=False):
-        self.owner = None
+    def __init__(self, owner, target, skill, num_of_frames=30, target_self=False):
+        self.owner = owner
         self.target = target
         self.skill = skill
         self.num_of_frames = num_of_frames

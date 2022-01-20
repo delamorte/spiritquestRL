@@ -130,8 +130,8 @@ class RenderFunctions:
                     self.draw(entity, x, y)
 
             if game_map.visible[entity.x, entity.y] and entity.ai and self.owner.options.gfx != "ascii":
-                self.draw_indicator(player.x, player.y, player.indicator_color)
-                self.draw_indicator(entity.x, entity.y, entity.indicator_color, entity.occupied_tiles)
+                self.draw_indicator(player)
+                self.draw_indicator(entity)
                 self.draw_health_bar(entity)
                 self.draw_health_bar(player)
             
@@ -168,7 +168,9 @@ class RenderFunctions:
                 # Draw tiles within fov
                 if visible:
                     blt.layer(0)
-                    if self.owner.game_state == GameStates.TARGETING and not game_map.tiles[map_x][map_y].targeting_zone:
+                    if (self.owner.game_state == GameStates.TARGETING and
+                            not game_map.tiles[map_x][map_y].targeting_zone and
+                            self.owner.cursor.cursor.targeting_ability is not None):
                         light_level = 0.5
                     elif player.fighter.revealing and game_map.tiles[map_x][map_y].targeting_zone:
                         light_level = 1.5
@@ -176,6 +178,9 @@ class RenderFunctions:
                         dist = float(cityblock(center, np.array([map_y, map_x])))
                         light_level = game_map.tiles[map_x][map_y].natural_light_level * \
                                       (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
+
+                    if player.fighter.sneaking and game_map.tiles[map_x][map_y].targeting_zone:
+                        light_level *= 0.5
                     game_map.light_map[map_x, map_y] = light_level
 
                     c = blt.color_from_name(game_map.tiles[map_x][map_y].color)
@@ -427,16 +432,21 @@ class RenderFunctions:
             blt.put(element.offset_x, y, element.tile_vertical)
             blt.put(element.offset_x2, y, element.tile_vertical)
 
-    def draw_indicator(self, entity_x, entity_y, color=None, occupied_tiles=None):
+    def draw_indicator(self, entity):
         # Draw player indicator
         blt.layer(4)
-        x, y = self.owner.game_camera.get_coordinates(entity_x, entity_y)
-        blt.color(color)
-        if occupied_tiles is not None:
+        x, y = self.owner.game_camera.get_coordinates(entity.x, entity.y)
+        blt.color(entity.indicator_color)
+        if entity.occupied_tiles is not None:
             return
         else:
             blt.put(x * self.owner.options.tile_offset_x, y *
                     self.owner.options.tile_offset_y, tilemap()["indicator"])
+
+        if entity.ai and entity.ai.cant_see_player:
+            blt.color(None)
+            blt.put_ext(x * self.owner.options.tile_offset_x + 2, y *
+                        self.owner.options.tile_offset_y, 5, -5, '?')
 
     def draw_health_bar(self, entity):
         blt.layer(4)
@@ -445,8 +455,11 @@ class RenderFunctions:
         three_q_hp = "[color=green].[color=green].[color=green].[color=red]."
         half_hp = "[color=green].[color=green].[color=red].[color=red]."
         one_q_hp = "[color=green].[color=red].[color=red].[color=red]."
+        zero_hp = "[color=red].[color=red].[color=red].[color=red]."
 
-        if entity.fighter.hp / entity.fighter.max_hp <= 0.25:
+        if entity.fighter.hp <= 0:
+            hp_bar = zero_hp
+        elif entity.fighter.hp / entity.fighter.max_hp <= 0.25:
             hp_bar = one_q_hp
         elif entity.fighter.hp / entity.fighter.max_hp <= 0.5:
             hp_bar = half_hp
@@ -505,6 +518,9 @@ class RenderFunctions:
         for animation in self.owner.animations_buffer:
 
             if animation.target.fighter is None or animation.target.fighter.dead:
+                self.owner.animations_buffer.remove(animation)
+                continue
+            elif animation.owner.fighter is None or animation.owner.fighter.dead:
                 self.owner.animations_buffer.remove(animation)
                 continue
 

@@ -41,7 +41,7 @@
         "atk_spd": 1,
         "size": "normal",
         "fov": 8,
-        "player_abilities": ["crow talons", "peck eyes", "fly", "reveal", "summon crow", "heal", "spit poison"],
+        "player_abilities": ["crow talons", "peck eyes", "fly", "reveal", "summon crow", "heal", "spit poison", "sneak"],
         "abilities": [
             "talons",
             "swoop"
