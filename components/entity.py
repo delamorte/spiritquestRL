@@ -126,7 +126,7 @@ class Entity:
         walkable = np.frompyfunc(lambda tile: not tile.blocked, 1, 1)
         cost = np.array(walkable(game_map.tiles), dtype=np.int8)
 
-        blocking_entities = entities["monsters"] + entities["allies"]
+        blocking_entities = entities["monsters"] + entities["allies"] + entities["player"]
 
         for entity in blocking_entities:
             # Check that an entity blocks movement and the cost isn't zero (blocking.)

@@ -54,7 +54,7 @@ class Summoner:
             game_map.tiles[summon_tile.x][summon_tile.y].add_entity(monster)
             game_map.entities["allies"].append(monster)
             self.summoned_entities.append(monster)
-            msg = Message("A friendly {0} appears!".format(entity_name))
+            msg = Message("A friendly {0} appears!".format(entity_name), style="xtra")
             msgs.append(msg)
             remark_str = "{0}: {1}".format(monster.colored_name, choice(monster.remarks))
             remark_msg = Message(msg=remark_str, style="dialog")
@@ -81,8 +81,8 @@ class Summoner:
                 self.owner.status_effects.remove_item(item)
         self.summoning = None
         if len(summons) > 1:
-            msg = Message("Your trusty companions {0} return back to the spirit plane!".format(", ".join(summons)))
+            msg = Message("Your trusty companions {0} return back to the spirit plane!".format(", ".join(summons)), style="xtra")
         else:
-            msg = Message("Your trusty companion {0} returns back to the spirit plane!".format(summons[0]))
+            msg = Message("Your trusty companion {0} returns back to the spirit plane!".format(summons[0]), style="xtra")
         msgs.append(msg)
         return msgs

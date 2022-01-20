@@ -47,7 +47,7 @@ class BasicMonster:
                     combat_msgs.append(Message("{0}: {1}".format(self.owner.colored_name, remark),
                                                style="dialog"))
 
-        if game_map.visible[target.x, target.y]:
+        elif game_map.visible[target.x, target.y]:
 
             self.target_seen = True
             if self.path and (target.x != self.target_last_seen_x or target.y != self.target_last_seen_y):
