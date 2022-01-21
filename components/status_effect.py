@@ -43,7 +43,7 @@ class StatusEffect:
         if self.process_instantly:
             self.process_instantly = False
 
-        if self.source.dead and self.name == "strangle":
+        if self.source.owner.dead and self.name == "strangle":
             self.duration = 0
 
         if self.heal:

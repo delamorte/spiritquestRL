@@ -15,3 +15,4 @@ class JsonData:
         self.fighters = fetch_data(self.root + "fighters.json")
         self.abilities = fetch_data(self.root + "abilities.json")
         self.status_effects = fetch_data(self.root + "status_effects.json")
+        self.remarks = fetch_data(self.root + "remarks.json")

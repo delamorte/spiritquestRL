@@ -3,6 +3,7 @@ from random import choice
 from color_functions import get_monster_color
 from components.abilities import Abilities
 from components.ai import BasicMonster
+from components.animation import Animation
 from components.animations import Animations
 from components.entity import Entity
 from components.fighter import Fighter
@@ -56,9 +57,8 @@ class Summoner:
             self.summoned_entities.append(monster)
             msg = Message("A friendly {0} appears!".format(entity_name), style="xtra")
             msgs.append(msg)
-            remark_str = "{0}: {1}".format(monster.colored_name, choice(monster.remarks))
-            remark_msg = Message(msg=remark_str, style="dialog")
-            msgs.append(remark_msg)
+            remark = choice(monster.remarks)
+            monster.animations.buffer.append(Animation(monster, monster, dialog=remark, target_self=True))
             return msgs
 
         return msgs
@@ -70,7 +70,7 @@ class Summoner:
             summons.append(entity.name)
             game_map.entities["allies"].remove(entity)
             game_map.tiles[entity.x][entity.y].remove_entity(entity)
-            del entity
+            entity.dead = True
         self.summoned_entities = []
         self.owner.fighter.summoning = False
         for effect in self.owner.fighter.effects:

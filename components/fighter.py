@@ -24,7 +24,6 @@ class Fighter:
         self.level = level
         self.fov = fov
         self.size = size
-        self.dead = False
         self.paralyzed = False
         self.flying = False
         self.revealing = False
@@ -35,7 +34,7 @@ class Fighter:
     def take_damage(self, amount):
         self.hp -= amount
         if self.hp <= 0:
-            self.dead = True
+            self.owner.dead = True
 
     def heal(self, power):
         result = None

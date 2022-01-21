@@ -1,4 +1,7 @@
 from random import choices, randint, choice
+
+from components.animation import Animation
+from data import json_data
 from ui.message import Message
 
 
@@ -44,8 +47,8 @@ class BasicMonster:
                 self.owner.move_to_tile(target_tile.x, target_tile.y)
                 if self.owner.remarks:
                     remark = choice(self.owner.remarks)
-                    combat_msgs.append(Message("{0}: {1}".format(self.owner.colored_name, remark),
-                                               style="dialog"))
+                    self.owner.animations.buffer.append(Animation(self.owner, self.owner,
+                                                                  dialog=remark, target_self=True))
 
         elif game_map.visible[target.x, target.y]:
 
@@ -76,17 +79,17 @@ class BasicMonster:
                     tiles = game_map.get_neighbours(self.owner, algorithm="square", empty_tiles=True)
                     target_tile = choice(tiles)
                     self.owner.move_to_tile(target_tile.x, target_tile.y)
-                    combat_msgs.append(Message("{0}: Come out, wherever you are.".format(self.owner.colored_name),
-                                               style="dialog"))
+                    remark = choice(json_data.data.remarks["sneaking"])
+                    self.owner.animations.buffer.append(Animation(self.owner, self.owner,
+                                                                  dialog=remark, target_self=True))
                     action_cost += 1 / self.owner.fighter.mv_spd
 
                 elif 1 / self.owner.fighter.mv_spd <= time_to_act - action_cost and self.owner.distance_to(target) >= 2:
-                    if randint(0, 4) == 0:
+                    if randint(0, 6) == 0:
                         if self.owner.remarks:
                             remark = choice(self.owner.remarks)
-                            combat_msgs.append(
-                                Message(msg="{0}: {1}".format(self.owner.colored_name, remark),
-                                        style="dialog"))
+                            self.owner.animations.buffer.append(Animation(self.owner, self.owner,
+                                                                          dialog=remark, target_self=True))
                     if self.path:
                         self.owner.x, self.owner.y = self.path.pop(0)
                     else:

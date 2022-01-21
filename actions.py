@@ -20,7 +20,7 @@ class Actions:
             self.owner.message_log.send(msg)
         self.owner.fov_recompute = True
 
-        if wait or move or interact or pickup or stairs or use_ability and not self.owner.player.fighter.dead:
+        if wait or move or interact or pickup or stairs or use_ability and not self.owner.player.dead:
             self.owner.player.status_effects.process_effects(game_map=self.owner.levels.current_map)
             if self.owner.player.fighter.paralyzed:
                 msg = Message("You are paralyzed!")
@@ -299,13 +299,15 @@ class Actions:
         self.owner.render_functions.draw_messages()
 
         for entity in self.owner.levels.current_map.entities["monsters"]:
+            entity.visible = False
             visible = self.owner.levels.current_map.visible[entity.x, entity.y]
             if visible:
+                entity.visible = True
                 if entity.fighter:
                     entity.status_effects.process_effects()
                     self.owner.render_functions.draw_stats(entity)
 
-                if self.owner.player.fighter.dead:
+                if self.owner.player.dead:
                     kill_msg = self.owner.player.kill()
                     self.owner.game_state = GameStates.PLAYER_DEAD
                     self.owner.message_log.send(kill_msg)
@@ -313,7 +315,7 @@ class Actions:
                     self.owner.fov_recompute = True
                     break
 
-                if entity.fighter and entity.fighter.dead:
+                if entity.fighter and entity.dead:
                     level_up_msg = self.owner.player.player.handle_player_exp(entity.fighter)
                     kill_msg = entity.kill()
                     self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
@@ -349,14 +351,14 @@ class Actions:
                     if combat_msg:
                         self.owner.message_log.send(combat_msg)
                         self.owner.render_functions.draw_stats(entity)
-                    if self.owner.player.fighter.dead:
+                    if self.owner.player.dead:
                         kill_msg = self.owner.player.kill()
                         self.owner.game_state = GameStates.PLAYER_DEAD
                         self.owner.message_log.send(kill_msg)
                         self.owner.render_functions.draw_stats()
                         break
                     # Functions on monster death
-                    if entity.fighter and entity.fighter.dead:
+                    if entity.fighter and entity.dead:
                         level_up_msg = self.owner.player.player.handle_player_exp(entity.fighter)
                         kill_msg = entity.kill()
                         self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
@@ -376,13 +378,15 @@ class Actions:
     def ally_actions(self):
 
         for entity in self.owner.levels.current_map.entities["allies"]:
+            entity.visible = False
             visible = self.owner.levels.current_map.visible[entity.x, entity.y]
             if visible:
+                entity.visible = True
                 if entity.fighter:
                     entity.status_effects.process_effects()
                     self.owner.render_functions.draw_stats(entity)
 
-                if self.owner.player.fighter.dead:
+                if self.owner.player.dead:
                     kill_msg = self.owner.player.kill()
                     self.owner.game_state = GameStates.PLAYER_DEAD
                     self.owner.message_log.send(kill_msg)
@@ -390,7 +394,7 @@ class Actions:
                     self.owner.fov_recompute = True
                     break
 
-                if entity.fighter and entity.fighter.dead:
+                if entity.fighter and entity.dead:
                     entity.kill()
                     self.owner.player.summoner.summoning = None
                     self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
@@ -413,6 +417,8 @@ class Actions:
                     combat_msg = entity.ai.take_turn(
                         target, self.owner.levels.current_map, self.owner.levels.current_map.entities,
                         self.owner.time_counter)
+                    self.owner.animations_buffer.extend(entity.animations.buffer)
+                    entity.animations.buffer = []
                     self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
                     self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
                     if entity.occupied_tiles is not None:
@@ -428,14 +434,14 @@ class Actions:
                     if combat_msg:
                         self.owner.message_log.send(combat_msg)
                         self.owner.render_functions.draw_stats(entity)
-                    if self.owner.player.fighter.dead:
+                    if self.owner.player.dead:
                         kill_msg = self.owner.player.kill()
                         self.owner.game_state = GameStates.PLAYER_DEAD
                         self.owner.message_log.send(kill_msg)
                         self.owner.render_functions.draw_stats()
                         break
                     # Functions on monster death
-                    if entity.fighter and entity.fighter.dead:
+                    if entity.fighter and entity.dead:
                         level_up_msg = self.owner.player.player.handle_player_exp(entity.fighter)
                         kill_msg = entity.kill()
                         self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None

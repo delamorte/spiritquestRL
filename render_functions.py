@@ -517,10 +517,12 @@ class RenderFunctions:
     def draw_animations(self):
         for animation in self.owner.animations_buffer:
 
-            if animation.target.fighter is None or animation.target.fighter.dead:
+            if (animation.target.dead or animation.target.fighter is None or animation.target.dead or not
+                    animation.target.visible):
                 self.owner.animations_buffer.remove(animation)
                 continue
-            elif animation.owner.fighter is None or animation.owner.fighter.dead:
+            elif (animation.owner.dead or animation.owner.fighter is None or animation.owner.dead or not
+                    animation.owner.visible):
                 self.owner.animations_buffer.remove(animation)
                 continue
 
@@ -534,7 +536,9 @@ class RenderFunctions:
                     key = blt.read()
                     # if animation interrupted by key press, cache rest of the frames
                     animation.cached_alpha = animation.cached_alpha[i:]
-                    animation.cached_frames = animation.cached_frames[i:]
+                    if animation.dialog is None:
+                        # Dialog doesn't have frame buffer
+                        animation.cached_frames = animation.cached_frames[i:]
                     return key
                 blt.layer(4)
                 x, y = self.owner.game_camera.get_coordinates(animation.target.x, animation.target.y)
@@ -542,14 +546,22 @@ class RenderFunctions:
                 argb = argb_from_color(c)
                 a, r, g, b = alpha.item(), argb[1], argb[2], argb[3]
                 blt.color(blt.color_from_argb(a, r, g, b))
-                blt.put_ext(x * self.owner.options.tile_offset_x, y *
-                            self.owner.options.tile_offset_y, animation.offset_x, animation.offset_y,
-                            animation.cached_frames[i].item())
+                if animation.dialog is not None:
+                    blt.puts(x * self.owner.options.tile_offset_x - 13, y *
+                             self.owner.options.tile_offset_y - 2,
+                             animation.dialog, 30, 0, blt.TK_ALIGN_CENTER+blt.TK_ALIGN_MIDDLE)
+                else:
+                    blt.put_ext(x * self.owner.options.tile_offset_x, y *
+                                self.owner.options.tile_offset_y, animation.offset_x, animation.offset_y,
+                                animation.cached_frames[i].item())
                 blt.refresh()
                 # remove cache if animation finished
                 if i == animation.cached_alpha.size - 1:
                     animation.cached_alpha = None
-                    animation.cached_frames = None
+                    if animation.dialog is None:
+                        # Dialog doesn't have frame buffer
+                        animation.cached_frames = None
+                    animation.dialog = None
 
             if animation.cached_alpha is None:
                 # remove from buffer after all frames rendered

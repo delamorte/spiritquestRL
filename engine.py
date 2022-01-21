@@ -121,7 +121,8 @@ class Engine:
             1, 1, 3, player_component.char["player"], "default", "player", blocks=True, player=player_component,
             fighter=fighter_component, inventory=inventory_component, light_source=light_component,
             summoner=summoner_component, indicator_color="gray", animations=animations_component,
-            abilities=abilities_component, status_effects=status_effects_component, stand_on_messages=False)
+            abilities=abilities_component, status_effects=status_effects_component, stand_on_messages=False,
+            visible=True)
         player.player.avatar["player"] = fighter_component
         avatar_f_data = self.data.fighters[choice]
         a_fighter_component = Fighter(hp=avatar_f_data["hp"], ac=avatar_f_data["ac"], ev=avatar_f_data["ev"],

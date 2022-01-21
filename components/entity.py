@@ -18,7 +18,7 @@ class Entity:
                  fighter=None, ai=None, item=None, inventory=None, stairs=None, summoner=None,
                  wall=None, door=None, cursor=None, light_source=None, abilities=None,
                  status_effects=None, stand_on_messages=True, boss=False, hidden=False, remarks=None,
-                 indicator_color="dark red", animations=None):
+                 indicator_color="dark red", animations=None, visible=False):
         self.x = x
         self.y = y
         self.layer = layer
@@ -52,6 +52,8 @@ class Entity:
         self.remarks = remarks
         self.indicator_color = indicator_color
         self.animations = animations
+        self.dead = False
+        self.visible = visible
 
         # Set entity as component owner, so components can call their owner
         if self.player:
@@ -163,12 +165,14 @@ class Entity:
         if self.player:
             self.char = tilemap()["player_remains"]
             death_message = Message(msg="You died!", style="death")
+            self.dead = True
 
         elif self.ai.ally:
             self.light_source = None
             self.blocks = False
             self.fighter = None
             self.ai = None
+            self.dead = True
             return None
 
         else:
@@ -184,6 +188,7 @@ class Entity:
             self.blocks = False
             self.fighter = None
             self.ai = None
+            self.dead = True
             self.name = "remains of " + get_article(self.name) + " " + self.name
             self.layer = 1
 
