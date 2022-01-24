@@ -90,6 +90,7 @@ class Fighter:
                             dps = json_efx["dps"] if "dps" in json_efx.keys() else []
                             slow = json_efx["slow"] if "slow" in json_efx.keys() else []
                             drain_stats = json_efx["drain_stats"] if "drain_stats" in json_efx.keys() else []
+                            drain_power = json_efx["drain_power"] if "drain_power" in json_efx.keys() else []
                             description = json_efx["description"]
                             paralyze = json_efx["paralyze"] if "paralyze" in json_efx.keys() else False
                             color = json_efx["color"] if "color" in json_efx.keys() else None
@@ -98,7 +99,7 @@ class Fighter:
                             effect_component = StatusEffect(owner=target.fighter, source=self, name=effect, duration=duration, slow=slow, dps=dps,
                                                             delayed_damage=delayed_damage,  rank=rank, drain_stats=drain_stats,
                                                             hit_penalty=hit_penalty, paralyze=paralyze, description=description,
-                                                            chance=chance, color=color, power=power)
+                                                            chance=chance, color=color, power=power, drain_power=drain_power)
 
                             target.status_effects.add_item(effect_component)
                             msg = Message(msg="The {0} is inflicted with {1}!".format(

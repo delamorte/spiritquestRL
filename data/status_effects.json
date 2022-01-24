@@ -25,7 +25,7 @@
         "name": "disease",
         "description": "diseased",
         "color": "yellow",
-        "drain_stats": [2, 4, 6],
+        "power": [2, 4, 6],
         "duration": ["1d4", "1d6", "1d8"],
         "chance": [
             1.0
@@ -84,6 +84,16 @@
         "name": "boost HP",
         "description": "AC++",
         "power": [1.1, 1.2, 1.33]
+    },
+    "drain_power": {
+        "name": "drain power",
+        "description": "drained (power)",
+        "color": "yellow",
+        "power": [2, 4, 6],
+        "duration": ["1d4", "1d6", "1d8"],
+        "chance": [
+            1.0
+        ]
     },
     "invisibility": {
         "name": "invisibility",

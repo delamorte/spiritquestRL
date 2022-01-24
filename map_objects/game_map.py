@@ -822,8 +822,7 @@ class GameMap:
                     monsters.append((x, y))
             elif self.owner.world_tendency > 0:
                 for x, y in tilemap()["monsters_light"].items():
-                    if x == "fairy":
-                        monsters.append((x, y))
+                    monsters.append((x, y))
             else:
                 for x, y in tilemap()["monsters"].items():
                     monsters.append((x, y))

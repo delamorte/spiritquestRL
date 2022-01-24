@@ -6,7 +6,7 @@ class StatusEffect:
     def __init__(self, owner, source, name, description=None, dps=None, delayed_damage=None, rank=None,
                  fly=None, sneak=None, reveal=None, invisibility=None, slow=None, drain_stats=None,
                  hit_penalty=None, paralyze=None, duration=None, chance=None, color=None, power=None,
-                 heal=None, summoning=None, target_self=None):
+                 heal=None, summoning=None, target_self=None, drain_power=None):
         self.owner = owner
         self.source = source
         self.name = name
@@ -22,6 +22,7 @@ class StatusEffect:
         self.rank = rank
         self.color = color
         self.drain_stats = drain_stats
+        self.drain_power = drain_power
         self.hit_penalty = hit_penalty
         self.paralyze = paralyze
         self.duration = duration
@@ -55,8 +56,10 @@ class StatusEffect:
             if self.hit_penalty:
                 self.owner.hit_penalty -= self.hit_penalty[self.rank]
             if self.drain_stats:
-                self.owner.ac += self.drain_stats[self.rank]
-                self.owner.ev += self.drain_stats[self.rank]
+                self.owner.ac += self.power[self.rank]
+                self.owner.ev += self.power[self.rank]
+            if self.drain_power:
+                self.owner.power += self.power[self.rank]
             if self.slow_amount:
                 self.owner.mv_spd += self.slow_amount
             if self.delayed_damage:
@@ -91,9 +94,13 @@ class StatusEffect:
 
         if self.drain_stats:
             if self.description not in self.owner.effects:
-                self.owner.hit_penalty -= self.drain_stats[self.rank]
-                self.owner.ac -= self.drain_stats[self.rank]
-                self.owner.ev -= self.drain_stats[self.rank]
+                self.owner.hit_penalty -= self.power[self.rank]
+                self.owner.ac -= self.power[self.rank]
+                self.owner.ev -= self.power[self.rank]
+
+        if self.drain_power:
+            if self.description not in self.owner.effects:
+                self.owner.power -= self.power[self.rank]
 
         if self.slow:
             if self.description not in self.owner.effects:

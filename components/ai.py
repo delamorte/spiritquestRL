@@ -1,8 +1,6 @@
 from random import choices, randint, choice
-
 from components.animation import Animation
 from data import json_data
-from ui.message import Message
 
 
 class BasicMonster:
@@ -33,6 +31,7 @@ class BasicMonster:
         if target.player and not target.fighter.sneaking:
             self.cant_see_player = False
 
+        # If ally, follow player or chance to move randomly if already next to player
         if self.ally and target.player:
             if self.owner.distance_to(target) > 1:
                 if target.x == self.target_last_seen_x and target.y == self.target_last_seen_y and self.path:
@@ -61,12 +60,22 @@ class BasicMonster:
 
             while action_cost < time_to_act:
 
-                if self.owner.distance_to(target) == 1 and self.owner.fighter.atk_spd <= time_to_act - action_cost:
+                skill = self.choose_skill()
+                radius = skill.get_range()
+
+                # Use ranged skill
+                if skill.requires_targeting and self.owner.distance_to(target) <= radius:
                     if target.fighter.hp > 0:
-                        combat_msg, skill = self.choose_skill()
-                        if skill is None:
-                            combat_msgs.extend(combat_msg)
-                            return combat_msgs
+                        combat_msg = self.owner.fighter.attack(target, skill)
+                        combat_msgs.extend(combat_msg)
+                        action_cost += 1
+                    else:
+                        break
+
+                # If enough 'action points' and in melee range, attack
+                elif self.owner.distance_to(target) == 1 and self.owner.fighter.atk_spd <= time_to_act - action_cost:
+                    if target.fighter.hp > 0:
+
                         combat_msg = self.owner.fighter.attack(target, skill)
                         combat_msgs.extend(combat_msg)
                         action_cost += 1
@@ -75,6 +84,7 @@ class BasicMonster:
                     else:
                         break
 
+                # Player is sneaking
                 elif target.player and self.cant_see_player:
                     tiles = game_map.get_neighbours(self.owner, algorithm="square", empty_tiles=True)
                     target_tile = choice(tiles)
@@ -84,6 +94,7 @@ class BasicMonster:
                                                                   dialog=remark, target_self=True))
                     action_cost += 1 / self.owner.fighter.mv_spd
 
+                # Move closer to player
                 elif 1 / self.owner.fighter.mv_spd <= time_to_act - action_cost and self.owner.distance_to(target) >= 2:
                     if randint(0, 6) == 0:
                         if self.owner.remarks:
@@ -108,7 +119,6 @@ class BasicMonster:
         return combat_msgs
 
     def choose_skill(self):
-        result = []
         skill_choice = None
         if self.owner.abilities.items:
             skills = []
@@ -116,13 +126,11 @@ class BasicMonster:
             weights = []
             default_atk_chance = 1.0
             for skill in self.owner.abilities.items:
-                if skill.needs_ai is True or skill.target_self is True or skill.target_other is True:
-                    result.append("Skill {0} not yet implemented :(".format(skill.name))
-                elif skill.player_only is True:
+                if skill.player_only is True:
                     continue
                 elif skill.skill_type != "weapon":
                     skills.append(skill)
-                    chance = skill.chance[min(self.owner.fighter.level, 2)]
+                    chance = skill.chance[skill.rank]
                     weights.append(chance)
                     default_atk_chance -= chance
 
@@ -133,9 +141,8 @@ class BasicMonster:
                 skills.append(attack)
                 weights.append(default_atk_chance/len(attacks))
             skill_choice = choices(skills, weights, k=1)[0]
-        else:
-            result.append("{0} doesn't know what to do!".format(self.owner.name))
-        return result, skill_choice
+
+        return skill_choice
 
     def move_to_last_known_location(self, target, game_map, entities):
         # Try to move to last known target location
