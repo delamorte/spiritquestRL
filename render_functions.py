@@ -416,7 +416,7 @@ class RenderFunctions:
     def draw_ui(self, element):
         self.clear_camera(element.w, element.h, 5)
         blt.color(element.color)
-        blt.layer(1)
+        blt.layer(6)
 
         for x in range(element.offset_x+1, element.offset_x2):
             blt.put(x, element.offset_y, element.tile_horizontal)
@@ -751,9 +751,9 @@ class RenderFunctions:
 
     def clear_camera(self, n, w=None, h=None):
         if not w:
-            w = self.owner.ui.viewport.offset_w - self.owner.ui.viewport.border
+            w = self.owner.ui.viewport.offset_w
         if not h:
-            h = self.owner.ui.viewport.offset_h - self.owner.ui.viewport.border
+            h = self.owner.ui.viewport.offset_h
         i = 0
         while i < n:
             blt.layer(i)
