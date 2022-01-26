@@ -22,7 +22,7 @@ class Actions:
 
         if wait or move or interact or pickup or stairs or use_ability and not self.owner.player.dead:
             self.owner.player.status_effects.process_effects(game_map=self.owner.levels.current_map)
-            if self.owner.player.fighter.paralyzed:
+            if "paralyzed" in self.owner.player.status_effects.names:
                 msg = Message("You are paralyzed!")
                 self.owner.message_log.send(msg)
                 self.owner.time_counter.take_turn(1)
@@ -46,7 +46,7 @@ class Actions:
             if not self.owner.levels.current_map.is_blocked(destination_x, destination_y):
                 target = self.owner.levels.current_map.tiles[destination_x][destination_y].blocking_entity
                 if target:
-                    results = self.owner.player.fighter.attack(target, self.owner.player.player.sel_weapon)
+                    results = self.owner.player.fighter.use_skill(target, self.owner.player.player.sel_weapon)
                     self.owner.message_log.send(results)
                     # player.player.spirit_power -= 0.5
                     self.owner.time_counter.take_turn(1)
@@ -146,7 +146,7 @@ class Actions:
             self.owner.message_log.send(result)
             self.owner.fov_recompute = True
 
-        if self.owner.player.fighter.summoning:
+        if "summoning" in self.owner.player.status_effects.names:
             msg = self.owner.player.summoner.process(game_map=self.owner.levels.current_map)
             if msg:
                 self.owner.message_log.send(msg)
@@ -288,11 +288,6 @@ class Actions:
             self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
             self.owner.player.animations.buffer = []
 
-        # if self.owner.player.fighter.paralyzed:
-        #     self.owner.message_log.send("You are paralyzed!")
-        #     self.owner.time_counter.take_turn(1)
-        #     self.owner.game_state = GameStates.ENEMY_TURN
-
         return False
 
     def enemy_actions(self):
@@ -325,7 +320,7 @@ class Actions:
                         self.owner.message_log.send(level_up_msg)
                     self.owner.fov_recompute = True
 
-                elif entity.fighter and entity.fighter.paralyzed:
+                elif entity.fighter and "paralyzed" in entity.status_effects.names:
                     self.owner.message_log.send(Message("The monster is paralyzed!"))
                     self.owner.game_state = GameStates.PLAYER_TURN
 
@@ -396,21 +391,22 @@ class Actions:
 
                 if entity.fighter and entity.dead:
                     entity.kill()
-                    self.owner.player.summoner.summoning = None
+                    self.owner.player.summoner.end_summoning(game_map=self.owner.levels.current_map)
                     self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
                     self.owner.fov_recompute = True
                     del entity
                     return
 
-                elif entity.fighter and entity.fighter.paralyzed:
+                elif entity.fighter and "paralyzed" in entity.status_effects.names:
                     self.owner.message_log.send(Message("Your {0} friend is paralyzed!".format(entity.name)))
                     self.owner.game_state = GameStates.PLAYER_TURN
 
                 elif entity.ai:
                     target = self.owner.player
                     prev_pos_x, prev_pos_y = entity.x, entity.y
+                    # TODO: Implement ally AI component
                     targets = self.owner.levels.current_map.get_neighbours(entity, radius=3, fighters=True,
-                                             exclude_player=True)
+                                                                           exclude_player=True)
                     if targets:
                         target = targets[0]
 

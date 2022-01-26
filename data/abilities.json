@@ -99,7 +99,7 @@
         "skill_type": "attack",
         "target_area": "melee",
         "damage": ["1d4", "1d6", "1d8"],
-        "needs_ai": true,
+        
         "chance": [
             0.1,
             0.2,
@@ -169,7 +169,7 @@
             0.5,
             0.66
         ],
-        "needs_ai": true,
+        
         "icon": 13,
         "efx_icons": [41]
     },
@@ -197,8 +197,6 @@
         "effect": ["poison"],
         "radius": [3, 4, 6],
         "chance": [0.1, 0.15, 0.2],
-        "needs_ai": true,
-        "target_other": true,
         "requires_targeting": true,
         "target_area": "disc",
         "icon": 4,
@@ -209,15 +207,15 @@
         "name": "leap",
         "description": "leap to a tile in a radius",
         "skill_type": "utility",
-        "radius": [2, 3, 4],
+        "radius": [3, 5, 7],
         "target_area": "square",
         "chance": [
             0.1,
-            0.1,
-            0.1
+            0.2,
+            0.3
         ],
-        "needs_ai": true,
         "requires_targeting": true,
+        "target_self": true,
         "icon": 41
     },
     "reveal": {
@@ -228,7 +226,6 @@
         "effect": ["reveal"],
         "duration": [10, 15, 99],
         "radius": [3, 7, 9],
-        "needs_ai": true,
         "player_only": true,
         "target_self": true,
         "targets_fighters_only": false,
@@ -243,7 +240,7 @@
         "effect": ["stun"],
         "radius": [2, 3, 4],
         "chance": [0.1, 0.15, 0.2],
-        "needs_ai": true,
+        
         "icon": 33
     },
     "call allies": {
@@ -253,7 +250,6 @@
         "duration": ["5d2", "10d2", "15d2"],
         "skill_type": "utility",
         "chance": [0.05, 0.07, 0.1],
-        "needs_ai": true,
         "target_self": true,
         "target_area": "square",
         "icon": 34
@@ -281,30 +277,30 @@
         "chance": [0.1, 0.15, 0.2],
         "target_self": true,
         "target_other": true,
-        "needs_ai": true,
+        "requires_targeting": true,
         "icon": 36
     },
-    "give power": {
-        "name": "give power",
+    "boost atk": {
+        "name": "boost atk",
         "description": "cast a magical spell to temporarily raise one's strength",
         "skill_type": "utility",
-        "damage": ["1d4"],
-        "effect": ["boost_power"],
-        "target_area": "melee",
+        "effect": ["boost_atk"],
+        "target_area": "disc",
         "duration": ["1d6"],
         "chance": [0.1, 0.15, 0.2],
+        "radius": [3, 4, 5],
         "target_self": true,
         "target_other": true,
-        "needs_ai": true,
+        "requires_targeting": true,
         "icon": 37
     },
-    "drain power": {
-        "name": "drain power",
+    "drain atk": {
+        "name": "drain atk",
         "description": "cast a magical spell to temporarily drain one's strength",
         "skill_type": "utility",
-        "damage": ["1d4"],
-        "target_area": "melee",
-        "effect": ["drain_power"],
+        "target_area": "disc",
+        "effect": ["drain_atk"],
+        "radius": [3, 4, 5],
         "duration": ["1d4"],
         "chance": [0.1, 0.15, 0.2],
         "requires_targeting": true,

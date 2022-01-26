@@ -2,7 +2,7 @@ from random import choice
 
 from color_functions import get_monster_color
 from components.abilities import Abilities
-from components.ai import BasicMonster
+from components.AI.ai_basic import AIBasic
 from components.animation import Animation
 from components.animations import Animations
 from components.entity import Entity
@@ -15,30 +15,37 @@ from ui.message import Message
 
 
 class Summoner:
-    def __init__(self, summoning=None, rank=None):
+    def __init__(self, rank=None):
         self.owner = None
-        self.summoning = summoning
+        self.summoning = False
         self.rank = rank
         self.summoned_entities = []
 
     def process(self, game_map):
         msgs = []
+        if "summoning" in self.owner.status_effects.names:
+            self.summoning = True
+        else:
+            self.summoning = False
+
         if not self.summoning and self.summoned_entities:
             msgs = self.end_summoning(game_map)
 
         elif self.summoning and not self.summoned_entities:
-            if len(self.summoning) <= self.rank:
-                name = self.summoning[-1]
-            else:
-                name = self.summoning[self.rank]
+            name = None
+            for effect in self.owner.status_effects.items:
+                if effect.summon:
+                    name = effect.summon[effect.rank]
+            if not name:
+                return msgs
             char = tilemap()["monsters"][name]
             color = get_monster_color(name)
             f_data = json_data.data.fighters[name]
             remarks = f_data["remarks"]
             fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
-                                        power=f_data["power"], mv_spd=f_data["mv_spd"],
+                                        atk=f_data["atk"], mv_spd=f_data["mv_spd"],
                                         atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
-            ai_component = BasicMonster(ally=True)
+            ai_component = AIBasic(ally=True)
             light_component = LightSource(radius=fighter_component.fov)
             abilities_component = Abilities(name)
             status_effects_component = StatusEffects(name)
@@ -57,8 +64,7 @@ class Summoner:
             self.summoned_entities.append(monster)
             msg = Message("A friendly {0} appears!".format(entity_name), style="xtra")
             msgs.append(msg)
-            remark = choice(monster.remarks)
-            monster.animations.buffer.append(Animation(monster, monster, dialog=remark, target_self=True))
+            monster.remark(random=False)
             return msgs
 
         return msgs
@@ -72,14 +78,13 @@ class Summoner:
             game_map.tiles[entity.x][entity.y].remove_entity(entity)
             entity.dead = True
         self.summoned_entities = []
-        self.owner.fighter.summoning = False
-        for effect in self.owner.fighter.effects:
+        self.summoning = False
+        for effect in self.owner.status_effects.names:
             if effect == "summoning":
-                self.owner.fighter.effects.remove(effect)
+                self.owner.status_effects.names.remove(effect)
         for item in self.owner.status_effects.items:
             if item.name == "summon":
                 self.owner.status_effects.remove_item(item)
-        self.summoning = None
         if len(summons) > 1:
             msg = Message("Your trusty companions {0} return back to the spirit plane!".format(", ".join(summons)), style="xtra")
         else:

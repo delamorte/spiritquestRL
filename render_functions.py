@@ -36,6 +36,8 @@ class RenderFunctions:
             g = min(int(argb[2] * game_map.light_map[entity.x, entity.y]), 255)
             b = min(int(argb[3] * game_map.light_map[entity.x, entity.y]), 255)
 
+            if entity.fighter and "invisible" in entity.status_effects.names:
+                a = 100
             blt.color(blt.color_from_argb(a, r, g, b))
 
         if not (game_map.visible[entity.x, entity.y] and
@@ -172,14 +174,14 @@ class RenderFunctions:
                             not game_map.tiles[map_x][map_y].targeting_zone and
                             self.owner.cursor.cursor.targeting_ability is not None):
                         light_level = 0.5
-                    elif player.fighter.revealing and game_map.tiles[map_x][map_y].targeting_zone:
+                    elif "revealing" in player.status_effects.names and game_map.tiles[map_x][map_y].targeting_zone:
                         light_level = 1.5
                     else:
                         dist = float(cityblock(center, np.array([map_y, map_x])))
                         light_level = game_map.tiles[map_x][map_y].natural_light_level * \
                                       (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
 
-                    if player.fighter.sneaking and game_map.tiles[map_x][map_y].targeting_zone:
+                    if "sneaking" in player.status_effects.names and game_map.tiles[map_x][map_y].targeting_zone:
                         light_level *= 0.5
                     game_map.light_map[map_x, map_y] = light_level
 
@@ -363,7 +365,7 @@ class RenderFunctions:
 
         ac_player = "[color=default]AC:" + str(player.fighter.ac) + "  "
 
-        power_player = "[color=default]ATK:" + str(player.fighter.power) + "  "
+        power_player = "[color=default]ATK:" + str(player.fighter.atk) + "  "
         lvl_player = "LVL:" + str(player.player.char_level) + "  "
         exp_player = "EXP:" + str(player.player.char_exp["player"]) + "/" + \
                      str(player.player.char_level * player.player.exp_lvl_interval)
@@ -403,7 +405,7 @@ class RenderFunctions:
                          0, 0, blt.TK_ALIGN_RIGHT)
 
             ac_target = "[color=default]AC:" + str(target.fighter.ac) + "  "
-            power_target = "ATK:" + str(target.fighter.power) + " "
+            power_target = "ATK:" + str(target.fighter.atk) + " "
 
             blt.puts(self.owner.ui.viewport.offset_w-1, self.owner.ui.viewport.offset_h + self.ui_offset_y + 1,
                      "[offset=0,-2]" + target.colored_name + ":  " + hp_target + ac_target + ev_target + power_target,

@@ -107,7 +107,7 @@ class Engine:
         inventory_component = Inventory(26)
         f_data = self.data.fighters["player"]
         fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
-                                    power=f_data["power"], mv_spd=f_data["mv_spd"],
+                                    atk=f_data["atk"], mv_spd=f_data["mv_spd"],
                                     atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
 
         light_component = LightSource(radius=fighter_component.fov)
@@ -126,7 +126,7 @@ class Engine:
         player.player.avatar["player"] = fighter_component
         avatar_f_data = self.data.fighters[choice]
         a_fighter_component = Fighter(hp=avatar_f_data["hp"], ac=avatar_f_data["ac"], ev=avatar_f_data["ev"],
-                                      power=avatar_f_data["power"], mv_spd=avatar_f_data["mv_spd"],
+                                      atk=avatar_f_data["atk"], mv_spd=avatar_f_data["mv_spd"],
                                       atk_spd=avatar_f_data["atk_spd"], size=avatar_f_data["size"],
                                       fov=avatar_f_data["fov"])
         player.player.avatar[choice] = a_fighter_component
@@ -138,7 +138,7 @@ class Engine:
 
         player.player.avatar[choice].max_hp += 20
         player.player.avatar[choice].hp += 20
-        player.player.avatar[choice].power += 1
+        player.player.avatar[choice].atk += 1
         player.player.insights = 200
         
         self.player = player

@@ -1,8 +1,11 @@
 from math import sqrt
+from random import randint, choice
 
 import numpy as np
 import tcod
 
+from components.animation import Animation
+from data import json_data
 from game_states import GameStates
 from helpers import get_article
 from map_objects.tilemap import tilemap
@@ -193,3 +196,14 @@ class Entity:
             self.layer = 1
 
         return death_message
+
+    def remark(self, random=True, sneak=False):
+        if sneak:
+            remark = choice(json_data.data.remarks["sneaking"])
+        elif self.remarks:
+            remark = choice(self.remarks)
+        else:
+            return
+        chance = randint(0, 6) if random else 0
+        if chance == 0:
+            self.animations.buffer.append(Animation(self, self, dialog=remark, target_self=True))

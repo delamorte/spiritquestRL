@@ -25,7 +25,7 @@ class Player:
     def handle_player_exp(self, killed_fighter):
         self.spirit_power += killed_fighter.max_hp
         self.char_exp["player"] += killed_fighter.max_hp
-        self.owner.fighter.hp += killed_fighter.power
+        self.owner.fighter.hp += killed_fighter.atk
         levels_gained = int(self.char_exp["player"] / (self.exp_lvl_interval * self.char_level))
         entity_name = killed_fighter.owner.name
 
@@ -83,7 +83,7 @@ class Player:
 
         if include_self:
             target = self.owner
-            results = self.owner.fighter.attack(target, ability)
+            results = self.owner.fighter.use_skill(target, ability)
             msgs = self.owner.status_effects.process_effects(game_map=game_map, self_targeting=True)
             if msgs:
                 results.extend(msgs)
@@ -99,7 +99,7 @@ class Player:
                 results.append(msg)
             elif len(entities) == 1 and not ability.requires_targeting:
                 target = entities[0]
-                results = self.owner.fighter.attack(target, ability)
+                results = self.owner.fighter.use_skill(target, ability)
             else:
                 msg = Message(msg="Use '{0}' on which target? Range: {1}".format(
                     ability.name, radius), style="question")
@@ -107,6 +107,6 @@ class Player:
                 target = entities[0]
                 targeting = True
         else:
-            results = self.owner.fighter.attack(target, ability)
+            results = self.owner.fighter.use_skill(target, ability)
 
         return results, target, targeting

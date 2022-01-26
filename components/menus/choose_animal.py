@@ -26,7 +26,7 @@ class ChooseAnimal:
         for (k, v) in animals.items():
             animal = json_data.data.fighters[k]
             stats = "hp: {0}, ac: {1}, ev: {2}, power: {3}".format(animal["hp"], animal["ac"], animal["ev"],
-                                                                   animal["power"])
+                                                                   animal["atk"])
             skills = "skills: {0}".format(", ".join(animal["player_abilities"]))
             self.items.append(k)
             self.items_icons.append(v)

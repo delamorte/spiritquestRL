@@ -1,22 +1,22 @@
 from components.animation import Animation
 from helpers import roll_dice
 from math import ceil
-from random import randint
+from random import randint, choice
 from components.status_effect import StatusEffect
 from data import json_data
 from ui.message import Message
 
 
 class Fighter:
-    def __init__(self, hp, ac, ev, power, mv_spd, atk_spd, size, level=1, fov=6):
+    def __init__(self, hp, ac, ev, atk, mv_spd, atk_spd, size, level=1, fov=6):
         self.owner = None
         self.max_hp = hp
         self.hp = hp
         self.ac = ac
         self.ev = ev
         self.hit_penalty = 0
-        self.power = power
-        self.str_bonus = ceil(power / 2 - 1)
+        self.atk = atk
+        self.str_bonus = ceil(atk / 2 - 1)
         if self.str_bonus <= 0:
             self.str_bonus = 0
         self.mv_spd = mv_spd
@@ -24,12 +24,6 @@ class Fighter:
         self.level = level
         self.fov = fov
         self.size = size
-        self.paralyzed = False
-        self.flying = False
-        self.revealing = False
-        self.summoning = False
-        self.sneaking = False
-        self.effects = []
 
     def take_damage(self, amount):
         self.hp -= amount
@@ -49,8 +43,23 @@ class Fighter:
                 self.hp += amount
         return result
 
-    def attack(self, target, skill):
+    def leap(self, game_map, skill):
         results = []
+        neighbours = game_map.get_neighbours(self.owner, radius=skill.radius[skill.rank], algorithm="square",
+                                             empty_tiles=True)
+        leap_tile = choice(neighbours)
+        self.owner.move_to_tile(leap_tile.x, leap_tile.y)
+        msg = Message(msg="The {0} leaps to a safe distance!".format(self.owner.colored_name))
+        results.append(msg)
+        self.owner.animations.buffer.append(Animation(self.owner, self.owner, skill, target_self=True))
+        return results
+
+    def use_skill(self, target, skill, game_map=None):
+        results = []
+        if skill.name == "leap" and not self.owner.player:
+            results.extend(self.leap(game_map, skill))
+            return results
+
         hit_chance = randint(1, 100)
         miss = (target.fighter.ev * 2) >= hit_chance - self.hit_penalty
         if (skill.skill_type == "attack" or skill.skill_type == "utility") and self.owner.player:
@@ -90,16 +99,22 @@ class Fighter:
                             dps = json_efx["dps"] if "dps" in json_efx.keys() else []
                             slow = json_efx["slow"] if "slow" in json_efx.keys() else []
                             drain_stats = json_efx["drain_stats"] if "drain_stats" in json_efx.keys() else []
-                            drain_power = json_efx["drain_power"] if "drain_power" in json_efx.keys() else []
+                            drain_atk = json_efx["drain_atk"] if "drain_atk" in json_efx.keys() else []
+                            boost_atk = json_efx["boost_atk"] if "boost_atk" in json_efx.keys() else []
+                            boost_ac = json_efx["boost_ac"] if "boost_ac" in json_efx.keys() else []
+                            boost_ev = json_efx["boost_ev"] if "boost_ev" in json_efx.keys() else []
+                            boost_hp = json_efx["boost_hp"] if "boost_hp" in json_efx.keys() else []
                             description = json_efx["description"]
                             paralyze = json_efx["paralyze"] if "paralyze" in json_efx.keys() else False
                             color = json_efx["color"] if "color" in json_efx.keys() else None
                             chance = json_efx["chance"]
                             power = json_efx["power"] if "power" in json_efx.keys() else None
-                            effect_component = StatusEffect(owner=target.fighter, source=self, name=effect, duration=duration, slow=slow, dps=dps,
+                            effect_component = StatusEffect(owner=target.status_effects, source=self, name=effect, duration=duration, slow=slow, dps=dps,
                                                             delayed_damage=delayed_damage,  rank=rank, drain_stats=drain_stats,
                                                             hit_penalty=hit_penalty, paralyze=paralyze, description=description,
-                                                            chance=chance, color=color, power=power, drain_power=drain_power)
+                                                            chance=chance, color=color, power=power, drain_atk=drain_atk,
+                                                            boost_atk=boost_atk, boost_ac=boost_ac, boost_hp=boost_hp,
+                                                            boost_ev=boost_ev)
 
                             target.status_effects.add_item(effect_component)
                             msg = Message(msg="The {0} is inflicted with {1}!".format(
@@ -132,8 +147,8 @@ class Fighter:
                             json_efx = json_data.data.status_effects[effect]
                             description = json_efx["description"]
 
-                            if description in self.effects:
-                                results.append(Message("The {0} is already {1}!".format(self.owner.colored_name.lower(), description)))
+                            if description in target.status_effects.names:
+                                results.append(Message("The {0} is already {1}!".format(target.colored_name.lower(), description)))
                                 continue
 
                             duration = roll_dice(skill.duration[skill.rank])
@@ -141,8 +156,13 @@ class Fighter:
                             sneak = skill if effect == "sneak" else None
                             reveal = skill if effect == "reveal" else None
                             heal = skill if effect == "heal" else None
-                            summoning = skill.summoned_entities if skill.summoned_entities else None
+                            summon = skill.summoned_entities if skill.summoned_entities else None
                             invisibility = skill if skill.name == "invisibility" else None
+                            drain_atk = skill if skill.name == "drain atk" else None
+                            boost_atk = skill if skill.name == "boost atk" else None
+                            boost_ac = skill if skill.name == "boost ac" else None
+                            boost_ev = skill if skill.name == "boost ev" else None
+                            boost_hp = skill if skill.name == "boost hp" else None
                             color = json_efx["color"] if "color" in json_efx.keys() else None
 
                             if skill.power:
@@ -151,11 +171,13 @@ class Fighter:
                                 power = json_efx["power"] if "power" in json_efx.keys() else None
                             rank = skill.rank
 
-                            effect_component = StatusEffect(owner=target.fighter, source=self, name=effect,
+                            effect_component = StatusEffect(owner=target.status_effects, source=self, name=effect,
                                                             duration=duration, fly=fly, sneak=sneak, reveal=reveal,
                                                             invisibility=invisibility, description=description,
                                                             color=color, power=power, rank=rank, heal=heal,
-                                                            summoning=summoning)
+                                                            summon=summon, drain_atk=drain_atk,
+                                                            boost_atk=boost_atk, boost_ac=boost_ac, boost_hp=boost_hp,
+                                                            boost_ev=boost_ev)
 
                             target.status_effects.add_item(effect_component)
                             results.extend(self.hit_messages(skill, target, damage))

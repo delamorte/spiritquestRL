@@ -82,12 +82,22 @@
     },
     "boost_hp": {
         "name": "boost HP",
-        "description": "AC++",
+        "description": "HP+",
         "power": [1.1, 1.2, 1.33]
     },
-    "drain_power": {
-        "name": "drain power",
-        "description": "drained (power)",
+    "boost_atk": {
+        "name": "boost atk",
+        "description": "ATK+",
+        "color": "yellow",
+        "power": [2, 4, 6],
+        "duration": ["1d4", "1d6", "1d8"],
+        "chance": [
+            1.0
+        ]
+    },
+    "drain_atk": {
+        "name": "drain atk",
+        "description": "drained (atk)",
         "color": "yellow",
         "power": [2, 4, 6],
         "duration": ["1d4", "1d6", "1d8"],
@@ -99,7 +109,8 @@
         "name": "invisibility",
         "description": "invisible (sneak, EV+)",
         "color": "lighter blue",
-        "duration": ["4d2", "5d2", "6d2"]
+        "duration": ["4d2", "5d2", "6d2"],
+        "power": [0.33, 0.5, 0.67]
     },
     "sneak": {
         "name": "sneak",
