@@ -82,55 +82,48 @@ class StatusEffect:
                 fighter.ev -= self.fly_ev_boost
             if self.invisibility:
                 fighter.ev -= self.inv_ev_boost
-            self.owner.names.remove(self.description)
             return self, msg
 
         if self.dps:
             fighter.take_damage(self.dps[self.rank])
 
         if self.hit_penalty:
-            if self.description not in self.owner.names:
+            if not self.owner.has_effect(self.description):
                 fighter.hit_penalty += self.hit_penalty[self.rank]
 
         if self.drain_stats:
-            if self.description not in self.owner.names:
+            if not self.owner.has_effect(self.description):
                 fighter.hit_penalty -= self.power[self.rank]
                 fighter.ac -= self.power[self.rank]
                 fighter.ev -= self.power[self.rank]
 
         if self.drain_atk:
-            if self.description not in self.owner.names:
+            if not self.owner.has_effect(self.description):
                 fighter.atk -= self.power[self.rank]
 
         if self.boost_atk:
-            if self.description not in self.owner.names:
+            if not self.owner.has_effect(self.description):
                 fighter.atk += self.power[self.rank]
         
         if self.boost_ac:
-            if self.description not in self.owner.names:
+            if not self.owner.has_effect(self.description):
                 fighter.ac += self.power[self.rank]
 
         if self.boost_hp:
-            if self.description not in self.owner.names:
+            if not self.owner.has_effect(self.description):
                 fighter.hp += self.power[self.rank]
 
         if self.boost_ev:
-            if self.description not in self.owner.names:
+            if not self.owner.has_effect(self.description):
                 fighter.ev += self.power[self.rank]
 
         if self.slow:
-            if self.description not in self.owner.names:
+            if not self.owner.has_effect(self.description):
                 self.slow_amount = fighter.mv_spd - fighter.mv_spd * self.slow[self.rank]
                 fighter.mv_spd -= self.slow_amount
 
-        if self.paralyze:
-            if random() <= self.chance[self.rank]:
-                self.owner.names.append(self.description)
-            else:
-                self.owner.names.remove(self.description)
-
         if self.fly:
-            if self.description not in self.owner.names:
+            if not self.owner.has_effect(self.description):
                 self.fly_ev_boost = ceil(fighter.ev * self.power[self.rank] - fighter.ev)
                 fighter.ev += self.fly_ev_boost
 
@@ -143,7 +136,7 @@ class StatusEffect:
                     entity.hidden = False
 
         if self.invisibility:
-            if self.description not in self.owner.names:
+            if not self.owner.has_effect(self.description):
                 self.inv_ev_boost = ceil(fighter.ev * ceil(1 + self.power[self.rank]) - fighter.ev)
                 fighter.ev += self.inv_ev_boost
                 
@@ -182,8 +175,6 @@ class StatusEffect:
                     else:
                         entity.ai.cant_see_player = False
 
-        if self.description not in self.owner.names:
-            self.owner.names.append(self.description)
         self.duration -= 1
 
         return None, msg

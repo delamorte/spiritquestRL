@@ -34,7 +34,7 @@ class AIBasic:
         self.action_cost = 0
         combat_msgs = []
 
-        if target.player and "sneaking" not in target.status_effects.names:
+        if target.player and not target.status_effects.has_effect("sneaking"):
             self.cant_see_player = False
 
         # If ally, follow player or chance to move randomly if already next to player

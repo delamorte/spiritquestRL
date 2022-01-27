@@ -22,7 +22,7 @@ class Actions:
 
         if wait or move or interact or pickup or stairs or use_ability and not self.owner.player.dead:
             self.owner.player.status_effects.process_effects(game_map=self.owner.levels.current_map)
-            if "paralyzed" in self.owner.player.status_effects.names:
+            if self.owner.player.status_effects.has_effect("paralyzed"):
                 msg = Message("You are paralyzed!")
                 self.owner.message_log.send(msg)
                 self.owner.time_counter.take_turn(1)
@@ -146,7 +146,7 @@ class Actions:
             self.owner.message_log.send(result)
             self.owner.fov_recompute = True
 
-        if "summoning" in self.owner.player.status_effects.names:
+        if self.owner.player.status_effects.has_effect("summoning"):
             msg = self.owner.player.summoner.process(game_map=self.owner.levels.current_map)
             if msg:
                 self.owner.message_log.send(msg)
@@ -320,7 +320,7 @@ class Actions:
                         self.owner.message_log.send(level_up_msg)
                     self.owner.fov_recompute = True
 
-                elif entity.fighter and "paralyzed" in entity.status_effects.names:
+                elif entity.fighter and entity.status_effects.has_effect("paralyzed"):
                     self.owner.message_log.send(Message("The monster is paralyzed!"))
                     self.owner.game_state = GameStates.PLAYER_TURN
 
@@ -397,7 +397,7 @@ class Actions:
                     del entity
                     return
 
-                elif entity.fighter and "paralyzed" in entity.status_effects.names:
+                elif entity.fighter and entity.status_effects.has_effect("paralyzed"):
                     self.owner.message_log.send(Message("Your {0} friend is paralyzed!".format(entity.name)))
                     self.owner.game_state = GameStates.PLAYER_TURN
 

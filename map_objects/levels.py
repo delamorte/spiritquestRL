@@ -20,7 +20,7 @@ class Levels:
 
         self.player = self.owner.player
         # Clear status effects on level change
-        if "summoning" in self.player.status_effects.names:
+        if self.player.status_effects.has_effect("summoning"):
             self.player.summoner.end_summoning(self.current_map)
         self.player.status_effects.remove_all()
 

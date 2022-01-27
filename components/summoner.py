@@ -23,7 +23,7 @@ class Summoner:
 
     def process(self, game_map):
         msgs = []
-        if "summoning" in self.owner.status_effects.names:
+        if self.owner.status_effects.has_effect("summoning"):
             self.summoning = True
         else:
             self.summoning = False
@@ -79,12 +79,8 @@ class Summoner:
             entity.dead = True
         self.summoned_entities = []
         self.summoning = False
-        for effect in self.owner.status_effects.names:
-            if effect == "summoning":
-                self.owner.status_effects.names.remove(effect)
-        for item in self.owner.status_effects.items:
-            if item.name == "summon":
-                self.owner.status_effects.remove_item(item)
+        item = self.owner.status_effects.get_item("summoning")
+        self.owner.status_effects.remove_item(item)
         if len(summons) > 1:
             msg = Message("Your trusty companions {0} return back to the spirit plane!".format(", ".join(summons)), style="xtra")
         else:

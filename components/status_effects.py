@@ -3,10 +3,10 @@ class StatusEffects:
         self.owner = None
         self.name = name
         self.items = []
-        self.names = []
 
     def add_item(self, item):
-        if item.description not in self.names:
+
+        if not self.has_effect(item.description):
             self.items.append(item)
 
     def remove_item(self, item):
@@ -14,7 +14,14 @@ class StatusEffects:
 
     def remove_all(self):
         self.items = []
-        self.names = []
+
+    def get_item(self, description):
+        has_effect = next((x for x in self.items if x.description == description), False)
+        return has_effect
+
+    def has_effect(self, description):
+        has_effect = next((True for x in self.items if x.description == description), False)
+        return has_effect
 
     def process_effects(self, effect=None, game_map=None, self_targeting=False):
         results = []

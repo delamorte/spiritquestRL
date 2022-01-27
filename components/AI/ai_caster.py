@@ -86,7 +86,7 @@ class AICaster(AIBasic):
                         for effect in skill.effect:
                             json_efx = json_data.data.status_effects[effect]
                             description = json_efx["description"]
-                            if skill_target.status_effects.names and description in skill_target.status_effects.names:
+                            if skill_target.status_effects.has_effect(description):
                                 skip = True
                     if skip and not skill.target_other:
                         continue
@@ -111,7 +111,7 @@ class AICaster(AIBasic):
                                     break
                         elif "boost" in skill.name:
                             for target in targets:
-                                if not target.stauts_effects.names:
+                                if not target.stauts_effects.items:
                                     skill_target = target
                                     break
                         if skill_target is None:

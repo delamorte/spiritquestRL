@@ -92,8 +92,8 @@ class Player:
             radius = ability.get_range()
 
             entities = game_map.get_neighbours(self.owner, radius, fighters=True,
-                                      include_self=include_self, algorithm=area,
-                                      mark_area=True)
+                                               include_self=include_self, algorithm=area,
+                                               mark_area=True)
             if not entities and not include_self:
                 msg = Message("There are no available targets in range.")
                 results.append(msg)

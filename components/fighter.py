@@ -147,7 +147,7 @@ class Fighter:
                             json_efx = json_data.data.status_effects[effect]
                             description = json_efx["description"]
 
-                            if description in target.status_effects.names:
+                            if target.status_effects.has_effect(description):
                                 results.append(Message("The {0} is already {1}!".format(target.colored_name.lower(), description)))
                                 continue
 
