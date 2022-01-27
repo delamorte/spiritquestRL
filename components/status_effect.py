@@ -39,6 +39,7 @@ class StatusEffect:
         self.target_self = target_self
         self.slow_amount = None
         self.process_instantly = False
+        self.active = False
 
         # Process buffs etc. instantly after casting
         if self.fly or self.heal or self.reveal or self.invisibility or self.sneak or self.summon:
@@ -88,42 +89,42 @@ class StatusEffect:
             fighter.take_damage(self.dps[self.rank])
 
         if self.hit_penalty:
-            if not self.owner.has_effect(self.description):
+            if not self.active:
                 fighter.hit_penalty += self.hit_penalty[self.rank]
 
         if self.drain_stats:
-            if not self.owner.has_effect(self.description):
+            if not self.active:
                 fighter.hit_penalty -= self.power[self.rank]
                 fighter.ac -= self.power[self.rank]
                 fighter.ev -= self.power[self.rank]
 
         if self.drain_atk:
-            if not self.owner.has_effect(self.description):
+            if not self.active:
                 fighter.atk -= self.power[self.rank]
 
         if self.boost_atk:
-            if not self.owner.has_effect(self.description):
+            if not self.active:
                 fighter.atk += self.power[self.rank]
         
         if self.boost_ac:
-            if not self.owner.has_effect(self.description):
+            if not self.active:
                 fighter.ac += self.power[self.rank]
 
         if self.boost_hp:
-            if not self.owner.has_effect(self.description):
+            if not self.active:
                 fighter.hp += self.power[self.rank]
 
         if self.boost_ev:
-            if not self.owner.has_effect(self.description):
+            if not self.active:
                 fighter.ev += self.power[self.rank]
 
         if self.slow:
-            if not self.owner.has_effect(self.description):
+            if not self.active:
                 self.slow_amount = fighter.mv_spd - fighter.mv_spd * self.slow[self.rank]
                 fighter.mv_spd -= self.slow_amount
 
         if self.fly:
-            if not self.owner.has_effect(self.description):
+            if not self.active:
                 self.fly_ev_boost = ceil(fighter.ev * self.power[self.rank] - fighter.ev)
                 fighter.ev += self.fly_ev_boost
 
@@ -136,7 +137,7 @@ class StatusEffect:
                     entity.hidden = False
 
         if self.invisibility:
-            if not self.owner.has_effect(self.description):
+            if not self.active:
                 self.inv_ev_boost = ceil(fighter.ev * ceil(1 + self.power[self.rank]) - fighter.ev)
                 fighter.ev += self.inv_ev_boost
                 
@@ -176,5 +177,6 @@ class StatusEffect:
                         entity.ai.cant_see_player = False
 
         self.duration -= 1
+        self.active = True
 
         return None, msg

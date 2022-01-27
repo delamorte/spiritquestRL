@@ -106,13 +106,17 @@ class Entity:
         self.x += dx
         self.y += dy
 
-    def move_towards(self, target_x, target_y, game_map):
+    def move_towards(self, target_x, target_y, game_map, escape=False):
         dx = target_x - self.x
         dy = target_y - self.y
         distance = sqrt(dx ** 2 + dy ** 2)
 
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
+
+        if escape:
+            dx = -1 * dx
+            dy = -1 * dy
 
         if not (game_map.is_blocked(self.x + dx, self.y + dy) or
                 game_map.tiles[self.x+dx][self.y+dy].blocking_entity):

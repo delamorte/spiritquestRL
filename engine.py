@@ -112,7 +112,6 @@ class Engine:
 
         light_component = LightSource(radius=fighter_component.fov)
         player_component = Player(50)
-        abilities_component = Abilities("player")
         status_effects_component = StatusEffects("player")
         summoner_component = Summoner()
         animations_component = Animations()
@@ -121,7 +120,7 @@ class Engine:
             1, 1, 3, player_component.char["player"], "default", "player", blocks=True, player=player_component,
             fighter=fighter_component, inventory=inventory_component, light_source=light_component,
             summoner=summoner_component, indicator_color="gray", animations=animations_component,
-            abilities=abilities_component, status_effects=status_effects_component, stand_on_messages=False,
+            status_effects=status_effects_component, stand_on_messages=False,
             visible=True)
         player.player.avatar["player"] = fighter_component
         avatar_f_data = self.data.fighters[choice]
@@ -131,6 +130,7 @@ class Engine:
                                       fov=avatar_f_data["fov"])
         player.player.avatar[choice] = a_fighter_component
         player.player.avatar[choice].owner = player
+        player.abilities = Abilities(player)
         player.abilities.initialize_abilities(choice)
         player.player.char[choice] = tilemap()["monsters"][choice]
         player.player.char_exp[choice] = 20

@@ -36,7 +36,7 @@ class RenderFunctions:
             g = min(int(argb[2] * game_map.light_map[entity.x, entity.y]), 255)
             b = min(int(argb[3] * game_map.light_map[entity.x, entity.y]), 255)
 
-            if entity.fighter and entity.status_effects.has_effect("invisible"):
+            if entity.fighter and entity.status_effects.has_effect(name="invisibility"):
                 a = 100
             blt.color(blt.color_from_argb(a, r, g, b))
 
@@ -174,14 +174,14 @@ class RenderFunctions:
                             not game_map.tiles[map_x][map_y].targeting_zone and
                             self.owner.cursor.cursor.targeting_ability is not None):
                         light_level = 0.5
-                    elif player.status_effects.has_effect("revealing") and game_map.tiles[map_x][map_y].targeting_zone:
+                    elif player.status_effects.has_effect(name="reveal") and game_map.tiles[map_x][map_y].targeting_zone:
                         light_level = 1.5
                     else:
                         dist = float(cityblock(center, np.array([map_y, map_x])))
                         light_level = game_map.tiles[map_x][map_y].natural_light_level * \
                                       (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
 
-                    if player.status_effects.has_effect("sneaking") and game_map.tiles[map_x][map_y].targeting_zone:
+                    if player.status_effects.has_effect(name="sneak") and game_map.tiles[map_x][map_y].targeting_zone:
                         light_level *= 0.5
                     game_map.light_map[map_x, map_y] = light_level
 
@@ -691,7 +691,6 @@ class RenderFunctions:
             blt.put(side_panel.offset_x + x_margin + 1 + i * 6,
                     side_panel.offset_y + second_heading_y + 5 + y_margin, atk.icon)
             blt.color(None)
-
 
         third_heading_y = second_heading_y + 10
 

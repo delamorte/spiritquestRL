@@ -16,11 +16,14 @@ class StatusEffects:
         self.items = []
 
     def get_item(self, description):
-        has_effect = next((x for x in self.items if x.description == description), False)
-        return has_effect
+        effect = next((x for x in self.items if x.description == description), False)
+        return effect
 
-    def has_effect(self, description):
-        has_effect = next((True for x in self.items if x.description == description), False)
+    def has_effect(self, description=None, name=None):
+        if name:
+            has_effect = next((True for x in self.items if x.name == name), False)
+        else:
+            has_effect = next((True for x in self.items if x.description == description), False)
         return has_effect
 
     def process_effects(self, effect=None, game_map=None, self_targeting=False):

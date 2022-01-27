@@ -47,7 +47,7 @@ class Summoner:
                                         atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
             ai_component = AIBasic(ally=True)
             light_component = LightSource(radius=fighter_component.fov)
-            abilities_component = Abilities(name)
+
             status_effects_component = StatusEffects(name)
             animations_component = Animations()
             neighbours = game_map.get_neighbours(self.owner, radius=1, algorithm="square", empty_tiles=True)
@@ -55,9 +55,9 @@ class Summoner:
             entity_name = name + " (ally)"
             monster = Entity(summon_tile.x, summon_tile.y, 3, char,
                              color, entity_name, blocks=True, fighter=fighter_component, ai=ai_component,
-                             light_source=light_component, abilities=abilities_component,
-                             status_effects=status_effects_component, remarks=remarks, indicator_color="light green",
+                             light_source=light_component, status_effects=status_effects_component, remarks=remarks, indicator_color="light green",
                              animations=animations_component)
+            monster.abilities = Abilities(monster, name)
             monster.light_source.initialize_fov(game_map)
             game_map.tiles[summon_tile.x][summon_tile.y].add_entity(monster)
             game_map.entities["allies"].append(monster)
@@ -79,8 +79,6 @@ class Summoner:
             entity.dead = True
         self.summoned_entities = []
         self.summoning = False
-        item = self.owner.status_effects.get_item("summoning")
-        self.owner.status_effects.remove_item(item)
         if len(summons) > 1:
             msg = Message("Your trusty companions {0} return back to the spirit plane!".format(", ".join(summons)), style="xtra")
         else:

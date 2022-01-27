@@ -3,16 +3,19 @@ from data import json_data
 
 
 class Abilities:
-    def __init__(self, name, capacity=None):
-        self.owner = None
-        self.name = name
+    def __init__(self, entity, name=None, capacity=None):
+        self.owner = entity
+        if name:
+            self.name = name
+        else:
+            self.name = entity.name
         self.capacity = capacity
         self.items = []
         self.weapon_skills = []
         self.attack_skills = []
         self.utility_skills = []
 
-        if name != "player":
+        if entity.name != "player":
             self.initialize_abilities()
 
     def initialize_abilities(self, name=None):

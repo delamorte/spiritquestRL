@@ -128,7 +128,7 @@
     },
     "reveal": {
         "name": "reveal",
-        "description": "revealing hidden tiles",
+        "description": "revealing",
         "color": "amber",
         "duration": [10, 15, 99]
     },

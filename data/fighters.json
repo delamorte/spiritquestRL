@@ -2,7 +2,7 @@
     "player": {
         "hp": 20,
         "ac": 1,
-        "ev": 10,
+        "ev": 5,
         "atk": 5,
         "mv_spd": 1,
         "atk_spd": 1,
@@ -363,12 +363,16 @@
         "atk_spd": 1,
         "size": "normal",
         "fov": 6,
+        "ai": "caster",
         "abilities": [
             "heal",
+            "harm",
+            "invisibility",
+            "slap",
             "boost atk"
         ],
         "remarks": ["TEEHEE!", "Trick or treat?", "Someday you will be old enough to start reading fairy tales again.",
-        "I know you, I walked with you once upon a dream."]
+        "I know you, I walked with you once upon a dream.", "I hope karma slaps you in the face before I do."]
     },
     "king kobra": {
         "hp": 30,
