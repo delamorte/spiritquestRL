@@ -21,6 +21,17 @@
             0.8
         ]
     },
+    "stun": {
+        "name": "stun",
+        "description": "stunned",
+        "color": "light yellow",
+        "duration": ["1d3", "1d4", "1d6"],
+        "chance": [
+            0.5,
+            0.6,
+            0.8
+        ]
+    },
     "disease": {
         "name": "disease",
         "description": "diseased",

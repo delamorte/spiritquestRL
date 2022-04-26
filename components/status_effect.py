@@ -5,7 +5,7 @@ from random import random
 class StatusEffect:
     def __init__(self, owner, source, name, description=None, dps=None, delayed_damage=None, rank=None,
                  fly=None, sneak=None, reveal=None, invisibility=None, slow=None, drain_stats=None,
-                 hit_penalty=None, paralyze=None, duration=None, chance=None, color=None, power=None,
+                 hit_penalty=None, paralyze=None, stun=None, duration=None, chance=None, color=None, power=None,
                  heal=None, summon=None, target_self=None, drain_atk=None, boost_atk=None,
                  boost_ac=None, boost_hp=None, boost_ev=None):
         self.owner = owner
@@ -31,6 +31,7 @@ class StatusEffect:
         self.boost_ev = boost_ev
         self.hit_penalty = hit_penalty
         self.paralyze = paralyze
+        self.stun = stun
         self.duration = duration
         self.chance = chance
         self.power = power

@@ -106,6 +106,7 @@ class Fighter:
                             boost_hp = json_efx["boost_hp"] if "boost_hp" in json_efx.keys() else []
                             description = json_efx["description"]
                             paralyze = json_efx["paralyze"] if "paralyze" in json_efx.keys() else False
+                            stun = json_efx["stun"] if "stun" in json_efx.keys() else False
                             color = json_efx["color"] if "color" in json_efx.keys() else None
                             chance = json_efx["chance"]
                             power = json_efx["power"] if "power" in json_efx.keys() else None
@@ -114,7 +115,7 @@ class Fighter:
                                                             hit_penalty=hit_penalty, paralyze=paralyze, description=description,
                                                             chance=chance, color=color, power=power, drain_atk=drain_atk,
                                                             boost_atk=boost_atk, boost_ac=boost_ac, boost_hp=boost_hp,
-                                                            boost_ev=boost_ev)
+                                                            boost_ev=boost_ev, stun=stun)
 
                             target.status_effects.add_item(effect_component)
                             msg = Message(msg="The {0} is inflicted with {1}!".format(

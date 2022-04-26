@@ -72,6 +72,13 @@ class AIBasic:
             if target.player and self.cant_see_player:
                 self.move_randomly(game_map)
 
+            elif self.owner.status_effects.has_effect("stunned"):
+                msg = Message(msg="The {0} is stunned and can't act..".format(
+                    self.owner.name.lower()),
+                    style="miss")
+                combat_msgs.append(msg)
+                self.move_randomly(game_map)
+
             skill, skill_target, target_range = self.choose_skill(target, game_map)
 
             if skill and skill_target:

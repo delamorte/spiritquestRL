@@ -249,7 +249,6 @@
         "effect": ["stun"],
         "radius": [2, 3, 4],
         "chance": [0.1, 0.15, 0.2],
-        
         "icon": 33
     },
     "call allies": {

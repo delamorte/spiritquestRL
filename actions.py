@@ -46,11 +46,16 @@ class Actions:
             if not self.owner.levels.current_map.is_blocked(destination_x, destination_y):
                 target = self.owner.levels.current_map.tiles[destination_x][destination_y].blocking_entity
                 if target:
-                    results = self.owner.player.fighter.use_skill(target, self.owner.player.player.sel_weapon)
-                    self.owner.message_log.send(results)
-                    # player.player.spirit_power -= 0.5
-                    self.owner.time_counter.take_turn(1)
-                    self.owner.render_functions.draw_stats(target)
+                    if self.owner.player.status_effects.has_effect("stunned"):
+                        msg = Message("You are stunned and unable to act!")
+                        self.owner.message_log.send(msg)
+                        return
+                    else:
+                        results = self.owner.player.fighter.use_skill(target, self.owner.player.player.sel_weapon)
+                        self.owner.message_log.send(results)
+                        # player.player.spirit_power -= 0.5
+                        self.owner.time_counter.take_turn(1)
+                        self.owner.render_functions.draw_stats(target)
 
                 else:
                     if self.owner.player.fighter.mv_spd <= 0:
