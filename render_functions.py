@@ -5,7 +5,7 @@ from game_states import GameStates
 from helpers import get_article
 from textwrap import shorten, fill
 import numpy as np
-from map_objects.tilemap import tilemap, tilemap_ui
+from map_objects import tilemap
 from scipy.spatial.distance import cityblock
 from color_functions import argb_from_color
 import random
@@ -45,7 +45,7 @@ class RenderFunctions:
             blt.color("dark gray")
 
         # Cursor needs some offset in ascii
-        if self.owner.options.gfx == "ascii" and entity.name == "cursor":
+        if tilemap.data.tileset == "ascii" and entity.name == "cursor":
             blt.put_ext(x * self.owner.options.tile_offset_x, y *
                         self.owner.options.tile_offset_y, -3 * self.owner.options.tile_offset_x, -5 * self.owner.options.tile_offset_y, entity.char)
         else:
@@ -443,7 +443,7 @@ class RenderFunctions:
             return
         else:
             blt.put(x * self.owner.options.tile_offset_x, y *
-                    self.owner.options.tile_offset_y, tilemap()["indicator"])
+                    self.owner.options.tile_offset_y, tilemap.data.tiles["indicator"])
 
         if entity.ai and entity.ai.cant_see_player:
             blt.color(None)

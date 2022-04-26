@@ -10,7 +10,6 @@ from components.fighter import Fighter
 from components.light_source import LightSource
 from components.status_effects import StatusEffects
 from data import json_data
-from map_objects.tilemap import tilemap
 from ui.message import Message
 
 
@@ -38,7 +37,7 @@ class Summoner:
                     name = effect.summon[effect.rank]
             if not name:
                 return msgs
-            char = tilemap()["monsters"][name]
+            char = tilemap.data.tiles["monsters"][name]
             color = get_monster_color(name)
             f_data = json_data.data.fighters[name]
             remarks = f_data["remarks"]

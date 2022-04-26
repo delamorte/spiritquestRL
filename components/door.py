@@ -1,4 +1,4 @@
-from map_objects.tilemap import tilemap
+from map_objects import tilemap
 from ui.message import Message
 
 
@@ -17,19 +17,19 @@ class Door:
             self.status = "open"
             game_map.tiles[self.owner.x][self.owner.y].blocked = False
             game_map.tiles[self.owner.x][self.owner.y].block_sight = False
-            self.owner.char = tilemap()["door"]["open"]
+            self.owner.char = tilemap.data.tiles["door"]["open"]
             self.name = "door (open)"
         if status == "closed":
             self.status = "closed"
             game_map.tiles[self.owner.x][self.owner.y].blocked = True
             game_map.tiles[self.owner.x][self.owner.y].block_sight = True       
-            self.owner.char = tilemap()["door"]["closed"]
+            self.owner.char = tilemap.data.tiles["door"]["closed"]
             self.name = "door (closed)"
         if status == "locked":
             self.status = "locked"
             game_map.tiles[self.owner.x][self.owner.y].blocked = True
             game_map.tiles[self.owner.x][self.owner.y].block_sight = True    
-            self.owner.char = tilemap()["door"]["locked"]
+            self.owner.char = tilemap.data.tiles["door"]["locked"]
 
     def interaction(self, game_map):
         if self.status == "closed":

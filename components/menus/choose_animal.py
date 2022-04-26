@@ -1,5 +1,5 @@
 from data import json_data
-from map_objects.tilemap import tilemap
+from map_objects import tilemap
 
 
 class ChooseAnimal:
@@ -21,7 +21,7 @@ class ChooseAnimal:
         self.items = []
         self.items_icons = []
         self.sub_items = {}
-        animals = tilemap()["monsters"]
+        animals = tilemap.data.tiles["monsters"]
         animals = {x: animals[x] for x in ("crow", "rat", "snake")}
         for (k, v) in animals.items():
             animal = json_data.data.fighters[k]

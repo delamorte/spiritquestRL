@@ -19,10 +19,10 @@ from components.player import Player
 from components.status_effects import StatusEffects
 from components.summoner import Summoner
 from data import json_data
+from map_objects import tilemap
 from game_states import GameStates
 from input_handlers import handle_keys
 from map_objects.levels import Levels
-from map_objects.tilemap import init_tiles, tilemap
 from options import Options
 from render_functions import RenderFunctions
 from ui.elements import UIElements
@@ -45,6 +45,7 @@ class Engine:
         self.levels = None
         self.player = None
         self.options = None
+        self.tilemap = None
         self.data = None
         self.animations_buffer = []
 
@@ -71,10 +72,12 @@ class Engine:
         blt.refresh()
         blt.read()
 
-        self.options = Options()
+        self.options = Options(gfx="ascii")
 
         # Load tiles
-        init_tiles(self.options)
+        tiles_data = tilemap.Tilemap(tileset=self.options.gfx)
+        tiles_data.init_tiles(self.options)
+        tilemap.data = tiles_data
 
         # Init UI
         self.ui = UIElements()
@@ -117,8 +120,9 @@ class Engine:
         animations_component = Animations()
 
         player = Entity(
-            1, 1, 3, player_component.char["player"], "default", "player", blocks=True, player=player_component,
-            fighter=fighter_component, inventory=inventory_component, light_source=light_component,
+            1, 1, 3, player_component.char["player"], "default", "player",
+            blocks=True, player=player_component, fighter=fighter_component, inventory=inventory_component,
+            light_source=light_component,
             summoner=summoner_component, indicator_color="gray", animations=animations_component,
             status_effects=status_effects_component, stand_on_messages=False,
             visible=True)
@@ -132,7 +136,7 @@ class Engine:
         player.player.avatar[choice].owner = player
         player.abilities = Abilities(player)
         player.abilities.initialize_abilities(choice)
-        player.player.char[choice] = tilemap()["monsters"][choice]
+        player.player.char[choice] = tilemap.data.tiles["monsters"][choice]
         player.player.char_exp[choice] = 20
         player.fighter.mv_spd = avatar_f_data["mv_spd"]
 
@@ -163,7 +167,7 @@ class Engine:
                        self.ui.offset_y + 1, self.ui.viewport.x, 1)
 
         # if settings.gfx == "ascii":
-        #     player.char = tilemap()["player"]
+        #     player.char = tilemap.data.tiles["player"]
         #     player.color = "lightest green"
 
         self.levels.change("hub")
@@ -179,7 +183,6 @@ class Engine:
             if (blt.state(floor(blt.TK_WIDTH)) != self.ui.screen_w or
                     blt.state(floor(blt.TK_HEIGHT)) != self.ui.screen_h):
 
-                init_tiles(self.options)
                 self.ui = UIElements()
                 self.ui.owner = self
                 self.ui.draw()
@@ -197,7 +200,7 @@ class Engine:
             self.fov_recompute = False
             blt.refresh()
 
-            if self.animations_buffer:
+            if self.animations_buffer and tilemap.data.tileset == "oryx":
                 key = self.render_functions.draw_animations()
 
             else:

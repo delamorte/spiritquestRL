@@ -1,7 +1,7 @@
 import random
 
 from map_objects.game_map import GameMap
-from map_objects.tilemap import tilemap
+from map_objects import tilemap
 from descriptions import level_biomes, meditate_params
 from ui.menus import MenuData
 
@@ -97,13 +97,13 @@ class Levels:
             if random.random() > 0.7:
                 monsters = []
                 if self.world_tendency < 0:
-                    for x, y in tilemap()["monsters_chaos"].items():
+                    for x, y in tilemap.data.tiles["monsters_chaos"].items():
                         monsters.append((x, y))
                 elif self.world_tendency > 0:
-                    for x, y in tilemap()["monsters_light"].items():
+                    for x, y in tilemap.data.tiles["monsters_light"].items():
                         monsters.append((x, y))
                 else:
-                    for x, y in tilemap()["monsters"].items():
+                    for x, y in tilemap.data.tiles["monsters"].items():
                         monsters.append((x, y))
                 monsters.sort()
                 spawn_rates = self.get_spawn_rates(monsters)

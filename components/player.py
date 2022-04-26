@@ -1,4 +1,4 @@
-from map_objects.tilemap import tilemap
+from map_objects import tilemap
 import numpy as np
 
 from ui.message import Message
@@ -8,7 +8,7 @@ class Player:
     def __init__(self, spirit_power):
         self.owner = None
         self.spirit_power = spirit_power
-        self.char = {"player": tilemap()["player"]}
+        self.char = {"player": tilemap.data.tiles["player"]}
         self.char_exp = {"player": 0}
         self.char_level = 1
         self.skill_points = 0
@@ -29,12 +29,12 @@ class Player:
         levels_gained = int(self.char_exp["player"] / (self.exp_lvl_interval * self.char_level))
         entity_name = killed_fighter.owner.name
 
-        if entity_name in tilemap()["monsters"].keys():
-            self.char[entity_name] = tilemap()["monsters"][entity_name]
-        elif entity_name in tilemap()["monsters_light"].keys():
-            self.char[entity_name] = tilemap()["monsters_light"][entity_name]
-        elif entity_name in tilemap()["monsters_chaos"].keys():
-            self.char[entity_name] = tilemap()["monsters_chaos"][entity_name]
+        if entity_name in tilemap.data.tiles["monsters"].keys():
+            self.char[entity_name] = tilemap.data.tiles["monsters"][entity_name]
+        elif entity_name in tilemap.data.tiles["monsters_light"].keys():
+            self.char[entity_name] = tilemap.data.tiles["monsters_light"][entity_name]
+        elif entity_name in tilemap.data.tiles["monsters_chaos"].keys():
+            self.char[entity_name] = tilemap.data.tiles["monsters_chaos"][entity_name]
 
         if entity_name in self.char_exp.keys():
             self.char_exp[entity_name] += 1

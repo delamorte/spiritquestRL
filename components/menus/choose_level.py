@@ -1,3 +1,6 @@
+from map_objects import tilemap
+
+
 class ChooseLevel:
     def __init__(self, name="choose_level", data=None, sub_menu=False, event=None):
         self.owner = None
@@ -20,7 +23,10 @@ class ChooseLevel:
         for item in self.data:
             name = item["title"]
             self.items.append(name)
-            self.items_icons.append(0xE000 + 399)
+            if tilemap.data.tileset == "oryx":
+                self.items_icons.append(0xE000 + 399)
+            else:
+                self.items_icons.append("#")
             self.sub_items[name] = ["Rescue: Blacksmith"]
 
     def show(self):

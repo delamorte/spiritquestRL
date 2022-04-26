@@ -7,7 +7,7 @@ from components.menus.choose_animal import ChooseAnimal
 from components.menus.choose_level import ChooseLevel
 from game_states import GameStates
 from color_functions import get_monster_color
-from map_objects.tilemap import init_tiles
+from map_objects import tilemap
 from ui.elements import UIElements
 
 
@@ -53,7 +53,6 @@ class Menus:
             if (blt.state(floor(blt.TK_WIDTH)) != self.owner.ui.screen_w or
                     blt.state(floor(blt.TK_HEIGHT)) != self.owner.ui.screen_h):
 
-                init_tiles(self.owner.options)
                 self.owner.ui = UIElements()
                 self.owner.ui.owner = self.owner
                 self.refresh(menu.heading)
@@ -81,12 +80,13 @@ class Menus:
                     # Draw icon tile
                     blt.layer(1)
                     blt.color(get_monster_color(sel))
-                    # if settings.gfx == "ascii":
-                    #     blt.puts(self.center_x - 6 + 1,
-                    #              self.center_y - 2 + i * 5, items_icons[i], 0, 0)
+                    if tilemap.data.tileset == "ascii":
+                        blt.puts(self.center_x - 6 + 1,
+                                 self.center_y + i * menu.margin, menu.items_icons[i], 0, 0)
+                    else:
 
-                    blt.puts(self.center_x - 6 + 1, self.center_y +
-                             i * menu.margin, "[U+" + hex(menu.items_icons[i]) + "]", 0, 0)
+                        blt.puts(self.center_x - 6 + 1, self.center_y +
+                                 i * menu.margin, "[U+" + hex(menu.items_icons[i]) + "]", 0, 0)
 
             blt.refresh()
 

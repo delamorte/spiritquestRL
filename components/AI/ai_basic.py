@@ -92,6 +92,7 @@ class AIBasic:
             # If AI can't attack/use skill, try to move
             elif 1 / self.owner.fighter.mv_spd <= self.time_to_act - self.action_cost:
                 self.move_action(target, entities, game_map, target_range)
+                self.action_cost += 1 / self.owner.fighter.mv_spd
 
             # No possible actions left, end turn
             else:
@@ -161,6 +162,7 @@ class AIBasic:
                             targets = None
                             break
                 elif "boost" in skill.name:
+                    print("shouldn't be here")
                     for target in targets:
                         if not target.status_effects.items:
                             possible_skills["heal_buff_others"].append((skill, target))

@@ -8,7 +8,7 @@ from components.animation import Animation
 from data import json_data
 from game_states import GameStates
 from helpers import get_article
-from map_objects.tilemap import tilemap
+from map_objects import tilemap
 from ui.message import Message
 
 
@@ -170,7 +170,7 @@ class Entity:
 
     def kill(self):
         if self.player:
-            self.char = tilemap()["player_remains"]
+            self.char = tilemap.data.tiles["player_remains"]
             death_message = Message(msg="You died!", style="death")
             self.dead = True
 
@@ -186,10 +186,10 @@ class Entity:
             death_message = Message("The {0} is dead!".format(self.name), style="death")
 
             if self.boss:
-                self.char = tilemap()["boss_remains"]
+                self.char = tilemap.data.tiles["boss_remains"]
                 self.color = "darkest red"
             else:
-                self.char = tilemap()["monster_remains"]
+                self.char = tilemap.data.tiles["monster_remains"]
                 self.color = "dark gray"
                 self.light_source = None
             self.blocks = False
