@@ -138,7 +138,7 @@ class Engine:
         player.abilities = Abilities(player)
         player.abilities.initialize_abilities(choice)
         player.player.char[choice] = tilemap.data.tiles["monsters"][choice]
-        player.player.char_exp[choice] = 20
+        player.player.char_exp[choice] = player.player.avatar_exp_lvl_intervals[0]
         player.fighter.mv_spd = avatar_f_data["mv_spd"]
 
         player.player.avatar[choice].max_hp += 20

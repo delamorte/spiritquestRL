@@ -135,7 +135,7 @@ class Menus:
             elif self.current_menu.name == "choose_animal":
                 output = MenuData(params=sel, event="new_game")
             elif self.current_menu.name == "level_up":
-                output = MenuData(params=sel, event="level_up")
+                output = MenuData(params=sel, event="level_up", sub_menu=True, prev_menu=self.current_menu)
             else:
                 output = MenuData(params=sel)
 

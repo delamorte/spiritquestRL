@@ -320,6 +320,9 @@ class RenderFunctions:
         # TODO: Clean up this function
         player = self.owner.player
         power_msg = "[color=light azure]Spirit power left: " + str(player.player.spirit_power)
+        if player.player.skill_points > 0:
+            power_msg = "[color=yellow]PRESS F2 TO LEVEL UP!"
+
         blt.layer(0)
         blt.clear_area(2, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
                        self.owner.ui.viewport.offset_center_x + int(len(power_msg) / 2) - 5, 3)

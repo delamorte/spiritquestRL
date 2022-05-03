@@ -176,7 +176,9 @@ class Actions:
             return True
 
         if level_up:
-            self.owner.menus.level_up.show()
+            results = self.owner.menus.level_up.show()
+            if results:
+                self.owner.message_log.send(results)
             self.owner.fov_recompute = True
             return True
 

@@ -32,6 +32,7 @@ class AvatarInfo:
             self.sub_items[k] = [exp]
 
     def show(self):
+        self.refresh()
         output = self.owner.show(self)
         if output:
             self.owner.handle_output(output)
