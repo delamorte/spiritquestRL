@@ -322,7 +322,7 @@ class RenderFunctions:
         power_msg = "[color=light azure]Spirit power left: " + str(player.player.spirit_power)
         blt.layer(0)
         blt.clear_area(2, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
-                       self.owner.ui.viewport.offset_center_x + int(len(power_msg) / 2 + 5) - 5, 3)
+                       self.owner.ui.viewport.offset_center_x + int(len(power_msg) / 2) - 5, 3)
         blt.color("gray")
 
         # Draw spirit power left and position it depending on window size
@@ -517,6 +517,8 @@ class RenderFunctions:
         blt.put(x0 + 3, y0 + 3, 0xF900)
 
     def draw_animations(self):
+        # num_of_animations = len(self.owner.animations_buffer)
+        game_map = self.owner.levels.current_map
         for animation in self.owner.animations_buffer:
 
             if (animation.target.dead or animation.target.fighter is None or animation.target.dead or not
@@ -542,21 +544,24 @@ class RenderFunctions:
                         # Dialog doesn't have frame buffer
                         animation.cached_frames = animation.cached_frames[i:]
                     return key
-                blt.layer(4)
-                x, y = self.owner.game_camera.get_coordinates(animation.target.x, animation.target.y)
-                c = blt.color_from_name(animation.color)
-                argb = argb_from_color(c)
-                a, r, g, b = alpha.item(), argb[1], argb[2], argb[3]
-                blt.color(blt.color_from_argb(a, r, g, b))
-                if animation.dialog is not None:
-                    blt.puts(x * self.owner.options.tile_offset_x - 13, y *
-                             self.owner.options.tile_offset_y - 2,
-                             animation.dialog, 30, 0, blt.TK_ALIGN_CENTER+blt.TK_ALIGN_MIDDLE)
-                else:
-                    blt.put_ext(x * self.owner.options.tile_offset_x, y *
-                                self.owner.options.tile_offset_y, animation.offset_x, animation.offset_y,
-                                animation.cached_frames[i].item())
-                blt.refresh()
+                visible = game_map.visible[animation.target.x, animation.target.y]
+                if visible:
+                    x, y = self.owner.game_camera.get_coordinates(animation.target.x, animation.target.y)
+                    blt.layer(4)
+                    c = blt.color_from_name(animation.color)
+                    argb = argb_from_color(c)
+                    a, r, g, b = alpha.item(), argb[1], argb[2], argb[3]
+                    blt.color(blt.color_from_argb(a, r, g, b))
+
+                    if animation.dialog is not None:
+                        blt.puts(x * self.owner.options.tile_offset_x - 13, y *
+                                 self.owner.options.tile_offset_y - 2,
+                                 animation.dialog, 30, 0, blt.TK_ALIGN_CENTER+blt.TK_ALIGN_MIDDLE)
+                    else:
+                        blt.put_ext(x * self.owner.options.tile_offset_x, y *
+                                    self.owner.options.tile_offset_y, animation.offset_x, animation.offset_y,
+                                    animation.cached_frames[i].item())
+                    blt.refresh()
                 # remove cache if animation finished
                 if i == animation.cached_alpha.size - 1:
                     animation.cached_alpha = None

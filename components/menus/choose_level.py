@@ -1,3 +1,4 @@
+from bearlibterminal import terminal as blt
 from map_objects import tilemap
 
 
@@ -12,7 +13,9 @@ class ChooseLevel:
         self.items_icons = []
         self.sub_items = {}
         self.sub_menu = sub_menu
-        self.margin = 6
+        self.margin_x = 6
+        self.margin_y = 6
+        self.align = blt.TK_ALIGN_LEFT
         self.event = event
         self.refresh()
 

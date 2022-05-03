@@ -1,6 +1,10 @@
+from components.abilities import Abilities
+from components.fighter import Fighter
+from data import json_data
 from map_objects import tilemap
 import numpy as np
 
+from ui.menus import MenuData
 from ui.message import Message
 
 
@@ -12,7 +16,9 @@ class Player:
         self.char_exp = {"player": 0}
         self.char_level = 1
         self.skill_points = 0
-        self.exp_lvl_interval = 100
+        self.avatar_exp_to_spend = 0
+        self.exp_lvl_interval = 10
+        self.avatar_exp_lvl_intervals = (25, 75, 200)
         self.insights = 0
         self.avatar = {"player": None}
         self.sel_weapon = None
@@ -37,19 +43,38 @@ class Player:
             self.char[entity_name] = tilemap.data.tiles["monsters_chaos"][entity_name]
 
         if entity_name in self.char_exp.keys():
-            self.char_exp[entity_name] += 1
+            self.char_exp[entity_name] += 5
         else:
             self.char_exp[entity_name] = 1
+            avatar_f_data = json_data.data.fighters[entity_name]
+            a_fighter_component = Fighter(hp=avatar_f_data["hp"], ac=avatar_f_data["ac"], ev=avatar_f_data["ev"],
+                                          atk=avatar_f_data["atk"], mv_spd=avatar_f_data["mv_spd"],
+                                          atk_spd=avatar_f_data["atk_spd"], size=avatar_f_data["size"],
+                                          fov=avatar_f_data["fov"], level=0)
+            self.avatar[entity_name] = a_fighter_component
+            self.avatar[entity_name].owner = self.owner
 
         if levels_gained >= 1:
-            self.level_up(levels_gained)
+            self.char_level += levels_gained
+            self.skill_points += 1
+            self.avatar_exp_to_spend += self.char_level * 10
             return Message("You have gained a level!", style="level_up")
 
         return None
 
-    def level_up(self, levels_gained):
-        self.char_level += levels_gained
-        self.skill_points += 1
+    def handle_level_up(self, data):
+        # TODO: NEEDS TO BE DEBUGGED
+        avatar = self.avatar[data]
+
+        exp_interval = self.avatar_exp_lvl_intervals[avatar.level - 1]
+        potential_exp = self.char_exp[data] + self.avatar_exp_to_spend
+        if potential_exp >= exp_interval:
+            avatar.level += 1
+        self.char_exp[data] += self.avatar_exp_to_spend
+        self.avatar_exp_to_spend = 0
+
+        # Show upgrade skills menu
+
 
     def switch_weapon(self):
         idx = self.sel_weapon_idx + 1

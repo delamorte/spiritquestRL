@@ -1,3 +1,6 @@
+from bearlibterminal import terminal as blt
+
+
 class AvatarInfo:
     def __init__(self, name="avatar_info", data=None, sub_menu=False, event=None):
         self.owner = None
@@ -9,7 +12,9 @@ class AvatarInfo:
         self.items = []
         self.items_icons = []
         self.sub_items = {}
-        self.margin = 6
+        self.margin_x = 6
+        self.margin_y = 6
+        self.align = blt.TK_ALIGN_LEFT
         self.event = event
         self.refresh()
 

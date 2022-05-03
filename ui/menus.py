@@ -5,6 +5,8 @@ from bearlibterminal import terminal as blt
 from components.menus.avatar_info import AvatarInfo
 from components.menus.choose_animal import ChooseAnimal
 from components.menus.choose_level import ChooseLevel
+from components.menus.level_up import LevelUp
+from components.menus.upgrade_skills import UpgradeSkills
 from game_states import GameStates
 from color_functions import get_monster_color
 from map_objects import tilemap
@@ -12,12 +14,15 @@ from ui.elements import UIElements
 
 
 class Menus:
-    def __init__(self, main_menu=None, choose_animal=None, choose_level=None, avatar_info=None):
+    def __init__(self, main_menu=None, choose_animal=None, choose_level=None, avatar_info=None,
+                 level_up=None, upgrade_skills=None):
         self.owner = None
         self.main_menu = main_menu
         self.choose_animal = choose_animal
         self.choose_level = choose_level
         self.avatar_info = avatar_info
+        self.level_up = level_up
+        self.upgrade_skills = upgrade_skills
         self.current_menu = None
         self.text_wrap = 50
         self.sel_index = 0
@@ -34,9 +39,13 @@ class Menus:
             self.choose_level.owner = self
         if self.avatar_info:
             self.avatar_info.owner = self
+        if self.level_up:
+            self.level_up.owner = self
+        if self.upgrade_skills:
+            self.upgrade_skills.owner = self
 
     def refresh(self, heading):
-        self.center_x = self.owner.ui.viewport.offset_center_x - int(len(heading) / 2)
+        self.center_x = self.owner.ui.viewport.offset_center_x
         self.center_y = self.owner.ui.viewport.offset_center_y - 5
         self.viewport_w = self.owner.ui.viewport.offset_w
         self.viewport_h = self.owner.ui.viewport.offset_h
@@ -62,31 +71,31 @@ class Menus:
 
             blt.layer(0)
             self.owner.render_functions.clear_camera(5)
-            blt.puts(self.center_x, self.center_y - 5,
-                     menu.heading, 0, 0, blt.TK_ALIGN_LEFT)
+            blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 5,
+                     menu.heading, self.text_wrap, 0, menu.align)
 
             for i, sel in enumerate(menu.items):
                 selected = i == self.sel_index
                 blt.color("orange" if selected else "light_gray")
-                blt.puts(self.center_x, self.center_y + i * menu.margin, "%s%s" %
-                         ("[U+203A]" if selected else " ", sel), 0, 0, blt.TK_ALIGN_LEFT)
+                blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + i * menu.margin_y, "%s%s" %
+                         ("[U+203A]" if selected else " ", sel), self.text_wrap, 0, menu.align)
 
                 if sel in menu.sub_items:
                     for j, sub_sel in enumerate(menu.sub_items[sel]):
-                        blt.puts(self.center_x, self.center_y + i * menu.margin + j + 2,
-                                 sub_sel, self.text_wrap, 0, blt.TK_ALIGN_LEFT)
+                        blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + i * menu.margin_y + j + 2,
+                                 sub_sel, self.text_wrap, 0, menu.align)
 
                 if menu.items_icons:
                     # Draw icon tile
                     blt.layer(1)
                     blt.color(get_monster_color(sel))
                     if tilemap.data.tileset == "ascii":
-                        blt.puts(self.center_x - 6 + 1,
-                                 self.center_y + i * menu.margin, menu.items_icons[i], 0, 0)
+                        blt.puts(int(self.center_x / 2),
+                                 self.center_y + i * menu.margin_y, menu.items_icons[i], 0, 0, menu.align)
                     else:
 
-                        blt.puts(self.center_x - 6 + 1, self.center_y +
-                                 i * menu.margin, "[U+" + hex(menu.items_icons[i]) + "]", 0, 0)
+                        blt.puts(int(self.center_x / 2), self.center_y +
+                                 i * menu.margin_y - 1, "[U+" + hex(menu.items_icons[i]) + "]", 0, 0, menu.align)
 
             blt.refresh()
 
@@ -125,6 +134,8 @@ class Menus:
                 output = MenuData(name="choose_animal", sub_menu=True, prev_menu=self.current_menu)
             elif self.current_menu.name == "choose_animal":
                 output = MenuData(params=sel, event="new_game")
+            elif self.current_menu.name == "level_up":
+                output = MenuData(params=sel, event="level_up")
             else:
                 output = MenuData(params=sel)
 
@@ -174,6 +185,28 @@ class Menus:
                 self.avatar_info = avatar_info_menu
                 self.avatar_info.owner = self
                 self.avatar_info.show()
+        elif data.name == "level_up":
+            if self.level_up:
+                self.level_up.data = data.params
+                self.level_up.refresh()
+                #self.level_up.show()
+            else:
+                level_up_menu = LevelUp(data=data.params)
+                self.level_up = level_up_menu
+                self.level_up.owner = self
+                #self.level_up.show()
+        elif data.name == "upgrade_skills":
+            if self.upgrade_skills:
+                self.upgrade_skills.data = data.params
+                self.upgrade_skills.refresh()
+                self.upgrade_skills.show()
+            else:
+                upgrade_skills_menu = UpgradeSkills(data=data.params)
+                self.upgrade_skills = upgrade_skills_menu
+                self.upgrade_skills.owner = self
+                self.upgrade_skills.show()
+
+
 
         self.owner.game_state = GameStates.PLAYER_TURN
         #self.owner.ui.draw()

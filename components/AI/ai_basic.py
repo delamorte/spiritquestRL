@@ -162,7 +162,6 @@ class AIBasic:
                             targets = None
                             break
                 elif "boost" in skill.name:
-                    print("shouldn't be here")
                     for target in targets:
                         if not target.status_effects.items:
                             possible_skills["heal_buff_others"].append((skill, target))

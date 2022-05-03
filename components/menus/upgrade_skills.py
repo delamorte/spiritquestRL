@@ -3,8 +3,8 @@ from data import json_data
 from map_objects import tilemap
 
 
-class ChooseAnimal:
-    def __init__(self, name="choose_animal", data=None, sub_menu=False, event=None):
+class UpgradeSkills:
+    def __init__(self, name="upgrade_skills", data=None, sub_menu=False, event=None):
         self.owner = None
         self.title_screen = False
         self.name = name
@@ -14,7 +14,7 @@ class ChooseAnimal:
         self.items_icons = []
         self.sub_items = {}
         self.sub_menu = sub_menu
-        self.margin_x = 10
+        self.margin_x = 6
         self.margin_y = 6
         self.align = blt.TK_ALIGN_LEFT
         self.event = event

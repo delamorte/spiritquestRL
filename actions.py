@@ -163,7 +163,8 @@ class Actions:
 
         return False
 
-    def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False):
+    def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False,
+                     level_up=False):
         if main_menu:
             self.owner.menus.main_menu.show()
             self.owner.fov_recompute = True
@@ -171,6 +172,11 @@ class Actions:
 
         if avatar_info:
             self.owner.menus.avatar_info.show()
+            self.owner.fov_recompute = True
+            return True
+
+        if level_up:
+            self.owner.menus.level_up.show()
             self.owner.fov_recompute = True
             return True
 

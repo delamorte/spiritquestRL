@@ -72,7 +72,8 @@ class Engine:
         blt.refresh()
         blt.read()
 
-        self.options = Options(gfx="ascii")
+        # self.options = Options(gfx="ascii")
+        self.options = Options()
 
         # Load tiles
         tiles_data = tilemap.Tilemap(tileset=self.options.gfx)
@@ -150,6 +151,9 @@ class Engine:
         character_menu = MenuData(name="avatar_info", params=self.player)
         self.menus.create_or_show_menu(character_menu)
 
+        level_up_menu = MenuData(name="level_up", params=self.player)
+        self.menus.create_or_show_menu(level_up_menu)
+
         message_log = MessageLog(4)
         self.message_log = message_log
         self.message_log.owner = self
@@ -219,6 +223,7 @@ class Engine:
             close = action.get('close')
             main_menu = action.get('main_menu')
             avatar_info = action.get('avatar_info')
+            level_up = action.get('level_up')
             inventory = action.get('inventory')
             msg_history = action.get('msg_history')
             switch_ability = action.get('switch_ability')
@@ -241,7 +246,8 @@ class Engine:
                 if self.actions.menu_actions(main_menu=main_menu,
                                              avatar_info=avatar_info,
                                              inventory=inventory,
-                                             msg_history=msg_history):
+                                             msg_history=msg_history,
+                                             level_up=level_up):
                     continue
 
                 elif self.actions.ability_actions(switch=switch_ability, key=key):
