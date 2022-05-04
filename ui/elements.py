@@ -28,12 +28,12 @@ class UIElements:
         side_panel_w = 10
         side_panel_x = w - side_panel_w
 
-        self.side_panel = SidePanel(side_panel_x, 0, side_panel_w-1, h)
+        self.side_panel = SidePanel(side_panel_x, 0, side_panel_w-1, h-1)
         self.side_panel.owner = self
         self.elements.append(self.side_panel)
         self.side_panel.update_offset(self.offset_x, self.offset_y)
 
-        self.viewport = Viewport(0, 0, w-side_panel_w-1, h-5)
+        self.viewport = Viewport(0, 0, w-side_panel_w-1, h-6)
         self.viewport.owner = self
         self.elements.append(self.viewport)
         self.viewport.update_offset(self.offset_x, self.offset_y)

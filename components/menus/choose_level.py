@@ -9,6 +9,7 @@ class ChooseLevel:
         self.name = name
         self.data = data
         self.heading = "[color=white]Choose your destination..."
+        self.sub_heading = None
         self.items = []
         self.items_icons = []
         self.sub_items = {}

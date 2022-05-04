@@ -164,7 +164,7 @@ class Actions:
         return False
 
     def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False,
-                     level_up=False):
+                     level_up=False, upgrade_skills=False):
         if main_menu:
             self.owner.menus.main_menu.show()
             self.owner.fov_recompute = True
@@ -177,6 +177,15 @@ class Actions:
 
         if level_up:
             results = self.owner.menus.level_up.show()
+            if results:
+                self.owner.message_log.send(results)
+                if self.owner.player.player.skill_points > 0:
+                    self.owner.menus.upgrade_skills.show()
+            self.owner.fov_recompute = True
+            return True
+
+        if upgrade_skills:
+            results = self.owner.menus.upgrade_skills.show()
             if results:
                 self.owner.message_log.send(results)
             self.owner.fov_recompute = True

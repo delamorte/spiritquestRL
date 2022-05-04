@@ -108,7 +108,6 @@
         "skill_type": "attack",
         "target_area": "melee",
         "damage": ["1d4", "1d6", "1d8"],
-        
         "chance": [
             0.1,
             0.2,

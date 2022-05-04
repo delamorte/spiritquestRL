@@ -9,6 +9,7 @@ class AvatarInfo:
         self.data = data
         self.sub_menu = sub_menu
         self.heading = "[color=white]The following spirits have awakened within you.."
+        self.sub_heading = None
         self.items = []
         self.items_icons = []
         self.sub_items = {}

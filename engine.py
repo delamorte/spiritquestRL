@@ -154,6 +154,9 @@ class Engine:
         level_up_menu = MenuData(name="level_up", params=self.player)
         self.menus.create_or_show_menu(level_up_menu)
 
+        skills_menu = MenuData(name="upgrade_skills", params=self.player)
+        self.menus.create_or_show_menu(skills_menu)
+
         message_log = MessageLog(4)
         self.message_log = message_log
         self.message_log.owner = self
@@ -170,9 +173,9 @@ class Engine:
         blt.clear_area(2, self.ui.viewport.offset_h +
                        self.ui.offset_y + 1, self.ui.viewport.x, 1)
 
-        # if settings.gfx == "ascii":
-        #     player.char = tilemap.data.tiles["player"]
-        #     player.color = "lightest green"
+        if self.options.gfx == "ascii":
+            player.char = tilemap.data.tiles["player"]
+            player.color = "lightest green"
 
         self.levels.change("hub")
         self.fov_recompute = True
@@ -224,6 +227,7 @@ class Engine:
             main_menu = action.get('main_menu')
             avatar_info = action.get('avatar_info')
             level_up = action.get('level_up')
+            upgrade_skills = action.get('upgrade_skills')
             inventory = action.get('inventory')
             msg_history = action.get('msg_history')
             switch_ability = action.get('switch_ability')
@@ -247,7 +251,8 @@ class Engine:
                                              avatar_info=avatar_info,
                                              inventory=inventory,
                                              msg_history=msg_history,
-                                             level_up=level_up):
+                                             level_up=level_up,
+                                             upgrade_skills=upgrade_skills):
                     continue
 
                 elif self.actions.ability_actions(switch=switch_ability, key=key):

@@ -57,6 +57,7 @@ class Player:
                                               fov=avatar_f_data["fov"], level=0)
                 self.avatar[entity_name] = a_fighter_component
                 self.avatar[entity_name].owner = self.owner
+                self.owner.abilities.set_learnable(entity_name)
 
             lvl_up_msg = self.handle_avatar_exp(entity_name, exp_to_spend)
             exp_messages.extend(lvl_up_msg)
@@ -150,15 +151,21 @@ class Player:
             else:
                 break
         if avatar_lvl + potential_levels >= len(exp_intervals):
+            lvl_diff = len(exp_intervals) - avatar_lvl
             avatar.level = len(exp_intervals)
             self.max_lvl_avatars.append(entity_name)
             max_lvl_msg = Message(msg="Your bond with {0} has reached the maximum level!".format(
                 entity_name), style="level_up")
         else:
+            lvl_diff = potential_levels
             avatar.level += potential_levels
             msg = Message(msg="Your bond with {0} grows stronger..! The {0} grants you insight into new skills.".format(
                 entity_name), style="level_up")
             msgs.append(msg)
+
+        for i in range(lvl_diff):
+            unlock_msg = self.owner.abilities.unlock(entity_name=entity_name)
+            msgs.extend(unlock_msg)
 
         if max_lvl_msg:
             msgs.append(max_lvl_msg)

@@ -82,7 +82,7 @@ class AIBasic:
             skill, skill_target, target_range = self.choose_skill(target, game_map)
 
             if skill and skill_target:
-                if target.fighter.hp > 0:
+                if skill_target.fighter.hp > 0:
                     combat_msg = self.owner.fighter.use_skill(skill_target, skill, game_map)
                     combat_msgs.extend(combat_msg)
                     self.action_cost += 1

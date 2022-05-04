@@ -10,6 +10,7 @@ class LevelUp:
         self.sub_menu = sub_menu
         self.heading = "[color=white]You have gained more wisdom. You feel a stronger bond with one particular " \
                        "spirit... "
+        self.sub_heading = None
         self.items = []
         self.items_icons = []
         self.sub_items = {}
@@ -36,6 +37,7 @@ class LevelUp:
             if k not in self.data.player.avatar:
                 continue
             avatar = self.data.player.avatar[k]
+            next_learnable_abilities = self.data.abilities.learnable[k]
             avatar_lvl = avatar.level
             exp_intervals = self.data.player.avatar_exp_lvl_intervals
             exp_interval = exp_intervals[max(0, avatar_lvl - 1)]
@@ -58,7 +60,8 @@ class LevelUp:
 
             if potential_levels > 0:
                 next_avatar_lvl = min(len(exp_intervals) - 1, avatar_lvl + potential_levels)
-                exp_3 = " Learns new skill"
+
+                exp_3 = " Learns new skill: {0}".format(", ".join(next_learnable_abilities[:potential_levels]))
             else:
                 next_avatar_lvl = avatar_lvl
 

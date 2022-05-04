@@ -1,6 +1,7 @@
 from bearlibterminal import terminal as blt
 from data import json_data
 from map_objects import tilemap
+from ui.message import Message
 
 
 class UpgradeSkills:
@@ -9,13 +10,14 @@ class UpgradeSkills:
         self.title_screen = False
         self.name = name
         self.data = data
-        self.heading = "[color=white]Choose your spirit animal..."
+        self.heading = "[color=white]The following abilities have awakened within you..."
+        self.sub_heading = None
         self.items = []
         self.items_icons = []
         self.sub_items = {}
         self.sub_menu = sub_menu
         self.margin_x = 6
-        self.margin_y = 6
+        self.margin_y = 7
         self.align = blt.TK_ALIGN_LEFT
         self.event = event
         self.refresh()
@@ -24,21 +26,37 @@ class UpgradeSkills:
         self.items = []
         self.items_icons = []
         self.sub_items = {}
-        animals = tilemap.data.tiles["monsters"]
-        animals = {x: animals[x] for x in ("crow", "rat", "snake")}
-        for (k, v) in animals.items():
-            animal = json_data.data.fighters[k]
-            stats = "hp: {0}, ac: {1}, ev: {2}, power: {3}".format(animal["hp"], animal["ac"], animal["ev"],
-                                                                   animal["atk"])
-            skills = "skills: {0}".format(", ".join(animal["player_abilities"]))
-            self.items.append(k)
-            self.items_icons.append(v)
-            self.sub_items[k] = [stats, skills]
+        abilities = self.data.abilities
+        skill_points = self.data.player.skill_points
+        self.sub_heading = "[color=yellow]You have {0} skill points".format(skill_points)
+
+        for skill in abilities.items:
+            self.items.append(skill.name)
+            self.items_icons.append(skill.icon)
+            description = "[color=white]{0}".format(skill.get_description())
+            next_rank_description = ""
+            upgradeable = skill.rank < skill.max_rank
+            if upgradeable:
+                next_rank_description = "[color=lighter blue]Rank up[color=white] -> {0}".format(skill.get_description(rank=skill.rank+1))
+
+            self.sub_items[skill.name] = [skill.description, description, next_rank_description]
+
+        for skill in abilities.unlocked:
+            self.items.append(skill.name)
+            self.items_icons.append(skill.icon)
+            learn_str = "[color=lighter yellow]New skill[color=white]"
+            description = skill.get_description()
+
+            self.sub_items[skill.name] = [learn_str, skill.description, description]
 
     def show(self):
+        self.refresh()
         output = self.owner.show(self)
-        if not output and self.sub_menu:
-            self.event = "show_prev_menu"
-        else:
-            self.event = None
+        results = None
+        if output:
+            if self.data.player.skill_points > 0:
+                results = self.data.abilities.learn_or_rank_up(output.params)
+            else:
+                results = Message(msg="You have no skill points...")
             self.owner.handle_output(output)
+        return results

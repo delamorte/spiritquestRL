@@ -43,7 +43,7 @@ class MessagePanel:
         self.offset_x = self.x * offset_x
         self.offset_y = self.y * offset_y
         self.offset_w = self.w * offset_x - (offset_x + 1)
-        self.offset_h = self.h * offset_y - (offset_y + 1)
+        self.offset_h = self.h * offset_y - (offset_y + 2)
         self.offset_x2 = self.offset_x + self.offset_w
         self.offset_y2 = self.offset_y + self.offset_h
         self.border_offset = self.border * offset_x

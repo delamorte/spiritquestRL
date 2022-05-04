@@ -24,7 +24,7 @@ class Menus:
         self.level_up = level_up
         self.upgrade_skills = upgrade_skills
         self.current_menu = None
-        self.text_wrap = 50
+        self.text_wrap = 60
         self.sel_index = 0
         self.center_x = 0
         self.center_y = 0
@@ -44,19 +44,18 @@ class Menus:
         if self.upgrade_skills:
             self.upgrade_skills.owner = self
 
-    def refresh(self, heading):
+    def refresh(self):
         self.center_x = self.owner.ui.viewport.offset_center_x
         self.center_y = self.owner.ui.viewport.offset_center_y - 5
         self.viewport_w = self.owner.ui.viewport.offset_w
         self.viewport_h = self.owner.ui.viewport.offset_h
-        #self.owner.ui.draw()
 
     def show(self, menu):
         self.current_menu = menu
         self.owner.game_state = GameStates.MENU
         self.sel_index = 0
         output = None
-        self.refresh(menu.heading)
+        self.refresh()
 
         while not output:
             if (blt.state(floor(blt.TK_WIDTH)) != self.owner.ui.screen_w or
@@ -64,7 +63,7 @@ class Menus:
 
                 self.owner.ui = UIElements()
                 self.owner.ui.owner = self.owner
-                self.refresh(menu.heading)
+                self.refresh()
                 self.owner.ui.draw()
                 blt.refresh()
                 self.owner.fov_recompute = True
@@ -73,6 +72,10 @@ class Menus:
             self.owner.render_functions.clear_camera(5)
             blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 5,
                      menu.heading, self.text_wrap, 0, menu.align)
+
+            if menu.sub_heading:
+                blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 3,
+                         menu.sub_heading, self.text_wrap, 0, menu.align)
 
             for i, sel in enumerate(menu.items):
                 selected = i == self.sel_index
@@ -135,7 +138,9 @@ class Menus:
             elif self.current_menu.name == "choose_animal":
                 output = MenuData(params=sel, event="new_game")
             elif self.current_menu.name == "level_up":
-                output = MenuData(params=sel, event="level_up", sub_menu=True, prev_menu=self.current_menu)
+                output = MenuData(params=sel, event="level_up")
+            elif self.current_menu.name == "upgrade_skills":
+                output = MenuData(params=sel, event="upgrade_skills")
             else:
                 output = MenuData(params=sel)
 
@@ -189,22 +194,18 @@ class Menus:
             if self.level_up:
                 self.level_up.data = data.params
                 self.level_up.refresh()
-                #self.level_up.show()
             else:
                 level_up_menu = LevelUp(data=data.params)
                 self.level_up = level_up_menu
                 self.level_up.owner = self
-                #self.level_up.show()
         elif data.name == "upgrade_skills":
             if self.upgrade_skills:
                 self.upgrade_skills.data = data.params
                 self.upgrade_skills.refresh()
-                self.upgrade_skills.show()
             else:
                 upgrade_skills_menu = UpgradeSkills(data=data.params)
                 self.upgrade_skills = upgrade_skills_menu
                 self.upgrade_skills.owner = self
-                self.upgrade_skills.show()
 
 
 

@@ -11,13 +11,14 @@ class MainMenu:
         self.margin_y = 1
         self.align = blt.TK_ALIGN_CENTER
         self.heading = "[color=white]Spirit Quest RL"
+        self.sub_heading = None
         self.items = ["New game", "Exit"]
         self.items_icons = []
         self.sub_items = {}
         self.sub_menu = sub_menu
 
     def refresh(self):
-        self.owner.refresh(self.heading)
+        self.owner.refresh()
 
     def show(self):
         if not self.title_screen:

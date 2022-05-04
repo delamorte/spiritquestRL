@@ -10,6 +10,7 @@ class ChooseAnimal:
         self.name = name
         self.data = data
         self.heading = "[color=white]Choose your spirit animal..."
+        self.sub_heading = None
         self.items = []
         self.items_icons = []
         self.sub_items = {}
