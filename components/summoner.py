@@ -35,7 +35,7 @@ class Summoner:
             name = None
             for effect in self.owner.status_effects.items:
                 if effect.summon:
-                    name = effect.summon[effect.rank]
+                    name = effect.summon[min(len(effect.summon), effect.rank)]
             if not name:
                 return msgs
             char = tilemap.data.tiles["monsters"][name]
