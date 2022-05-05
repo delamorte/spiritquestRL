@@ -136,7 +136,7 @@ class RenderFunctions:
                 self.draw_indicator(entity)
                 self.draw_health_bar(entity)
                 self.draw_health_bar(player)
-            
+
         self.owner.message_log.send(results)
 
     def draw_map(self):
@@ -522,24 +522,27 @@ class RenderFunctions:
         blt.put(x0 + 3, y0 + 3, 0xF900)
 
     def draw_animations(self):
-        # num_of_animations = len(self.owner.animations_buffer)
         game_map = self.owner.levels.current_map
-        for animation in self.owner.animations_buffer:
+        frames_length = max(item.num_of_frames for item in self.owner.animations_buffer)
 
-            if (animation.target.dead or animation.target.fighter is None or animation.target.dead or not
-                    animation.target.visible):
-                self.owner.animations_buffer.remove(animation)
-                continue
-            elif (animation.owner.dead or animation.owner.fighter is None or animation.owner.dead or not
-                    animation.owner.visible):
-                self.owner.animations_buffer.remove(animation)
-                continue
+        for i in range(frames_length):
+            if not self.owner.animations_buffer:
+                return None
+            for animation in self.owner.animations_buffer:
 
-            if animation.cached_alpha is None:
-                self.owner.animations_buffer.remove(animation)
-                continue
+                if (animation.target.dead or animation.target.fighter is None or animation.target.dead or not
+                        animation.target.visible):
+                    self.owner.animations_buffer.remove(animation)
+                    continue
+                elif (animation.owner.dead or animation.owner.fighter is None or animation.owner.dead or not
+                        animation.owner.visible):
+                    self.owner.animations_buffer.remove(animation)
+                    continue
 
-            for i, alpha in enumerate(animation.cached_alpha):
+                if animation.cached_alpha is None or animation.cached_frames is None:
+                    self.owner.animations_buffer.remove(animation)
+                    continue
+
                 # avoid blocking animation rendering with blt.read
                 if blt.has_input():
                     key = blt.read()
@@ -549,13 +552,14 @@ class RenderFunctions:
                         # Dialog doesn't have frame buffer
                         animation.cached_frames = animation.cached_frames[i:]
                     return key
+
                 visible = game_map.visible[animation.target.x, animation.target.y]
                 if visible:
                     x, y = self.owner.game_camera.get_coordinates(animation.target.x, animation.target.y)
                     blt.layer(4)
                     c = blt.color_from_name(animation.color)
                     argb = argb_from_color(c)
-                    a, r, g, b = alpha.item(), argb[1], argb[2], argb[3]
+                    a, r, g, b = animation.cached_alpha[i].item(), argb[1], argb[2], argb[3]
                     blt.color(blt.color_from_argb(a, r, g, b))
 
                     if animation.dialog is not None:
@@ -566,18 +570,19 @@ class RenderFunctions:
                         blt.put_ext(x * self.owner.options.tile_offset_x, y *
                                     self.owner.options.tile_offset_y, animation.offset_x, animation.offset_y,
                                     animation.cached_frames[i].item())
-                    blt.refresh()
-                # remove cache if animation finished
-                if i == animation.cached_alpha.size - 1:
-                    animation.cached_alpha = None
-                    if animation.dialog is None:
-                        # Dialog doesn't have frame buffer
-                        animation.cached_frames = None
-                    animation.dialog = None
 
-            if animation.cached_alpha is None:
-                # remove from buffer after all frames rendered
-                self.owner.animations_buffer.remove(animation)
+                    # remove cache if animation finished
+                    if i == animation.cached_alpha.size - 1:
+                        animation.cached_alpha = None
+                        if animation.dialog is None:
+                            # Dialog doesn't have frame buffer
+                            animation.cached_frames = None
+                        animation.dialog = None
+
+                if animation.cached_alpha is None:
+                    # remove from buffer after all frames rendered
+                    self.owner.animations_buffer.remove(animation)
+            blt.refresh()
         return None
 
     def draw_turn_count(self):
