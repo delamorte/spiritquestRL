@@ -203,7 +203,10 @@ class AIBasic:
     def follow_player(self, target, entities, game_map):
         if self.owner.distance_to(target) > 1:
             if self.path:
-                self.owner.x, self.owner.y = self.path.pop(0)
+                x, y = self.path.pop(0)
+                if not (game_map.is_blocked(x, y) or
+                        game_map.tiles[x][y].blocking_entity):
+                    self.owner.x, self.owner.y = x, y
             else:
                 self.path = self.owner.get_path_to(target, entities, game_map)
                 if self.path:

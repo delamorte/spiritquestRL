@@ -37,7 +37,9 @@ class UpgradeSkills:
             next_rank_description = ""
             upgradeable = skill.rank < skill.max_rank
             if upgradeable:
-                next_rank_description = "[color=lighter blue]Rank up[color=white] -> {0}".format(skill.get_description(rank=skill.rank+1))
+                next_rank_description =\
+                    "[color=lighter blue]Rank {0}[color=white] -> {1}".format(skill.rank+2,
+                                                                              skill.get_description(rank=skill.rank+1))
 
             self.sub_items[skill.name] = [skill.description, description, next_rank_description]
 
@@ -51,12 +53,22 @@ class UpgradeSkills:
 
     def show(self):
         self.refresh()
+        results = []
         output = self.owner.show(self)
+        if output:
+            results = output.messages
+            self.owner.handle_output(output)
+        return results
+
+    def spend_points(self, output):
         results = []
         if output:
             if self.data.player.skill_points > 0:
                 results = self.data.abilities.learn_or_rank_up(output.params)
             else:
                 results.append(Message(msg="You have no skill points..."))
-            self.owner.handle_output(output)
-        return results
+            output.params = None
+            output.messages.extend(results)
+            output.menu_actions_left = self.data.player.skill_points > 0
+        self.refresh()
+        return output

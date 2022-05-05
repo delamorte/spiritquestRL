@@ -17,7 +17,8 @@ class Levels:
         self.current_map = None
 
     def change(self, destination=None):
-
+        # Clear animation buffer on level change
+        self.owner.animations_buffer = []
         self.player = self.owner.player
         # Clear status effects on level change
         if self.player.status_effects.has_effect("summoning"):

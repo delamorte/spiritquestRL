@@ -58,7 +58,7 @@
         "efx_icons": [9]
     },
     "claws": {
-        "name": "claw",
+        "name": "claws",
         "description": "Rends the enemy with sharp claws",
         "skill_type": "weapon",
         "target_area": "melee",

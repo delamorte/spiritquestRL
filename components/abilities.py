@@ -115,7 +115,7 @@ class Abilities:
 
         else:
             item = ability_name
-            results.append(Message(msg="You learn the {0}!".format(item), style="level_up"))
+            results.append(Message(msg="You learn {0}!".format(item.capitalize()), style="level_up"))
             self.initialize_abilities(ability_name=item)
             unlocked = next((x for x in self.unlocked if x.name == item), False)
             if unlocked:
@@ -131,7 +131,7 @@ class Abilities:
             item = self.learnable[entity_name].pop(0)
         else:
             item = ability_name
-        results.append(Message(msg="You have unlocked the {0}!".format(item), style="level_up"))
+        results.append(Message(msg="You have unlocked {0}!".format(item.capitalize()), style="level_up"))
         skill = self.initialize_abilities(ability_name=item, learn=False)
         unlocked = next((x for x in self.unlocked if x.name == skill.name), False)
         if not unlocked:
@@ -146,7 +146,7 @@ class Abilities:
                 skill.rank_up()
                 msg = Message(
                     msg="You have learned {0} (rank {1})!".format(
-                        ability_name, skill.rank), style="level_up")
+                        ability_name.capitalize(), skill.rank + 1), style="level_up")
                 results.append(msg)
                 break
 

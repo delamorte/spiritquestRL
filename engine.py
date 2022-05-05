@@ -157,7 +157,7 @@ class Engine:
         skills_menu = MenuData(name="upgrade_skills", params=self.player)
         self.menus.create_or_show_menu(skills_menu)
 
-        message_log = MessageLog(4)
+        message_log = MessageLog(5)
         self.message_log = message_log
         self.message_log.owner = self
 

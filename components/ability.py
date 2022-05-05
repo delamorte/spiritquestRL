@@ -6,7 +6,7 @@ class Ability:
                  radius=None, chance=None, rank=None, icon=None, needs_ai=None, target_self=None,
                  target_other=None, player_only=None, blt_input=None, power=None, requires_targeting=None,
                  targets_fighters_only=None, target_area=None, summoned_entities=None, color=None,
-                 efx_icons=None, max_rank=3):
+                 efx_icons=None, max_rank=2):
         self.owner = owner
         self.name = name
         self.description = description
@@ -67,16 +67,7 @@ class Ability:
 
         return skill_str
 
-    def rank_up(self, rank=None):
-        item = json_data.data.abilities[self.name]
-        if not rank:
-            rank = self.rank + 1
-
-        if self.chance:
-            self.chance = item["chance"][min(len(item["chance"])-1, rank)]
-        if self.duration:
-            self.duration = item["duration"][min(len(item["duration"])-1, rank)]
-        if self.damage:
-            self.damage = item["damage"][min(len(item["damage"])-1, rank)]
-        if self.radius:
-            self.radius = item["radius"][min(len(item["radius"])-1, rank)]
+    def rank_up(self):
+        self.rank += 1
+        if self.rank > self.max_rank:
+            self.rank = self.max_rank

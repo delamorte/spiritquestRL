@@ -122,9 +122,11 @@ class Entity:
                 game_map.tiles[self.x+dx][self.y+dy].blocking_entity):
             self.move(dx, dy)
 
-    def move_to_tile(self, x, y):
-        self.x = x
-        self.y = y
+    def move_to_tile(self, game_map, x, y):
+        if not (game_map.is_blocked(x, y) or
+                game_map.tiles[x][y].blocking_entity):
+            self.x = x
+            self.y = y
 
     def get_path_to(self, target, entities, game_map):
         """Compute and return a path to the target position.

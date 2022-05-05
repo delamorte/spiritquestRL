@@ -54,10 +54,10 @@ class Menus:
         self.current_menu = menu
         self.owner.game_state = GameStates.MENU
         self.sel_index = 0
-        output = None
+        output = MenuData()
         self.refresh()
 
-        while not output:
+        while output.menu_actions_left:
             if (blt.state(floor(blt.TK_WIDTH)) != self.owner.ui.screen_w or
                     blt.state(floor(blt.TK_HEIGHT)) != self.owner.ui.screen_h):
 
@@ -105,23 +105,24 @@ class Menus:
             sel = menu.items[self.sel_index]
             key = blt.read()
 
-            output = self.handle_input(key, sel, menu.items)
-            if output == "break":
+            output = self.handle_input(output, key, sel, menu.items)
+            if output.event == "break":
                 if menu.title_screen:
                     output = None
                     continue
                 else:
                     self.owner.game_state = GameStates.PLAYER_TURN
                     break
-            elif output:
+            elif output.params or output.sub_menu or not output.menu_actions_left:
                 return output
 
-    def handle_input(self, key, sel, items):
-        output = None
+    def handle_input(self, output, key, sel, items):
+
         if key == blt.TK_CLOSE:
             exit()
         elif key == blt.TK_ESCAPE:
-            return "break"
+            output.event = "break"
+            return output
         elif key == blt.TK_UP:
             if self.sel_index > 0:
                 self.sel_index -= 1
@@ -130,19 +131,26 @@ class Menus:
                 self.sel_index += 1
         elif key == blt.TK_ENTER:
             if sel == "Resume game":
-                return "break"
+                output.event = "break"
+                return output
             elif sel == "Exit":
                 exit()
             elif sel == "New game":
-                output = MenuData(name="choose_animal", sub_menu=True, prev_menu=self.current_menu)
+                output.name = "choose_animal"
+                output.sub_menu = True
+                output.prev_menu = self.current_menu
             elif self.current_menu.name == "choose_animal":
-                output = MenuData(params=sel, event="new_game")
+                output.params = sel
+                output.event = "new_game"
             elif self.current_menu.name == "level_up":
-                output = MenuData(params=sel, event="level_up")
+                output.params = sel
+                output.event = "level_up"
             elif self.current_menu.name == "upgrade_skills":
-                output = MenuData(params=sel, event="upgrade_skills")
+                output.params = sel
+                output.event = "upgrade_skills"
+                output = self.current_menu.spend_points(output)
             else:
-                output = MenuData(params=sel)
+                output.params = sel
 
         return output
 
@@ -207,16 +215,15 @@ class Menus:
                 self.upgrade_skills = upgrade_skills_menu
                 self.upgrade_skills.owner = self
 
-
-
         self.owner.game_state = GameStates.PLAYER_TURN
-        #self.owner.ui.draw()
 
 
 class MenuData:
-    def __init__(self, name=None, sub_menu=False, prev_menu=None, params=None, event=None):
+    def __init__(self, name=None, sub_menu=False, prev_menu=None, params=None, event=None, menu_actions_left=True):
         self.name = name
         self.sub_menu = sub_menu
         self.prev_menu = prev_menu
         self.params = params
         self.event = event
+        self.menu_actions_left = menu_actions_left
+        self.messages = []

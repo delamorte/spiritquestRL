@@ -302,7 +302,7 @@ class RenderFunctions:
 
             # Print the game messages, one line at a time. Display newest
             # msg at the bottom and scroll others up
-            i = 4
+            i = 5
             # if i > message_log.max_length:
             #    i = 0
 
@@ -320,8 +320,10 @@ class RenderFunctions:
         # TODO: Clean up this function
         player = self.owner.player
         power_msg = "[color=light azure]Spirit power left: " + str(player.player.spirit_power)
-        if player.player.skill_points > 0:
+        if player.player.avatar_exp_to_spend > 0:
             power_msg = "[color=yellow]PRESS F2 TO LEVEL UP!"
+        elif player.player.skill_points > 0:
+            power_msg = "[color=yellow]PRESS F3 TO UPGRADE SKILLS!"
 
         blt.layer(0)
         blt.clear_area(2, self.owner.ui.viewport.offset_h + self.ui_offset_y + 3,
