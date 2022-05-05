@@ -18,6 +18,7 @@ class Animation:
             # Draw skill usage animation on top of the entity
             self.offset_x = -10
             self.offset_y = -10
+
         else:
             # Draw skill usage animation to top left of entity tile
             self.offset_x = 1

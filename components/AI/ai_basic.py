@@ -61,7 +61,7 @@ class AIBasic:
 
             self.last_action += self.action_cost
 
-        self.owner.remark(sneak=self.cant_see_player)
+        self.owner.remark(sneak=self.cant_see_player, game_map=game_map)
         return combat_msgs
 
     def handle_actions(self, target, game_map, entities) -> list:
@@ -219,7 +219,7 @@ class AIBasic:
     def move_randomly(self, game_map):
         tiles = game_map.get_neighbours(self.owner, algorithm="square", empty_tiles=True)
         target_tile = choice(tiles)
-        self.owner.move_to_tile(target_tile.x, target_tile.y)
+        self.owner.move_to_tile(game_map, target_tile.x, target_tile.y)
         self.action_cost += 1 / self.owner.fighter.mv_spd
 
     def move_to_last_known_location(self, target, game_map, entities):

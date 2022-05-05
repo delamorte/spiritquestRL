@@ -523,7 +523,7 @@ class RenderFunctions:
 
     def draw_animations(self):
         game_map = self.owner.levels.current_map
-        frames_length = max(item.num_of_frames for item in self.owner.animations_buffer)
+        frames_length = max(len(item.cached_alpha) for item in self.owner.animations_buffer)
 
         for i in range(frames_length):
             if not self.owner.animations_buffer:
@@ -539,9 +539,12 @@ class RenderFunctions:
                     self.owner.animations_buffer.remove(animation)
                     continue
 
-                if animation.cached_alpha is None or animation.cached_frames is None:
+                if animation.cached_alpha is None:
                     self.owner.animations_buffer.remove(animation)
                     continue
+
+                if i >= len(animation.cached_alpha):
+                    break
 
                 # avoid blocking animation rendering with blt.read
                 if blt.has_input():
@@ -559,14 +562,24 @@ class RenderFunctions:
                     blt.layer(4)
                     c = blt.color_from_name(animation.color)
                     argb = argb_from_color(c)
-                    a, r, g, b = animation.cached_alpha[i].item(), argb[1], argb[2], argb[3]
+                    try:
+                        a, r, g, b = animation.cached_alpha[i].item(), argb[1], argb[2], argb[3]
+                    except IndexError as e:
+                        print(e)
+                        break
+
                     blt.color(blt.color_from_argb(a, r, g, b))
 
                     if animation.dialog is not None:
+                        if animation.target.x > game_map.width - 5 or animation.target.x < 5:
+                            continue
+                        offset = -2
+                        if animation.target.y == 1:
+                            offset = 1
                         blt.puts(x * self.owner.options.tile_offset_x - 13, y *
-                                 self.owner.options.tile_offset_y - 2,
+                                 self.owner.options.tile_offset_y + offset,
                                  animation.dialog, 30, 0, blt.TK_ALIGN_CENTER+blt.TK_ALIGN_MIDDLE)
-                    else:
+                    elif animation.cached_frames is not None:
                         blt.put_ext(x * self.owner.options.tile_offset_x, y *
                                     self.owner.options.tile_offset_y, animation.offset_x, animation.offset_y,
                                     animation.cached_frames[i].item())
@@ -707,7 +720,7 @@ class RenderFunctions:
                     side_panel.offset_y + second_heading_y + 5 + y_margin, atk.icon)
             blt.color(None)
 
-        third_heading_y = second_heading_y + 10
+        third_heading_y = second_heading_y + 10 if attack else second_heading_y
 
         # Utility skills
         for i, utl in enumerate(utility):
@@ -740,10 +753,8 @@ class RenderFunctions:
 
             blt.put(side_panel.offset_x + x_margin + 1 + i * 6,
                     side_panel.offset_y + third_heading_y + 5 + y_margin, utl.icon)
-            blt.layer(0)
             blt.put_ext(side_panel.offset_x + x_margin + i * 6,
-                    side_panel.offset_y + third_heading_y + 5 + y_margin, -2, -14, str(i+1))
-            blt.layer(1)
+                        side_panel.offset_y + third_heading_y + 5 + y_margin, -2, -14, str(i+1))
             blt.color(None)
 
     def draw_all(self):

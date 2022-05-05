@@ -203,7 +203,11 @@ class Entity:
 
         return death_message
 
-    def remark(self, random=True, sneak=False):
+    def remark(self, random=True, sneak=False, game_map=None):
+        if self.x > game_map.width - 5 or self.x < 5:
+            return
+        if self.animations.buffer:
+            return
         if sneak:
             remark = choice(json_data.data.remarks["sneaking"])
         elif self.remarks:

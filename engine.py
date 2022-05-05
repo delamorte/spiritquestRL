@@ -62,7 +62,6 @@ class Engine:
         resizable = 'resizeable=true'
         window = "window: " + size + "," + title + "," + cellsize + "," + resizable
 
-        blt.composition(True)
         blt.open()
         blt.set(window)
         blt.set("font: default")
@@ -100,6 +99,7 @@ class Engine:
         self.menus.main_menu.show()
 
         self.menus.main_menu.title_screen = False
+
         self.game_loop()
 
     def init_new_game(self, params):
@@ -185,7 +185,6 @@ class Engine:
     def game_loop(self):
 
         game_quit = False
-
         while not game_quit:
             if (blt.state(floor(blt.TK_WIDTH)) != self.ui.screen_w or
                     blt.state(floor(blt.TK_HEIGHT)) != self.ui.screen_h):

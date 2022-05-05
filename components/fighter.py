@@ -48,7 +48,7 @@ class Fighter:
         neighbours = game_map.get_neighbours(self.owner, radius=skill.radius[skill.rank], algorithm="square",
                                              empty_tiles=True)
         leap_tile = choice(neighbours)
-        self.owner.move_to_tile(leap_tile.x, leap_tile.y)
+        self.owner.move_to_tile(game_map, leap_tile.x, leap_tile.y)
         msg = Message(msg="The {0} leaps to a safe distance!".format(self.owner.colored_name))
         results.append(msg)
         self.owner.animations.buffer.append(Animation(self.owner, self.owner, skill, target_self=True))
@@ -232,17 +232,17 @@ class Fighter:
                     results.append(msg)
             else:
                 msg = Message(msg="You attack the {0} with {1} for {2} damage.".format(
-                    target.colored_name.lower(), skill.name, damage))
+                    target.colored_name.lower(), skill.name.capitalize(), damage))
                 results.append(msg)
 
         else:
             if skill.skill_type != "weapon":
                 if target == self.owner:
                     msg = Message(msg="The {0} uses {1} on itself!".format(
-                        self.owner.colored_name.lower(), skill.name), style="skill_use")
+                        self.owner.colored_name.lower(), skill.name.capitalize()), style="skill_use")
                 else:
                     msg = Message(msg="The {0} uses {1} on {2}!".format(
-                        self.owner.colored_name.lower(), skill.name, target.colored_name.lower()), style="skill_use")
+                        self.owner.colored_name.lower(), skill.name.capitalize(), target.colored_name.lower()), style="skill_use")
                 results.append(msg)
                 if damage > 0:
                     if skill.name == "heal" and target == self.owner:
@@ -258,7 +258,7 @@ class Fighter:
                     results.append(msg)
             else:
                 msg = Message(msg="The {0} attacks the {1} with {2} for {3} damage.".format(
-                    self.owner.colored_name.lower(), target.colored_name.lower(), skill.name, damage))
+                    self.owner.colored_name.lower(), target.colored_name.lower(), skill.name.capitalize(), damage))
                 results.append(msg)
 
         return results
