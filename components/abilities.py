@@ -27,8 +27,10 @@ class Abilities:
     def set_learnable(self, entity_name):
         item = json_data.data.fighters[entity_name]
         abilities = item["player_abilities"] if "player_abilities" in item.keys() else item["abilities"]
-        shuffle(abilities)
-        self.learnable[entity_name] = abilities
+        learned = [x.name for x in self.items]
+        learnable = list(filter(lambda x: x not in learned, abilities))
+        shuffle(learnable)
+        self.learnable[entity_name] = learnable
 
     def initialize_abilities(self, entity_name=None, ability_name=None, learn=True):
         if entity_name is None:
@@ -109,12 +111,15 @@ class Abilities:
         results = []
 
         if self.capacity and len(self.items) >= self.capacity:
-            results.append("You can't learn any more abilities.")
+            results.append(Message(msg="You can't learn any more abilities.", style="level_up"))
 
         else:
             item = ability_name
-            results.append("You learn the {0}!".format(item))
+            results.append(Message(msg="You learn the {0}!".format(item), style="level_up"))
             self.initialize_abilities(ability_name=item)
+            unlocked = next((x for x in self.unlocked if x.name == item), False)
+            if unlocked:
+                self.unlocked.remove(unlocked)
 
         return results
 
@@ -128,7 +133,9 @@ class Abilities:
             item = ability_name
         results.append(Message(msg="You have unlocked the {0}!".format(item), style="level_up"))
         skill = self.initialize_abilities(ability_name=item, learn=False)
-        self.unlocked.append(skill)
+        unlocked = next((x for x in self.unlocked if x.name == skill.name), False)
+        if not unlocked:
+            self.unlocked.append(skill)
 
         return results
 
@@ -144,7 +151,8 @@ class Abilities:
                 break
 
         if not results:
-            msg = self.learn(ability_name=ability_name)
-            results.append(msg)
+            results.extend(self.learn(ability_name=ability_name))
+
+        self.owner.player.skill_points -= 1
 
         return results

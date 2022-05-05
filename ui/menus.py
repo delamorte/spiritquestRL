@@ -85,7 +85,7 @@ class Menus:
 
                 if sel in menu.sub_items:
                     for j, sub_sel in enumerate(menu.sub_items[sel]):
-                        blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + i * menu.margin_y + j + 2,
+                        blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + i * menu.margin_y + j + 1,
                                  sub_sel, self.text_wrap, 0, menu.align)
 
                 if menu.items_icons:

@@ -143,6 +143,7 @@ class Player:
             exp_to_spend = self.avatar_exp_to_spend
         potential_exp = current_avatar_exp + exp_to_spend
         potential_levels = 0
+        lvl_diff = 0
         self.char_exp[entity_name] += exp_to_spend
 
         for interval in exp_intervals[avatar_lvl:]:
@@ -156,7 +157,7 @@ class Player:
             self.max_lvl_avatars.append(entity_name)
             max_lvl_msg = Message(msg="Your bond with {0} has reached the maximum level!".format(
                 entity_name), style="level_up")
-        else:
+        elif potential_levels > 0:
             lvl_diff = potential_levels
             avatar.level += potential_levels
             msg = Message(msg="Your bond with {0} grows stronger..! The {0} grants you insight into new skills.".format(

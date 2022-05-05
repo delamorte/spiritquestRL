@@ -178,9 +178,12 @@ class Actions:
         if level_up:
             results = self.owner.menus.level_up.show()
             if results:
-                self.owner.message_log.send(results)
                 if self.owner.player.player.skill_points > 0:
-                    self.owner.menus.upgrade_skills.show()
+                    upg_results = self.owner.menus.upgrade_skills.show()
+                    if upg_results:
+                        results.extend(upg_results)
+                self.owner.message_log.send(results)
+                self.owner.render_functions.draw_side_panel_content()
             self.owner.fov_recompute = True
             return True
 
@@ -188,6 +191,7 @@ class Actions:
             results = self.owner.menus.upgrade_skills.show()
             if results:
                 self.owner.message_log.send(results)
+                self.owner.render_functions.draw_side_panel_content()
             self.owner.fov_recompute = True
             return True
 

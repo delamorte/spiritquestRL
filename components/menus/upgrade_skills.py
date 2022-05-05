@@ -52,11 +52,11 @@ class UpgradeSkills:
     def show(self):
         self.refresh()
         output = self.owner.show(self)
-        results = None
+        results = []
         if output:
             if self.data.player.skill_points > 0:
                 results = self.data.abilities.learn_or_rank_up(output.params)
             else:
-                results = Message(msg="You have no skill points...")
+                results.append(Message(msg="You have no skill points..."))
             self.owner.handle_output(output)
         return results
