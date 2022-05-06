@@ -527,10 +527,10 @@ class RenderFunctions:
         for item in self.owner.animations_buffer:
             if item.cached_alpha is not None:
                 length = len(item.cached_alpha)
+                if length > frames_length:
+                    frames_length = length
             else:
                 self.owner.animations_buffer.remove(item)
-            if length > frames_length:
-                frames_length = length
 
         for i in range(frames_length):
             if not self.owner.animations_buffer:

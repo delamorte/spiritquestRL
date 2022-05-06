@@ -45,7 +45,7 @@ class Actions:
             # Handle player attack
             if not self.owner.levels.current_map.is_blocked(destination_x, destination_y):
                 target = self.owner.levels.current_map.tiles[destination_x][destination_y].blocking_entity
-                if target:
+                if target and target.fighter:
                     if self.owner.player.status_effects.has_effect("stunned"):
                         msg = Message("You are stunned and unable to act!")
                         self.owner.message_log.send(msg)
