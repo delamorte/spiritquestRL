@@ -13,6 +13,7 @@ class Animation:
         self.target_self = target_self
         self.cached_alpha = None
         self.cached_frames = None
+        self.single_frame = True
 
         if target_self:
             # Draw skill usage animation on top of the entity
@@ -27,6 +28,7 @@ class Animation:
         if skill is not None:
             if skill.efx_icons:
                 self.frames = [0xE800 + x for x in skill.efx_icons]
+                self.single_frame = False
             else:
                 self.frames = [skill.icon]
 
@@ -57,3 +59,8 @@ class Animation:
             color = "light amber"
 
         return color
+
+    def finish(self, buffer):
+        if self in self.owner.animations.buffer:
+            self.owner.animations.buffer.remove(self)
+        buffer.remove(self)

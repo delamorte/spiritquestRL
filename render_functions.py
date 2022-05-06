@@ -523,30 +523,22 @@ class RenderFunctions:
 
     def draw_animations(self):
         game_map = self.owner.levels.current_map
-        frames_length = max(len(item.cached_alpha) for item in self.owner.animations_buffer)
+        frames_length = 0
+        for item in self.owner.animations_buffer:
+            if item.cached_alpha is not None:
+                length = len(item.cached_alpha)
+            else:
+                self.owner.animations_buffer.remove(item)
+            if length > frames_length:
+                frames_length = length
 
         for i in range(frames_length):
             if not self.owner.animations_buffer:
                 return None
+
             for animation in self.owner.animations_buffer:
 
-                if (animation.target.dead or animation.target.fighter is None or animation.target.dead or not
-                        animation.target.visible):
-                    self.owner.animations_buffer.remove(animation)
-                    continue
-                elif (animation.owner.dead or animation.owner.fighter is None or animation.owner.dead or not
-                        animation.owner.visible):
-                    self.owner.animations_buffer.remove(animation)
-                    continue
-
-                if animation.cached_alpha is None:
-                    self.owner.animations_buffer.remove(animation)
-                    continue
-
-                if i >= len(animation.cached_alpha):
-                    break
-
-                # avoid blocking animation rendering with blt.read
+                # avoid blocking game while rendering with blt.read
                 if blt.has_input():
                     key = blt.read()
                     # if animation interrupted by key press, cache rest of the frames
@@ -555,6 +547,22 @@ class RenderFunctions:
                         # Dialog doesn't have frame buffer
                         animation.cached_frames = animation.cached_frames[i:]
                     return key
+
+                if (animation.target.dead or animation.target.fighter is None or animation.target.dead or not
+                        animation.target.visible):
+                    animation.finish(self.owner.animations_buffer)
+                    continue
+                elif (animation.owner.dead or animation.owner.fighter is None or animation.owner.dead or not
+                        animation.owner.visible):
+                    animation.finish(self.owner.animations_buffer)
+                    continue
+
+                if animation.cached_alpha is None:
+                    animation.finish(self.owner.animations_buffer)
+                    continue
+
+                if i >= len(animation.cached_alpha):
+                    break
 
                 visible = game_map.visible[animation.target.x, animation.target.y]
                 if visible:
@@ -567,6 +575,12 @@ class RenderFunctions:
                     except IndexError as e:
                         print(e)
                         break
+
+                    # Avoid drawing animation if frame and position haven't changed
+                    if (i > 0 and animation.cached_alpha[i] == animation.cached_alpha[i - 1] and
+                            animation.single_frame and animation.target.x == animation.target.last_seen_x and
+                            animation.target.y == animation.target.last_seen_y):
+                        continue
 
                     blt.color(blt.color_from_argb(a, r, g, b))
 
@@ -594,7 +608,8 @@ class RenderFunctions:
 
                 if animation.cached_alpha is None:
                     # remove from buffer after all frames rendered
-                    self.owner.animations_buffer.remove(animation)
+                    animation.finish(self.owner.animations_buffer)
+
             blt.refresh()
         return None
 

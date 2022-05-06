@@ -159,7 +159,6 @@ class Actions:
 
         if not self.owner.cursor:
             self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
-            self.owner.player.animations.buffer = []
 
         return False
 
@@ -312,7 +311,6 @@ class Actions:
             self.owner.cursor = None
             self.owner.fov_recompute = True
             self.owner.animations_buffer.extend(self.owner.player.animations.buffer)
-            self.owner.player.animations.buffer = []
 
         return False
 
@@ -356,7 +354,6 @@ class Actions:
                         self.owner.player, self.owner.levels.current_map, self.owner.levels.current_map.entities,
                         self.owner.time_counter)
                     self.owner.animations_buffer.extend(entity.animations.buffer)
-                    entity.animations.buffer = []
                     self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
                     self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
                     if entity.occupied_tiles is not None:
@@ -440,7 +437,6 @@ class Actions:
                         target, self.owner.levels.current_map, self.owner.levels.current_map.entities,
                         self.owner.time_counter)
                     self.owner.animations_buffer.extend(entity.animations.buffer)
-                    entity.animations.buffer = []
                     self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
                     self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
                     if entity.occupied_tiles is not None:
