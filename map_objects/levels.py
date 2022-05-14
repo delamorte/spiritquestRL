@@ -1,5 +1,7 @@
 import random
 
+import options
+from data import json_data
 from map_objects.game_map import GameMap
 from map_objects import tilemap
 from descriptions import level_biomes, meditate_params
@@ -7,14 +9,18 @@ from ui.menus import MenuData
 
 
 class Levels:
-    def __init__(self, tileset):
+    def __init__(self):
         self.owner = None
-        self.tileset = tileset
+        self.tileset = options.data.gfx
         self.player = None
         self.items = {}
         self.params = None
         self.world_tendency = 0
         self.current_map = None
+        self.monsters_alignment = {"light": [],
+                                   "neutral": [],
+                                   "chaos": []}
+        self.get_alignments()
 
     def change(self, destination=None):
         # Clear animation buffer on level change
@@ -96,16 +102,12 @@ class Levels:
             level["freq_monster"] = None
             # Generate level title
             if random.random() > 0.7:
-                monsters = []
                 if self.world_tendency < 0:
-                    for x, y in tilemap.data.tiles["monsters_chaos"].items():
-                        monsters.append((x, y))
+                    monsters = self.monsters_alignment["chaos"]
                 elif self.world_tendency > 0:
-                    for x, y in tilemap.data.tiles["monsters_light"].items():
-                        monsters.append((x, y))
+                    monsters = self.monsters_alignment["light"]
                 else:
-                    for x, y in tilemap.data.tiles["monsters"].items():
-                        monsters.append((x, y))
+                    monsters = self.monsters_alignment["neutral"]
                 monsters.sort()
                 spawn_rates = self.get_spawn_rates(monsters)
                 monster_prefix = random.choice(random.choices(monsters, spawn_rates, k=5))[0]
@@ -145,3 +147,12 @@ class Levels:
             spawn_rates.append(rates[mon[0]])
 
         return spawn_rates
+
+    def get_alignments(self):
+        for k, v in json_data.data.fighters.items():
+            if v["light"]:
+                self.monsters_alignment["light"].append(k)
+            if v["neutral"]:
+                self.monsters_alignment["neutral"].append(k)
+            if v["chaos"]:
+                self.monsters_alignment["chaos"].append(k)

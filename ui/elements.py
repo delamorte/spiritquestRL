@@ -4,11 +4,20 @@ from math import floor
 from components.ui.message_panel import MessagePanel
 from components.ui.side_panel import SidePanel
 from components.ui.viewport import Viewport
+from map_objects.tilemap import get_tile_object, get_tile_variant
 
 
 class UIElements:
-    def __init__(self):
+    def __init__(self, tiles=None):
         self.owner = None
+        self.tiles = tiles
+        self.color = get_tile_object("ui_block")["color"]
+        self.tile_horizontal = get_tile_variant("ui_block", 0, True)
+        self.tile_vertical = get_tile_variant("ui_block", 2, True)
+        self.tile_ne = get_tile_variant("ui_block", 1, True)
+        self.tile_se = get_tile_variant("ui_block", 3, True)
+        self.tile_sw = get_tile_variant("ui_block", 5, True)
+        self.tile_nw = get_tile_variant("ui_block", 7, True)
         self.screen_w = blt.state(floor(blt.TK_WIDTH))
         self.screen_h = blt.state(floor(blt.TK_HEIGHT))
         self.elements = []
@@ -21,6 +30,7 @@ class UIElements:
         self.init_ui()
 
     def init_ui(self):
+
         w = floor(self.screen_w / self.offset_x)
         h = floor(self.screen_h / self.offset_y)
 

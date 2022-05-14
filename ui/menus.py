@@ -2,6 +2,7 @@ from math import floor
 
 from bearlibterminal import terminal as blt
 
+import options
 from components.menus.avatar_info import AvatarInfo
 from components.menus.choose_animal import ChooseAnimal
 from components.menus.choose_level import ChooseLevel
@@ -92,7 +93,7 @@ class Menus:
                     # Draw icon tile
                     blt.layer(1)
                     blt.color(get_monster_color(sel))
-                    if tilemap.data.tileset == "ascii":
+                    if options.data.gfx == "ascii":
                         blt.puts(int(self.center_x / 2),
                                  self.center_y + i * menu.margin_y, menu.items_icons[i], 0, 0, menu.align)
                     else:

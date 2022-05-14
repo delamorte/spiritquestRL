@@ -328,6 +328,7 @@ class Actions:
 
                 if self.owner.player.dead:
                     kill_msg = self.owner.player.kill()
+                    self.owner.player.char = self.owner.tilemap.get_tile("remains_player")
                     self.owner.game_state = GameStates.PLAYER_DEAD
                     self.owner.message_log.send(kill_msg)
                     self.owner.render_functions.draw_stats()
@@ -337,6 +338,7 @@ class Actions:
                 if entity.fighter and entity.dead:
                     level_up_msg = self.owner.player.player.handle_player_exp(entity.fighter)
                     kill_msg = entity.kill()
+                    entity.char = self.owner.tilemap.get_tile("remains_monster")
                     self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
                     self.owner.message_log.send(kill_msg)
                     self.owner.message_log.send(Message("I feel my power returning!"))
@@ -371,6 +373,7 @@ class Actions:
                         self.owner.render_functions.draw_stats(entity)
                     if self.owner.player.dead:
                         kill_msg = self.owner.player.kill()
+                        self.owner.player.char = self.owner.tilemap.get_tile("remains_player")
                         self.owner.game_state = GameStates.PLAYER_DEAD
                         self.owner.message_log.send(kill_msg)
                         self.owner.render_functions.draw_stats()
@@ -379,6 +382,7 @@ class Actions:
                     if entity.fighter and entity.dead:
                         level_up_msg = self.owner.player.player.handle_player_exp(entity.fighter)
                         kill_msg = entity.kill()
+                        entity.char = self.owner.tilemap.get_tile("remains_monster")
                         self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
                         self.owner.message_log.send(kill_msg)
                         self.owner.message_log.send(Message("I feel my power returning!"))
@@ -406,6 +410,7 @@ class Actions:
 
                 if self.owner.player.dead:
                     kill_msg = self.owner.player.kill()
+                    self.owner.player.char = self.owner.tilemap.get_tile("remains_player")
                     self.owner.game_state = GameStates.PLAYER_DEAD
                     self.owner.message_log.send(kill_msg)
                     self.owner.render_functions.draw_stats()
@@ -414,6 +419,7 @@ class Actions:
 
                 if entity.fighter and entity.dead:
                     entity.kill()
+                    entity.char = self.owner.tilemap.get_tile("remains_monster")
                     self.owner.player.summoner.end_summoning(game_map=self.owner.levels.current_map)
                     self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
                     self.owner.fov_recompute = True
@@ -454,6 +460,7 @@ class Actions:
                         self.owner.render_functions.draw_stats(entity)
                     if self.owner.player.dead:
                         kill_msg = self.owner.player.kill()
+                        self.owner.player.char = self.owner.tilemap.get_tile("remains_player")
                         self.owner.game_state = GameStates.PLAYER_DEAD
                         self.owner.message_log.send(kill_msg)
                         self.owner.render_functions.draw_stats()
@@ -462,6 +469,7 @@ class Actions:
                     if entity.fighter and entity.dead:
                         level_up_msg = self.owner.player.player.handle_player_exp(entity.fighter)
                         kill_msg = entity.kill()
+                        entity.char = self.owner.tilemap.get_tile("remains_monster")
                         self.owner.levels.current_map.tiles[entity.x][entity.y].blocking_entity = None
                         self.owner.message_log.send(kill_msg)
                         self.owner.message_log.send(Message("I feel my power returning!"))

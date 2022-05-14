@@ -1,5 +1,7 @@
+import pickle
 import threading
 import time
+from ctypes import addressof, c_uint32
 from math import floor
 
 import numpy as np
@@ -23,7 +25,7 @@ from map_objects import tilemap
 from game_states import GameStates
 from input_handlers import handle_keys
 from map_objects.levels import Levels
-from options import Options
+import options
 from render_functions import RenderFunctions
 from ui.elements import UIElements
 from ui.menus import Menus, MenuData
@@ -44,7 +46,6 @@ class Engine:
         self.menus = None
         self.levels = None
         self.player = None
-        self.options = None
         self.tilemap = None
         self.data = None
         self.animations_buffer = []
@@ -72,15 +73,14 @@ class Engine:
         blt.read()
 
         # self.options = Options(gfx="ascii")
-        self.options = Options()
+        global_options = options.Options()
+        options.data = global_options
 
         # Load tiles
-        tiles_data = tilemap.Tilemap(tileset=self.options.gfx)
-        tiles_data.init_tiles(self.options)
-        tilemap.data = tiles_data
+        self.init_tiles()
 
         # Init UI
-        self.ui = UIElements()
+        self.ui = UIElements(tiles=self.tilemap)
         self.ui.owner = self
 
         self.actions = Actions()
@@ -102,6 +102,55 @@ class Engine:
 
         self.game_loop()
 
+    def init_gfx(self, f):
+        with open(f, 'rb') as gfx:
+            tileset = pickle.load(gfx)
+
+        arr = (c_uint32 * len(tileset))(*tileset)
+        return arr
+
+    def init_tiles(self,):
+        tilesize = options.data.tile_width + 'x' + options.data.tile_height
+
+        gfx1 = self.init_gfx('./gfx/gfx1')
+        gfx2 = self.init_gfx('./gfx/gfx2')
+        gfx3 = self.init_gfx('./gfx/gfx3')
+        gfx4 = self.init_gfx('./gfx/gfx4')
+        gfx5 = self.init_gfx('./gfx/gfx5')
+        gfx6 = self.init_gfx('./gfx/gfx6')
+
+        blt.set("U+E000: %d, \
+            size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx1), 304, 1184) +
+                tilesize + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+        blt.set("U+E400: %d, \
+            size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx2), 320, 1080) +
+                tilesize + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+        blt.set("U+E800: %d, \
+             size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx3), 288, 168) +
+                tilesize + ", resize-filter=nearest, spacing=4x4 align=top-left")
+
+        blt.set("U+F000: %d, \
+            size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx4), 176, 240) +
+                "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+        blt.set("U+F100: %d, \
+            size=32x32, raw-size=%dx%d, resize=" % (addressof(gfx5), 192, 448) +
+                "32x32" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+        # Big tiles
+        blt.set("U+F300: %d, \
+            size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx6), 144, 48) +
+                "64x96" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+        options.tile_offset_x = int(
+            int(options.data.tile_width) / blt.state(blt.TK_CELL_WIDTH))
+        options.tile_offset_y = int(
+            int(options.data.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
+
+        blt.clear()
+
     def init_new_game(self, params):
         choice = params
         self.player = None
@@ -116,12 +165,13 @@ class Engine:
 
         light_component = LightSource(radius=fighter_component.fov)
         player_component = Player(50)
+        player_component.set_char("player", self.data.fighters["player"])
         status_effects_component = StatusEffects("player")
         summoner_component = Summoner()
         animations_component = Animations()
 
         player = Entity(
-            1, 1, 3, player_component.char["player"], "default", "player",
+            1, 1, 3, "default", "player", tile=f_data,
             blocks=True, player=player_component, fighter=fighter_component, inventory=inventory_component,
             light_source=light_component,
             summoner=summoner_component, indicator_color="gray", animations=animations_component,
@@ -137,7 +187,7 @@ class Engine:
         player.player.avatar[choice].owner = player
         player.abilities = Abilities(player)
         player.abilities.initialize_abilities(choice)
-        player.player.char[choice] = tilemap.data.tiles["monsters"][choice]
+        player.player.set_char(choice, self.data.fighters[choice])
         player.player.char_exp[choice] = player.player.avatar_exp_lvl_intervals[0]
         player.fighter.mv_spd = avatar_f_data["mv_spd"]
 
@@ -162,19 +212,18 @@ class Engine:
         self.message_log.owner = self
 
         # Initialize game camera
-        game_camera = Camera(1, 1, self.ui.viewport.w, self.ui.viewport.h, self.options)
+        game_camera = Camera(1, 1, self.ui.viewport.w, self.ui.viewport.h)
         self.game_camera = game_camera
         self.game_camera.owner = self
 
-        levels = Levels(tileset=self.options.gfx)
+        levels = Levels()
         self.levels = levels
         self.levels.owner = self
 
         blt.clear_area(2, self.ui.viewport.offset_h +
                        self.ui.offset_y + 1, self.ui.viewport.x, 1)
 
-        if self.options.gfx == "ascii":
-            player.char = tilemap.data.tiles["player"]
+        if options.data.gfx == "ascii":
             player.color = "lightest green"
 
         self.levels.change("hub")
@@ -206,7 +255,7 @@ class Engine:
             self.fov_recompute = False
             blt.refresh()
 
-            if self.animations_buffer and tilemap.data.tileset == "oryx":
+            if self.animations_buffer and options.data.gfx == "oryx":
                 key = self.render_functions.draw_animations()
 
             else:

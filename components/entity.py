@@ -4,11 +4,13 @@ from random import randint, choice
 import numpy as np
 import tcod
 
+import options
 from components.animation import Animation
 from data import json_data
 from game_states import GameStates
 from helpers import get_article
 from map_objects import tilemap
+from map_objects.tilemap import get_tile
 from ui.message import Message
 
 
@@ -17,7 +19,7 @@ class Entity:
     A generic object to represent players, enemies, items, etc.
     """
 
-    def __init__(self, x, y, layer, char, color, name, blocks=False, player=None,
+    def __init__(self, x, y, layer, color, name, tile=None, char=None, blocks=False, player=None,
                  fighter=None, ai=None, item=None, inventory=None, stairs=None, summoner=None,
                  wall=None, door=None, cursor=None, light_source=None, abilities=None,
                  status_effects=None, stand_on_messages=True, boss=False, hidden=False, remarks=None,
@@ -25,11 +27,14 @@ class Entity:
         self.x = x
         self.y = y
         self.layer = layer
-        self.char = char
-        if color is None:
+        if not color:
             color = "default"
         self.color = color
         self.name = name
+        self.tile = tile
+        if not char:
+            char = get_tile(name, tile)
+        self.char = char
         self.colored_name = "[color={0}]{1}[color=default]".format(color, name.capitalize())
         self.blocks = blocks
         self.fighter = fighter
@@ -57,6 +62,9 @@ class Entity:
         self.animations = animations
         self.dead = False
         self.visible = visible
+        self.light = tile["light"] if tile else True
+        self.neutral = tile["neutral"] if tile else True
+        self.chaos = tile["chaos"] if tile else True
 
         # Set entity as component owner, so components can call their owner
         if self.player:
@@ -172,7 +180,6 @@ class Entity:
 
     def kill(self):
         if self.player:
-            self.char = tilemap.data.tiles["player_remains"]
             death_message = Message(msg="You died!", style="death")
             self.dead = True
 
@@ -188,12 +195,11 @@ class Entity:
             death_message = Message("The {0} is dead!".format(self.name), style="death")
 
             if self.boss:
-                self.char = tilemap.data.tiles["boss_remains"]
                 self.color = "darkest red"
             else:
-                self.char = tilemap.data.tiles["monster_remains"]
                 self.color = "dark gray"
-                self.light_source = None
+
+            self.light_source = None
             self.blocks = False
             self.fighter = None
             self.ai = None

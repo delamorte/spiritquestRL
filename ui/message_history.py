@@ -84,7 +84,7 @@ class FrameWithScrollbar(object):
         # Scroll bar
         blt.bkcolor("transparent")
         blt.clear_area(self.left + self.width, self.top, 1, self.height)
-        blt.bkcolor("none")
+        blt.bkcolor("default")
         blt.color("dark orange")
         self.scrollbar_column = self.left + self.width
         self.scrollbar_offset = int(
