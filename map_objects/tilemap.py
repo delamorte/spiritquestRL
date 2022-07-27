@@ -32,15 +32,17 @@ def get_fighter_tile(name, tile=None):
     return hex_tile
 
 
-def get_tile_variant(name, variant=None, no_ascii=False):
+def get_tile_variant(name, variant_idx=None, variant_char=None, no_ascii=False):
     base_tile = json_data.data.tiles[name]
     if options.data.gfx == "ascii" and not no_ascii:
         return base_tile["ascii"]
     variants = base_tile["tile_variants"]
     if not variants:
         return get_tile(name)
-    if variant:
-        tile = variants[variant]
+    if variant_idx is not None:
+        tile = variants[variant_idx]
+    elif variant_char:
+        tile = variant_char
     else:
         tile = choice(variants)
     hex_tile = int(base_tile["hex"], 0) + tile

@@ -11,12 +11,12 @@ class UIElements:
     def __init__(self):
         self.owner = None
         self.color = get_color("ui_block")
-        self.tile_horizontal = get_tile_variant("ui_block", 0, True)
-        self.tile_vertical = get_tile_variant("ui_block", 2, True)
-        self.tile_ne = get_tile_variant("ui_block", 1, True)
-        self.tile_se = get_tile_variant("ui_block", 3, True)
-        self.tile_sw = get_tile_variant("ui_block", 5, True)
-        self.tile_nw = get_tile_variant("ui_block", 7, True)
+        self.tile_horizontal = get_tile_variant("ui_block", variant_idx=0, no_ascii=True)
+        self.tile_vertical = get_tile_variant("ui_block", variant_idx=2, no_ascii=True)
+        self.tile_ne = get_tile_variant("ui_block", variant_idx=1, no_ascii=True)
+        self.tile_se = get_tile_variant("ui_block", variant_idx=3, no_ascii=True)
+        self.tile_sw = get_tile_variant("ui_block", variant_idx=5, no_ascii=True)
+        self.tile_nw = get_tile_variant("ui_block", variant_idx=7, no_ascii=True)
         self.screen_w = blt.state(floor(blt.TK_WIDTH))
         self.screen_h = blt.state(floor(blt.TK_HEIGHT))
         self.elements = []

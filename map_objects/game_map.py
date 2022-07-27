@@ -177,6 +177,7 @@ class GameMap:
 
                     if entity != 0:
                         name = get_tile_by_value(entity)
+                        char = get_tile_variant(name, variant_char=entity)
                         tile = get_tile_object(name)
                         color = get_color(name, mod=self.owner.world_tendency)
 
@@ -209,7 +210,7 @@ class GameMap:
                         else:
                             wall_component = Wall(name=name, tile=tile)
                             wall = Entity(x, y, 2,
-                                          color, name, tile=tile, wall=wall_component)
+                                          color, name, char=char, tile=tile, wall=wall_component)
                             self.tiles[x][y].add_entity(wall)
                             wall_component.set_attributes(self)
                             entities.append(wall)
