@@ -144,9 +144,9 @@ class Engine:
             size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx6), 144, 48) +
                 "64x96" + ", resize-filter=nearest, spacing=4x4, align=top-left")
 
-        options.tile_offset_x = int(
+        options.data.tile_offset_x = int(
             int(options.data.tile_width) / blt.state(blt.TK_CELL_WIDTH))
-        options.tile_offset_y = int(
+        options.data.tile_offset_y = int(
             int(options.data.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
 
         blt.clear()
