@@ -1,4 +1,6 @@
 from bearlibterminal import terminal as blt
+
+import options
 from map_objects import tilemap
 
 

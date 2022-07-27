@@ -12,9 +12,9 @@
         "tile": 460,
         "ascii": "@",
         "colors": ["default"],
-        "light": true,
-        "neutral": true,
-        "chaos": true,
+        "light": false,
+        "neutral": false,
+        "chaos": false,
         "abilities": [],
         "remarks": ["Hmm."]
     },

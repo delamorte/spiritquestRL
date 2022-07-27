@@ -5,6 +5,7 @@ from data import json_data
 from map_objects.game_map import GameMap
 from map_objects import tilemap
 from descriptions import level_biomes, meditate_params
+from map_objects.tilemap import get_fighters_by_attribute
 from ui.menus import MenuData
 
 
@@ -17,10 +18,6 @@ class Levels:
         self.params = None
         self.world_tendency = 0
         self.current_map = None
-        self.monsters_alignment = {"light": [],
-                                   "neutral": [],
-                                   "chaos": []}
-        self.get_alignments()
 
     def change(self, destination=None):
         # Clear animation buffer on level change
@@ -103,11 +100,11 @@ class Levels:
             # Generate level title
             if random() > 0.7:
                 if self.world_tendency < 0:
-                    monsters = self.monsters_alignment["chaos"]
+                    monsters = get_fighters_by_attribute("chaos", True)
                 elif self.world_tendency > 0:
-                    monsters = self.monsters_alignment["light"]
+                    monsters = get_fighters_by_attribute("light", True)
                 else:
-                    monsters = self.monsters_alignment["neutral"]
+                    monsters = get_fighters_by_attribute("neutral", True)
                 monsters.sort()
                 spawn_rates = self.get_spawn_rates(monsters)
                 monster_prefix = choice(choices(monsters, spawn_rates, k=5))[0]
@@ -147,12 +144,3 @@ class Levels:
             spawn_rates.append(rates[mon[0]])
 
         return spawn_rates
-
-    def get_alignments(self):
-        for k, v in json_data.data.fighters.items():
-            if v["light"]:
-                self.monsters_alignment["light"].append(k)
-            if v["neutral"]:
-                self.monsters_alignment["neutral"].append(k)
-            if v["chaos"]:
-                self.monsters_alignment["chaos"].append(k)
