@@ -1,16 +1,14 @@
 from random import choice
 
-from color_functions import get_monster_color
 from components.abilities import Abilities
 from components.AI.ai_basic import AIBasic
-from components.animation import Animation
 from components.animations import Animations
 from components.entity import Entity
 from components.fighter import Fighter
 from components.light_source import LightSource
 from components.status_effects import StatusEffects
 from data import json_data
-from map_objects import tilemap
+from map_objects.tilemap import get_color
 from ui.message import Message
 
 
@@ -38,8 +36,8 @@ class Summoner:
                     name = effect.summon[min(len(effect.summon), effect.rank)]
             if not name:
                 return msgs
-            color = get_monster_color(name)
             f_data = json_data.data.fighters[name]
+            color = get_color(name, f_data, game_map.owner.world_tendency)
             remarks = f_data["remarks"]
             fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
                                         atk=f_data["atk"], mv_spd=f_data["mv_spd"],

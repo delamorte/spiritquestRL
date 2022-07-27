@@ -3,7 +3,7 @@ from bearlibterminal import terminal as blt
 import options
 from data import json_data
 from map_objects import tilemap
-from map_objects.tilemap import get_tile, get_fighter_tile
+from map_objects.tilemap import get_tile
 
 
 class ChooseAnimal:
@@ -35,7 +35,7 @@ class ChooseAnimal:
                                                                    animal["atk"])
             skills = "skills: {0}".format(", ".join(animal["player_abilities"]))
             self.items.append(k)
-            tile = get_fighter_tile(k)
+            tile = get_tile(k)
             self.items_icons.append(tile)
             self.sub_items[k] = [stats, skills]
 

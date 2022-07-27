@@ -8,16 +8,14 @@ from components.fighter import Fighter
 from components.item import Item
 from components.status_effects import StatusEffects
 from components.entity import Entity
-from map_objects import tilemap
 from map_objects.tile import Tile
-from color_functions import get_dngn_colors, get_forest_colors, get_monster_color, name_color_from_value
 from random import choice, choices, randint
 from components.stairs import Stairs
-from components.door import Door
+from components.openable import Openable
 from components.wall import Wall
 from components.light_source import LightSource
 from map_objects.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant, \
-    get_fighters_by_attribute, get_fighter_tile, get_tile_by_attribute
+    get_fighters_by_attribute
 from resources.dungeon_generation.dungeon_generator import DrunkardsWalk, MessyBSPTree, CellularAutomata, \
     MazeWithRooms
 import xml.etree.ElementTree as ET
@@ -182,19 +180,21 @@ class GameMap:
                         color = get_color(name, mod=self.owner.world_tendency)
 
                         if tile["openable"]:
-                            door_component = Door(name)
+                            name = tile["name"]
+                            door_component = Openable(name, char)
                             door = Entity(x, y, 2,
                                           color, name, tile=tile, door=door_component, stand_on_messages=False)
                             self.tiles[x][y].add_entity(door)
                             self.tiles[x][y].is_door = True
                             self.tiles[x][y].door = door_component
-                            door_component.set_status(door_component.status, self)
+                            door_component.set_state(door_component.state, self)
                             entities.append(door)
-                        elif tile["pickable"]:
-                            item_component = Item(name)
+                        elif tile["interactable"] or tile["pickable"]:
+                            item_component = Item(name, pickable=tile["pickable"], interactable=tile["interactable"],
+                                                  light_source=tile["light_source"])
                             item = Entity(x, y, 2,
                                           color, name, tile=tile, item=item_component)
-                            if item.name == "flask":
+                            if item.name == "flask":  # For testing "reveal" skill
                                 item.hidden = True
                             self.tiles[x][y].add_entity(item)
                             item_component.set_attributes(self)
@@ -389,12 +389,12 @@ class GameMap:
         self.algorithm = map_algorithm.name
 
         map_algorithm.generateLevel(self.width, self.height)
-        forest_colors = get_forest_colors()
-        dngn_color = get_dngn_colors()
+        color = get_color("ground_soil")
+        tree_color = get_color("tree", mod=self.owner.world_tendency)
         objects = []
         for y in range(0, self.height):
             for x in range(0, self.width):
-                self.tiles[x][y].color = dngn_color
+                self.tiles[x][y].color = color
                 self.tiles[x][y].char = get_tile("ground_soil")
                 if map_algorithm.level[x][y] == 1:
                     self.tiles[x][y].spawnable = False
@@ -402,17 +402,22 @@ class GameMap:
                     # Don't make unvisible trees entities to save in performance
                     if self.count_walls(1, x, y) < 8:
 
-                        if abs(self.owner.world_tendency) * 33 > randint(1, 100):
+                        if self.owner.world_tendency < 0 and abs(self.owner.world_tendency) * 5 > randint(1, 100):
                             name = "tree_dead"
+                            char = get_tile_variant(name)
+                            dead_tree_color = get_color(name)
+                            wall_component = Wall(name)
+                            wall = Entity(x, y, 2, dead_tree_color, "dead tree",
+                                          char=char, wall=wall_component)
 
                         else:
                             name = "tree"
-
-                        char = get_tile_variant(name)
-                        color = get_color(name)
-                        wall_component = Wall(name)
-                        wall = Entity(x, y, 2, color, name,
-                                      char=char, wall=wall_component)
+                            char = get_tile_variant(name)
+                            if (y == 0 and x == 0) or y % 5 == 0:
+                                tree_color = get_color(name)
+                            wall_component = Wall(name)
+                            wall = Entity(x, y, 2, tree_color, name,
+                                          char=char, wall=wall_component)
                         self.tiles[x][y].add_entity(wall)
                         wall_component.set_attributes(self)
                         objects.append(wall)
@@ -429,11 +434,10 @@ class GameMap:
     def generate_forest(self):
 
         entities = []
-        cavern_colors = get_dngn_colors()
-
+        color = get_color("ground_soil")
         for y in range(1, self.height - 1):
             for x in range(1, self.width - 1):
-                self.tiles[x][y].color = cavern_colors[5]
+                self.tiles[x][y].color = color
                 self.tiles[x][y].char = get_tile("ground_soil")
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
@@ -459,6 +463,7 @@ class GameMap:
         """Generate a forest to a rectangular area."""
 
         entities = []
+        tree_color = get_color("tree", mod=self.owner.world_tendency)
         for y in range(dy, height):
             for x in range(dx, width):
                 if not self.tiles[x][y].occupied:
@@ -467,16 +472,22 @@ class GameMap:
                     # Generate forest tiles
                     if randint(1, 100) < freq:
 
-                        if abs(self.owner.world_tendency) * 33 > randint(1, 100):
+                        if self.owner.world_tendency < 0 and abs(self.owner.world_tendency) * 5 > randint(1, 100):
                             name = "tree_dead"
+                            char = get_tile_variant(name)
+                            dead_tree_color = get_color(name)
+                            wall_component = Wall(name)
+                            wall = Entity(x, y, 2, dead_tree_color, "dead tree",
+                                          char=char, wall=wall_component)
 
                         else:
                             name = "tree"
-                        char = get_tile_variant(name)
-                        color = get_color(name)
-                        wall_component = Wall(name)
-                        wall = Entity(x, y, 2, color, name,
-                                      char=char, wall=wall_component)
+                            char = get_tile_variant(name)
+                            if (y == 0 and x == 0) or y % 5 == 0:
+                                tree_color = get_color(name)
+                            wall_component = Wall(name)
+                            wall = Entity(x, y, 2, tree_color, name,
+                                          char=char, wall=wall_component)
                         self.tiles[x][y].add_entity(wall)
                         wall_component.set_attributes(self)
                         entities.append(wall)
@@ -713,7 +724,7 @@ class GameMap:
             #     if x == "crow":
             #         monsters.append((x, y))
             boss = "keeper of dreams"
-            tile = get_fighter_tile("keeper of dreams")
+            tile = get_tile("keeper of dreams")
             monsters.append((boss, tile))
 
             for i in range(number_of_monsters):
@@ -726,8 +737,8 @@ class GameMap:
                 if not any([entity for entity in self.entities["monsters"] if entity.x == x and entity.y == y]):
                     # r = randint(0, 2)
                     name, char = monsters[0]
-                    color = get_monster_color(name)
                     f_data = self.owner.owner.data.fighters[name]
+                    color = get_color(name, f_data, self.owner.world_tendency)
                     remarks = f_data["remarks"]
                     fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
                                                 atk=f_data["atk"], mv_spd=f_data["mv_spd"],
@@ -755,7 +766,7 @@ class GameMap:
 
             number_of_monsters = randint(self.width / 2 - 40, self.width / 2 - 20)
             # number_of_monsters = 0
-            monsters = [("frog", get_fighter_tile("frog"))]
+            monsters = [("frog", get_tile("frog"))]
 
             for i in range(number_of_monsters):
                 x = randint(1, self.width - 1)
@@ -767,8 +778,8 @@ class GameMap:
                 if not any([entity for entity in self.entities["monsters"] if entity.x == x and entity.y == y]):
                     # r = randint(0, 2)
                     name, char = monsters[0]
-                    color = get_monster_color(name)
                     f_data = self.owner.owner.data.fighters[name]
+                    color = get_color(name, f_data, self.owner.world_tendency)
                     remarks = f_data["remarks"]
                     fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
                                                 atk=f_data["atk"], mv_spd=f_data["mv_spd"],
@@ -817,8 +828,8 @@ class GameMap:
                 if not any([entity for entity in self.entities["monsters"] if entity.x == x and entity.y == y]):
                     name = mon[0]
                     char = mon[1]
-                    color = get_monster_color(name)
                     f_data = self.owner.owner.data.fighters[name]
+                    color = get_color(name, f_data, self.owner.world_tendency)
                     remarks = f_data["remarks"]
                     fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
                                                 atk=f_data["atk"], mv_spd=f_data["mv_spd"],
@@ -842,7 +853,8 @@ class GameMap:
                     self.tiles[x][y].add_entity(monster)
                     self.entities["monsters"].append(monster)
 
-    def create_door(self, room=None, status="open", tile=None, name="door", color=None, random=False, x=None, y=None):
+    def create_door(self, room=None, state="open", tile=None, char=None,
+                    name="door", color=None, random=False, x=None, y=None):
 
         """
         Create a door entity in map. If no coordinates are given,
@@ -862,18 +874,18 @@ class GameMap:
             y = walls[door_seed][1]
 
         if tile is None:
-            value = "door ({0})".format(status)
-            tile = get_tile_by_attribute("name", value)
+            tile = get_tile_object(name)
+            char = get_tile(name, tile, state)
         if color is None:
             color = "dark amber"
-        door_component = Door(room.name, status)
-        door = Entity(x, y, 2, color, name, char=tile,
+        door_component = Openable(name, char, state)
+        door = Entity(x, y, 2, color, name, tile=tile, char=char,
                       door=door_component, stand_on_messages=False)
         self.tiles[x][y].add_entity(door)
         self.tiles[x][y].is_door = True
         self.tiles[x][y].door = door_component
 
-        if status == "open":
+        if state == "open":
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
         else:
@@ -881,25 +893,6 @@ class GameMap:
             self.tiles[x][y].block_sight = True
 
         return door
-
-    def scan_doors(self, room):
-        doors_open = [0xE400 + 21, 0xE400 + 23, 0xE400 + 25, 0xE400 + 29, 0xE400 + 31, 0xE400 + 33, 0xE400 + 35,
-                      0xE400 + 37, 0xE400 + 103]
-        doors_closed = [0xE400 + 20, 0xE400 + 22, 0xE400 + 24, 0xE400 + 26, 0xE400 + 27, 0xE400 + 28, 0xE400 + 30,
-                        0xE400 + 32, 0xE400 + 36, 0xE400 + 102]
-        doors = []
-        for y, row in enumerate(room.layers["terrain_objects"]):
-            for x, char in enumerate(row):
-                if char in doors_open:
-                    name, color = name_color_from_value(char, self.owner.world_tendency)
-                    doors.append(self.create_door(room, "open", char, name=name, color=color,
-                                                  x=room.x1 + x, y=room.y1 + y))
-                if char in doors_closed:
-                    name, color = name_color_from_value(char, self.owner.world_tendency)
-                    doors.append(self.create_door(room, "closed", char, name=name, color=color,
-                                                  x=room.x1 + x, y=room.y1 + y))
-
-        return doors
 
     def create_decor(self):
 

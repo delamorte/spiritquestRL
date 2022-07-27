@@ -10,30 +10,29 @@
       203
     ],
     "ascii": "T",
-    "ascii_variants": "t",
+    "ascii_variants": [
+      "t"
+    ],
     "colors": [
       "green",
-      "red",
       "flame",
       "amber",
       "orange",
       "yellow",
       "lime",
-      "chartreuse",
-      "violet",
-      "purple",
-      "pink",
       "crimson"
     ],
     "corners": false,
-    "shaded": false,
+    "hue": false,
     "blocks_sight": true,
     "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "tree_dead": {
@@ -44,63 +43,54 @@
       125
     ],
     "ascii": "T",
-    "ascii_variants": "t",
+    "ascii_variants": [
+      "t"
+    ],
     "colors": [
       "gray",
-      "dark gray",
-      "#4A3728"
+      "dark gray"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": true,
     "draw_floor": true,
     "light": false,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
-  "coffin_open": {
-    "name": "coffin (open)",
+  "coffin": {
+    "name": "coffin",
     "hex": "0xE400",
     "tile": 50,
     "tile_variants": [
+      51
     ],
+    "open": 50,
+    "closed": 51,
+    "locked": 51,
     "ascii": "¤",
+    "ascii_open": "¤",
+    "ascii_closed": "¤",
+    "ascii_locked": "¤",
     "colors": [
       "#856654"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": true,
+    "interactable": false,
     "pickable": false,
-    "stairs": false
-  },
-  "coffin_closed": {
-    "name": "coffin (closed)",
-    "hex": "0xE400",
-    "tile": 51,
-    "tile_variants": [
-    ],
-    "ascii": "¤",
-    "colors": [
-      "#856654"
-    ],
-    "corners": false,
-    "shaded": true,
-    "blocks_sight": false,
-    "draw_floor": false,
-    "light": true,
-    "neutral": true,
-    "chaos": true,
-    "openable": true,
-    "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "shrine": {
@@ -119,14 +109,16 @@
       "gray"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": true,
     "stairs": false
   },
   "candle": {
@@ -140,14 +132,16 @@
       "amber"
     ],
     "corners": false,
-    "shaded": false,
+    "hue": false,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": true,
     "pickable": true,
+    "light_source": true,
     "stairs": false
   },
   "candelabra": {
@@ -161,77 +155,46 @@
       "amber"
     ],
     "corners": false,
-    "shaded": false,
+    "hue": false,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": true,
     "pickable": false,
+    "light_source": true,
     "stairs": false
   },
-  "gate_open": {
-    "name": "gate (open)",
+  "gate": {
+    "name": "gate",
     "hex": "0xE400",
     "tile": 103,
     "tile_variants": [
+      102
     ],
+    "open": 103,
+    "closed": 102,
+    "locked": 102,
     "ascii": "-",
+    "ascii_open": "-",
+    "ascii_closed": "+",
+    "ascii_locked": "*",
     "colors": [
       "gray"
     ],
     "corners": false,
-    "shaded": false,
+    "hue": false,
     "blocks_sight": false,
     "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": true,
+    "interactable": false,
     "pickable": false,
-    "stairs": false
-  },
-  "gate_closed": {
-    "name": "gate (closed)",
-    "hex": "0xE400",
-    "tile": 102,
-    "tile_variants": [
-    ],
-    "ascii": "+",
-    "colors": [
-      "gray"
-    ],
-    "corners": false,
-    "shaded": false,
-    "blocks_sight": false,
-    "draw_floor": true,
-    "light": true,
-    "neutral": true,
-    "chaos": true,
-    "openable": true,
-    "pickable": false,
-    "stairs": false
-  },
-  "gate_locked": {
-    "name": "gate (locked)",
-    "hex": "0xE400",
-    "tile": 102,
-    "tile_variants": [
-    ],
-    "ascii": "*",
-    "colors": [
-      "gray"
-    ],
-    "corners": false,
-    "shaded": false,
-    "blocks_sight": false,
-    "draw_floor": true,
-    "light": true,
-    "neutral": true,
-    "chaos": true,
-    "openable": true,
-    "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "fence": {
@@ -253,14 +216,16 @@
       "dark gray"
     ],
     "corners": true,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "fence_alt": {
@@ -282,14 +247,16 @@
       "dark gray"
     ],
     "corners": true,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "statue": {
@@ -307,14 +274,16 @@
       "gray"
     ],
     "corners": false,
-    "shaded": false,
+    "hue": false,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "ground_soil": {
@@ -325,17 +294,24 @@
     ],
     "ascii": ".",
     "colors": [
-      "#423023"
+      "#402316",
+      "#4f3a28",
+      "#4f3a28",
+      "#33221a",
+      "#30170b",
+      "#361c18"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "ground_moss": {
@@ -349,14 +325,16 @@
       "darker amber"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "floor": {
@@ -372,14 +350,16 @@
       "darkest gray"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "floor_wood": {
@@ -390,17 +370,19 @@
     ],
     "ascii": ".",
     "colors": [
-      "default"
+      "#423023"
     ],
     "corners": false,
-    "shaded": false,
+    "hue": false,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "floor_stone": {
@@ -415,14 +397,16 @@
       "darkest gray"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "plants": {
@@ -453,14 +437,16 @@
       "crimson"
     ],
     "corners": false,
-    "shaded": false,
+    "hue": false,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "flowers": {
@@ -487,14 +473,16 @@
       "crimson"
     ],
     "corners": false,
-    "shaded": false,
+    "hue": false,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "mushrooms": {
@@ -513,14 +501,16 @@
       "#361c18"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "rocks": {
@@ -535,14 +525,16 @@
       "dark gray"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "bones": {
@@ -560,78 +552,48 @@
       "gray"
     ],
     "corners": false,
-    "shaded": false,
+    "hue": false,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
-  "door_open": {
-    "name": "door (open)",
+  "door": {
+    "name": "door",
     "hex": "0xE400",
     "tile": 23,
     "tile_variants": [
-    ],
-    "ascii": "-",
-    "colors": [
-      "darker amber"
-    ],
-    "corners": false,
-    "shaded": true,
-    "blocks_sight": false,
-    "draw_floor": false,
-    "light": true,
-    "neutral": true,
-    "chaos": true,
-    "openable": true,
-    "pickable": false,
-    "stairs": false
-  },
-  "door_closed": {
-    "name": "door (closed)",
-    "hex": "0xE400",
-    "tile": 22,
-    "tile_variants": [
+      22,
+      30,
       327
     ],
-    "ascii": "+",
+    "open": 23,
+    "closed": 22,
+    "locked": 30,
+    "ascii": "-",
+    "ascii_open": "-",
+    "ascii_closed": "+",
+    "ascii_locked": "*",
     "colors": [
       "darker amber"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": true,
+    "interactable": false,
     "pickable": false,
-    "stairs": false
-  },
-  "door_locked": {
-    "name": "door (locked)",
-    "hex": "0xE400",
-    "tile": 30,
-    "tile_variants": [
-    ],
-    "ascii": "+",
-    "colors": [
-      "darker amber"
-    ],
-    "corners": false,
-    "shaded": true,
-    "blocks_sight": false,
-    "draw_floor": false,
-    "light": true,
-    "neutral": true,
-    "chaos": true,
-    "openable": true,
-    "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "holy symbol": {
@@ -645,14 +607,16 @@
       "lightest orange"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": true,
     "stairs": true
   },
   "stairs_up": {
@@ -666,14 +630,16 @@
       "default"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": true
   },
   "stairs_down": {
@@ -687,14 +653,16 @@
       "default"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": true
   },
   "wall_brick": {
@@ -716,17 +684,19 @@
       "#2e2016"
     ],
     "corners": true,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": true,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
-  "wall_brick_2": {
+  "wall_brick_alt": {
     "name": "brick wall (cracked)",
     "hex": "0xE400",
     "tile": 230,
@@ -745,14 +715,16 @@
       "#2e2016"
     ],
     "corners": true,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": true,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "wall_wood": {
@@ -774,14 +746,16 @@
       "#2e2016"
     ],
     "corners": true,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": true,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "throne": {
@@ -795,14 +769,16 @@
       "dark gray"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "table": {
@@ -816,14 +792,16 @@
       "#36200f"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "window": {
@@ -837,14 +815,16 @@
       "darker gray"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "flask": {
@@ -860,14 +840,16 @@
       "light sky"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": true,
+    "light_source": false,
     "stairs": false
   },
   "skull": {
@@ -881,14 +863,16 @@
       "default"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": true,
     "pickable": true,
+    "light_source": false,
     "stairs": false
   },
   "book": {
@@ -906,14 +890,16 @@
       "#856654"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": true,
+    "light_source": false,
     "stairs": false
   },
   "cross": {
@@ -927,14 +913,16 @@
       "gray"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "shrubs": {
@@ -957,14 +945,16 @@
       "darker green"
     ],
     "corners": true,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "ui_block": {
@@ -986,19 +976,21 @@
       "gray"
     ],
     "corners": true,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": false,
     "neutral": false,
     "chaos": false,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "remains_monster": {
     "name": "remains",
-    "hex": "0xF400",
+    "hex": "0xE400",
     "tile": 86,
     "tile_variants": [
     ],
@@ -1007,19 +999,21 @@
       "dark gray"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   },
   "remains_player": {
     "name": "remains",
-    "hex": "0xF400",
+    "hex": "0xE400",
     "tile": 98,
     "tile_variants": [
     ],
@@ -1028,14 +1022,16 @@
       "default"
     ],
     "corners": false,
-    "shaded": true,
+    "hue": true,
     "blocks_sight": false,
     "draw_floor": false,
     "light": false,
     "neutral": false,
     "chaos": false,
     "openable": false,
+    "interactable": false,
     "pickable": false,
+    "light_source": false,
     "stairs": false
   }
 }

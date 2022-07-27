@@ -94,6 +94,7 @@ class RenderFunctions:
 
                     results.append(Message(get_article(entity.name).capitalize() + " " + entity.name + "."))
                     results.append(Message(msg=str("x: " + (str(cursor.x) + ", y: " + str(cursor.y))), extend_line=True))
+                    results.append(Message(str(", color: " + entity.color), extend_line=True))
 
                     if entity.xtra_info:
                         results.append(Message(msg=entity.xtra_info + ".", style="xtra", extend_line=True))

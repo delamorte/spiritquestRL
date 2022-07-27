@@ -8,21 +8,17 @@ def get_tile_object(name):
     return base_tile
 
 
-def get_tile(name, tile=None):
+def get_tile(name, tile=None, state=None):
+    if state is not None:
+        if options.data.gfx == "ascii":
+            state = "ascii_{0}".format(state)
+            return tile[state]
+        else:
+            return int(tile["hex"], 0) + tile[state]
     if tile:
         base_tile = tile
-    else:
+    elif name in json_data.data.tiles:
         base_tile = json_data.data.tiles[name]
-    if options.data.gfx == "ascii":
-        return base_tile["ascii"]
-    tile = base_tile["tile"]
-    hex_tile = int(base_tile["hex"], 0) + tile
-    return hex_tile
-
-
-def get_fighter_tile(name, tile=None):
-    if tile:
-        base_tile = tile
     else:
         base_tile = json_data.data.fighters[name]
     if options.data.gfx == "ascii":
@@ -35,7 +31,11 @@ def get_fighter_tile(name, tile=None):
 def get_tile_variant(name, variant_idx=None, variant_char=None, no_ascii=False):
     base_tile = json_data.data.tiles[name]
     if options.data.gfx == "ascii" and not no_ascii:
-        return base_tile["ascii"]
+        variants = base_tile["ascii_variants"]
+        if variants:
+            return choice(variants)
+        else:
+            return base_tile["ascii"]
     variants = base_tile["tile_variants"]
     if not variants:
         return get_tile(name)
@@ -58,16 +58,25 @@ def get_tile_by_value(value):
     return None
 
 
-def get_color(name, tile=None, mod=None):
+def get_color(name, tile=None, mod=None, force_index=None, force_color=None):
+    if force_color is not None:
+        return force_color
     if tile:
         base_tile = tile
     else:
-        base_tile = json_data.data.tiles[name]
+        if name in json_data.data.tiles:
+            base_tile = json_data.data.tiles[name]
+        elif name in json_data.data.fighters:
+            base_tile = json_data.data.fighters[name]
+        else:
+            base_tile = {"colors": ["default"]}
 
     colors = base_tile["colors"]
+    if force_index is not None:
+        return colors[force_index]
     color = choice(colors)
 
-    if mod and "shaded" in base_tile.keys() and not base_tile["shaded"]:
+    if mod and "hue" in base_tile.keys() and not base_tile["hue"]:
         # Pick random tone
         if mod > 0:
             color = (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + color
@@ -108,7 +117,7 @@ def get_fighters_by_attribute(name, value):
     fighters = []
     for k, v in json_data.data.fighters.items():
         if v[name] == value:
-            tile = get_fighter_tile(k)
+            tile = get_tile(k)
             fighters.append((k, tile))
 
     return fighters
