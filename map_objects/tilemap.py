@@ -20,13 +20,25 @@ def get_tile(name, tile=None):
     return hex_tile
 
 
-def get_tile_variant(name, variant, no_ascii=False):
+def get_fighter_tile(name, tile=None):
+    if tile:
+        base_tile = tile
+    else:
+        base_tile = json_data.data.fighters[name]
+    if options.data.gfx == "ascii":
+        return base_tile["ascii"]
+    tile = base_tile["tile"]
+    hex_tile = int(base_tile["hex"], 0) + tile
+    return hex_tile
+
+
+def get_tile_variant(name, variant=None, no_ascii=False):
     base_tile = json_data.data.tiles[name]
     if options.data.gfx == "ascii" and not no_ascii:
         return base_tile["ascii"]
     variants = base_tile["tile_variants"]
     if not variants:
-        return base_tile
+        return get_tile(name)
     if variant:
         tile = variants[variant]
     else:
@@ -41,7 +53,6 @@ def get_tile_by_value(value):
             return k
         elif value in v["tile_variants"]:
             return k
-
     return None
 
 
@@ -64,3 +75,38 @@ def get_color(name, tile=None, mod=None):
             color = (choice(["", "dark", "darker"]) + " ").lstrip() + color
 
     return color
+
+
+def get_tile_by_attribute(name, value):
+    tile = None
+    for k, v in json_data.data.tiles.items():
+        if v[name] == value:
+            tile = get_tile(k)
+            return tile
+
+    return tile
+
+
+def get_tiles_by_attribute(name, value):
+    tiles = []
+    for k, v in json_data.data.tiles.items():
+        if v[name] == value:
+            tiles.append(k)
+
+    return tiles
+
+
+def get_fighters_by_attribute(name, value):
+    """
+    Get fighter name/char pairs based on attribute
+    :param name: attribute name
+    :param value: attribute value
+    :return: fighters: return a list of tuples with name/char pairs
+    """
+    fighters = []
+    for k, v in json_data.data.fighters.items():
+        if v[name] == value:
+            tile = get_fighter_tile(k)
+            fighters.append((k, tile))
+
+    return fighters

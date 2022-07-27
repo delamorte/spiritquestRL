@@ -80,7 +80,7 @@ class Engine:
         self.init_tiles()
 
         # Init UI
-        self.ui = UIElements(tiles=self.tilemap)
+        self.ui = UIElements()
         self.ui.owner = self
 
         self.actions = Actions()

@@ -1,7 +1,12 @@
+from map_objects.tilemap import get_tile_object
+
+
 class Wall:
     def __init__(self, name=None, tile=None, status=None, blocked=True, block_sight=True):
         self.owner = None
         self.name = name
+        if not tile:
+            tile = get_tile_object(name)
         self.tile = tile
         self.status = status
         self.blocked = blocked

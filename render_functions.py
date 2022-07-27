@@ -1,6 +1,7 @@
 from bearlibterminal import terminal as blt
 from collections import Counter
 
+import options
 from game_states import GameStates
 from helpers import get_article
 from textwrap import shorten, fill

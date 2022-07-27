@@ -4,14 +4,13 @@ from math import floor
 from components.ui.message_panel import MessagePanel
 from components.ui.side_panel import SidePanel
 from components.ui.viewport import Viewport
-from map_objects.tilemap import get_tile_object, get_tile_variant
+from map_objects.tilemap import get_tile_object, get_tile_variant, get_color
 
 
 class UIElements:
-    def __init__(self, tiles=None):
+    def __init__(self):
         self.owner = None
-        self.tiles = tiles
-        self.color = get_tile_object("ui_block")["color"]
+        self.color = get_color("ui_block")
         self.tile_horizontal = get_tile_variant("ui_block", 0, True)
         self.tile_vertical = get_tile_variant("ui_block", 2, True)
         self.tile_ne = get_tile_variant("ui_block", 1, True)

@@ -122,7 +122,7 @@ class Actions:
         elif examine:
             self.owner.game_state = GameStates.TARGETING
             cursor_component = Cursor()
-            cursor = Entity(self.owner.player.x, self.owner.player.y, 5, 0xF000 + 9, "light yellow", "cursor",
+            cursor = Entity(self.owner.player.x, self.owner.player.y, 5, "light yellow", "cursor", char=0xF000 + 9,
                             cursor=cursor_component, stand_on_messages=False)
             self.owner.cursor = cursor
             self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(self.owner.cursor)
@@ -141,7 +141,7 @@ class Actions:
                 self.owner.game_state = GameStates.TARGETING
 
                 cursor_component = Cursor(targeting_ability=ability)
-                cursor = Entity(target.x, target.y, 5, 0xF000 + 9, "light yellow", "cursor",
+                cursor = Entity(target.x, target.y, 5, "light yellow", "cursor", char=0xF000 + 9,
                                 cursor=cursor_component, stand_on_messages=False)
                 self.owner.cursor = cursor
                 self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(

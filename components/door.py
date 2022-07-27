@@ -1,5 +1,6 @@
 from data import json_data
 from map_objects import tilemap
+from map_objects.tilemap import get_tile_by_attribute
 from ui.message import Message
 
 
@@ -14,23 +15,17 @@ class Door:
             self.status = "locked"
 
     def set_status(self, status, game_map):
+        self.status = status
+        self.name = "door ({0})".format(status)
+        self.owner.char = get_tile_by_attribute("name", self.name)
+
         if status == "open":
-            self.status = "open"
             game_map.tiles[self.owner.x][self.owner.y].blocked = False
             game_map.tiles[self.owner.x][self.owner.y].block_sight = False
-            self.owner.char = json_data.data.tiles["door"]["open"]
-            self.name = "door (open)"
-        if status == "closed":
-            self.status = "closed"
+
+        else:
             game_map.tiles[self.owner.x][self.owner.y].blocked = True
-            game_map.tiles[self.owner.x][self.owner.y].block_sight = True       
-            self.owner.char = json_data.data.tiles["door"]["closed"]
-            self.name = "door (closed)"
-        if status == "locked":
-            self.status = "locked"
-            game_map.tiles[self.owner.x][self.owner.y].blocked = True
-            game_map.tiles[self.owner.x][self.owner.y].block_sight = True    
-            self.owner.char = json_data.data.tiles["door"]["locked"]
+            game_map.tiles[self.owner.x][self.owner.y].block_sight = True
 
     def interaction(self, game_map):
         if self.status == "closed":

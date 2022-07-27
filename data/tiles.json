@@ -726,6 +726,35 @@
     "pickable": false,
     "stairs": false
   },
+  "wall_brick_2": {
+    "name": "brick wall (cracked)",
+    "hex": "0xE400",
+    "tile": 230,
+    "tile_variants": [
+      232,
+      217,
+      217,
+      232,
+      232,
+      232,
+      217,
+      217
+    ],
+    "ascii": "#",
+    "colors": [
+      "#2e2016"
+    ],
+    "corners": true,
+    "shaded": true,
+    "blocks_sight": true,
+    "draw_floor": false,
+    "light": true,
+    "neutral": true,
+    "chaos": true,
+    "openable": false,
+    "pickable": false,
+    "stairs": false
+  },
   "wall_wood": {
     "name": "wooden wall",
     "hex": "0xE400",

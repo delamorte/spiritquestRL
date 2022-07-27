@@ -10,7 +10,7 @@ from data import json_data
 from game_states import GameStates
 from helpers import get_article
 from map_objects import tilemap
-from map_objects.tilemap import get_tile
+from map_objects.tilemap import get_tile, get_fighter_tile
 from ui.message import Message
 
 
@@ -33,7 +33,10 @@ class Entity:
         self.name = name
         self.tile = tile
         if not char:
-            char = get_tile(name, tile)
+            if fighter:
+                char = get_fighter_tile(name, tile)
+            else:
+                char = get_tile(name, tile)
         self.char = char
         self.colored_name = "[color={0}]{1}[color=default]".format(color, name.capitalize())
         self.blocks = blocks

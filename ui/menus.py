@@ -97,7 +97,6 @@ class Menus:
                         blt.puts(int(self.center_x / 2),
                                  self.center_y + i * menu.margin_y, menu.items_icons[i], 0, 0, menu.align)
                     else:
-
                         blt.puts(int(self.center_x / 2), self.center_y +
                                  i * menu.margin_y - 1, "[U+" + hex(menu.items_icons[i]) + "]", 0, 0, menu.align)
 

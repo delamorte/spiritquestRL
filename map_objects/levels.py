@@ -1,4 +1,4 @@
-import random
+from random import choice, random, choices
 
 import options
 from data import json_data
@@ -95,13 +95,13 @@ class Levels:
         biome_params = meditate_params()
         for i in range(5):
             level = {}
-            biome = random.choice(biomes)
-            biome_desc, biome_mod = random.choice(list(biome_params.items()))
+            biome = choice(biomes)
+            biome_desc, biome_mod = choice(list(biome_params.items()))
             level["biome"] = biome
             level["modifier"] = biome_mod
             level["freq_monster"] = None
             # Generate level title
-            if random.random() > 0.7:
+            if random() > 0.7:
                 if self.world_tendency < 0:
                     monsters = self.monsters_alignment["chaos"]
                 elif self.world_tendency > 0:
@@ -110,7 +110,7 @@ class Levels:
                     monsters = self.monsters_alignment["neutral"]
                 monsters.sort()
                 spawn_rates = self.get_spawn_rates(monsters)
-                monster_prefix = random.choice(random.choices(monsters, spawn_rates, k=5))[0]
+                monster_prefix = choice(choices(monsters, spawn_rates, k=5))[0]
                 level["title"] = "The " + monster_prefix.capitalize() + " " + biome.capitalize() + " of " + biome_desc
                 level["freq_monster"] = monster_prefix
             else:
