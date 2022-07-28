@@ -1,624 +1,779 @@
 {
-    "player": {
-        "hp": 20,
-        "ac": 1,
-        "ev": 5,
-        "atk": 5,
-        "mv_spd": 1,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 460,
-        "ascii": "@",
-        "colors": ["default"],
-        "light": false,
-        "neutral": false,
-        "chaos": false,
-        "abilities": [],
-        "remarks": ["Hmm."]
-    },
-    "rat": {
-        "hp": 10,
-        "ac": 1,
-        "ev": 4,
-        "atk": 4,
-        "mv_spd": 2,
-        "atk_spd": 1,
-        "size": "small",
-        "fov": 4,
-        "hex": "0xE000",
-        "tile": 495,
-        "ascii": "r",
-        "colors": ["#856654"],
-        "light": false,
-        "neutral": true,
-        "chaos": true,
-        "player_abilities": ["nasty bite", "paralyzing bite", "sneak", "diseasing bite", "call allies"],
-        "abilities": [
-            "bite",
-            "paralyzing bite"
-        ],
-        "remarks": ["Squeek!", "Nobody near me here, but rats, and they are fine stealthy secret fellows.",
-        "I'm not a theater rat, so I never got a theatrical agent and did a play. I came really close though.",
-        "Squirrels are just rats with good publicity.",
-        "It's so different to be a sparrow. But nobody asked this rat if he wanted to be a rat when he was made. Nobody said, 'Wouldn't you rather be a sparrow?",
-        "To a rat, a small hole is like a door.",
-        "I loved to party with the Rat Pack, they were so much fun."]
-    },
-    "crow": {
-        "hp": 8,
-        "ac": 1,
-        "ev": 6,
-        "atk": 3,
-        "mv_spd": 1.6,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 8,
-        "hex": "0xE000",
-        "tile": 509,
-        "ascii": "C",
-        "colors": ["darker azure"],
-        "light": true,
-        "neutral": true,
-        "chaos": true,
-        "player_abilities": ["crow talons", "peck eyes", "fly", "reveal", "summon crow", "heal", "spit poison", "sneak"],
-        "abilities": [
-            "talons",
-            "swoop"
-        ],
-        "remarks": ["Caw!", "If men had wings and bore black feathers, few of them would be clever enough to be crows.",
-        "Without darkness, one cannot know light.",
-        "If you have to eat crow, eat it while it's young and tender.",
-        "Crows are incredibly smart. They can be taught five things on the drop.",
-        "I will make thee think thy swan a crow.",
-        "Maybe all crows are just creepy.",
-        "Nothing is unreal as long as you can imagine like a crow."
-        ]
-    },
-    "snake": {
-        "hp": 12,
-        "ac": 1,
-        "ev": 2,
-        "atk": 5,
-        "mv_spd": 1,
-        "atk_spd": 1,
-        "size": "small",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 502,
-        "ascii": "s",
-        "colors": ["yellow"],
-        "light": true,
-        "neutral": true,
-        "chaos": false,
-        "player_abilities": ["snaketail whip", "poison bite", "spit poison", "strangle"],
-        "abilities": [
-            "bite",
-            "poison bite"
-        ],
-        "remarks": ["SshsshSHSHsHsshh!", "Oh my gosh! Where are my legs?!",
-            "Snakes have no arms. That's why they don't wear vests.",
-        "Always carry a flagon of whiskey in case of snakebite and furthermore always carry a small snake.",
-        "You listen to a talking snake and there's gonna be trouble.",
-            "Every great story seems to begin with a snake.",
-            "I always wanted to be a snake. Every time I saw a snake on TV. I'd always say 'Why not me?"
-        ]
-    },
-    "frog": {
-        "hp": 15,
-        "ac": 1,
-        "ev": 5,
-        "atk": 5,
-        "mv_spd": 1.4,
-        "atk_spd": 1,
-        "size": "small",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 504,
-        "ascii": "f",
-        "colors": ["green"],
-        "light": true,
-        "neutral": true,
-        "chaos": false,
-        "abilities": [
-            "strike",
-            "leap"
-        ],
-        "remarks": ["RIBBIT!"]
-    },
-    "bear": {
-        "hp": 20,
-        "ac": 3,
-        "ev": 1,
-        "atk": 6,
-        "mv_spd": 1,
-        "atk_spd": 1,
-        "size": "large",
-        "fov": 5,
-        "hex": "0xE000",
-        "tile": 526,
-        "ascii": "B",
-        "colors": ["#856654"],
-        "light": true,
-        "neutral": true,
-        "chaos": false,
-        "abilities": [
-            "maul",
-            "claws",
-            "stunning roar"
-        ],
-        "remarks": ["Roar.", "Bears will be bears.", "The problem is that bears are pretty smart and humans aren't.",
-        "Bears can be very nice, as long as you're nice to them."]
-    },
-    "felid": {
-        "hp": 10,
-        "ac": 2,
-        "ev": 5,
-        "atk": 3,
-        "mv_spd": 1.4,
-        "atk_spd": 1,
-        "size": "small",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 505,
-        "ascii": "f",
-        "colors": ["lighter blue"],
-        "light": false,
-        "neutral": true,
-        "chaos": false,
-        "abilities": [
-            "claws",
-            "lacerate",
-            "leap"
-        ],
-        "remarks": ["Meow!", "If cats could talk, they wouldn't.", "We...we could be friends.", "The smallest feline is a masterpiece.",
-        "“Meow” means “woof” in cat.", "One cat just leads to another."]
-    },
-    "mosquito": {
-        "hp": 6,
-        "ac": 1,
-        "ev": 6,
-        "atk": 3,
-        "mv_spd": 1.2,
-        "atk_spd": 1,
-        "size": "small",
-        "fov": 4,
-        "hex": "0xE000",
-        "tile": 524,
-        "ascii": "m",
-        "colors": ["pink"],
-        "light": true,
-        "neutral": true,
-        "chaos": false,
-        "abilities": [
-            "bite",
-            "paralyzing bite",
-            "poison bite"
-        ],
-        "remarks": ["Bzzz", "I have come to suck your blood", "Why don't you go home?"]
-    },
-    "chaos cat": {
-        "hp": 12,
-        "ac": 3,
-        "ev": 5,
-        "atk": 4,
-        "mv_spd": 1.3,
-        "atk_spd": 1,
-        "size": "small",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 506,
-        "ascii": "C",
-        "colors": ["dark red"],
-        "light": false,
-        "neutral": false,
-        "chaos": true,
-        "abilities": [
-            "claws",
-            "lacerate",
-            "call allies",
-            "leap"
-        ],
-        "remarks": ["MEOW", "We all will feed the worms and trees", "Eat you alive", "Fat and soft, pink and weak",
-        "COME CLOSER"]
-    },
-    "chaos bear": {
-        "hp": 25,
-        "ac": 4,
-        "ev": 1,
-        "atk": 6,
-        "mv_spd": 0.8,
-        "atk_spd": 1,
-        "size": "large",
-        "fov": 5,
-        "hex": "0xE000",
-        "tile": 529,
-        "ascii": "B",
-        "colors": ["dark amber"],
-        "light": false,
-        "neutral": false,
-        "chaos": true,
-        "abilities": [
-            "maul",
-            "claws",
-            "stunning roar"
-        ],
-        "remarks": ["Röööaaarrr", "The sky is falling", "Close your eyes and see the skies are falling"]
-    },
-    "cockroach": {
-        "hp": 10,
-        "ac": 3,
-        "ev": 3,
-        "atk": 3,
-        "mv_spd": 0.8,
-        "atk_spd": 1,
-        "size": "small",
-        "fov": 5,
-        "hex": "0xE000",
-        "tile": 517,
-        "ascii": "r",
-        "colors": ["dark amber"],
-        "light": false,
-        "neutral": false,
-        "chaos": true,
-        "abilities": [
-            "bite",
-            "diseasing bite"
-        ],
-        "remarks": ["As every cockroach knows, thriving on poisons is the secret of success.",
-            "Can you see the beauty in a cockroach?",
-            "I am a survivor. I am a cockroach, you just can't get rid of me.",
-        "Cockroaches and socialites are the only things that can stay up all night and eat anything.",
-        "Elephants have a hard time adapting. Cockroaches outlive everything."
-        ]
-    },
-    "bone snake": {
-        "hp": 15,
-        "ac": 2,
-        "ev": 2,
-        "atk": 5,
-        "mv_spd": 1,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 5,
-        "hex": "0xE000",
-        "tile": 511,
-        "ascii": "S",
-        "colors": ["default"],
-        "light": false,
-        "neutral": false,
-        "chaos": true,
-        "abilities": [
-            "strike",
-            "strangle"
-        ],
-        "remarks": ["*rattles*", "*The foot bone's connected to the leg bone*", "*The leg bone's connected to the knee bone*",
-        "*The knee bone's connected to the thigh bone*"]
-    },
-    "chaos dog": {
-        "hp": 14,
-        "ac": 2,
-        "ev": 4,
-        "atk": 5,
-        "mv_spd": 1.4,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 499,
-        "ascii": "D",
-        "colors": ["light azure"],
-        "light": false,
-        "neutral": false,
-        "chaos": true,
-        "abilities": [
-            "claws",
-            "lacerate",
-            "fire breath"
-        ],
-        "remarks": ["YOU WILL BURN IN HELLFIRE", "Hell is empty and all the devils are here.",
-            "Maybe this world is another planet's hell.", "Time is the fire in which we burn."]
-    },
-    "bat": {
-        "hp": 10,
-        "ac": 1,
-        "ev": 7,
-        "atk": 3,
-        "mv_spd": 1.4,
-        "atk_spd": 1,
-        "size": "small",
-        "fov": 4,
-        "hex": "0xE000",
-        "tile": 500,
-        "ascii": "b",
-        "colors": ["light #856654"],
-        "light": false,
-        "neutral": false,
-        "chaos": true,
-        "abilities": [
-            "bite",
-            "leeching bite"
-        ],
-        "remarks": ["*flappy sounds*", "Listen to them. Children of the night. What music they make."]
-    },
-    "imp": {
-        "hp": 12,
-        "ac": 2,
-        "ev": 4,
-        "atk": 4,
-        "mv_spd": 1.2,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 555,
-        "ascii": "I",
-        "colors": ["red"],
-        "light": false,
-        "neutral": false,
-        "chaos": true,
-        "abilities": [
-            "claws",
-            "call allies"
-        ],
-        "remarks": ["You are stupid and ugly. Loser."]
-    },
-    "leech": {
-        "hp": 13,
-        "ac": 3,
-        "ev": 3,
-        "atk": 4,
-        "mv_spd": 0.5,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 614,
-        "ascii": "l",
-        "colors": ["dark pink"],
-        "light": false,
-        "neutral": false,
-        "chaos": true,
-        "abilities": [
-            "bite",
-            "leeching bite"
-        ],
-        "remarks": ["*slimy quivering*"]
-    },
-    "spirit": {
-        "hp": 10,
-        "ac": 1,
-        "ev": 6,
-        "atk": 3,
-        "mv_spd": 1,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 636,
-        "ascii": "S",
-        "colors": ["lightest azure"],
-        "light": true,
-        "neutral": false,
-        "chaos": false,
-        "abilities": [
-            "strike",
-            "boost atk",
-            "heal",
-            "call allies"
-        ],
-        "remarks": ["OOoohoOOOo", "Do you know my name?", "Hello..", "Please die.", "Help me"]
-    },
-    "chaos spirit": {
-        "hp": 10,
-        "ac": 1,
-        "ev": 6,
-        "atk": 3,
-        "mv_spd": 1,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 638,
-        "ascii": "S",
-        "colors": ["dark orange"],
-        "light": false,
-        "neutral": false,
-        "chaos": true,
-        "abilities": [
-            "harm",
-            "drain atk"
-        ],
-        "remarks": ["You must have chaos within you to give birth to a dancing star.",
-        "Chaos is the law of nature; Order is the dream of man.", "EMBRACE CHAOS",
-            "Why are we still here? Just to suffer?"]
-    },
-    "ghost dog": {
-        "hp": 12,
-        "ac": 2,
-        "ev": 4,
-        "atk": 5,
-        "mv_spd": 1.5,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 605,
-        "ascii": "D",
-        "colors": ["default"],
-        "light": true,
-        "neutral": false,
-        "chaos": false,
-        "abilities": [
-            "claws",
-            "invisibility"
-        ],
-        "remarks": ["What does a dog say?", "Woof?"]
-    },
-    "serpent": {
-        "hp": 15,
-        "ac": 2,
-        "ev": 5,
-        "atk": 5,
-        "mv_spd": 1.3,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 512,
-        "ascii": "§",
-        "colors": ["violet"],
-        "light": true,
-        "neutral": false,
-        "chaos": false,
-        "abilities": [
-            "strangle"
-        ],
-        "remarks": ["Better a serpent than a stepmother!",
-            "Those who tread among serpents, and along a tortuous path, must use the cunning of the serpent.",
-        "SSSHSHshsHs! "]
-    },
-    "gecko": {
-        "hp": 16,
-        "ac": 3,
-        "ev": 4,
-        "atk": 5,
-        "mv_spd": 1,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 503,
-        "ascii": "g",
-        "colors": ["dark green"],
-        "light": true,
-        "neutral": false,
-        "chaos": false,
-        "abilities": [
-            "fire breath",
-            "claws"
-        ],
-        "remarks": ["HSSSzT!", "I am the lizard king!"]
-    },
-    "fairy": {
-        "hp": 12,
-        "ac": 1,
-        "ev": 4,
-        "atk": 4,
-        "mv_spd": 1.4,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 579,
-        "ascii": "F",
-        "colors": ["light violet"],
-        "light": true,
-        "neutral": false,
-        "chaos": false,
-        "ai": "caster",
-        "abilities": [
-            "heal",
-            "harm",
-            "invisibility",
-            "slap",
-            "boost atk"
-        ],
-        "remarks": ["TEEHEE!", "Trick or treat?", "Someday you will be old enough to start reading fairy tales again.",
-        "I know you, I walked with you once upon a dream.", "I hope karma slaps you in the face before I do."]
-    },
-    "king kobra": {
-        "hp": 30,
-        "ac": 3,
-        "ev": 3,
-        "atk": 6,
-        "mv_spd": 1,
-        "atk_spd": 1,
-        "size": "normal",
-        "fov": 6,
-        "hex": "0xF300",
-        "tile": 1,
-        "ascii": "K",
-        "colors": ["light green"],
-        "light": false,
-        "neutral": false,
-        "chaos": false,
-        "abilities": [
-            "poison bite",
-            "strangle"
-        ],
-        "remarks": ["The little serpent has left, and the great serpent has come."]
-    },
-    "albino rat": {
-        "hp": 20,
-        "ac": 2,
-        "ev": 6,
-        "atk": 5,
-        "mv_spd": 2,
-        "atk_spd": 1,
-        "size": "small",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 498,
-        "ascii": "R",
-        "colors": ["default"],
-        "light": false,
-        "neutral": false,
-        "chaos": false,
-        "abilities": [
-            "claws",
-            "diseasing bite",
-            "poison bite",
-            "call allies"
-        ],
-        "remarks": ["My mother is part albino."]
-    },
-    "keeper of dreams": {
-        "hp": 50,
-        "ac": 3,
-        "ev": 6,
-        "atk": 5,
-        "mv_spd": 0.7,
-        "atk_spd": 1,
-        "size": "gigantic",
-        "fov": 6,
-        "hex": "0xF300",
-        "tile": 0,
-        "ascii": "K",
-        "colors": ["flame"],
-        "light": false,
-        "neutral": false,
-        "chaos": false,
-        "xtra_info": "It appears to be a terrifying red dragon.",
-        "abilities": [
-            "claws",
-            "diseasing bite",
-            "poison bite",
-            "call allies"
-        ],
-        "remarks": ["THE DREAMER IS AWAKE"]
-    },
-    "black king crow": {
-        "hp": 40,
-        "ac": 3,
-        "ev": 6,
-        "atk": 5,
-        "mv_spd": 1,
-        "atk_spd": 1,
-        "size": "large",
-        "fov": 6,
-        "hex": "0xE000",
-        "tile": 551,
-        "ascii": "C",
-        "colors": ["azure"],
-        "light": true,
-        "neutral": true,
-        "chaos": true,
-        "ai": "npc",
-        "abilities": [],
-        "remarks": ["I am the black crow king, mhm.", "I'm still here rolling after everybody's gone",
-        "I am the black crow king, Honey, I won't say it again",
-        "I am the black crow king, Keeper of the forgotten corn"]
-    }
+  "player": {
+    "hp": 20,
+    "ac": 1,
+    "ev": 5,
+    "atk": 5,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 460,
+    "ascii": "@",
+    "colors": [
+      "default"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [],
+    "remarks": [
+      "Hmm."
+    ]
+  },
+  "rat": {
+    "hp": 10,
+    "ac": 1,
+    "ev": 4,
+    "atk": 4,
+    "mv_spd": 2,
+    "atk_spd": 1,
+    "size": "small",
+    "fov": 4,
+    "hex": "0xE000",
+    "tile": 495,
+    "ascii": "r",
+    "colors": [
+      "#856654"
+    ],
+    "light": false,
+    "neutral": true,
+    "chaos": true,
+    "player_abilities": [
+      "nasty bite",
+      "paralyzing bite",
+      "sneak",
+      "diseasing bite",
+      "call allies"
+    ],
+    "abilities": [
+      "bite",
+      "paralyzing bite"
+    ],
+    "remarks": [
+      "Squeek!",
+      "Nobody near me here, but rats, and they are fine stealthy secret fellows.",
+      "I'm not a theater rat, so I never got a theatrical agent and did a play. I came really close though.",
+      "Squirrels are just rats with good publicity.",
+      "It's so different to be a sparrow. But nobody asked this rat if he wanted to be a rat when he was made. Nobody said, 'Wouldn't you rather be a sparrow?",
+      "To a rat, a small hole is like a door.",
+      "I loved to party with the Rat Pack, they were so much fun."
+    ]
+  },
+  "crow": {
+    "hp": 8,
+    "ac": 1,
+    "ev": 6,
+    "atk": 3,
+    "mv_spd": 1.6,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 8,
+    "hex": "0xE000",
+    "tile": 509,
+    "ascii": "C",
+    "colors": [
+      "darker azure"
+    ],
+    "light": true,
+    "neutral": true,
+    "chaos": true,
+    "player_abilities": [
+      "crow talons",
+      "peck eyes",
+      "fly",
+      "reveal",
+      "summon crow",
+      "heal",
+      "spit poison",
+      "sneak"
+    ],
+    "abilities": [
+      "talons",
+      "swoop"
+    ],
+    "remarks": [
+      "Caw!",
+      "If men had wings and bore black feathers, few of them would be clever enough to be crows.",
+      "Without darkness, one cannot know light.",
+      "If you have to eat crow, eat it while it's young and tender.",
+      "Crows are incredibly smart. They can be taught five things on the drop.",
+      "I will make thee think thy swan a crow.",
+      "Maybe all crows are just creepy.",
+      "Nothing is unreal as long as you can imagine like a crow."
+    ]
+  },
+  "snake": {
+    "hp": 12,
+    "ac": 1,
+    "ev": 2,
+    "atk": 5,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "small",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 502,
+    "ascii": "s",
+    "colors": [
+      "yellow"
+    ],
+    "light": true,
+    "neutral": true,
+    "chaos": false,
+    "player_abilities": [
+      "snaketail whip",
+      "poison bite",
+      "spit poison",
+      "strangle"
+    ],
+    "abilities": [
+      "bite",
+      "poison bite"
+    ],
+    "remarks": [
+      "SshsshSHSHsHsshh!",
+      "Oh my gosh! Where are my legs?!",
+      "Snakes have no arms. That's why they don't wear vests.",
+      "Always carry a flagon of whiskey in case of snakebite and furthermore always carry a small snake.",
+      "You listen to a talking snake and there's gonna be trouble.",
+      "Every great story seems to begin with a snake.",
+      "I always wanted to be a snake. Every time I saw a snake on TV. I'd always say 'Why not me?"
+    ]
+  },
+  "frog": {
+    "hp": 15,
+    "ac": 1,
+    "ev": 5,
+    "atk": 5,
+    "mv_spd": 1.4,
+    "atk_spd": 1,
+    "size": "small",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 504,
+    "ascii": "f",
+    "colors": [
+      "green"
+    ],
+    "light": true,
+    "neutral": true,
+    "chaos": false,
+    "abilities": [
+      "strike",
+      "leap"
+    ],
+    "remarks": [
+      "RIBBIT!"
+    ]
+  },
+  "bear": {
+    "hp": 20,
+    "ac": 3,
+    "ev": 1,
+    "atk": 6,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "large",
+    "fov": 5,
+    "hex": "0xE000",
+    "tile": 526,
+    "ascii": "B",
+    "colors": [
+      "#856654"
+    ],
+    "light": true,
+    "neutral": true,
+    "chaos": false,
+    "abilities": [
+      "maul",
+      "claws",
+      "stunning roar"
+    ],
+    "remarks": [
+      "Roar.",
+      "Bears will be bears.",
+      "The problem is that bears are pretty smart and humans aren't.",
+      "Bears can be very nice, as long as you're nice to them."
+    ]
+  },
+  "felid": {
+    "hp": 10,
+    "ac": 2,
+    "ev": 5,
+    "atk": 3,
+    "mv_spd": 1.4,
+    "atk_spd": 1,
+    "size": "small",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 505,
+    "ascii": "f",
+    "colors": [
+      "lighter blue"
+    ],
+    "light": false,
+    "neutral": true,
+    "chaos": false,
+    "abilities": [
+      "claws",
+      "lacerate",
+      "leap"
+    ],
+    "remarks": [
+      "Meow!",
+      "If cats could talk, they wouldn't.",
+      "We...we could be friends.",
+      "The smallest feline is a masterpiece.",
+      "“Meow” means “woof” in cat.",
+      "One cat just leads to another."
+    ]
+  },
+  "mosquito": {
+    "hp": 6,
+    "ac": 1,
+    "ev": 6,
+    "atk": 3,
+    "mv_spd": 1.2,
+    "atk_spd": 1,
+    "size": "small",
+    "fov": 4,
+    "hex": "0xE000",
+    "tile": 524,
+    "ascii": "m",
+    "colors": [
+      "pink"
+    ],
+    "light": true,
+    "neutral": true,
+    "chaos": false,
+    "abilities": [
+      "bite",
+      "paralyzing bite",
+      "poison bite"
+    ],
+    "remarks": [
+      "Bzzz",
+      "I have come to suck your blood",
+      "Why don't you go home?"
+    ]
+  },
+  "chaos cat": {
+    "hp": 12,
+    "ac": 3,
+    "ev": 5,
+    "atk": 4,
+    "mv_spd": 1.3,
+    "atk_spd": 1,
+    "size": "small",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 506,
+    "ascii": "C",
+    "colors": [
+      "dark red"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": true,
+    "abilities": [
+      "claws",
+      "lacerate",
+      "call allies",
+      "leap"
+    ],
+    "remarks": [
+      "MEOW",
+      "We all will feed the worms and trees",
+      "Eat you alive",
+      "Fat and soft, pink and weak",
+      "COME CLOSER"
+    ]
+  },
+  "chaos bear": {
+    "hp": 25,
+    "ac": 4,
+    "ev": 1,
+    "atk": 6,
+    "mv_spd": 0.8,
+    "atk_spd": 1,
+    "size": "large",
+    "fov": 5,
+    "hex": "0xE000",
+    "tile": 529,
+    "ascii": "B",
+    "colors": [
+      "dark amber"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": true,
+    "abilities": [
+      "maul",
+      "claws",
+      "stunning roar"
+    ],
+    "remarks": [
+      "Röööaaarrr",
+      "The sky is falling",
+      "Close your eyes and see the skies are falling"
+    ]
+  },
+  "cockroach": {
+    "hp": 10,
+    "ac": 3,
+    "ev": 3,
+    "atk": 3,
+    "mv_spd": 0.8,
+    "atk_spd": 1,
+    "size": "small",
+    "fov": 5,
+    "hex": "0xE000",
+    "tile": 517,
+    "ascii": "r",
+    "colors": [
+      "dark amber"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": true,
+    "abilities": [
+      "bite",
+      "diseasing bite"
+    ],
+    "remarks": [
+      "As every cockroach knows, thriving on poisons is the secret of success.",
+      "Can you see the beauty in a cockroach?",
+      "I am a survivor. I am a cockroach, you just can't get rid of me.",
+      "Cockroaches and socialites are the only things that can stay up all night and eat anything.",
+      "Elephants have a hard time adapting. Cockroaches outlive everything."
+    ]
+  },
+  "bone snake": {
+    "hp": 15,
+    "ac": 2,
+    "ev": 2,
+    "atk": 5,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 5,
+    "hex": "0xE000",
+    "tile": 511,
+    "ascii": "S",
+    "colors": [
+      "default"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": true,
+    "abilities": [
+      "strike",
+      "strangle"
+    ],
+    "remarks": [
+      "*rattles*",
+      "*The foot bone's connected to the leg bone*",
+      "*The leg bone's connected to the knee bone*",
+      "*The knee bone's connected to the thigh bone*"
+    ]
+  },
+  "chaos dog": {
+    "hp": 14,
+    "ac": 2,
+    "ev": 4,
+    "atk": 5,
+    "mv_spd": 1.4,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 499,
+    "ascii": "D",
+    "colors": [
+      "light azure"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": true,
+    "abilities": [
+      "claws",
+      "lacerate",
+      "fire breath"
+    ],
+    "remarks": [
+      "YOU WILL BURN IN HELLFIRE",
+      "Hell is empty and all the devils are here.",
+      "Maybe this world is another planet's hell.",
+      "Time is the fire in which we burn."
+    ]
+  },
+  "bat": {
+    "hp": 10,
+    "ac": 1,
+    "ev": 7,
+    "atk": 3,
+    "mv_spd": 1.4,
+    "atk_spd": 1,
+    "size": "small",
+    "fov": 4,
+    "hex": "0xE000",
+    "tile": 500,
+    "ascii": "b",
+    "colors": [
+      "light #856654"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": true,
+    "abilities": [
+      "bite",
+      "leeching bite"
+    ],
+    "remarks": [
+      "*flappy sounds*",
+      "Listen to them. Children of the night. What music they make."
+    ]
+  },
+  "imp": {
+    "hp": 12,
+    "ac": 2,
+    "ev": 4,
+    "atk": 4,
+    "mv_spd": 1.2,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 555,
+    "ascii": "I",
+    "colors": [
+      "red"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": true,
+    "abilities": [
+      "claws",
+      "call allies"
+    ],
+    "remarks": [
+      "You are stupid and ugly. Loser."
+    ]
+  },
+  "leech": {
+    "hp": 13,
+    "ac": 3,
+    "ev": 3,
+    "atk": 4,
+    "mv_spd": 0.5,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 614,
+    "ascii": "l",
+    "colors": [
+      "dark pink"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": true,
+    "abilities": [
+      "bite",
+      "leeching bite"
+    ],
+    "remarks": [
+      "*slimy quivering*"
+    ]
+  },
+  "spirit": {
+    "hp": 10,
+    "ac": 1,
+    "ev": 6,
+    "atk": 3,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 636,
+    "ascii": "S",
+    "colors": [
+      "lightest azure"
+    ],
+    "light": true,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [
+      "strike",
+      "boost atk",
+      "heal",
+      "call allies"
+    ],
+    "remarks": [
+      "OOoohoOOOo",
+      "Do you know my name?",
+      "Hello..",
+      "Please die.",
+      "Help me"
+    ]
+  },
+  "chaos spirit": {
+    "hp": 10,
+    "ac": 1,
+    "ev": 6,
+    "atk": 3,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 638,
+    "ascii": "S",
+    "colors": [
+      "dark orange"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": true,
+    "abilities": [
+      "harm",
+      "drain atk"
+    ],
+    "remarks": [
+      "You must have chaos within you to give birth to a dancing star.",
+      "Chaos is the law of nature; Order is the dream of man.",
+      "EMBRACE CHAOS",
+      "Why are we still here? Just to suffer?"
+    ]
+  },
+  "ghost dog": {
+    "hp": 12,
+    "ac": 2,
+    "ev": 4,
+    "atk": 5,
+    "mv_spd": 1.5,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 605,
+    "ascii": "D",
+    "colors": [
+      "default"
+    ],
+    "light": true,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [
+      "claws",
+      "invisibility"
+    ],
+    "remarks": [
+      "What does a dog say?",
+      "Woof?"
+    ]
+  },
+  "serpent": {
+    "hp": 15,
+    "ac": 2,
+    "ev": 5,
+    "atk": 5,
+    "mv_spd": 1.3,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 512,
+    "ascii": "§",
+    "colors": [
+      "violet"
+    ],
+    "light": true,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [
+      "strangle"
+    ],
+    "remarks": [
+      "Better a serpent than a stepmother!",
+      "Those who tread among serpents, and along a tortuous path, must use the cunning of the serpent.",
+      "SSSHSHshsHs! "
+    ]
+  },
+  "gecko": {
+    "hp": 16,
+    "ac": 3,
+    "ev": 4,
+    "atk": 5,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 503,
+    "ascii": "g",
+    "colors": [
+      "dark green"
+    ],
+    "light": true,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [
+      "fire breath",
+      "claws"
+    ],
+    "remarks": [
+      "HSSSzT!",
+      "I am the lizard king!"
+    ]
+  },
+  "fairy": {
+    "hp": 12,
+    "ac": 1,
+    "ev": 4,
+    "atk": 4,
+    "mv_spd": 1.4,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 579,
+    "ascii": "F",
+    "colors": [
+      "light violet"
+    ],
+    "light": true,
+    "neutral": false,
+    "chaos": false,
+    "ai": "caster",
+    "abilities": [
+      "heal",
+      "harm",
+      "invisibility",
+      "slap",
+      "boost atk"
+    ],
+    "remarks": [
+      "TEEHEE!",
+      "Trick or treat?",
+      "Someday you will be old enough to start reading fairy tales again.",
+      "I know you, I walked with you once upon a dream.",
+      "I hope karma slaps you in the face before I do."
+    ]
+  },
+  "king kobra": {
+    "hp": 30,
+    "ac": 3,
+    "ev": 3,
+    "atk": 6,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xF300",
+    "tile": 1,
+    "ascii": "K",
+    "colors": [
+      "light green"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [
+      "poison bite",
+      "strangle"
+    ],
+    "remarks": [
+      "The little serpent has left, and the great serpent has come."
+    ]
+  },
+  "albino rat": {
+    "hp": 20,
+    "ac": 2,
+    "ev": 6,
+    "atk": 5,
+    "mv_spd": 2,
+    "atk_spd": 1,
+    "size": "small",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 498,
+    "ascii": "R",
+    "colors": [
+      "default"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [
+      "claws",
+      "diseasing bite",
+      "poison bite",
+      "call allies"
+    ],
+    "remarks": [
+      "My mother is part albino."
+    ]
+  },
+  "keeper of dreams": {
+    "hp": 50,
+    "ac": 3,
+    "ev": 6,
+    "atk": 5,
+    "mv_spd": 0.7,
+    "atk_spd": 1,
+    "size": "gigantic",
+    "fov": 6,
+    "hex": "0xF300",
+    "tile": 0,
+    "ascii": "K",
+    "colors": [
+      "flame"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": false,
+    "xtra_info": "It appears to be a terrifying red dragon.",
+    "abilities": [
+      "claws",
+      "diseasing bite",
+      "poison bite",
+      "call allies"
+    ],
+    "remarks": [
+      "THE DREAMER IS AWAKE"
+    ]
+  },
+  "black crow king": {
+    "hp": 40,
+    "ac": 3,
+    "ev": 6,
+    "atk": 5,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "gigantic",
+    "fov": 6,
+    "hex": "0xF300",
+    "tile": 2,
+    "ascii": "C",
+    "colors": [
+      "darkest azure"
+    ],
+    "light": true,
+    "neutral": true,
+    "chaos": true,
+    "xtra_info": "You see a large, human-like crow standing on two legs. He looks ominous.",
+    "ai": "npc",
+    "dialogue": true,
+    "abilities": [],
+    "remarks": [
+      "I am the black crow king, mhm.",
+      "I'm still here rolling after everybody's gone",
+      "I am the black crow king, Honey, I won't say it again",
+      "I am the black crow king, Keeper of the forgotten corn"
+    ]
+  }
 }

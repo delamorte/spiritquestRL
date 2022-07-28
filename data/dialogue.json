@@ -1,0 +1,200 @@
+{
+  "black crow king": {
+    "remarks": [
+      "I am the black crow king, mhm.",
+      "I'm still here rolling after everybody's gone.",
+      "I am the black crow king, Honey, I won't say it again.",
+      "I am the black crow king, Keeper of the forgotten corn.",
+      "CAAAAWWWWWW!! Are you scared? *ruffles feathers*"
+    ],
+    "dialogue": {
+      "idle": [
+        "I am the black crow king, mhm.",
+        "I am the black crow king, Honey, I won't say it again.",
+        "I am the black crow king, Keeper of the forgotten corn.",
+        "I am the black crow king, The King, The King, I'm the king of nothin' at all",
+        "CAAAAWWWWWW!! Are you scared? *ruffles feathers*"
+      ],
+      "quest_initiated": [
+        "Any luck finding the blacksmith?"
+      ],
+      "quest_failed": [
+        "I am unable to sense the spirit of the blacksmith anymore. It seems that you have failed..."
+      ],
+      "quest_completed": [
+        "Thanks for helping me get home friend!"
+      ],
+      "prompts": {
+        "100": [
+          "Will you listen to my request?",
+          "Will you listen to my *CAW!* ..I mean, request?",
+          "Will you hear my plea?"
+        ],
+        "102": [
+          "You may wonder why I'm standing here. You see, I've lost my shoes and I'm unable to move without them."
+        ],
+        "103": [
+          "Why can't YOU fly?"
+        ],
+        "104": [
+          "I left my shoes with my friend, the blacksmith, I think. I need you to rescue him. Will you *CAW!* accept?"
+        ],
+        "105": [
+          "Excellent! Take this horseshoe [item gained]. It should help you focus your dreams when meditating. [New quest available: Rescue blacksmith]"
+        ],
+        "201": [
+          "The black crow king stares at you in disbelief. *CAW!* What sorcery is this? Have you been blessed by the Great Crow Spirit? ..Will you teach me to fly?"
+        ],
+        "300": [
+          "*CAW!!!* I can finally go home. Bless you, kind traveler. Here, have this. [Quest completed!] [item gained]"
+        ],
+        "301": [
+          "*CAW!!!* I can finally go home. Bless you, kind traveler. Obviously I could also have flown, but I wanted to test your mettle. I shall now teach you. [Quest completed!] [skill gained]"
+        ],
+        "999": [
+          "Moron. Good luck with your nightmares. *CAW!*",
+          "Well, that sucks."
+        ]
+      },
+      "answers": {
+        "100": [
+          {
+            "choices": [
+              "No."
+            ],
+            "go_to": "999",
+            "set_state": "idle"
+          },
+          {
+            "choices": [
+              "Yes.",
+              "Sure.",
+              "Go ahead."
+            ],
+            "go_to": "102",
+            "set_state": null
+          }
+        ],
+        "102": [
+          {
+            "choices": [
+              "Why can't you fly?"
+            ],
+            "go_to": "103",
+            "set_state": null
+          },
+          {
+            "choices": [
+              "Ouch.",
+              "I see.",
+              "Go on."
+            ],
+            "go_to": "104",
+            "set_state": null
+          }
+        ],
+        "103": [
+          {
+            "choices": [
+              "[Fly: pass] Well, I mean.."
+            ],
+            "condition": "skill: fly, 1",
+            "go_to": "201",
+            "set_state": null
+          },
+          {
+            "choices": [
+              "Good point. Go on."
+            ],
+            "go_to": "104",
+            "set_state": null
+          }
+        ],
+        "104": [
+          {
+            "choices": [
+              "Of course!",
+              "Yes.",
+              "OK."
+            ],
+            "go_to": "105",
+            "reward": "item: horseshoe",
+            "set_state": null
+          },
+          {
+            "choices": [
+              "No.",
+              "Can't help you.",
+              "Maybe later."
+            ],
+            "go_to": "999",
+            "set_state": null
+          }
+        ],
+        "105": [
+          {
+            "choices": [
+              "OK."
+            ],
+            "go_to": null,
+            "set_state": "quest_initiated"
+          }
+        ],
+        "201": [
+          {
+            "choices": [
+              "Of course!",
+              "Yes.",
+              "OK."
+            ],
+            "go_to": "300",
+            "set_state": "quest_completed"
+          },
+          {
+            "choices": [
+              "No.",
+              "Can't help you.",
+              "Maybe later."
+            ],
+            "go_to": "999",
+            "set_state": null
+          }
+        ],
+        "quest_initiated": [
+          {
+            "choices": [
+              "I have rescued your friend."
+            ],
+            "condition": "npc: blacksmith",
+            "go_to": "301",
+            "reward": "skill: fly, 1",
+            "set_state": "quest_completed"
+          },
+          {
+            "choices": [
+              "Unfortunately, no."
+            ],
+            "go_to": null,
+            "set_state": null
+          }
+        ],
+        "quest_completed": [
+          {
+            "choices": [
+              "Return"
+            ],
+            "go_to": "quest_completed"
+          }
+        ],
+        "quest_failed": [
+          {
+            "choices": [
+              "Return"
+            ],
+            "go_to": "quest_failed"
+          }
+        ]
+      }
+    }
+  }
+}

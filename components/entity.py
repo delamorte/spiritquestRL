@@ -20,7 +20,7 @@ class Entity:
                  fighter=None, ai=None, item=None, inventory=None, stairs=None, summoner=None,
                  wall=None, door=None, cursor=None, light_source=None, abilities=None,
                  status_effects=None, stand_on_messages=True, boss=False, hidden=False, remarks=None,
-                 indicator_color="dark red", animations=None, visible=False):
+                 indicator_color="dark red", animations=None, visible=False, dialogue=None, npc=None):
         self.x = x
         self.y = y
         self.layer = layer
@@ -57,6 +57,8 @@ class Entity:
         self.remarks = remarks
         self.indicator_color = indicator_color
         self.animations = animations
+        self.dialogue = dialogue
+        self.npc = npc
         self.dead = False
         self.visible = visible
         self.light = tile["light"] if tile else True
@@ -105,6 +107,12 @@ class Entity:
 
         if self.animations:
             self.animations.owner = self
+
+        if self.dialogue:
+            self.dialogue.owner = self
+
+        if self.npc:
+            self.npc.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount

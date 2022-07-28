@@ -134,6 +134,11 @@ class RenderFunctions:
                 else:
                     self.draw(entity, x, y)
 
+            if entity.xtra_info and game_map.visible[entity.x, entity.y] and \
+                    not entity.x == player.x and not entity.y == player.y:
+                results.append(Message(msg=entity.xtra_info + ".", style="xtra"))
+                entity.xtra_info = None
+
             if game_map.visible[entity.x, entity.y] and entity.ai and options.data.gfx != "ascii":
                 self.draw_indicator(player)
                 self.draw_indicator(entity)

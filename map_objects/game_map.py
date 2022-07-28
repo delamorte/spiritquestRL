@@ -8,10 +8,12 @@ from components.AI.ai_basic import AIBasic
 from components.AI.ai_caster import AICaster
 from components.abilities import Abilities
 from components.animations import Animations
+from components.dialogue import Dialogue
 from components.entity import Entity
 from components.fighter import Fighter
 from components.item import Item
 from components.light_source import LightSource
+from components.npc import Npc
 from components.openable import Openable
 from components.stairs import Stairs
 from components.status_effects import StatusEffects
@@ -309,9 +311,20 @@ class GameMap:
     def get_random_unoccupied_space_near_room(self, room, radius=2):
         x = randint(room.x1 - radius, room.x2 + radius)
         y = randint(room.y1 - radius, room.y2 + radius)
-        while self.tiles[x][y].occupied or self.tiles[x][y].entities_on_tile:
+
+        while self.tiles[x][y].occupied or self.tiles[x][y].entities_on_tile or len(self.tiles[x][y].layers) > 0:
             x = randint(room.x1 - radius, room.x2 + radius)
             y = randint(room.y1 - radius, room.y2 + radius)
+
+        if radius == 2:
+            x2 = x + 1
+            y2 = y + 1
+            self.tiles[x2][y].entities_on_tile = []
+            self.tiles[x2][y].layers = []
+            self.tiles[x2][y2].entities_on_tile = []
+            self.tiles[x2][y2].layers = []
+            self.tiles[x][y2].entities_on_tile = []
+            self.tiles[x][y2].layers = []
 
         return x, y
 
@@ -387,7 +400,7 @@ class GameMap:
         self.entities = {"objects": objects, "stairs": map_stairs, "doors": doors, "items": map_items, "npcs": []}
 
         npcs = []
-        npc_name = "black king crow"
+        npc_name = "black crow king"
         npcs.append((npc_name, get_tile(npc_name)))
         location = self.get_random_unoccupied_space_near_room(shaman_room)
         self.create_entities(npcs, "npcs", location=location)
@@ -883,6 +896,8 @@ class GameMap:
                 f_data = self.owner.owner.data.fighters[name]
                 color = get_color(name, f_data, self.owner.world_tendency)
                 remarks = f_data["remarks"]
+                npc_component = None
+                dialogue_component = None
                 fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
                                             atk=f_data["atk"], mv_spd=f_data["mv_spd"],
                                             atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
@@ -890,8 +905,11 @@ class GameMap:
                     ai_component = AICaster()
                 elif "ai" in f_data.keys() and f_data["ai"] == "npc":
                     ai_component = AIBasic(passive=True)
+                    npc_component = Npc(name)
                 else:
                     ai_component = AIBasic()
+                if "dialogue" in f_data.keys() and f_data["dialogue"]:
+                    dialogue_component = Dialogue(name)
                 light_component = LightSource(radius=fighter_component.fov)
                 status_effects_component = StatusEffects(name)
                 animations_component = Animations()
@@ -901,7 +919,7 @@ class GameMap:
                                  blocks=True, fighter=fighter_component, ai=ai_component,
                                  light_source=light_component,
                                  status_effects=status_effects_component, remarks=remarks,
-                                 animations=animations_component)
+                                 animations=animations_component, dialogue=dialogue_component, npc=npc_component)
                 monster.abilities = Abilities(monster)
                 monster.light_source.initialize_fov(self)
                 if "xtra_info" in f_data.keys():

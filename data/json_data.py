@@ -17,3 +17,4 @@ class JsonData:
         self.status_effects = fetch_data(self.root + "status_effects.json")
         self.remarks = fetch_data(self.root + "remarks.json")
         self.tiles = fetch_data(self.root + "tiles.json")
+        self.dialogue = fetch_data(self.root + "dialogue.json")
