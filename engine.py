@@ -59,10 +59,11 @@ class Engine:
         window = "window: " + size + "," + title + "," + cellsize + "," + resizable
 
         blt.open()
+
         blt.set(window)
         blt.set("font: default")
         blt.set("input: filter=[keyboard]")
-
+        blt.composition(True)
         # Needed to avoid insta-close and flush the input queue
         blt.refresh()
         blt.read()
@@ -166,7 +167,7 @@ class Engine:
         animations_component = Animations()
 
         player = Entity(
-            1, 1, 1, "default", "player", tile=f_data,
+            1, 1, 2, "default", "player", tile=f_data,
             blocks=True, player=player_component, fighter=fighter_component, inventory=inventory_component,
             light_source=light_component,
             summoner=summoner_component, indicator_color="gray", animations=animations_component,

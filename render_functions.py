@@ -149,7 +149,7 @@ class RenderFunctions:
         bound_x2 = game_camera.bound_x2 * self.owner.ui.offset_x
         bound_y2 = game_camera.bound_y2 * self.owner.ui.offset_y
         # Clear what's drawn in camera
-        self.clear_camera(1)
+        self.clear_camera(2)
         # Set boundaries if map is smaller than viewport
         if game_map.width < game_camera.width:
             bound_x2 = game_map.width * self.owner.ui.offset_x
@@ -567,7 +567,7 @@ class RenderFunctions:
                 visible = game_map.visible[animation.target.x, animation.target.y]
                 if visible:
                     x, y = self.owner.game_camera.get_coordinates(animation.target.x, animation.target.y)
-                    blt.layer(4)
+                    blt.layer(1)
                     c = blt.color_from_name(animation.color)
                     argb = argb_from_color(c)
                     try:

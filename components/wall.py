@@ -19,8 +19,8 @@ class Wall:
             self.blocked = True
             game_map.tiles[self.owner.x][self.owner.y].blocked = True
             game_map.tiles[self.owner.x][self.owner.y].block_sight = True
-            if not self.tile["draw_floor"]:
-                game_map.tiles[self.owner.x][self.owner.y].char = " "
+            # if not self.tile["draw_floor"]:
+            #     game_map.tiles[self.owner.x][self.owner.y].char = " "
 
         else:
             self.block_sight = False

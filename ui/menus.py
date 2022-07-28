@@ -69,7 +69,7 @@ class Menus:
                 self.owner.fov_recompute = True
 
             blt.layer(0)
-            self.owner.render_functions.clear_camera(1)
+            self.owner.render_functions.clear_camera(2)
             blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 5,
                      menu.heading, self.text_wrap, 0, menu.align)
 
@@ -110,8 +110,7 @@ class Menus:
             output = self.handle_input(output, key, sel, menu.items)
             if output.event == "break":
                 if menu.title_screen:
-                    output = None
-                    continue
+                    exit()
                 else:
                     self.owner.game_state = GameStates.PLAYER_TURN
                     break
@@ -168,7 +167,6 @@ class Menus:
         self.owner.game_state = GameStates.PLAYER_TURN
 
     def create_or_show_menu(self, data):
-        blt.layer(1)
 
         if data.name == "choose_animal":
             if self.choose_animal:
