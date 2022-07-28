@@ -1,10 +1,7 @@
-from components.abilities import Abilities
 from components.fighter import Fighter
 from data import json_data
-from map_objects import tilemap
-import numpy as np
 
-from ui.menus import MenuData
+from map_objects.tilemap import get_tile
 from ui.message import Message
 
 
@@ -12,7 +9,7 @@ class Player:
     def __init__(self, spirit_power):
         self.owner = None
         self.spirit_power = spirit_power
-        self.char = {"player": tilemap.data.tiles["player"]}
+        self.char = {}
         self.char_exp = {"player": 0}
         self.char_level = 1
         self.skill_points = 0
@@ -29,6 +26,9 @@ class Player:
         self.sel_attack_idx = 0
         self.sel_utility_idx = 0
 
+    def set_char(self, name, tile):
+        self.char[name] = get_tile(name, tile)
+
     def handle_player_exp(self, killed_fighter):
         exp_messages = []
         self.spirit_power += killed_fighter.max_hp
@@ -37,13 +37,6 @@ class Player:
         levels_gained = int(self.char_exp["player"] / (self.exp_lvl_interval * self.char_level))
         entity_name = killed_fighter.owner.name
 
-        if entity_name in tilemap.data.tiles["monsters"].keys():
-            self.char[entity_name] = tilemap.data.tiles["monsters"][entity_name]
-        elif entity_name in tilemap.data.tiles["monsters_light"].keys():
-            self.char[entity_name] = tilemap.data.tiles["monsters_light"][entity_name]
-        elif entity_name in tilemap.data.tiles["monsters_chaos"].keys():
-            self.char[entity_name] = tilemap.data.tiles["monsters_chaos"][entity_name]
-
         if entity_name not in self.max_lvl_avatars:
             if entity_name in self.char_exp.keys():
                 exp_to_spend = 5
@@ -51,6 +44,7 @@ class Player:
                 self.char_exp[entity_name] = 0
                 exp_to_spend = 10
                 avatar_f_data = json_data.data.fighters[entity_name]
+                self.set_char(entity_name, avatar_f_data)
                 a_fighter_component = Fighter(hp=avatar_f_data["hp"], ac=avatar_f_data["ac"], ev=avatar_f_data["ev"],
                                               atk=avatar_f_data["atk"], mv_spd=avatar_f_data["mv_spd"],
                                               atk_spd=avatar_f_data["atk_spd"], size=avatar_f_data["size"],

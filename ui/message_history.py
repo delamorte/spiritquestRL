@@ -1,5 +1,6 @@
-from bearlibterminal import terminal as blt
 from math import ceil
+
+from bearlibterminal import terminal as blt
 
 padding_left = 10
 padding_right = 10
@@ -84,7 +85,7 @@ class FrameWithScrollbar(object):
         # Scroll bar
         blt.bkcolor("transparent")
         blt.clear_area(self.left + self.width, self.top, 1, self.height)
-        blt.bkcolor("none")
+        #blt.bkcolor("default")
         blt.color("dark orange")
         self.scrollbar_column = self.left + self.width
         self.scrollbar_offset = int(
@@ -102,7 +103,10 @@ def show_msg_history(message_log, name, viewport_w, viewport_h):
     message_log.reverse()
 
     for message in message_log:
-        messages.append(message.msg)
+        if isinstance(message, str):
+            messages.append(message)
+        else:
+            messages.append(message.msg)
 
     # Initial update
     frame.update_geometry(

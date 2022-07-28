@@ -1,15 +1,16 @@
-import random
+from random import choice, random, choices
 
-from map_objects.game_map import GameMap
-from map_objects import tilemap
+import options
 from descriptions import level_biomes, meditate_params
+from map_objects.game_map import GameMap
+from map_objects.tilemap import get_fighters_by_attribute
 from ui.menus import MenuData
 
 
 class Levels:
-    def __init__(self, tileset):
+    def __init__(self):
         self.owner = None
-        self.tileset = tileset
+        self.tileset = options.data.gfx
         self.player = None
         self.items = {}
         self.params = None
@@ -89,26 +90,22 @@ class Levels:
         biome_params = meditate_params()
         for i in range(5):
             level = {}
-            biome = random.choice(biomes)
-            biome_desc, biome_mod = random.choice(list(biome_params.items()))
+            biome = choice(biomes)
+            biome_desc, biome_mod = choice(list(biome_params.items()))
             level["biome"] = biome
             level["modifier"] = biome_mod
             level["freq_monster"] = None
             # Generate level title
-            if random.random() > 0.7:
-                monsters = []
+            if random() > 0.7:
                 if self.world_tendency < 0:
-                    for x, y in tilemap.data.tiles["monsters_chaos"].items():
-                        monsters.append((x, y))
+                    monsters = get_fighters_by_attribute("chaos", True)
                 elif self.world_tendency > 0:
-                    for x, y in tilemap.data.tiles["monsters_light"].items():
-                        monsters.append((x, y))
+                    monsters = get_fighters_by_attribute("light", True)
                 else:
-                    for x, y in tilemap.data.tiles["monsters"].items():
-                        monsters.append((x, y))
+                    monsters = get_fighters_by_attribute("neutral", True)
                 monsters.sort()
                 spawn_rates = self.get_spawn_rates(monsters)
-                monster_prefix = random.choice(random.choices(monsters, spawn_rates, k=5))[0]
+                monster_prefix = choice(choices(monsters, spawn_rates, k=5))[0]
                 level["title"] = "The " + monster_prefix.capitalize() + " " + biome.capitalize() + " of " + biome_desc
                 level["freq_monster"] = monster_prefix
             else:

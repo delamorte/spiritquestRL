@@ -1,25 +1,26 @@
+import xml.etree.ElementTree as ET
+from random import choice, choices, randint
+
+import numpy as np
 from tcod.map import compute_fov
 
+from components.AI.ai_basic import AIBasic
 from components.AI.ai_caster import AICaster
 from components.abilities import Abilities
-from components.AI.ai_basic import AIBasic
 from components.animations import Animations
+from components.entity import Entity
 from components.fighter import Fighter
 from components.item import Item
-from components.status_effects import StatusEffects
-from components.entity import Entity
-from map_objects import tilemap
-from map_objects.tile import Tile
-from color_functions import get_dngn_colors, get_forest_colors, get_monster_color, name_color_from_value
-from random import choice, choices, randint
-from components.stairs import Stairs
-from components.door import Door
-from components.wall import Wall
 from components.light_source import LightSource
+from components.openable import Openable
+from components.stairs import Stairs
+from components.status_effects import StatusEffects
+from components.wall import Wall
+from map_objects.tile import Tile
+from map_objects.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant, \
+    get_fighters_by_attribute
 from resources.dungeon_generation.dungeon_generator import DrunkardsWalk, MessyBSPTree, CellularAutomata, \
     MazeWithRooms
-import xml.etree.ElementTree as ET
-import numpy as np
 
 
 class GameMap:
@@ -148,7 +149,6 @@ class GameMap:
             return list(filter(lambda entity: self.visible[entity.x, entity.y], entities))
 
     def create_room(self, room):
-        # TODO: REFACTOR THIS FUNCTION
         entities = []
         for y in range(room.y1, room.y2):
             for x in range(room.x1, room.x2):
@@ -161,106 +161,90 @@ class GameMap:
                     entity = room.layers[2][y - room.y1][x - room.x1]
 
                     if ground != 0:
-                        name, color = name_color_from_value(ground, self.owner.world_tendency)
-                        if self.owner.tileset == "oryx":
-                            ground += 0xE400
-                        else:
-                            ground = tilemap.data.tiles[name]
-                        self.tiles[x][y].char = ground
+                        name = get_tile_by_value(ground)
+                        ground_char = get_tile(name)
+                        color = get_color(name, mod=self.owner.world_tendency)
+                        self.tiles[x][y].char = ground_char
                         if color is not None:
                             self.tiles[x][y].color = color
 
                     if ground_top != 0:
-                        name, color = name_color_from_value(ground_top, self.owner.world_tendency)
-                        if self.owner.tileset == "oryx":
-                            ground_top += 0xE400
-                        else:
-                            ground_top = tilemap.data.tiles[name]
-                        self.tiles[x][y].layers.append((ground_top, color))
+                        name = get_tile_by_value(ground_top)
+                        ground_top_char = get_tile(name)
+                        color = get_color(name, mod=self.owner.world_tendency)
+                        self.tiles[x][y].layers.append((ground_top_char, color))
 
                     if entity != 0:
-                        name, color = name_color_from_value(entity, self.owner.world_tendency)
-                        if self.owner.tileset == "oryx":
-                            entity += 0xE400
-                        else:
-                            if isinstance(tilemap.data.tiles[name], tuple):
-                                entity = tilemap.data.tiles[name][0]
-                            else:
-                                entity = tilemap.data.tiles[name]
+                        name = get_tile_by_value(entity)
+                        char = get_tile_variant(name, variant_char=entity)
+                        tile = get_tile_object(name)
+                        color = get_color(name, mod=self.owner.world_tendency)
 
-                        if "," in name:
-                            name = name.split(",")[0]
-                        if name in tilemap.data.openables_names:
-                            door_component = Door(name)
-                            door = Entity(x, y, 2, entity,
-                                          color, name, door=door_component, stand_on_messages=False)
+                        if tile["openable"]:
+                            name = tile["name"]
+                            door_component = Openable(name, char)
+                            door = Entity(x, y, 1,
+                                          color, name, tile=tile, door=door_component, stand_on_messages=False)
                             self.tiles[x][y].add_entity(door)
                             self.tiles[x][y].is_door = True
                             self.tiles[x][y].door = door_component
-                            door_component.set_status(door_component.status, self)
+                            door_component.set_state(door_component.state, self)
                             entities.append(door)
-                        elif name in tilemap.data.items_names:
-                            item_component = Item(name)
-                            item = Entity(x, y, 2, entity,
-                                          color, name, item=item_component)
-                            if item.name == "flask":
+                        elif tile["interactable"] or tile["pickable"]:
+                            item_component = Item(name, pickable=tile["pickable"], interactable=tile["interactable"],
+                                                  light_source=tile["light_source"])
+                            item = Entity(x, y, 1,
+                                          color, name, tile=tile, item=item_component)
+                            if item.name == "flask":  # For testing "reveal" skill
                                 item.hidden = True
                             self.tiles[x][y].add_entity(item)
                             item_component.set_attributes(self)
                             entities.append(item)
-                        elif name in tilemap.data.stairs_names:
+                        elif tile["stairs"]:
                             stairs_component = Stairs(("hub", x, y), ["dream"], name)
-                            portal = Entity(x, y, 1, entity, color, name,
+                            portal = Entity(x, y, 1, color, name, tile=tile,
                                             stairs=stairs_component)
                             self.tiles[x][y].add_entity(portal)
                             stairs_component.set_attributes(self)
                             portal.xtra_info = "Meditate and go to dream world with '<' or '>'"
                             entities.append(portal)
                         else:
-                            wall_component = Wall(name)
-                            wall = Entity(x, y, 2, entity,
-                                          color, name, wall=wall_component)
+                            wall_component = Wall(name=name, tile=tile)
+                            wall = Entity(x, y, 1,
+                                          color, name, char=char, tile=tile, wall=wall_component)
                             self.tiles[x][y].add_entity(wall)
                             wall_component.set_attributes(self)
                             entities.append(wall)
 
                 else:
-                    # Vertical walls
-                    if (x == room.x1 or x == room.x2 - 1) and 0 <= y < room.y2 - 1:
-                        wall_component = Wall(room.wall)
-                        wall = Entity(x, y, 2, tilemap.data.tiles[room.wall]["vertical"],
-                                      room.wall_color, room.wall, wall=wall_component)
-                        self.tiles[x][y].add_entity(wall)
-                        wall_component.set_attributes(self)
-                        entities.append(wall)
-
                     # Horizontal walls
-                    elif (y == room.y1 or y == room.y2 - 1) and 0 <= x <= room.x2 - 1:
-                        wall_component = Wall(room.wall)
-                        wall = Entity(x, y, 2, tilemap.data.tiles[room.wall]["horizontal"],
-                                      room.wall_color, room.wall, wall=wall_component)
-                        self.tiles[x][y].add_entity(wall)
-                        wall_component.set_attributes(self)
+                    if (y == room.y1 or y == room.y2 - 1) and 0 <= x <= room.x2 - 1:
+                        wall = self.create_wall(room.wall, x, y, 0)
                         entities.append(wall)
-
-                    #                 # Upper left corner
-                    #                 elif x == room.x1 and y == room.y1:
-                    #                     pass
-                    #                 # Upper right corner
-                    #                 elif x == room.x2 and y == room.y1:
-                    #                     pass
-                    #                 # Lower left corner
-                    #                 elif x == room.x1 and y == room.y2:
-                    #                     pass
-                    #                 # Lower right corner
-                    #                 elif x == room.x2 and y == room.y2:
-                    #                     pass
+                    # Vertical walls
+                    elif (x == room.x1 or x == room.x2 - 1) and 0 <= y < room.y2 - 1:
+                        wall = self.create_wall(room.wall, x, y, 2)
+                        entities.append(wall)
+                    # Upper right corner
+                    elif x == room.x2 and y == room.y1:
+                        wall = self.create_wall(room.wall, x, y, 1)
+                        entities.append(wall)
+                    # Lower right corner
+                    elif x == room.x2 and y == room.y2:
+                        wall = self.create_wall(room.wall, x, y, 3)
+                        entities.append(wall)
+                    # Lower left corner
+                    elif x == room.x1 and y == room.y2:
+                        wall = self.create_wall(room.wall, x, y, 5)
+                        entities.append(wall)
+                    # Upper left corner
+                    elif x == room.x1 and y == room.y1:
+                        wall = self.create_wall(room.wall, x, y, 7)
+                        entities.append(wall)
 
                     else:
-                        self.tiles[x][y].color = room.floor_color
-                        self.tiles[x][y].char = tilemap.data.tiles[room.floor]
-                        #                     self.tiles[x][y].blocked = False
-                        #                     self.tiles[x][y].block_sight = False
+                        self.tiles[x][y].color = get_color(room.floor)
+                        self.tiles[x][y].char = get_tile(room.floor)
                         self.tiles[x][y].spawnable = True
 
         # Make sure nothing can block room wall immediate neighbours
@@ -273,6 +257,24 @@ class GameMap:
             self.rooms[room.name] = room
 
         return entities
+
+    def create_wall(self, name, x, y, index):
+        """
+        :param name:
+        :param x:
+        :param y:
+        :param index: 0 = horizontal, 2 = vertical, 1 = NE, 3 = SE, 5 = SW, 7 = NW
+        :return: wall entity
+        """
+        tile = get_tile_object(name)
+        color = get_color(name)
+        wall_component = Wall(name=name, tile=tile)
+        tile_char = get_tile_variant(name, index)
+        wall = Entity(x, y, 1,
+                      color, name, tile=tile, char=tile_char, wall=wall_component)
+        self.tiles[x][y].add_entity(wall)
+        wall_component.set_attributes(self)
+        return wall
 
     def count_walls(self, n, x, y):
         wall_count = 0
@@ -308,13 +310,12 @@ class GameMap:
         for y in range(1, self.height - 1):
             for x in range(1, self.width - 1):
                 self.tiles[x][y].color = "#423023"
-                self.tiles[x][y].char = tilemap.data.tiles["ground_soil"][randint(
-                    0, (len(tilemap.data.tiles["ground_soil"]) - 1))]
+                self.tiles[x][y].char = get_tile("ground_soil")
 
         # Generate a house
         w = h = 10
         # x1, y1 = self.get_rand_unoccupied_space(w, h)
-        # home = Room(x1, y1, w, h, "#6b3d24", "#423023", wall="brick", floor="floor_wood", name="home")
+        # home = Room(x1, y1, w, h, "#6b3d24", "#423023", wall="wall_brick", floor="floor_wood", name="home")
         # objects = self.create_room(home)
         # door_home = self.create_door(home, "open", random=True)
         objects = []
@@ -327,7 +328,7 @@ class GameMap:
         # Make sure room doesn't overlap with existing rooms
         w = h = 10
         x1, y1 = self.get_rand_unoccupied_space(w, h)
-        d_entrance = Room(x1, y1, w, h, "dark amber", "darkest amber", wall="brick", name="d_entrance")
+        d_entrance = Room(x1, y1, w, h, "dark amber", "darkest amber", wall="wall_brick", name="d_entrance")
 
         objects.extend(self.create_room(d_entrance))
         door_d_entrance = self.create_door(d_entrance, "locked", random=True)
@@ -344,8 +345,9 @@ class GameMap:
         center_x, center_y = self.rooms["d_entrance"].get_center()
 
         stairs_component = Stairs(("hub", center_x, center_y), ["debug"], "stairs down", 0)
-        stairs_down = Entity(center_x, center_y, 1, tilemap.data.tiles["stairs"]["down"], "dark amber",
-                             "stairs to a mysterious cavern", stairs=stairs_component)
+        char = get_tile("stairs_down")
+        stairs_down = Entity(center_x, center_y, 1, "dark amber", "stairs to a mysterious cavern",
+                             char=char, stairs=stairs_component)
         stairs_down.xtra_info = "You feel an ominous presence. Go down with '<' or '>'"
         self.tiles[center_x][center_y].add_entity(stairs_down)
         self.create_decor()
@@ -388,38 +390,38 @@ class GameMap:
         self.algorithm = map_algorithm.name
 
         map_algorithm.generateLevel(self.width, self.height)
-        forest_colors = get_forest_colors()
-        dngn_color = get_dngn_colors()
+        color = get_color("ground_soil")
+        tree_color = get_color("tree", mod=self.owner.world_tendency)
         objects = []
         for y in range(0, self.height):
             for x in range(0, self.width):
-                self.tiles[x][y].color = dngn_color
-                self.tiles[x][y].char = tilemap.data.tiles["ground_soil"][randint(
-                    0, (len(tilemap.data.tiles["ground_soil"]) - 1))]
+                self.tiles[x][y].color = color
+                self.tiles[x][y].char = get_tile("ground_soil")
                 if map_algorithm.level[x][y] == 1:
                     self.tiles[x][y].spawnable = False
 
                     # Don't make unvisible trees entities to save in performance
                     if self.count_walls(1, x, y) < 8:
 
-                        if abs(self.owner.world_tendency) * 33 > randint(1, 100):
-                            name = "dead tree"
-                            char = tilemap.data.tiles["dead_tree"][randint(0, (len(tilemap.data.tiles["dead_tree"]) - 1))]
+                        if self.owner.world_tendency < 0 and abs(self.owner.world_tendency) * 5 > randint(1, 100):
+                            name = "tree_dead"
+                            char = get_tile_variant(name)
+                            dead_tree_color = get_color(name)
                             wall_component = Wall(name)
-                            wall = Entity(x, y, 2, char, forest_colors[randint(0, len(forest_colors) - 1)],
-                                          name, wall=wall_component)
-                            self.tiles[x][y].add_entity(wall)
-                            wall_component.set_attributes(self)
-                            objects.append(wall)
+                            wall = Entity(x, y, 1, dead_tree_color, "dead tree",
+                                          char=char, wall=wall_component)
+
                         else:
                             name = "tree"
-                            char = tilemap.data.tiles["tree"][randint(0, (len(tilemap.data.tiles["tree"]) - 1))]
+                            char = get_tile_variant(name)
+                            if (y == 0 and x == 0) or y % 5 == 0:
+                                tree_color = get_color(name)
                             wall_component = Wall(name)
-                            wall = Entity(x, y, 2, char, forest_colors[randint(0, len(forest_colors) - 1)],
-                                          name, wall=wall_component)
-                            self.tiles[x][y].add_entity(wall)
-                            wall_component.set_attributes(self)
-                            objects.append(wall)
+                            wall = Entity(x, y, 1, tree_color, name,
+                                          char=char, wall=wall_component)
+                        self.tiles[x][y].add_entity(wall)
+                        wall_component.set_attributes(self)
+                        objects.append(wall)
 
                 else:
                     self.tiles[x][y].spawnable = True
@@ -433,13 +435,11 @@ class GameMap:
     def generate_forest(self):
 
         entities = []
-        cavern_colors = get_dngn_colors()
-
+        color = get_color("ground_soil")
         for y in range(1, self.height - 1):
             for x in range(1, self.width - 1):
-                self.tiles[x][y].color = cavern_colors[5]
-                self.tiles[x][y].char = tilemap.data.tiles["ground_soil"][randint(
-                    0, (len(tilemap.data.tiles["ground_soil"]) - 1))]
+                self.tiles[x][y].color = color
+                self.tiles[x][y].char = get_tile("ground_soil")
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
                 self.tiles[x][y].spawnable = True
@@ -463,8 +463,8 @@ class GameMap:
     def generate_trees(self, dx, dy, width, height, freq):
         """Generate a forest to a rectangular area."""
 
-        forest_colors = get_forest_colors()
         entities = []
+        tree_color = get_color("tree", mod=self.owner.world_tendency)
         for y in range(dy, height):
             for x in range(dx, width):
                 if not self.tiles[x][y].occupied:
@@ -473,48 +473,42 @@ class GameMap:
                     # Generate forest tiles
                     if randint(1, 100) < freq:
 
-                        if abs(self.owner.world_tendency) * 33 > randint(1, 100):
-                            name = "dead tree"
-                            char = tilemap.data.tiles["dead_tree"][randint(0, (len(tilemap.data.tiles["dead_tree"]) - 1))]
+                        if self.owner.world_tendency < 0 and abs(self.owner.world_tendency) * 5 > randint(1, 100):
+                            name = "tree_dead"
+                            char = get_tile_variant(name)
+                            dead_tree_color = get_color(name)
                             wall_component = Wall(name)
-                            wall = Entity(x, y, 2, char, forest_colors[randint(0, 4)], name, wall=wall_component)
-                            self.tiles[x][y].add_entity(wall)
-                            wall_component.set_attributes(self)
-                            entities.append(wall)
+                            wall = Entity(x, y, 1, dead_tree_color, "dead tree",
+                                          char=char, wall=wall_component)
+
                         else:
                             name = "tree"
-                            char = tilemap.data.tiles["tree"][randint(0, (len(tilemap.data.tiles["tree"]) - 1))]
+                            char = get_tile_variant(name)
+                            if (y == 0 and x == 0) or y % 5 == 0:
+                                tree_color = get_color(name)
                             wall_component = Wall(name)
-                            wall = Entity(x, y, 2, char, forest_colors[randint(0, 4)], name, wall=wall_component)
-                            self.tiles[x][y].add_entity(wall)
-                            wall_component.set_attributes(self)
-                            entities.append(wall)
+                            wall = Entity(x, y, 1, tree_color, name,
+                                          char=char, wall=wall_component)
+                        self.tiles[x][y].add_entity(wall)
+                        wall_component.set_attributes(self)
+                        entities.append(wall)
 
         return entities
 
     def generate_cavern(self, entities):
 
-        cavern_colors = ["lightest amber",
-                         "lighter amber",
-                         "light amber",
-                         "dark amber",
-                         "darker amber",
-                         "darkest amber"]
-
         for y in range(self.height):
             for x in range(self.width):
 
-                self.tiles[x][y].color = cavern_colors[4]
-                self.tiles[x][y].char = tilemap.data.tiles["ground_moss"][randint(
-                    0, (len(tilemap.data.tiles["ground_moss"]) - 1))]
+                self.tiles[x][y].color = get_color("ground_moss")
+                self.tiles[x][y].char = get_tile("ground_moss")
                 self.tiles[x][y].visited = False
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
                 freq = randint(1, 100)
                 if freq < 50:
-                    self.tiles[x][y].color = cavern_colors[4]
-                    self.tiles[x][y].char = tilemap.data.tiles["moss"][randint(
-                        0, (len(tilemap.data.tiles["moss"]) - 1))]
+                    self.tiles[x][y].color = get_color("moss")
+                    self.tiles[x][y].char = get_tile("moss")
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = True
 
@@ -525,9 +519,8 @@ class GameMap:
                     wall_two_away = self.count_walls(2, x, y)
 
                     if wall_one_away >= 5 or wall_two_away <= 2:
-                        self.tiles[x][y].color = cavern_colors[4]
-                        self.tiles[x][y].char = tilemap.data.tiles["moss"][randint(
-                            0, (len(tilemap.data.tiles["moss"]) - 1))]
+                        self.tiles[x][y].color = get_color("moss")
+                        self.tiles[x][y].char = get_tile("moss")
                         self.tiles[x][y].blocked = True
                         self.tiles[x][y].block_sight = True
 
@@ -562,9 +555,8 @@ class GameMap:
 
                 if (x == 1 or x == self.width - 2 or
                         y == 1 or y == self.height - 2):
-                    self.tiles[x][y].color = cavern_colors[4]
-                    self.tiles[x][y].char = tilemap.data.tiles["moss"][randint(
-                        0, (len(tilemap.data.tiles["moss"]) - 1))]
+                    self.tiles[x][y].color = get_color("moss")
+                    self.tiles[x][y].char = get_tile("moss")
                     self.tiles[x][y].blocked = True
                     self.tiles[x][y].block_sight = True
 
@@ -613,12 +605,11 @@ class GameMap:
         objects = []
         for i in range(0, len(caverns)):
             for j in range(0, len(caverns[i])):
-                color = cavern_colors[4]
+                color = get_color("moss")
                 name = "moss"
-                char = tilemap.data.tiles["moss"][randint(
-                    0, (len(tilemap.data.tiles["moss"]) - 1))]
+                char = get_tile("moss")
                 wall_component = Wall(name)
-                wall = Entity(i, j, 2, char, color, name, wall=wall_component)
+                wall = Entity(i, j, 1, color, name, char=char, wall=wall_component)
                 wall_component.set_attributes(self)
                 objects.append(wall)
 
@@ -633,7 +624,8 @@ class GameMap:
                                                             entities["stairs"][1].stairs.source[2]], "hub",
                                       self.dungeon_level)
             entities["stairs"][1].stairs.destination.extend((px, py))
-            stairs_up = Entity(px, py, 1, tilemap.data.tiles["stairs"]["up"], "dark amber", "stairs up", stairs=stairs_component)
+            char = get_tile("stairs_up")
+            stairs_up = Entity(px, py, 1, "dark amber", "stairs up", char=char, stairs=stairs_component)
             stairs_current_floor.append(stairs_up)
         # Make as many stairs upstairs as previous floor had stairs down
         else:
@@ -641,10 +633,11 @@ class GameMap:
                 if entity.stairs.name == "stairs down":
                     pos = randint(0, len(main_cave) - 1)
                     px, py = main_cave[pos].x, main_cave[pos].y
+                    char = get_tile("stairs_up")
                     stairs_component = Stairs(("cavern" + str(self.dungeon_level), px, py),
                                               ["cavern" + str(self.dungeon_level - 1), entity.stairs.source[1],
                                                entity.stairs.source[2]], "stairs up", self.dungeon_level)
-                    stairs_up = Entity(px, py, 1, tilemap.data.tiles["stairs"]["up"], "dark amber", "stairs up",
+                    stairs_up = Entity(px, py, 1, "dark amber", "stairs up", char=char,
                                        stairs=stairs_component)
                     self.tiles[px][py].add_entity(stairs_up)
                     # Connect the stairs with previous level's down going stairs
@@ -659,7 +652,8 @@ class GameMap:
             px, py = main_cave[pos].x, main_cave[pos].y
             stairs_component = Stairs(("cavern" + str(self.dungeon_level), px, py),
                                       ["cavern" + str(self.dungeon_level + 1)], "stairs down", self.dungeon_level)
-            stairs_down = Entity(px, py, 1, tilemap.data.tiles["stairs"]["down"], "dark amber", "stairs down",
+            char = get_tile("stairs_down")
+            stairs_down = Entity(px, py, 1, "dark amber", "stairs down", char=char,
                                  stairs=stairs_component)
             self.tiles[px][py].add_entity(stairs_down)
             stairs_current_floor.append(stairs_down)
@@ -730,10 +724,9 @@ class GameMap:
             # for x, y in tilemap.data.tiles["monsters"].items():
             #     if x == "crow":
             #         monsters.append((x, y))
-
-            for x, y in tilemap.data.tiles["unique_monsters"].items():
-                if x == "keeper of dreams":
-                    monsters.append((x, y))
+            boss = "keeper of dreams"
+            tile = get_tile("keeper of dreams")
+            monsters.append((boss, tile))
 
             for i in range(number_of_monsters):
                 x = randint(1, self.width - 1)
@@ -745,8 +738,8 @@ class GameMap:
                 if not any([entity for entity in self.entities["monsters"] if entity.x == x and entity.y == y]):
                     # r = randint(0, 2)
                     name, char = monsters[0]
-                    color = get_monster_color(name)
                     f_data = self.owner.owner.data.fighters[name]
+                    color = get_color(name, f_data, self.owner.world_tendency)
                     remarks = f_data["remarks"]
                     fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
                                                 atk=f_data["atk"], mv_spd=f_data["mv_spd"],
@@ -755,8 +748,8 @@ class GameMap:
                     light_component = LightSource(radius=fighter_component.fov)
                     status_effects_component = StatusEffects(name)
                     animations_component = Animations()
-                    monster = Entity(x, y, 3, char,
-                                     color, name, blocks=True, fighter=fighter_component, ai=ai_component,
+                    monster = Entity(x, y, 1, color, name, char=char, blocks=True, fighter=fighter_component,
+                                     ai=ai_component,
                                      light_source=light_component,
                                      status_effects=status_effects_component, boss=True, remarks=remarks,
                                      animations=animations_component)
@@ -774,10 +767,7 @@ class GameMap:
 
             number_of_monsters = randint(self.width / 2 - 40, self.width / 2 - 20)
             # number_of_monsters = 0
-            monsters = []
-            for x, y in tilemap.data.tiles["monsters"].items():
-                if x == "frog":
-                    monsters.append((x, y))
+            monsters = [("frog", get_tile("frog"))]
 
             for i in range(number_of_monsters):
                 x = randint(1, self.width - 1)
@@ -789,8 +779,8 @@ class GameMap:
                 if not any([entity for entity in self.entities["monsters"] if entity.x == x and entity.y == y]):
                     # r = randint(0, 2)
                     name, char = monsters[0]
-                    color = get_monster_color(name)
                     f_data = self.owner.owner.data.fighters[name]
+                    color = get_color(name, f_data, self.owner.world_tendency)
                     remarks = f_data["remarks"]
                     fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
                                                 atk=f_data["atk"], mv_spd=f_data["mv_spd"],
@@ -799,8 +789,10 @@ class GameMap:
                     light_component = LightSource(radius=fighter_component.fov)
                     status_effects_component = StatusEffects(name)
                     animations_component = Animations()
-                    monster = Entity(x, y, 3, char,
-                                     color, name, blocks=True, fighter=fighter_component, ai=ai_component,
+                    monster = Entity(x, y, 1,
+                                     color, name,
+                                     char=char,
+                                     blocks=True, fighter=fighter_component, ai=ai_component,
                                      light_source=light_component,
                                      status_effects=status_effects_component, remarks=remarks,
                                      animations=animations_component)
@@ -815,18 +807,13 @@ class GameMap:
 
             self.create_decor()
             number_of_monsters = randint(int(self.width / 4), int(self.width / 2))
-            monsters = []
 
             if self.owner.world_tendency < 0:
-                for x, y in tilemap.data.tiles["monsters_chaos"].items():
-                    monsters.append((x, y))
+                monsters = get_fighters_by_attribute("chaos", True)
             elif self.owner.world_tendency > 0:
-                for x, y in tilemap.data.tiles["monsters_light"].items():
-                    if x == "fairy":
-                        monsters.append((x, y))
+                monsters = get_fighters_by_attribute("light", True)
             else:
-                for x, y in tilemap.data.tiles["monsters"].items():
-                    monsters.append((x, y))
+                monsters = get_fighters_by_attribute("neutral", True)
             monsters.sort()
             spawn_rates = self.owner.get_spawn_rates(monsters)
 
@@ -842,8 +829,8 @@ class GameMap:
                 if not any([entity for entity in self.entities["monsters"] if entity.x == x and entity.y == y]):
                     name = mon[0]
                     char = mon[1]
-                    color = get_monster_color(name)
                     f_data = self.owner.owner.data.fighters[name]
+                    color = get_color(name, f_data, self.owner.world_tendency)
                     remarks = f_data["remarks"]
                     fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
                                                 atk=f_data["atk"], mv_spd=f_data["mv_spd"],
@@ -855,8 +842,10 @@ class GameMap:
                     light_component = LightSource(radius=fighter_component.fov)
                     status_effects_component = StatusEffects(name)
                     animations_component = Animations()
-                    monster = Entity(x, y, 3, char,
-                                     color, name, blocks=True, fighter=fighter_component, ai=ai_component,
+                    monster = Entity(x, y, 1,
+                                     color, name,
+                                     char=char,
+                                     blocks=True, fighter=fighter_component, ai=ai_component,
                                      light_source=light_component,
                                      status_effects=status_effects_component, remarks=remarks,
                                      animations=animations_component)
@@ -865,7 +854,8 @@ class GameMap:
                     self.tiles[x][y].add_entity(monster)
                     self.entities["monsters"].append(monster)
 
-    def create_door(self, room=None, status="open", tile=None, name="door", color=None, random=False, x=None, y=None):
+    def create_door(self, room=None, state="open", tile=None, char=None,
+                    name="door", color=None, random=False, x=None, y=None):
 
         """
         Create a door entity in map. If no coordinates are given,
@@ -885,17 +875,18 @@ class GameMap:
             y = walls[door_seed][1]
 
         if tile is None:
-            tile = tilemap.data.tiles["door"][status]
+            tile = get_tile_object(name)
+            char = get_tile(name, tile, state)
         if color is None:
             color = "dark amber"
-        door_component = Door(room.name, status)
-        door = Entity(x, y, 2, tile, color, name,
+        door_component = Openable(name, char, state)
+        door = Entity(x, y, 1, color, name, tile=tile, char=char,
                       door=door_component, stand_on_messages=False)
         self.tiles[x][y].add_entity(door)
         self.tiles[x][y].is_door = True
         self.tiles[x][y].door = door_component
 
-        if status == "open":
+        if state == "open":
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
         else:
@@ -904,73 +895,31 @@ class GameMap:
 
         return door
 
-    def scan_doors(self, room):
-        doors_open = [0xE400 + 21, 0xE400 + 23, 0xE400 + 25, 0xE400 + 29, 0xE400 + 31, 0xE400 + 33, 0xE400 + 35,
-                      0xE400 + 37, 0xE400 + 103]
-        doors_closed = [0xE400 + 20, 0xE400 + 22, 0xE400 + 24, 0xE400 + 26, 0xE400 + 27, 0xE400 + 28, 0xE400 + 30,
-                        0xE400 + 32, 0xE400 + 36, 0xE400 + 102]
-        doors = []
-        for y, row in enumerate(room.layers["terrain_objects"]):
-            for x, char in enumerate(row):
-                if char in doors_open:
-                    name, color = name_color_from_value(char, self.owner.world_tendency)
-                    doors.append(self.create_door(room, "open", char, name=name, color=color,
-                                                  x=room.x1 + x, y=room.y1 + y))
-                if char in doors_closed:
-                    name, color = name_color_from_value(char, self.owner.world_tendency)
-                    doors.append(self.create_door(room, "closed", char, name=name, color=color,
-                                                  x=room.x1 + x, y=room.y1 + y))
-
-        return doors
-
     def create_decor(self):
 
         if self.owner.tileset == "ascii":
             return
         # Generate rocks & rubble on floor tiles
         decor_odds = 0.1
-        decor_options = ["rocks", "bones", "flowers", "plants", "mushrooms"]
-        decormap = np.random.rand(self.height, self.width)
+        decor_options = ["rocks", "flowers", "plants", "mushrooms"]
+        decor_map = np.random.rand(self.height, self.width)
         for y in range(1, self.height - 1):
             for x in range(1, self.width - 1):
                 if not self.is_blocked(x, y) and not self.tiles[x][y].occupied:
 
-                    if decormap[y, x] < decor_odds and len(self.tiles[x][y].layers) == 0:
-                        option = randint(0, len(decor_options) - 1)
-
-                        if option == 0:
-                            name, color = name_color_from_value(tilemap.data.tiles["rocks"][0] - 0xE400, self.owner.world_tendency)
-                            char = tilemap.data.tiles["rocks"][randint(
-                                0, (len(tilemap.data.tiles["rocks"]) - 1))]
-                            self.tiles[x][y].layers.append((char, color))
-                            self.tiles[x][y].name = name
-
-                        if option == 1:
-                            name, color = name_color_from_value(tilemap.data.tiles["plants"][0] - 0xE400, self.owner.world_tendency)
-                            char = tilemap.data.tiles["plants"][randint(
-                                0, (len(tilemap.data.tiles["plants"]) - 1))]
-                            self.tiles[x][y].layers.append((char, color))
-                            self.tiles[x][y].name = name
-
-                        if option == 2:
-                            name, color = name_color_from_value(tilemap.data.tiles["flowers"][0] - 0xE400, self.owner.world_tendency)
-                            char = tilemap.data.tiles["flowers"][randint(
-                                0, (len(tilemap.data.tiles["flowers"]) - 1))]
-                            self.tiles[x][y].layers.append((char, color))
-                            self.tiles[x][y].name = name
-
-                        if option == 3:
-                            name, color = name_color_from_value(tilemap.data.tiles["mushrooms"] - 0xE400, self.owner.world_tendency)
-                            char = tilemap.data.tiles["mushrooms"]
-                            self.tiles[x][y].layers.append((char, color))
-                            self.tiles[x][y].name = name
+                    if decor_map[y, x] < decor_odds and len(self.tiles[x][y].layers) == 0:
+                        name = choice(decor_options)
+                        char = get_tile_variant(name)
+                        color = get_color(name, mod=self.owner.world_tendency)
+                        self.tiles[x][y].layers.append((char, color))
+                        self.tiles[x][y].name = name
 
                     if self.owner.world_tendency < 0:
                         if randint(1, 4) >= self.tiles[x][y].seed and len(self.tiles[x][y].layers) == 0:
                             if abs(self.owner.world_tendency) * 33 > randint(1, 100):
-                                name, color = name_color_from_value(tilemap.data.tiles["bones"][0] - 0xE400, self.owner.world_tendency)
-                                char = tilemap.data.tiles["bones"][randint(
-                                    0, (len(tilemap.data.tiles["bones"]) - 1))]
+                                name = "bones"
+                                char = get_tile_variant(name)
+                                color = get_color(name, mod=self.owner.world_tendency)
                                 self.tiles[x][y].layers.append((char, color))
                                 self.tiles[x][y].name = name
 
@@ -986,7 +935,7 @@ class GameMap:
 
 class Room:
     def __init__(self, x1=0, y1=0, w=5, h=5, wall_color="dark gray", floor_color="darkest amber",
-                 wall="brick", floor="floor", tiled=False, name=None, lightness=1.0):
+                 wall="wall_brick", floor="floor", tiled=False, name=None, lightness=1.0):
         self.x1 = x1
         self.y1 = y1
         self.w = w

@@ -1,5 +1,6 @@
 from bearlibterminal import terminal as blt
-from map_objects import tilemap
+
+import options
 
 
 class ChooseLevel:
@@ -27,7 +28,7 @@ class ChooseLevel:
         for item in self.data:
             name = item["title"]
             self.items.append(name)
-            if tilemap.data.tileset == "oryx":
+            if options.data.gfx == "oryx":
                 self.items_icons.append(0xE000 + 399)
             else:
                 self.items_icons.append("#")

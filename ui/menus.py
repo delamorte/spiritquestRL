@@ -2,14 +2,14 @@ from math import floor
 
 from bearlibterminal import terminal as blt
 
+import options
 from components.menus.avatar_info import AvatarInfo
 from components.menus.choose_animal import ChooseAnimal
 from components.menus.choose_level import ChooseLevel
 from components.menus.level_up import LevelUp
 from components.menus.upgrade_skills import UpgradeSkills
 from game_states import GameStates
-from color_functions import get_monster_color
-from map_objects import tilemap
+from map_objects.tilemap import get_color
 from ui.elements import UIElements
 
 
@@ -69,7 +69,7 @@ class Menus:
                 self.owner.fov_recompute = True
 
             blt.layer(0)
-            self.owner.render_functions.clear_camera(5)
+            self.owner.render_functions.clear_camera(1)
             blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 5,
                      menu.heading, self.text_wrap, 0, menu.align)
 
@@ -91,12 +91,14 @@ class Menus:
                 if menu.items_icons:
                     # Draw icon tile
                     blt.layer(1)
-                    blt.color(get_monster_color(sel))
-                    if tilemap.data.tileset == "ascii":
+                    color = get_color(sel)
+                    if color is None or color == "default":
+                        color = "amber"
+                    blt.color(color)
+                    if options.data.gfx == "ascii":
                         blt.puts(int(self.center_x / 2),
                                  self.center_y + i * menu.margin_y, menu.items_icons[i], 0, 0, menu.align)
                     else:
-
                         blt.puts(int(self.center_x / 2), self.center_y +
                                  i * menu.margin_y - 1, "[U+" + hex(menu.items_icons[i]) + "]", 0, 0, menu.align)
 
@@ -167,7 +169,6 @@ class Menus:
 
     def create_or_show_menu(self, data):
         blt.layer(1)
-        self.owner.render_functions.clear_camera(5)
 
         if data.name == "choose_animal":
             if self.choose_animal:

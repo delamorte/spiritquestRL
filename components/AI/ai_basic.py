@@ -1,6 +1,6 @@
 from math import ceil
 from random import choices, randint, choice
-from components.animation import Animation
+
 from data import json_data
 from ui.message import Message
 

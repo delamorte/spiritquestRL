@@ -1,20 +1,18 @@
 from components.light_source import LightSource
 from ui.message import Message
 
-misc_decor = ["grass", "rubble", "rocks", "shrub", "bones"]
-light_sources = ["candle", "lantern"]
-
 
 class Item:
-    def __init__(self, name, pickable=True, interactable=False):
+    def __init__(self, name, pickable=True, interactable=False, light_source=False):
         self.owner = None
         self.name = name
         self.pickable = pickable
         self.interactable = interactable
+        self.light_source = light_source
 
     def set_attributes(self, game_map):
 
-        if self.name in light_sources:
+        if self.light_source:
             light_component = LightSource(name=self.name)
             self.owner.light_source = light_component
             self.owner.light_source.owner = self.owner
@@ -23,14 +21,14 @@ class Item:
 
     def interaction(self, game_map):
         results = []
-        if self.name == "candle" and self.owner.light_source:
-            msg = Message(msg="You blow out the candle.")
+        if self.light_source and self.owner.light_source:
+            msg = Message(msg="You put out the {0}.".format(self.name))
             results.append(msg)
             self.owner.light_source = None
 
-        elif self.name == "candle" and not self.owner.light_source:
+        elif self.light_source and not self.owner.light_source:
             self.set_attributes(game_map)
-            msg = Message(msg="You light the candle.")
+            msg = Message(msg="You light the {0}.".format(self.name))
             results.append(msg)
 
         return results

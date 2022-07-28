@@ -1,5 +1,6 @@
-from map_objects import tilemap
 from random import randint
+
+from map_objects.tilemap import get_tile, get_color
 
 
 class Tile:
@@ -21,9 +22,9 @@ class Tile:
         self.explored = False
         self.visited = False
         self.seed = randint(1, 100)
-        self.char = tilemap.data.tiles["floor"]
+        self.char = get_tile("floor")
         self.layers = []
-        self.color = "darkest amber"
+        self.color = get_color("floor")
         self.name = None
         self.spawnable = False
         self.occupied = False
