@@ -1,6 +1,4 @@
-import numpy as np
 from tcod import map
-from tcod.map import compute_fov
 
 
 class LightSource:

@@ -1,6 +1,3 @@
-from map_objects import tilemap
-
-
 class Viewport:
     def __init__(self, x, y, w, h):
         self.owner = None

@@ -1,5 +1,6 @@
-from bearlibterminal import terminal as blt
 from math import ceil
+
+from bearlibterminal import terminal as blt
 
 padding_left = 10
 padding_right = 10

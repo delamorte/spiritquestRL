@@ -1,5 +1,3 @@
-from data import json_data
-from map_objects import tilemap
 from random import randint
 
 from map_objects.tilemap import get_tile, get_color

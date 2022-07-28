@@ -4,12 +4,9 @@ from random import randint, choice
 import numpy as np
 import tcod
 
-import options
 from components.animation import Animation
 from data import json_data
-from game_states import GameStates
 from helpers import get_article
-from map_objects import tilemap
 from map_objects.tilemap import get_tile
 from ui.message import Message
 

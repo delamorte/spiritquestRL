@@ -1,7 +1,7 @@
 from random import choice
 
-from components.abilities import Abilities
 from components.AI.ai_basic import AIBasic
+from components.abilities import Abilities
 from components.animations import Animations
 from components.entity import Entity
 from components.fighter import Fighter

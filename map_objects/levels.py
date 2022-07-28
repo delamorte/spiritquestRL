@@ -1,10 +1,8 @@
 from random import choice, random, choices
 
 import options
-from data import json_data
-from map_objects.game_map import GameMap
-from map_objects import tilemap
 from descriptions import level_biomes, meditate_params
+from map_objects.game_map import GameMap
 from map_objects.tilemap import get_fighters_by_attribute
 from ui.menus import MenuData
 

@@ -1,17 +1,15 @@
-from bearlibterminal import terminal as blt
-from collections import Counter
-
-import options
-from game_states import GameStates
-from helpers import get_article
-from textwrap import shorten, fill
-import numpy as np
-from map_objects import tilemap
-from scipy.spatial.distance import cityblock
-from color_functions import argb_from_color
 import random
 from ctypes import c_uint32, addressof
+from textwrap import fill
 
+import numpy as np
+from bearlibterminal import terminal as blt
+from scipy.spatial.distance import cityblock
+
+import options
+from color_functions import argb_from_color
+from game_states import GameStates
+from helpers import get_article
 from ui.message import Message
 
 

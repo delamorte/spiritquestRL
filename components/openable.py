@@ -1,7 +1,4 @@
-import options
-from data import json_data
-from map_objects import tilemap
-from map_objects.tilemap import get_tile_by_attribute, get_tile_object, get_tile
+from map_objects.tilemap import get_tile_object, get_tile
 from ui.message import Message
 
 

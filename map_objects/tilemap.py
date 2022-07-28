@@ -1,4 +1,5 @@
-from random import choice, randint
+from random import choice
+
 import options
 from data import json_data
 

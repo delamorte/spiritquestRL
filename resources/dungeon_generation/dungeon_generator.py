@@ -16,10 +16,11 @@ each of the algorithm classes to be easily portable into other
 projects. My success in that reguard is up for debate.
 '''
 
-import libtcodpy as libtcod
 import random
-from math import sqrt
 from collections import OrderedDict
+from math import sqrt
+
+import libtcodpy as libtcod
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 60

@@ -1,9 +1,11 @@
 # coding=utf-8
 
 from __future__ import division
+
 from ctypes import c_uint32, addressof
-from bearlibterminal import terminal as blt
+
 import numpy as np
+from bearlibterminal import terminal as blt
 
 
 def test_dynamic_sprites(game_map, ui_elements, options):

@@ -1,25 +1,26 @@
+import xml.etree.ElementTree as ET
+from random import choice, choices, randint
+
+import numpy as np
 from tcod.map import compute_fov
 
+from components.AI.ai_basic import AIBasic
 from components.AI.ai_caster import AICaster
 from components.abilities import Abilities
-from components.AI.ai_basic import AIBasic
 from components.animations import Animations
+from components.entity import Entity
 from components.fighter import Fighter
 from components.item import Item
-from components.status_effects import StatusEffects
-from components.entity import Entity
-from map_objects.tile import Tile
-from random import choice, choices, randint
-from components.stairs import Stairs
-from components.openable import Openable
-from components.wall import Wall
 from components.light_source import LightSource
+from components.openable import Openable
+from components.stairs import Stairs
+from components.status_effects import StatusEffects
+from components.wall import Wall
+from map_objects.tile import Tile
 from map_objects.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant, \
     get_fighters_by_attribute
 from resources.dungeon_generation.dungeon_generator import DrunkardsWalk, MessyBSPTree, CellularAutomata, \
     MazeWithRooms
-import xml.etree.ElementTree as ET
-import numpy as np
 
 
 class GameMap:

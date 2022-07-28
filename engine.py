@@ -1,15 +1,12 @@
 import pickle
-import threading
-import time
 from ctypes import addressof, c_uint32
 from math import floor
 
-import numpy as np
 from bearlibterminal import terminal as blt
 
+import options
 from actions import Actions
 from camera import Camera
-from color_functions import argb_from_color
 from components.abilities import Abilities
 from components.animations import Animations
 from components.entity import Entity
@@ -21,11 +18,9 @@ from components.player import Player
 from components.status_effects import StatusEffects
 from components.summoner import Summoner
 from data import json_data
-from map_objects import tilemap
 from game_states import GameStates
 from input_handlers import handle_keys
 from map_objects.levels import Levels
-import options
 from render_functions import RenderFunctions
 from ui.elements import UIElements
 from ui.menus import Menus, MenuData

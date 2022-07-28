@@ -1,6 +1,5 @@
 from bearlibterminal import terminal as blt
-from data import json_data
-from map_objects import tilemap
+
 from ui.message import Message
 
 
