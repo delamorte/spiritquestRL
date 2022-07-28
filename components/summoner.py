@@ -61,7 +61,7 @@ class Summoner:
             self.summoned_entities.append(monster)
             msg = Message("A friendly {0} appears!".format(entity_name), style="xtra")
             msgs.append(msg)
-            monster.remark(random=False, game_map=game_map)
+            monster.remark(chance=100, game_map=game_map)
             return msgs
 
         return msgs

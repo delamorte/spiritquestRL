@@ -25,7 +25,6 @@ class Stairs:
             self.owner.light_source = light_component
             self.owner.light_source.owner = self.owner
             self.owner.light_source.initialize_fov(game_map)
-            #self.owner.light_source.recompute_fov(game_map)
 
     def interaction(self, levels):
         levels.change(self.destination[0])

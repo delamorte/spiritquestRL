@@ -152,10 +152,7 @@ class RenderFunctions:
         bound_x2 = game_camera.bound_x2 * self.owner.ui.offset_x
         bound_y2 = game_camera.bound_y2 * self.owner.ui.offset_y
         # Clear what's drawn in camera
-        if GameStates.TARGETING or self.owner.cursor.cursor:
-            self.clear_camera(3)
-        else:
-            self.clear_camera(2)
+        self.clear_camera(3)
         # Set boundaries if map is smaller than viewport
         if game_map.width < game_camera.width:
             bound_x2 = game_map.width * self.owner.ui.offset_x
@@ -448,14 +445,11 @@ class RenderFunctions:
 
     def draw_indicator(self, entity):
         # Draw player indicator
-        blt.layer(1)
+        blt.layer(3)
         x, y = self.owner.game_camera.get_coordinates(entity.x, entity.y)
         blt.color(entity.indicator_color)
-        if entity.occupied_tiles is not None:
-            return
-        else:
-            blt.put(x * options.data.tile_offset_x, y *
-                    options.data.tile_offset_y, options.data.indicator)
+        blt.put(x * options.data.tile_offset_x, y *
+                options.data.tile_offset_y, options.data.indicator)
 
         if entity.ai and entity.ai.cant_see_player:
             blt.color(None)
@@ -482,7 +476,14 @@ class RenderFunctions:
         else:
             hp_bar = full_hp
 
-        blt.puts(x * options.data.tile_offset_x, y * options.data.tile_offset_y + 2, hp_bar)
+        if entity.occupied_tiles is not None:
+            offset_y = 3
+            offset_x = 2
+        else:
+            offset_y = 0
+            offset_x = 0
+
+        blt.puts(x * options.data.tile_offset_x + offset_x, y * options.data.tile_offset_y + 2 + offset_y, hp_bar)
 
     def draw_minimap(self):
         blt.layer(1)
@@ -574,7 +575,7 @@ class RenderFunctions:
                 visible = game_map.visible[animation.target.x, animation.target.y]
                 if visible:
                     x, y = self.owner.game_camera.get_coordinates(animation.target.x, animation.target.y)
-                    blt.layer(1)
+                    blt.layer(3)
                     c = blt.color_from_name(animation.color)
                     argb = argb_from_color(c)
                     try:
@@ -799,6 +800,17 @@ class RenderFunctions:
                            options.data.tile_offset_y, 2, 2)
 
     def clear_camera(self, n, w=None, h=None):
+        """
+        Clears all entities in n layers from blt camera area.
+        Layers:
+        0 - background, ground tiles
+        1 - objects, ui
+        2 - player
+        3 - overlay elements, such as animations and indicator icons
+        :param n: numbers of layers to clear
+        :param w: width of area to clear
+        :param h: height of area to clear
+        """
         if not w:
             w = self.owner.ui.viewport.offset_w-1
         if not h:

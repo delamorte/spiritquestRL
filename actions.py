@@ -359,14 +359,6 @@ class Actions:
                     self.owner.animations_buffer.extend(entity.animations.buffer)
                     self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
                     self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
-                    if entity.occupied_tiles is not None:
-                        self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y + 1].remove_entity(entity)
-                        self.owner.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y + 1].remove_entity(entity)
-                        self.owner.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y].remove_entity(entity)
-
-                        self.owner.levels.current_map.tiles[entity.x][entity.y + 1].add_entity(entity)
-                        self.owner.levels.current_map.tiles[entity.x + 1][entity.y + 1].add_entity(entity)
-                        self.owner.levels.current_map.tiles[entity.x + 1][entity.y].add_entity(entity)
 
                     self.owner.fov_recompute = True
                     if combat_msg:
@@ -400,7 +392,11 @@ class Actions:
 
     def ally_actions(self):
 
-        for entity in self.owner.levels.current_map.entities["allies"]:
+        allies = self.owner.levels.current_map.entities["allies"]
+        npcs = self.owner.levels.current_map.entities["npcs"]
+        allies_npcs = allies + npcs
+
+        for entity in allies_npcs:
             entity.visible = False
             visible = self.owner.levels.current_map.visible[entity.x, entity.y]
             if visible:
@@ -446,14 +442,6 @@ class Actions:
                     self.owner.animations_buffer.extend(entity.animations.buffer)
                     self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
                     self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
-                    if entity.occupied_tiles is not None:
-                        self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y + 1].remove_entity(entity)
-                        self.owner.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y + 1].remove_entity(entity)
-                        self.owner.levels.current_map.tiles[prev_pos_x + 1][prev_pos_y].remove_entity(entity)
-
-                        self.owner.levels.current_map.tiles[entity.x][entity.y + 1].add_entity(entity)
-                        self.owner.levels.current_map.tiles[entity.x + 1][entity.y + 1].add_entity(entity)
-                        self.owner.levels.current_map.tiles[entity.x + 1][entity.y].add_entity(entity)
 
                     self.owner.fov_recompute = True
                     if combat_msg:

@@ -6,7 +6,7 @@ from ui.message import Message
 
 
 class AIBasic:
-    def __init__(self, ally=False):
+    def __init__(self, ally=False, passive=False):
         self.owner = None
         self.action_cost = 0
         self.time_to_act = 0
@@ -19,6 +19,7 @@ class AIBasic:
         self.wait_first_turn = False
         self.cant_see_player = False
         self.path = None
+        self.passive = passive
         self.weights = {
             "heal_self": 5,
             "escape": 4,
@@ -32,6 +33,9 @@ class AIBasic:
             self.wait_first_turn = True
 
     def take_turn(self, target, game_map, entities, time):
+        if self.passive:
+            self.owner.remark(game_map=game_map)
+            return None
         if self.wait_first_turn:
             self.wait_first_turn = False
             return None

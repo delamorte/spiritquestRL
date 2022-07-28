@@ -69,7 +69,7 @@ class Menus:
                 self.owner.fov_recompute = True
 
             blt.layer(0)
-            self.owner.render_functions.clear_camera(2)
+            self.owner.render_functions.clear_camera(3)
             blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 5,
                      menu.heading, self.text_wrap, 0, menu.align)
 

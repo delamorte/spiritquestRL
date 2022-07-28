@@ -206,7 +206,7 @@ class Entity:
 
         return death_message
 
-    def remark(self, random=True, sneak=False, game_map=None):
+    def remark(self, chance=10, sneak=False, game_map=None):
         if self.x > game_map.width - 5 or self.x < 5:
             return
         if self.animations.buffer:
@@ -217,6 +217,5 @@ class Entity:
             remark = choice(self.remarks)
         else:
             return
-        chance = randint(0, 6) if random else 0
-        if chance == 0:
+        if chance >= (100 - randint(0, 100)):
             self.animations.buffer.append(Animation(self, self, dialog=remark, target_self=True))

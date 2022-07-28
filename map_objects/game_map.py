@@ -153,7 +153,7 @@ class GameMap:
         for y in range(room.y1, room.y2):
             for x in range(room.x1, room.x2):
                 self.tiles[x][y].occupied = True
-                if y != exclude_light_y:
+                if exclude_light_y is not None and y not in exclude_light_y:
                     self.tiles[x][y].natural_light_level = room.lightness
 
                 if room.tiled:
@@ -289,7 +289,7 @@ class GameMap:
 
         return wall_count
 
-    def get_rand_unoccupied_space(self, w, h):
+    def get_random_unoccupied_space(self, w, h):
         x1 = randint(2, self.width - w - 2)
         y1 = randint(2, self.height - h - 2)
         x2 = x1 + w
@@ -304,6 +304,16 @@ class GameMap:
             y2 = y1 + h
 
         return x1, y1
+
+    # TODO: Think of a better way to do this
+    def get_random_unoccupied_space_near_room(self, room, radius=2):
+        x = randint(room.x1 - radius, room.x2 + radius)
+        y = randint(room.y1 - radius, room.y2 + radius)
+        while self.tiles[x][y].occupied or self.tiles[x][y].entities_on_tile:
+            x = randint(room.x1 - radius, room.x2 + radius)
+            y = randint(room.y1 - radius, room.y2 + radius)
+
+        return x, y
 
     def generate_hub(self):
 
@@ -321,27 +331,31 @@ class GameMap:
         # door_home = self.create_door(home, "open", random=True)
         objects = []
         shaman_room = TiledRoom(name="home", lightness=0.8, filename="hub_shaman")
-        x1, y1 = self.get_rand_unoccupied_space(w, h)
+        x1, y1 = self.get_random_unoccupied_space(w, h)
         shaman_room.update_coordinates(x1, y1)
-        objects.extend(self.create_room(shaman_room, exclude_light_y=shaman_room.y2-1))
+        excludes_y = (shaman_room.y2-1,)
+        objects.extend(self.create_room(shaman_room, exclude_light_y=excludes_y))
 
         # Generate dungeon entrance
         # Make sure room doesn't overlap with existing rooms
         w = h = 10
-        x1, y1 = self.get_rand_unoccupied_space(w, h)
+        x1, y1 = self.get_random_unoccupied_space(w, h)
         d_entrance = Room(x1, y1, w, h, "dark amber", "darkest amber", wall="wall_brick", name="d_entrance")
 
         objects.extend(self.create_room(d_entrance))
         door_d_entrance = self.create_door(d_entrance, "locked", random=True)
 
         graveyard = TiledRoom(name="graveyard", lightness=0.5, filename="graveyard")
-        x1, y1 = self.get_rand_unoccupied_space(w, h)
+        x1, y1 = self.get_random_unoccupied_space(w, h)
         graveyard.update_coordinates(x1, y1)
-        objects.extend(self.create_room(graveyard, exclude_light_y=graveyard.y2-1))
+        excludes_y = (graveyard.y2-1, graveyard.y1,)
+        objects.extend(self.create_room(graveyard, exclude_light_y=excludes_y))
 
         doors = [door_d_entrance]
 
         objects.extend(self.generate_trees(1, 1, self.width - 1, self.height - 1, 20))
+
+        # objects.extend(self.create_entities())
 
         center_x, center_y = self.rooms["d_entrance"].get_center()
 
@@ -366,7 +380,18 @@ class GameMap:
             else:
                 map_objects.append(obj)
 
-        self.entities = {"objects": objects, "stairs": map_stairs, "doors": doors, "items": map_items}
+        # Place player
+        center_x, center_y = self.rooms["home"].get_center()
+        self.owner.player.x, self.owner.player.y = center_x - 1, center_y - 1
+
+        self.entities = {"objects": objects, "stairs": map_stairs, "doors": doors, "items": map_items, "npcs": []}
+
+        npcs = []
+        npc_name = "black king crow"
+        npcs.append((npc_name, get_tile(npc_name)))
+        location = self.get_random_unoccupied_space_near_room(shaman_room)
+        self.create_entities(npcs, "npcs", location=location)
+
         transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
         self.transparent = transparency(self.tiles)
 
@@ -678,6 +703,7 @@ class GameMap:
 
     def place_entities(self):
 
+        # Place player
         player = self.owner.player
         if self.name == "hub":
             center_x, center_y = self.rooms["home"].get_center()
@@ -729,40 +755,7 @@ class GameMap:
             tile = get_tile("keeper of dreams")
             monsters.append((boss, tile))
 
-            for i in range(number_of_monsters):
-                x = randint(1, self.width - 1)
-                y = randint(1, self.height - 1)
-                while self.is_blocked(x, y):
-                    x, y = randint(1, self.width -
-                                   1), randint(1, self.height - 1)
-
-                if not any([entity for entity in self.entities["monsters"] if entity.x == x and entity.y == y]):
-                    # r = randint(0, 2)
-                    name, char = monsters[0]
-                    f_data = self.owner.owner.data.fighters[name]
-                    color = get_color(name, f_data, self.owner.world_tendency)
-                    remarks = f_data["remarks"]
-                    fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
-                                                atk=f_data["atk"], mv_spd=f_data["mv_spd"],
-                                                atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
-                    ai_component = AIBasic()
-                    light_component = LightSource(radius=fighter_component.fov)
-                    status_effects_component = StatusEffects(name)
-                    animations_component = Animations()
-                    monster = Entity(x, y, 1, color, name, char=char, blocks=True, fighter=fighter_component,
-                                     ai=ai_component,
-                                     light_source=light_component,
-                                     status_effects=status_effects_component, boss=True, remarks=remarks,
-                                     animations=animations_component)
-                    monster.abilities = Abilities(monster)
-                    monster.xtra_info = "It appears to be a terrifying red dragon."
-                    monster.light_source.initialize_fov(self)
-                    self.tiles[x][y].add_entity(monster)
-                    self.tiles[x][y + 1].add_entity(monster)
-                    self.tiles[x + 1][y + 1].add_entity(monster)
-                    self.tiles[x + 1][y].add_entity(monster)
-                    monster.occupied_tiles = [(x, y), (x, y + 1), (x + 1, y + 1), (x + 1, y)]
-                    self.entities["monsters"].append(monster)
+            self.create_entities(monsters, "monsters", populate_pool=number_of_monsters)
 
         if stairs and self.name == "cavern" + str(stairs.floor + 1):
 
@@ -770,39 +763,7 @@ class GameMap:
             # number_of_monsters = 0
             monsters = [("frog", get_tile("frog"))]
 
-            for i in range(number_of_monsters):
-                x = randint(1, self.width - 1)
-                y = randint(1, self.height - 1)
-                while self.is_blocked(x, y):
-                    x, y = randint(1, self.width -
-                                   1), randint(1, self.height - 1)
-
-                if not any([entity for entity in self.entities["monsters"] if entity.x == x and entity.y == y]):
-                    # r = randint(0, 2)
-                    name, char = monsters[0]
-                    f_data = self.owner.owner.data.fighters[name]
-                    color = get_color(name, f_data, self.owner.world_tendency)
-                    remarks = f_data["remarks"]
-                    fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
-                                                atk=f_data["atk"], mv_spd=f_data["mv_spd"],
-                                                atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
-                    ai_component = AIBasic()
-                    light_component = LightSource(radius=fighter_component.fov)
-                    status_effects_component = StatusEffects(name)
-                    animations_component = Animations()
-                    monster = Entity(x, y, 1,
-                                     color, name,
-                                     char=char,
-                                     blocks=True, fighter=fighter_component, ai=ai_component,
-                                     light_source=light_component,
-                                     status_effects=status_effects_component, remarks=remarks,
-                                     animations=animations_component)
-                    monster.abilities = Abilities(monster)
-                    monster.light_source.initialize_fov(self)
-                    self.tiles[x][y].add_entity(monster)
-                    self.entities["monsters"].append(monster)
-
-        self.tiles[player.x][player.y].add_entity(player)
+            self.create_entities(monsters, "monsters", populate_pool=number_of_monsters)
 
         if self.name == "dream":
 
@@ -820,40 +781,9 @@ class GameMap:
 
             monster_pool = choices(monsters, spawn_rates, k=number_of_monsters)
 
-            for mon in monster_pool:
-                x = randint(1, self.width - 1)
-                y = randint(1, self.height - 1)
-                while self.is_blocked(x, y) or x == player.x and y == player.y:
-                    x, y = randint(1, self.width -
-                                   1), randint(1, self.height - 1)
+            self.create_entities(monster_pool, "monsters")
 
-                if not any([entity for entity in self.entities["monsters"] if entity.x == x and entity.y == y]):
-                    name = mon[0]
-                    char = mon[1]
-                    f_data = self.owner.owner.data.fighters[name]
-                    color = get_color(name, f_data, self.owner.world_tendency)
-                    remarks = f_data["remarks"]
-                    fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
-                                                atk=f_data["atk"], mv_spd=f_data["mv_spd"],
-                                                atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
-                    if "ai" in f_data.keys() and f_data["ai"] == "caster":
-                        ai_component = AICaster()
-                    else:
-                        ai_component = AIBasic()
-                    light_component = LightSource(radius=fighter_component.fov)
-                    status_effects_component = StatusEffects(name)
-                    animations_component = Animations()
-                    monster = Entity(x, y, 1,
-                                     color, name,
-                                     char=char,
-                                     blocks=True, fighter=fighter_component, ai=ai_component,
-                                     light_source=light_component,
-                                     status_effects=status_effects_component, remarks=remarks,
-                                     animations=animations_component)
-                    monster.abilities = Abilities(monster)
-                    monster.light_source.initialize_fov(self)
-                    self.tiles[x][y].add_entity(monster)
-                    self.entities["monsters"].append(monster)
+        self.tiles[player.x][player.y].add_entity(player)
 
     def create_door(self, room=None, state="open", tile=None, char=None,
                     name="door", color=None, random=False, x=None, y=None):
@@ -924,6 +854,69 @@ class GameMap:
                                 self.tiles[x][y].layers.append((char, color))
                                 self.tiles[x][y].name = name
 
+    def create_entities(self, pool=None, category=None, populate_pool=None, location=None):
+        """
+        Creates and adds entities to map from the given pool.
+        :param pool: List of entities in format (name, char)
+        :param category: Entity category, e.g. monsters, npcs, allies
+        :param populate_pool: If number set, populates the pool with amount
+        :param location: Tuple of coordinates to place entity, random if None
+        """
+        player = self.owner.player
+
+        if populate_pool is not None:
+            pool = choices(pool, k=populate_pool)
+
+        for item in pool:
+            if location is None:
+                x = randint(1, self.width - 1)
+                y = randint(1, self.height - 1)
+                while self.is_blocked(x, y) or x == player.x and y == player.y:
+                    x, y = randint(1, self.width -
+                                   1), randint(1, self.height - 1)
+            else:
+                x, y = location[0], location[1]
+
+            if not any([entity for entity in self.entities[category] if entity.x == x and entity.y == y]):
+                name = item[0]
+                char = item[1]
+                f_data = self.owner.owner.data.fighters[name]
+                color = get_color(name, f_data, self.owner.world_tendency)
+                remarks = f_data["remarks"]
+                fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
+                                            atk=f_data["atk"], mv_spd=f_data["mv_spd"],
+                                            atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
+                if "ai" in f_data.keys() and f_data["ai"] == "caster":
+                    ai_component = AICaster()
+                elif "ai" in f_data.keys() and f_data["ai"] == "npc":
+                    ai_component = AIBasic(passive=True)
+                else:
+                    ai_component = AIBasic()
+                light_component = LightSource(radius=fighter_component.fov)
+                status_effects_component = StatusEffects(name)
+                animations_component = Animations()
+                monster = Entity(x, y, 1,
+                                 color, name,
+                                 char=char,
+                                 blocks=True, fighter=fighter_component, ai=ai_component,
+                                 light_source=light_component,
+                                 status_effects=status_effects_component, remarks=remarks,
+                                 animations=animations_component)
+                monster.abilities = Abilities(monster)
+                monster.light_source.initialize_fov(self)
+                if "xtra_info" in f_data.keys():
+                    monster.xtra_info = f_data["xtra_info"]
+                if category == "npcs":
+                    monster.ai.ally = True
+                    monster.indicator_color = "light green"
+                if f_data["size"] == "gigantic":
+                    monster.boss = True
+                    monster.occupied_tiles = [(x, y), (x, y + 1), (x + 1, y + 1), (x + 1, y)]
+
+                self.tiles[x][y].add_entity(monster)
+                self.entities[category].append(monster)
+
+
     @staticmethod
     def entity_at_coordinates(entities, x, y):
         result = []
@@ -932,6 +925,8 @@ class GameMap:
                 if entity.x == x and entity.y == y:
                     result.append(entity)
         return result
+
+
 
 
 class Room:

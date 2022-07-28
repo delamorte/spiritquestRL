@@ -590,6 +590,7 @@
         "light": false,
         "neutral": false,
         "chaos": false,
+        "xtra_info": "It appears to be a terrifying red dragon.",
         "abilities": [
             "claws",
             "diseasing bite",
@@ -597,5 +598,27 @@
             "call allies"
         ],
         "remarks": ["THE DREAMER IS AWAKE"]
+    },
+    "black king crow": {
+        "hp": 40,
+        "ac": 3,
+        "ev": 6,
+        "atk": 5,
+        "mv_spd": 1,
+        "atk_spd": 1,
+        "size": "large",
+        "fov": 6,
+        "hex": "0xE000",
+        "tile": 551,
+        "ascii": "C",
+        "colors": ["azure"],
+        "light": true,
+        "neutral": true,
+        "chaos": true,
+        "ai": "npc",
+        "abilities": [],
+        "remarks": ["I am the black crow king, mhm.", "I'm still here rolling after everybody's gone",
+        "I am the black crow king, Honey, I won't say it again",
+        "I am the black crow king, Keeper of the forgotten corn"]
     }
 }

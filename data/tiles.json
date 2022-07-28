@@ -616,7 +616,7 @@
     "openable": false,
     "interactable": false,
     "pickable": false,
-    "light_source": true,
+    "light_source": false,
     "stairs": true
   },
   "stairs_up": {
