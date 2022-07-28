@@ -148,6 +148,7 @@
               "OK."
             ],
             "go_to": "300",
+            "reward": "skill: random_crow, 1",
             "set_state": "quest_completed"
           },
           {
