@@ -69,7 +69,7 @@ class Menus:
                 self.owner.fov_recompute = True
 
             blt.layer(0)
-            self.owner.render_functions.clear_camera(5)
+            self.owner.render_functions.clear_camera(1)
             blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 5,
                      menu.heading, self.text_wrap, 0, menu.align)
 
@@ -169,7 +169,6 @@ class Menus:
 
     def create_or_show_menu(self, data):
         blt.layer(1)
-        self.owner.render_functions.clear_camera(5)
 
         if data.name == "choose_animal":
             if self.choose_animal:

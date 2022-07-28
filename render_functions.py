@@ -151,7 +151,7 @@ class RenderFunctions:
         bound_x2 = game_camera.bound_x2 * self.owner.ui.offset_x
         bound_y2 = game_camera.bound_y2 * self.owner.ui.offset_y
         # Clear what's drawn in camera
-        self.clear_camera(6)
+        self.clear_camera(1)
         # Set boundaries if map is smaller than viewport
         if game_map.width < game_camera.width:
             bound_x2 = game_map.width * self.owner.ui.offset_x
@@ -423,9 +423,9 @@ class RenderFunctions:
                                self.ui_offset_y + 1, self.owner.ui.viewport.offset_w, 3)
 
     def draw_ui(self, element):
-        self.clear_camera(element.w, element.h, 5)
+        self.clear_camera(1, element.w, element.h)
         blt.color(element.owner.color)
-        blt.layer(6)
+        blt.layer(1)
 
         for x in range(element.offset_x+1, element.offset_x2):
             blt.put(x, element.offset_y, element.owner.tile_horizontal)
@@ -443,7 +443,7 @@ class RenderFunctions:
 
     def draw_indicator(self, entity):
         # Draw player indicator
-        blt.layer(4)
+        blt.layer(1)
         x, y = self.owner.game_camera.get_coordinates(entity.x, entity.y)
         blt.color(entity.indicator_color)
         if entity.occupied_tiles is not None:
@@ -458,7 +458,7 @@ class RenderFunctions:
                         options.data.tile_offset_y, 5, -5, '?')
 
     def draw_health_bar(self, entity):
-        blt.layer(4)
+        blt.layer(1)
         x, y = self.owner.game_camera.get_coordinates(entity.x, entity.y)
         full_hp = "[color=green].[color=green].[color=green].[color=green]."
         three_q_hp = "[color=green].[color=green].[color=green].[color=red]."
@@ -795,11 +795,11 @@ class RenderFunctions:
 
     def clear_camera(self, n, w=None, h=None):
         if not w:
-            w = self.owner.ui.viewport.offset_w
+            w = self.owner.ui.viewport.offset_w-1
         if not h:
-            h = self.owner.ui.viewport.offset_h
+            h = self.owner.ui.viewport.offset_h-1
         i = 0
-        while i < n:
+        while i <= n:
             blt.layer(i)
             blt.clear_area(1, 1, w, h)
             i += 1

@@ -171,7 +171,7 @@ class Engine:
         animations_component = Animations()
 
         player = Entity(
-            1, 1, 3, "default", "player", tile=f_data,
+            1, 1, 1, "default", "player", tile=f_data,
             blocks=True, player=player_component, fighter=fighter_component, inventory=inventory_component,
             light_source=light_component,
             summoner=summoner_component, indicator_color="gray", animations=animations_component,
@@ -234,6 +234,7 @@ class Engine:
     def game_loop(self):
 
         game_quit = False
+
         while not game_quit:
             if (blt.state(floor(blt.TK_WIDTH)) != self.ui.screen_w or
                     blt.state(floor(blt.TK_HEIGHT)) != self.ui.screen_h):

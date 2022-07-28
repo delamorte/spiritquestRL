@@ -182,7 +182,7 @@ class GameMap:
                         if tile["openable"]:
                             name = tile["name"]
                             door_component = Openable(name, char)
-                            door = Entity(x, y, 2,
+                            door = Entity(x, y, 1,
                                           color, name, tile=tile, door=door_component, stand_on_messages=False)
                             self.tiles[x][y].add_entity(door)
                             self.tiles[x][y].is_door = True
@@ -192,7 +192,7 @@ class GameMap:
                         elif tile["interactable"] or tile["pickable"]:
                             item_component = Item(name, pickable=tile["pickable"], interactable=tile["interactable"],
                                                   light_source=tile["light_source"])
-                            item = Entity(x, y, 2,
+                            item = Entity(x, y, 1,
                                           color, name, tile=tile, item=item_component)
                             if item.name == "flask":  # For testing "reveal" skill
                                 item.hidden = True
@@ -209,7 +209,7 @@ class GameMap:
                             entities.append(portal)
                         else:
                             wall_component = Wall(name=name, tile=tile)
-                            wall = Entity(x, y, 2,
+                            wall = Entity(x, y, 1,
                                           color, name, char=char, tile=tile, wall=wall_component)
                             self.tiles[x][y].add_entity(wall)
                             wall_component.set_attributes(self)
@@ -269,7 +269,7 @@ class GameMap:
         color = get_color(name)
         wall_component = Wall(name=name, tile=tile)
         tile_char = get_tile_variant(name, index)
-        wall = Entity(x, y, 2,
+        wall = Entity(x, y, 1,
                       color, name, tile=tile, char=tile_char, wall=wall_component)
         self.tiles[x][y].add_entity(wall)
         wall_component.set_attributes(self)
@@ -407,7 +407,7 @@ class GameMap:
                             char = get_tile_variant(name)
                             dead_tree_color = get_color(name)
                             wall_component = Wall(name)
-                            wall = Entity(x, y, 2, dead_tree_color, "dead tree",
+                            wall = Entity(x, y, 1, dead_tree_color, "dead tree",
                                           char=char, wall=wall_component)
 
                         else:
@@ -416,7 +416,7 @@ class GameMap:
                             if (y == 0 and x == 0) or y % 5 == 0:
                                 tree_color = get_color(name)
                             wall_component = Wall(name)
-                            wall = Entity(x, y, 2, tree_color, name,
+                            wall = Entity(x, y, 1, tree_color, name,
                                           char=char, wall=wall_component)
                         self.tiles[x][y].add_entity(wall)
                         wall_component.set_attributes(self)
@@ -477,7 +477,7 @@ class GameMap:
                             char = get_tile_variant(name)
                             dead_tree_color = get_color(name)
                             wall_component = Wall(name)
-                            wall = Entity(x, y, 2, dead_tree_color, "dead tree",
+                            wall = Entity(x, y, 1, dead_tree_color, "dead tree",
                                           char=char, wall=wall_component)
 
                         else:
@@ -486,7 +486,7 @@ class GameMap:
                             if (y == 0 and x == 0) or y % 5 == 0:
                                 tree_color = get_color(name)
                             wall_component = Wall(name)
-                            wall = Entity(x, y, 2, tree_color, name,
+                            wall = Entity(x, y, 1, tree_color, name,
                                           char=char, wall=wall_component)
                         self.tiles[x][y].add_entity(wall)
                         wall_component.set_attributes(self)
@@ -608,7 +608,7 @@ class GameMap:
                 name = "moss"
                 char = get_tile("moss")
                 wall_component = Wall(name)
-                wall = Entity(i, j, 2, color, name, char=char, wall=wall_component)
+                wall = Entity(i, j, 1, color, name, char=char, wall=wall_component)
                 wall_component.set_attributes(self)
                 objects.append(wall)
 
@@ -747,7 +747,7 @@ class GameMap:
                     light_component = LightSource(radius=fighter_component.fov)
                     status_effects_component = StatusEffects(name)
                     animations_component = Animations()
-                    monster = Entity(x, y, 3, color, name, char=char, blocks=True, fighter=fighter_component,
+                    monster = Entity(x, y, 1, color, name, char=char, blocks=True, fighter=fighter_component,
                                      ai=ai_component,
                                      light_source=light_component,
                                      status_effects=status_effects_component, boss=True, remarks=remarks,
@@ -788,7 +788,7 @@ class GameMap:
                     light_component = LightSource(radius=fighter_component.fov)
                     status_effects_component = StatusEffects(name)
                     animations_component = Animations()
-                    monster = Entity(x, y, 3,
+                    monster = Entity(x, y, 1,
                                      color, name,
                                      char=char,
                                      blocks=True, fighter=fighter_component, ai=ai_component,
@@ -841,7 +841,7 @@ class GameMap:
                     light_component = LightSource(radius=fighter_component.fov)
                     status_effects_component = StatusEffects(name)
                     animations_component = Animations()
-                    monster = Entity(x, y, 3,
+                    monster = Entity(x, y, 1,
                                      color, name,
                                      char=char,
                                      blocks=True, fighter=fighter_component, ai=ai_component,
@@ -879,7 +879,7 @@ class GameMap:
         if color is None:
             color = "dark amber"
         door_component = Openable(name, char, state)
-        door = Entity(x, y, 2, color, name, tile=tile, char=char,
+        door = Entity(x, y, 1, color, name, tile=tile, char=char,
                       door=door_component, stand_on_messages=False)
         self.tiles[x][y].add_entity(door)
         self.tiles[x][y].is_door = True
