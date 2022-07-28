@@ -74,7 +74,7 @@ class GameMap:
         self.visible[:] = compute_fov(
             self.transparent,
             (x, y),
-            radius=radius,
+            radius=radius
         )
         self.light_map = np.ones_like(self.visible, dtype=float)
         # If a tile is "visible" it should be added to "explored".
@@ -148,12 +148,13 @@ class GameMap:
         else:
             return list(filter(lambda entity: self.visible[entity.x, entity.y], entities))
 
-    def create_room(self, room):
+    def create_room(self, room, exclude_light_y=None):
         entities = []
         for y in range(room.y1, room.y2):
             for x in range(room.x1, room.x2):
                 self.tiles[x][y].occupied = True
-                self.tiles[x][y].natural_light_level = room.lightness
+                if y != exclude_light_y:
+                    self.tiles[x][y].natural_light_level = room.lightness
 
                 if room.tiled:
                     ground = room.layers[0][y - room.y1][x - room.x1]
@@ -322,7 +323,7 @@ class GameMap:
         shaman_room = TiledRoom(name="home", lightness=0.8, filename="hub_shaman")
         x1, y1 = self.get_rand_unoccupied_space(w, h)
         shaman_room.update_coordinates(x1, y1)
-        objects.extend(self.create_room(shaman_room))
+        objects.extend(self.create_room(shaman_room, exclude_light_y=shaman_room.y2-1))
 
         # Generate dungeon entrance
         # Make sure room doesn't overlap with existing rooms
@@ -336,7 +337,7 @@ class GameMap:
         graveyard = TiledRoom(name="graveyard", lightness=0.5, filename="graveyard")
         x1, y1 = self.get_rand_unoccupied_space(w, h)
         graveyard.update_coordinates(x1, y1)
-        objects.extend(self.create_room(graveyard))
+        objects.extend(self.create_room(graveyard, exclude_light_y=graveyard.y2-1))
 
         doors = [door_d_entrance]
 

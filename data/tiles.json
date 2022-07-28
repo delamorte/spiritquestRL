@@ -70,8 +70,8 @@
     "tile_variants": [
       51
     ],
-    "open": 50,
-    "closed": 51,
+    "open": 51,
+    "closed": 50,
     "locked": 51,
     "ascii": "¤",
     "ascii_open": "¤",

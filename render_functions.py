@@ -1,4 +1,3 @@
-import random
 from ctypes import c_uint32, addressof
 from textwrap import fill
 
@@ -31,9 +30,10 @@ class RenderFunctions:
         if not entity.cursor:
             argb = argb_from_color(c)
             a = argb[0]
-            r = min(int(argb[1] * game_map.light_map[entity.x, entity.y]), 255)
-            g = min(int(argb[2] * game_map.light_map[entity.x, entity.y]), 255)
-            b = min(int(argb[3] * game_map.light_map[entity.x, entity.y]), 255)
+            light_level = game_map.light_map[entity.x, entity.y]
+            r = min(int(argb[1] * light_level), 255)
+            g = min(int(argb[2] * light_level), 255)
+            b = min(int(argb[3] * light_level), 255)
 
             if entity.fighter and entity.status_effects.has_effect(name="invisibility"):
                 a = 100
@@ -93,6 +93,9 @@ class RenderFunctions:
                     results.append(Message(get_article(entity.name).capitalize() + " " + entity.name + "."))
                     results.append(Message(msg=str("x: " + (str(cursor.x) + ", y: " + str(cursor.y))), extend_line=True))
                     results.append(Message(str(", color: " + entity.color), extend_line=True))
+                    results.append(Message(str(", layer: " + str(entity.layer)), extend_line=True))
+                    results.append(Message(str(", light: " + str(game_map.light_map[entity.x, entity.y])), extend_line=True))
+                    print(str(game_map.tiles[entity.x][entity.y].natural_light_level))
 
                     if entity.xtra_info:
                         results.append(Message(msg=entity.xtra_info + ".", style="xtra", extend_line=True))
@@ -149,7 +152,10 @@ class RenderFunctions:
         bound_x2 = game_camera.bound_x2 * self.owner.ui.offset_x
         bound_y2 = game_camera.bound_y2 * self.owner.ui.offset_y
         # Clear what's drawn in camera
-        self.clear_camera(2)
+        if GameStates.TARGETING or self.owner.cursor.cursor:
+            self.clear_camera(3)
+        else:
+            self.clear_camera(2)
         # Set boundaries if map is smaller than viewport
         if game_map.width < game_camera.width:
             bound_x2 = game_map.width * self.owner.ui.offset_x
@@ -177,9 +183,10 @@ class RenderFunctions:
                     elif player.status_effects.has_effect(name="reveal") and game_map.tiles[map_x][map_y].targeting_zone:
                         light_level = 1.5
                     else:
+                        # light_level = 1.0
                         dist = float(cityblock(center, np.array([map_y, map_x])))
                         light_level = game_map.tiles[map_x][map_y].natural_light_level * \
-                                      (1.0 / (1.05 + 0.035 * dist + 0.025 * dist * dist))
+                                      (1.0 / (1.05 + 0.035 * dist + 0.015 * dist * dist))
 
                     if player.status_effects.has_effect(name="sneak") and game_map.tiles[map_x][map_y].targeting_zone:
                         light_level *= 0.5
@@ -235,16 +242,17 @@ class RenderFunctions:
         game_map = self.owner.levels.current_map
         game_camera = self.owner.game_camera
         for light in self.light_sources:
-            light_fov = np.where(light.fov_map.fov)
+            light.recompute_fov(game_map)
+            light_fov = np.where(light.fov_map)
             center = np.array([light.owner.y, light.owner.x])
 
-            for i in range(light_fov[0].size):
-                y, x = int(light_fov[0][i]), int(light_fov[1][i])
-                if game_map.visible[x, y]:
+            for j in range(light_fov[0].size):
+                x, y = int(light_fov[0][j]), int(light_fov[1][j])
+                if light.fov_map[x, y]:
                     v = np.array([y, x])
                     dist = float(cityblock(center, v))
                     light_level = game_map.tiles[x][y].natural_light_level * \
-                                  (1.0 / (0.2 + 0.1 * dist + 0.025 * dist * dist))
+                                  (1.0 / (0.2 + 0.1 * dist + 0.010 * dist * dist))
 
                     if game_map.light_map[x, y] < light_level:
                         game_map.light_map[x, y] = light_level
@@ -256,11 +264,10 @@ class RenderFunctions:
             blt.layer(0)
             c = blt.color_from_name(game_map.tiles[x][y].color)
             argb = argb_from_color(c)
-            flicker = random.uniform(0.95, 1.05) if options.data.flicker is True else 1
             a = argb[0]
-            r = min(int(argb[1] * game_map.light_map[x, y] * flicker), 255)
-            g = min(int(argb[2] * game_map.light_map[x, y] * flicker), 255)
-            b = min(int(argb[3] * game_map.light_map[x, y] * flicker), 255)
+            r = min(int(argb[1] * game_map.light_map[x, y]), 255)
+            g = min(int(argb[2] * game_map.light_map[x, y]), 255)
+            b = min(int(argb[3] * game_map.light_map[x, y]), 255)
 
             blt.color(blt.color_from_argb(a, r, g, b))
             blt.put(cam_x * options.data.tile_offset_x, cam_y * options.data.tile_offset_y,
@@ -273,9 +280,9 @@ class RenderFunctions:
                     c = blt.color_from_name(tile[1])
                     argb = argb_from_color(c)
                     a = argb[0]
-                    r = min(int(argb[1] * game_map.light_map[x, y] * flicker), 255)
-                    g = min(int(argb[2] * game_map.light_map[x, y] * flicker), 255)
-                    b = min(int(argb[3] * game_map.light_map[x, y] * flicker), 255)
+                    r = min(int(argb[1] * game_map.light_map[x, y]), 255)
+                    g = min(int(argb[2] * game_map.light_map[x, y]), 255)
+                    b = min(int(argb[3] * game_map.light_map[x, y]), 255)
                     blt.color(blt.color_from_argb(a, r, g, b))
                     blt.put(cam_x * options.data.tile_offset_x, cam_y * options.data.tile_offset_y,
                             tile[0])

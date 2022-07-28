@@ -63,7 +63,7 @@ class Engine:
         blt.set(window)
         blt.set("font: default")
         blt.set("input: filter=[keyboard]")
-        blt.composition(True)
+        #blt.composition(True)
         # Needed to avoid insta-close and flush the input queue
         blt.refresh()
         blt.read()

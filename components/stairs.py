@@ -21,11 +21,11 @@ class Stairs:
 
     def set_attributes(self, game_map):
         if self.name == "holy symbol":
-            light_component = LightSource(name=self.name)
+            light_component = LightSource(name=self.name, light_walls=False)
             self.owner.light_source = light_component
             self.owner.light_source.owner = self.owner
             self.owner.light_source.initialize_fov(game_map)
-            self.owner.light_source.recompute_fov(self.owner.x, self.owner.y)
+            #self.owner.light_source.recompute_fov(game_map)
 
     def interaction(self, levels):
         levels.change(self.destination[0])
