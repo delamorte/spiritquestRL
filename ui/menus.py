@@ -6,6 +6,7 @@ import options
 from components.menus.avatar_info import AvatarInfo
 from components.menus.choose_animal import ChooseAnimal
 from components.menus.choose_level import ChooseLevel
+from components.menus.dialogue_menu import DialogueMenu
 from components.menus.level_up import LevelUp
 from components.menus.upgrade_skills import UpgradeSkills
 from game_states import GameStates
@@ -15,7 +16,7 @@ from ui.elements import UIElements
 
 class Menus:
     def __init__(self, main_menu=None, choose_animal=None, choose_level=None, avatar_info=None,
-                 level_up=None, upgrade_skills=None):
+                 level_up=None, upgrade_skills=None, dialogue=None):
         self.owner = None
         self.main_menu = main_menu
         self.choose_animal = choose_animal
@@ -23,6 +24,7 @@ class Menus:
         self.avatar_info = avatar_info
         self.level_up = level_up
         self.upgrade_skills = upgrade_skills
+        self.dialogue = dialogue
         self.current_menu = None
         self.text_wrap = 60
         self.sel_index = 0
@@ -43,6 +45,8 @@ class Menus:
             self.level_up.owner = self
         if self.upgrade_skills:
             self.upgrade_skills.owner = self
+        if self.dialogue:
+            self.dialogue.owner = self
 
     def refresh(self):
         self.center_x = self.owner.ui.viewport.offset_center_x
@@ -213,6 +217,14 @@ class Menus:
                 upgrade_skills_menu = UpgradeSkills(data=data.params)
                 self.upgrade_skills = upgrade_skills_menu
                 self.upgrade_skills.owner = self
+        elif data.name == "dialogue":
+            if self.dialogue:
+                self.dialogue.data = data.params
+                self.dialogue.refresh()
+            else:
+                dialogue_menu = DialogueMenu(data=data.params)
+                self.dialogue = dialogue_menu
+                self.dialogue.owner = self
 
         self.owner.game_state = GameStates.PLAYER_TURN
 

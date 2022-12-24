@@ -1,5 +1,7 @@
 from enum import Enum
 
+from ui.menus import MenuData
+
 
 class NpcStates(Enum):
     IDLE = 1
@@ -13,5 +15,12 @@ class Npc:
     def __init__(self, name):
         self.owner = None
         self.name = name
+
+    def interaction(self, menus,):
+        params = self.owner.dialogue
+        dialogue_data = MenuData(name="dialogue", params=params)
+        menus.create_or_show_menu(dialogue_data)
+        return
+
 
 

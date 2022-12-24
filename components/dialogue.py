@@ -5,4 +5,5 @@ class Dialogue:
     def __init__(self, actor):
         self.owner = None
         self.actor = actor
-        self.dialog_tree = json_data.data.dialogue[actor]["dialogue"]
+        self.dialogue_json = json_data.data.dialogue[actor]
+        self.prompt_state = "100"

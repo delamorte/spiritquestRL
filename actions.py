@@ -94,6 +94,11 @@ class Actions:
                     interact_msg = entity.item.interaction(self.owner.levels.current_map)
                     if interact_msg:
                         self.owner.message_log.send(interact_msg)
+                elif entity.npc:
+                    entity.npc.interaction(self.owner.menus)
+                    self.owner.menus.dialogue.show()
+                    self.owner.fov_recompute = True
+                    return True
             if interact_msg:
                 self.owner.time_counter.take_turn(1)
                 self.owner.game_state = GameStates.ENEMY_TURN
