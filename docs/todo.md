@@ -11,7 +11,7 @@ Here are some main features:
 - Rescue people stuck in the spirit realm and gain their aid in your mission
 - Unlock the final spirit dungeon by rescuing enough lost souls
 
-## TODO:
+### TODO
 
 - ~~Handle inputs better and cleaner~~
 - ~~Refactor cursor component~~
@@ -29,26 +29,39 @@ Here are some main features:
 - ~~Refactor menus to use classes~~
 - Add better level generation
 
-REFACTOR:
+### REFACTOR
 - Caster AI component & behavior
 - remove target_self and target_other, make target an attribute under ability
 - ~~Status effects under one place, remove under fighter component~~
 - Check AI buffing & debuffing bugs
 - ~~Tilemap & palettes -> json~~
 
-FIX:
+### FIX
 - ~~drain atk don't work~~
 - long description names in skill upgrade menu (fly)
 
-BUGS:
+### BUGS
 - clear enemy stats after enemy dead
 - when standing on a corpse, entering menu, receiving messages from menu, corpse message shouldn't be displayed again
 
-IDEAS:
+### IDEAS
 - Unique locations: Black crow forest
 - Unique monsters: Black crow king
 - Add skill mutation (randomly mix parameters of two skills)
 - Implement AI skill cooldown
+- 
+#### Rescueable NPC ideas
+- Blacksmith (building: workshop, enables weapon upgrades)
+- Druid (building: altar, allow exchanging special items for insight)
+- Alchemist (building: laboratory, allows skill mutations)
+- Ranger (building: ranch? farm? hut? gives animal companion)
+- Merchant (building: shop, allows to purchase items)
+- Herbalist (building: totem, enables modifying dream parameters/world tendency)
+- Priest (building: shrine, allows removing death penalties, teaches heal?)
+- Ornithologist (building: wilderness? allows upgrading flying animal skills)
+
+#### Level generation ideas
+- 
 
 ### Alpha 0.0.1 roadmap
 
