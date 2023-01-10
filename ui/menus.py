@@ -58,7 +58,7 @@ class Menus:
         self.current_menu = menu
         self.owner.game_state = GameStates.MENU
         self.sel_index = 0
-        output = MenuData()
+        output = MenuData(name=self.current_menu.name)
         self.refresh()
 
         while output.menu_actions_left:
@@ -78,6 +78,7 @@ class Menus:
                      menu.heading, self.text_wrap, 0, menu.align)
 
             if menu.sub_heading:
+                blt.color(None)
                 blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 3,
                          menu.sub_heading, self.text_wrap, 0, menu.align)
 
@@ -86,6 +87,8 @@ class Menus:
                 blt.color("orange" if selected else "light_gray")
                 blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + i * menu.margin_y, "%s%s" %
                          ("[U+203A]" if selected else " ", sel), self.text_wrap, 0, menu.align)
+
+                blt.color(None)
 
                 if sel in menu.sub_items:
                     for j, sub_sel in enumerate(menu.sub_items[sel]):

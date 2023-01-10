@@ -16,7 +16,7 @@ class DialogueMenu:
         self.sub_items = {}
         self.sub_menu = sub_menu
         self.margin_x = 6
-        self.margin_y = 7
+        self.margin_y = 1
         self.align = blt.TK_ALIGN_LEFT
         self.event = event
         self.options = {}
@@ -49,6 +49,7 @@ class DialogueMenu:
                 self.prev_state = self.data.prompt_state
                 self.next_state = self.options[output.params]
                 self.data.prompt_state = self.next_state
+                output.sub_menu = True
             results = output.messages
             self.owner.handle_output(output)
         return results
