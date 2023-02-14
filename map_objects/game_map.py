@@ -753,6 +753,7 @@ class GameMap:
         # Player spawning point has been set in all scenarios, now place rest of the entities
         self.entities["monsters"] = []
         self.entities["allies"] = []
+        self.entities["npcs"] = []
         self.entities["player"] = [player]
 
         if self.name == "debug":

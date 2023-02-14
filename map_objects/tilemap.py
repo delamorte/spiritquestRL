@@ -32,11 +32,8 @@ def get_tile(name, tile=None, state=None):
 def get_tile_variant(name, variant_idx=None, variant_char=None, no_ascii=False):
     base_tile = json_data.data.tiles[name]
     if options.data.gfx == "ascii" and not no_ascii:
-        variants = base_tile["ascii_variants"]
-        if variants:
-            return choice(variants)
-        else:
-            return base_tile["ascii"]
+        variants = choice(base_tile["ascii_variants"]) if "ascii_variants" in base_tile.keys() else base_tile["ascii"]
+        return variants
     variants = base_tile["tile_variants"]
     if not variants:
         return get_tile(name)

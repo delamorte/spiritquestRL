@@ -6,6 +6,7 @@ import options
 from components.menus.avatar_info import AvatarInfo
 from components.menus.choose_animal import ChooseAnimal
 from components.menus.choose_level import ChooseLevel
+from components.menus.debug_map import DebugMap
 from components.menus.dialogue_menu import DialogueMenu
 from components.menus.level_up import LevelUp
 from components.menus.upgrade_skills import UpgradeSkills
@@ -16,7 +17,7 @@ from ui.elements import UIElements
 
 class Menus:
     def __init__(self, main_menu=None, choose_animal=None, choose_level=None, avatar_info=None,
-                 level_up=None, upgrade_skills=None, dialogue=None):
+                 level_up=None, upgrade_skills=None, dialogue=None, debug_map=None):
         self.owner = None
         self.main_menu = main_menu
         self.choose_animal = choose_animal
@@ -25,6 +26,7 @@ class Menus:
         self.level_up = level_up
         self.upgrade_skills = upgrade_skills
         self.dialogue = dialogue
+        self.debug_map = debug_map
         self.current_menu = None
         self.text_wrap = 60
         self.sel_index = 0
@@ -47,6 +49,8 @@ class Menus:
             self.upgrade_skills.owner = self
         if self.dialogue:
             self.dialogue.owner = self
+        if self.debug_map:
+            self.debug_map.owner = self
 
     def refresh(self):
         self.center_x = self.owner.ui.viewport.offset_center_x
@@ -111,7 +115,7 @@ class Menus:
 
             blt.refresh()
 
-            sel = menu.items[self.sel_index]
+            sel = menu.items[self.sel_index] if menu.items else None
             key = blt.read()
 
             output = self.handle_input(output, key, sel, menu.items)
@@ -228,6 +232,15 @@ class Menus:
                 dialogue_menu = DialogueMenu(data=data.params)
                 self.dialogue = dialogue_menu
                 self.dialogue.owner = self
+        elif data.name == "debug_map":
+            if self.debug_map:
+                self.debug_map.data = data.params
+                self.debug_map.show(self.owner.render_functions.draw_debug_map)
+            else:
+                debug_map = DebugMap(data=data.params)
+                self.debug_map = debug_map
+                self.debug_map.owner = self
+                self.debug_map.show(self.owner.render_functions.draw_debug_map)
 
         self.owner.game_state = GameStates.PLAYER_TURN
 

@@ -5,6 +5,7 @@ from components.entity import Entity
 from game_states import GameStates
 from helpers import get_article
 from map_objects.tilemap import get_tile
+from ui.menus import MenuData
 from ui.message import Message
 from ui.message_history import show_msg_history
 
@@ -169,7 +170,7 @@ class Actions:
         return False
 
     def menu_actions(self, main_menu=False, avatar_info=False, inventory=False, msg_history=False,
-                     level_up=False, upgrade_skills=False):
+                     level_up=False, upgrade_skills=False, debug_map=False):
         if main_menu:
             self.owner.menus.main_menu.show()
             self.owner.fov_recompute = True
@@ -219,6 +220,13 @@ class Actions:
                 show_items, "Inventory", self.owner.ui.viewport.offset_w - 1, self.owner.ui.viewport.offset_h - 1)
             self.owner.ui.draw()
             self.owner.ui.side_panel.draw_content()
+            self.owner.fov_recompute = True
+            return True
+
+        if debug_map:
+            debug_map_data = MenuData(name="debug_map", params=self.owner.levels.current_map)
+            self.owner.menus.create_or_show_menu(debug_map_data)
+            self.owner.render_functions.clear_camera(4)
             self.owner.fov_recompute = True
             return True
 

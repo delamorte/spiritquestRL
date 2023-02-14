@@ -762,9 +762,9 @@
     "colors": [
       "darkest azure"
     ],
-    "light": true,
-    "neutral": true,
-    "chaos": true,
+    "light": false,
+    "neutral": false,
+    "chaos": false,
     "xtra_info": "You see a large, human-like crow standing on two legs. He looks ominous.",
     "ai": "npc",
     "dialogue": true,

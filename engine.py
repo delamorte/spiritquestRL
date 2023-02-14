@@ -29,6 +29,7 @@ from ui.message_log import MessageLog
 
 class Engine:
     def __init__(self):
+        self.debug = None
         self.actions = None
         self.render_functions = None
         self.cursor = None
@@ -45,7 +46,8 @@ class Engine:
         self.data = None
         self.animations_buffer = []
 
-    def initialize(self):
+    def initialize(self, debug=False):
+        self.debug = debug
         # Initialize game data from external files
         game_data = json_data.JsonData()
         json_data.data = game_data
@@ -68,8 +70,10 @@ class Engine:
         blt.refresh()
         blt.read()
 
-        # self.options = Options(gfx="ascii")
-        global_options = options.Options()
+        if debug:
+            global_options = options.Options(tile_height="24", tile_width="16", ui_size="32")
+        else:
+            global_options = options.Options()
         options.data = global_options
 
         # Load tiles
@@ -261,6 +265,7 @@ class Engine:
             action = handle_keys(key)
 
             move = action.get('move')
+            debug_map = action.get('debug_map')
             wait = action.get('wait')
             pickup = action.get('pickup')
             interact = action.get("interact")
@@ -297,7 +302,8 @@ class Engine:
                                              inventory=inventory,
                                              msg_history=msg_history,
                                              level_up=level_up,
-                                             upgrade_skills=upgrade_skills):
+                                             upgrade_skills=upgrade_skills,
+                                             debug_map=debug_map):
                     continue
 
                 elif self.actions.ability_actions(switch=switch_ability, key=key):
@@ -346,6 +352,6 @@ class Engine:
 
 if __name__ == '__main__':
     engine = Engine()
-    engine.initialize()
+    engine.initialize(debug=True)
     blt.close()
 

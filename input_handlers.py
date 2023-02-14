@@ -51,6 +51,9 @@ def handle_keys(key):
     if key == blt.TK_F3:
         return {'upgrade_skills': True}
 
+    if key == blt.TK_F7:
+        return {'debug_map': True}
+
     if key == blt.TK_I:
         return {'inventory': True}
 

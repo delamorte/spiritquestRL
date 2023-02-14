@@ -534,6 +534,35 @@ class RenderFunctions:
 
         blt.put(x0 + 3, y0 + 3, 0xF900)
 
+    def draw_debug_map(self):
+        blt.layer(4)
+        x0 = 4
+        y0 = 3
+        game_map = self.owner.levels.current_map
+
+        for x in range(game_map.width):
+            for y in range(game_map.height):
+
+                if len(game_map.tiles[x][y].entities_on_tile) > 0:
+                    blt.color(game_map.tiles[x][y].entities_on_tile[-1].color)
+                    blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].entities_on_tile[-1].char)
+                    # if game_map.tiles[x][y].entities_on_tile[-1].name == "player":
+                    #     blt.color("green")
+                    #     blt.put(x0 + x * 2, y0 + y, "@")
+                else:
+                    blt.color("darkest grey")
+                    blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
+                # if game_map.tiles[x][y].blocked:
+                #
+                #     blt.color(None)
+                #     blt.put(x0 + x*2, y0 + y, "#")
+                # else:
+                #
+                #     blt.color("dark grey")
+                #     blt.put(x0 + x*2, y0 + y, ".")
+
+
+
     def draw_animations(self):
         game_map = self.owner.levels.current_map
         frames_length = 0
@@ -794,6 +823,8 @@ class RenderFunctions:
         self.draw_map()
         self.draw_stats()
         self.draw_minimap()
+
+
 
     def clear(self, entity, x, y):
         # Clear the entity from the screen
