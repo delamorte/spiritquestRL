@@ -71,13 +71,17 @@ class Engine:
         blt.read()
 
         if debug:
-            global_options = options.Options(tile_height="24", tile_width="16", ui_size="32")
+            global_options = options.Options(tile_height="24", tile_width="16", ui_size="32", debug=True)
         else:
             global_options = options.Options()
         options.data = global_options
 
         # Load tiles
         self.init_tiles()
+
+        levels = Levels()
+        self.levels = levels
+        self.levels.owner = self
 
         # Init UI
         self.ui = UIElements()
@@ -215,10 +219,6 @@ class Engine:
         game_camera = Camera(1, 1, self.ui.viewport.w, self.ui.viewport.h)
         self.game_camera = game_camera
         self.game_camera.owner = self
-
-        levels = Levels()
-        self.levels = levels
-        self.levels.owner = self
 
         blt.clear_area(2, self.ui.viewport.offset_h +
                        self.ui.offset_y + 1, self.ui.viewport.x, 1)

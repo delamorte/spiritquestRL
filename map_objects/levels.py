@@ -83,6 +83,16 @@ class Levels:
             # Initialize field of view
             self.current_map.recompute_fov(self.player)
 
+    def make_debug_map(self, algorithm):
+
+        game_map = GameMap(width=51,
+                           height=59,
+                           name="dream",
+                           title=algorithm)
+        game_map.owner = self
+        game_map.generate_map(name=algorithm)
+        return game_map
+
     def generate_level_params(self):
 
         level_params = []
@@ -114,7 +124,8 @@ class Levels:
 
         return level_params
 
-    def get_spawn_rates(self, monsters):
+    @staticmethod
+    def get_spawn_rates(monsters):
         rates = {"rat": 0.2,
                  "crow": 0.2,
                  "snake": 0.2,

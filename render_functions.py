@@ -534,11 +534,16 @@ class RenderFunctions:
 
         blt.put(x0 + 3, y0 + 3, 0xF900)
 
-    def draw_debug_map(self):
+    def draw_debug_map(self, params=None):
+        if params:
+            # parse level generator name from params, generate & draw new map
+            game_map = self.owner.levels.make_debug_map(algorithm=params)
+        else:
+            game_map = self.owner.levels.current_map
+
         blt.layer(4)
         x0 = 4
         y0 = 3
-        game_map = self.owner.levels.current_map
 
         for x in range(game_map.width):
             for y in range(game_map.height):

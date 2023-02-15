@@ -1,8 +1,8 @@
 from bearlibterminal import terminal as blt
 
 
-class DebugMap:
-    def __init__(self, name="debug_map", data=None, sub_menu=False, event=None):
+class MapGen:
+    def __init__(self, name="map_gen", data=None, sub_menu=False, event=None):
         self.owner = None
         self.title_screen = False
         self.name = name
@@ -10,23 +10,22 @@ class DebugMap:
         self.sub_menu = sub_menu
         self.heading = None
         self.sub_heading = None
-        self.items = []
+        self.items = ["messy_bsp", "cellular", "random_walk"]
         self.items_icons = []
         self.sub_items = {}
-        self.margin_x = 6
-        self.margin_y = 6
-        self.align = blt.TK_ALIGN_LEFT
+        self.margin_x = 0
+        self.margin_y = 1
+        self.align = blt.TK_ALIGN_CENTER
         self.event = event
         self.refresh()
 
     def refresh(self):
         pass
 
-    def show(self, draw_map):
-        draw_map(params=self.data)
-
+    def show(self,):
         output = self.owner.show(self)
         if not output and self.sub_menu:
             self.event = "show_prev_menu"
-        if output:
+        else:
+            self.event = None
             self.owner.handle_output(output)

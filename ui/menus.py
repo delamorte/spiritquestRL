@@ -9,6 +9,7 @@ from components.menus.choose_level import ChooseLevel
 from components.menus.debug_map import DebugMap
 from components.menus.dialogue_menu import DialogueMenu
 from components.menus.level_up import LevelUp
+from components.menus.map_gen import MapGen
 from components.menus.upgrade_skills import UpgradeSkills
 from game_states import GameStates
 from map_objects.tilemap import get_color
@@ -17,7 +18,7 @@ from ui.elements import UIElements
 
 class Menus:
     def __init__(self, main_menu=None, choose_animal=None, choose_level=None, avatar_info=None,
-                 level_up=None, upgrade_skills=None, dialogue=None, debug_map=None):
+                 level_up=None, upgrade_skills=None, dialogue=None, debug_map=None, map_gen=None):
         self.owner = None
         self.main_menu = main_menu
         self.choose_animal = choose_animal
@@ -27,6 +28,7 @@ class Menus:
         self.upgrade_skills = upgrade_skills
         self.dialogue = dialogue
         self.debug_map = debug_map
+        self.map_gen = map_gen
         self.current_menu = None
         self.text_wrap = 60
         self.sel_index = 0
@@ -51,6 +53,8 @@ class Menus:
             self.dialogue.owner = self
         if self.debug_map:
             self.debug_map.owner = self
+        if self.map_gen:
+            self.map_gen.owner = self
 
     def refresh(self):
         self.center_x = self.owner.ui.viewport.offset_center_x
@@ -151,6 +155,14 @@ class Menus:
                 output.name = "choose_animal"
                 output.sub_menu = True
                 output.prev_menu = self.current_menu
+            elif sel == "Map generator":
+                output.name = "map_gen"
+                output.sub_menu = True
+                output.prev_menu = self.current_menu
+            elif self.current_menu.name == "map_gen":
+                output.params = sel
+                output.event = "debug_map"
+                output.prev_menu = self.current_menu
             elif self.current_menu.name == "choose_animal":
                 output.params = sel
                 output.event = "new_game"
@@ -173,6 +185,10 @@ class Menus:
                 data.prev_menu.show()
         elif data.event == "new_game":
             self.owner.init_new_game(params=data.params)
+        elif data.event == "debug_map":
+            debug_map_data = MenuData(name="debug_map", params=data.params, sub_menu=True, prev_menu=self.current_menu)
+            self.owner.menus.create_or_show_menu(debug_map_data)
+            self.owner.render_functions.clear_camera(4)
         elif self.current_menu.event == "level_change":
             self.owner.levels.params = data.params
         self.owner.game_state = GameStates.PLAYER_TURN
@@ -232,12 +248,22 @@ class Menus:
                 dialogue_menu = DialogueMenu(data=data.params)
                 self.dialogue = dialogue_menu
                 self.dialogue.owner = self
+        elif data.name == "map_gen":
+            if self.map_gen:
+                self.map_gen.data = data.params
+                self.map_gen.refresh()
+                self.map_gen.show()
+            else:
+                map_gen_menu = MapGen(sub_menu=data.sub_menu)
+                self.map_gen = map_gen_menu
+                self.map_gen.owner = self
+                self.map_gen.show()
         elif data.name == "debug_map":
             if self.debug_map:
                 self.debug_map.data = data.params
                 self.debug_map.show(self.owner.render_functions.draw_debug_map)
             else:
-                debug_map = DebugMap(data=data.params)
+                debug_map = DebugMap(data=data.params, sub_menu=data.sub_menu)
                 self.debug_map = debug_map
                 self.debug_map.owner = self
                 self.debug_map.show(self.owner.render_functions.draw_debug_map)
