@@ -1,4 +1,5 @@
 from ctypes import c_uint32, addressof
+from random import randint
 from textwrap import fill
 
 import numpy as np
@@ -545,6 +546,22 @@ class RenderFunctions:
         x0 = 4
         y0 = 3
 
+        # Fetch room coordinates for labeling
+        room_entry_points = []
+        room_colors = []
+        counter = 1
+        has_rooms = False
+        if game_map.algorithm.rooms is not None:
+            has_rooms = True
+            for room in game_map.algorithm.rooms:
+                room_entry_points.append(next(iter(room)))
+                a = 255
+                r = randint(1, 255)
+                g = randint(1, 255)
+                b = randint(1, 255)
+                color = blt.color_from_argb(a, r, g, b)
+                room_colors.append(color)
+
         for x in range(game_map.width):
             for y in range(game_map.height):
 
@@ -554,18 +571,24 @@ class RenderFunctions:
                     # if game_map.tiles[x][y].entities_on_tile[-1].name == "player":
                     #     blt.color("green")
                     #     blt.put(x0 + x * 2, y0 + y, "@")
+
                 else:
                     blt.color("darkest grey")
                     blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
-                # if game_map.tiles[x][y].blocked:
-                #
-                #     blt.color(None)
-                #     blt.put(x0 + x*2, y0 + y, "#")
-                # else:
-                #
-                #     blt.color("dark grey")
-                #     blt.put(x0 + x*2, y0 + y, ".")
 
+                    if has_rooms:
+                        for i, room in enumerate(game_map.algorithm.rooms):
+                            if (x, y) in room:
+                                blt.color(room_colors[i])
+                                blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
+
+                        for point in room_entry_points:
+
+                            if x == point[0] and y == point[1]:
+                                blt.color(None)
+                                blt.puts(x0 + x * 2, y0 + y, "{0}".format(counter))
+                                counter += 1
+                                break
 
 
     def draw_animations(self):

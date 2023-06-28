@@ -85,8 +85,8 @@ class Levels:
 
     def make_debug_map(self, algorithm):
 
-        game_map = GameMap(width=51,
-                           height=59,
+        game_map = GameMap(width=74,
+                           height=79,
                            name="dream",
                            title=algorithm)
         game_map.owner = self

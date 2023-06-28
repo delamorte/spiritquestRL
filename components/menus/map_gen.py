@@ -10,7 +10,7 @@ class MapGen:
         self.sub_menu = sub_menu
         self.heading = None
         self.sub_heading = None
-        self.items = ["messy_bsp", "cellular", "random_walk"]
+        self.items = ["messy_bsp", "cellular", "random_walk", "room_addition"]
         self.items_icons = []
         self.sub_items = {}
         self.margin_x = 0

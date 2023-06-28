@@ -22,7 +22,7 @@ from map_objects.tile import Tile
 from map_objects.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant, \
     get_fighters_by_attribute
 from resources.dungeon_generation.dungeon_generator import DrunkardsWalk, MessyBSPTree, CellularAutomata, \
-    MazeWithRooms
+    MazeWithRooms, RoomAddition
 
 
 class GameMap:
@@ -417,7 +417,8 @@ class GameMap:
                       "random_walk": DrunkardsWalk(),
                       "messy_bsp": MessyBSPTree(),
                       "cellular": CellularAutomata(),
-                      "maze_with_rooms": MazeWithRooms()
+                      "maze_with_rooms": MazeWithRooms(),
+                      "room_addition": RoomAddition()
                       }
 
         if not name:
@@ -426,7 +427,7 @@ class GameMap:
         else:
             map_algorithm = generators[name]
 
-        self.algorithm = map_algorithm.name
+        self.algorithm = map_algorithm
 
         map_algorithm.generateLevel(self.width, self.height)
         color = get_color("ground_soil")
