@@ -1,127 +1,121 @@
-from bearlibterminal import terminal as blt
-import variables
+from random import choice
+
+import options
+from data import json_data
 
 
-def init_tiles():
-
-    tilesize = variables.tilesize + 'x' + variables.tilesize
-    ui_size = variables.ui_size + 'x' + variables.ui_size
-
-    # Load tilesets
-    blt.set("U+E100: ./tilesets/adam_bolt_angband16x16_fix.png, \
-        size=16x16, resize=" + tilesize + ", resize-filter=nearest, align=top-left")
-    blt.set("U+E900: ./tilesets/adam_bolt_angband16x16_fix.png, \
-        size=16x16, resize=" + ui_size + ", resize-filter=nearest, align=top-left")
-    variables.tile_offset_x = int(
-        int(variables.tilesize) / blt.state(blt.TK_CELL_WIDTH))
-    variables.tile_offset_y = int(
-        int(variables.tilesize) / blt.state(blt.TK_CELL_HEIGHT))
-    variables.ui_offset_x = int(
-        int(variables.ui_size) / blt.state(blt.TK_CELL_WIDTH))
-    variables.ui_offset_y = int(
-        int(variables.ui_size) / blt.state(blt.TK_CELL_HEIGHT))
-    variables.camera_offset = int(variables.ui_size) / int(variables.tilesize)
-    blt.clear()
+def get_tile_object(name):
+    base_tile = json_data.data.tiles[name]
+    return base_tile
 
 
-def tilemap():
-    tiles = {}
-    if variables.gfx is "tiles":
-        tiles = {"tree": (0xE100 + 87, 0xE100 + 88, 0xE100 + 89, 0xE100 + 93, 0xE100 + 94, 0xE100 + 95),
-                 "dead_tree": (0xE100 + 112, 0xE100 + 144),
-                 "rocks": (0xE100 + 1726, 0xE100 + 1727),
-                 "ground_soil": (0xE100 + 1748, 0xE100 + 1750),
-                 "ground_moss": (0xE100 + 1751, 0xE100 + 1752, 0xE100 + 1753),
-                 "floor": (0xE100 + 21, 0xE100 + 20, 0xE100 + 19),
-                 "rubble": (0xE100 + 388, 0xE100 + 119),
-                 "bones": (0xE100 + 468, 0xE100 + 469, 0xE100 + 470, 0xE100 + 471, 0xE100 + 475),
-                 "player": 0xE100 + 704,
-                 "player_remains": 0xE100 + 468,
-                 "monsters": {"rat": 0xE100 + 1416,
-                              "bear": 0xE100 + 1780,
-                              "crow": 0xE100 + 1587,
-                              "felid": 0xE100 + 1252,
-                              "snake": 0xE100 + 1097,
-                              "frog": 0xE100 + 1095,
-                              "mosquito": 0xE100 + 1554},
-                 "monsters_chaos": {"rat": 0xE100 + 1416,
-                                    "crow": 0xE100 + 1587,
-                                    "chaos cat": 0xE100 + 1255,
-                                    "chaos bear": 0xE100 + 1553,
-                                    "chaos spirit": 0xE100 + 1029,
-                                    "cockroach": 0xE100 + 1473,
-                                    "bone snake": 0xE100 + 1093,
-                                    "chaos dog": 0xE100 + 960,
-                                    "bat": 0xE100 + 1200,
-                                    "imp": 0xE100 + 1047,
-                                    "leech": 0xE100 + 1204},
-                 "monsters_light": {"bear": 0xE100 + 1780,
-                                    "crow": 0xE100 + 1587,
-                                    "spirit": 0xE100 + 1017,
-                                    "ghost dog": 0xE100 + 959,
-                                    "snake": 0xE100 + 1100,
-                                    "gecko": 0xE100 + 1104,
-                                    "serpent": 0xE100 + 1323,
-                                    "frog": 0xE100 + 1095,
-                                    "mosquito": 0xE100 + 1554,
-                                    "fairy": 0xE100 + 1032},
+def get_tile(name, tile=None, state=None):
+    if state is not None:
+        if options.data.gfx == "ascii":
+            state = "ascii_{0}".format(state)
+            return tile[state]
+        else:
+            return int(tile["hex"], 0) + tile[state]
+    if tile:
+        base_tile = tile
+    elif name in json_data.data.tiles:
+        base_tile = json_data.data.tiles[name]
+    else:
+        base_tile = json_data.data.fighters[name]
+    if options.data.gfx == "ascii":
+        return base_tile["ascii"]
+    tile = base_tile["tile"]
+    hex_tile = int(base_tile["hex"], 0) + tile
+    return hex_tile
 
-                 "unique_monsters": {"king kobra": 0xE100 + 1105, "albino rat": 0xE100 + 1414},
-                 "monster_remains": 0xE100 + 513,
-                 "door": {"open": 0xE100 + 68, "closed": 0xE100 + 67, "locked": 0xE100 + 78},
-                 "campfire": 0xE100 + 427,
-                 "stairs": {"up": 0xE100 + 22, "down": 0xE100 + 27},
-                 "wall_brick": 0xE100 + 83,
-                 "wall_moss": (0xE100 + 90, 0xE100 + 91, 0xE100 + 92),
-                 "weapons": {"club": 0xE100 + 242}}
 
-    elif variables.gfx is "ascii":
-        tiles = {"tree": ("T", "t"),
-                 "dead_tree": ("T", "t"),
-                 "rocks": ("^"),
-                 "ground_soil": ".",
-                 "ground_moss": ".",
-                 "floor": ".",
-                 "rubble": ".",
-                 "bones": ",",
-                 "player": "@",
-                 "player_remains": "@",
-                 "monsters": {"rat": "r",
-                              "bear": "B",
-                              "crow": "c",
-                              "felid": "f",
-                              "snake": "s",
-                              "frog": "f",
-                              "mosquito": "m"},
-                 "monsters_chaos": {"rat": "R",
-                                    "crow": "C",
-                                    "chaos cat": "C",
-                                    "chaos bear": "B",
-                                    "chaos spirit": "S",
-                                    "cockroach": "r",
-                                    "bone snake": "S",
-                                    "chaos dog": "D",
-                                    "bat": "b",
-                                    "imp": "I",
-                                    "leech": "l"},
-                 "monsters_light": {"bear": "B",
-                                    "crow": "c",
-                                    "spirit": "S",
-                                    "ghost dog": "D",
-                                    "snake": "s",
-                                    "gecko": "g",
-                                    "serpent": "§",
-                                    "frog": "f",
-                                    "mosquito": "m",
-                                    "fairy": "F"},
+def get_tile_variant(name, variant_idx=None, variant_char=None, no_ascii=False):
+    base_tile = json_data.data.tiles[name]
+    if options.data.gfx == "ascii" and not no_ascii:
+        variants = choice(base_tile["ascii_variants"]) if "ascii_variants" in base_tile.keys() else base_tile["ascii"]
+        return variants
+    variants = base_tile["tile_variants"]
+    if not variants:
+        return get_tile(name)
+    if variant_idx is not None:
+        tile = variants[variant_idx]
+    elif variant_char:
+        tile = variant_char
+    else:
+        tile = choice(variants)
+    hex_tile = int(base_tile["hex"], 0) + tile
+    return hex_tile
 
-                 "unique_monsters": {"king kobra": "K", "albino rat": "R"},
-                 "monster_remains": "%",
-                 "door": {"open": "-", "closed": "+", "locked": "*"},
-                 "campfire": "¤",
-                 "stairs": {"up": "<", "down": ">"},
-                 "wall_brick": "#",
-                 "wall_moss": "#",
-                 "weapons": {"club": "\\"}}
+
+def get_tile_by_value(value):
+    for k, v in json_data.data.tiles.items():
+        if v["tile"] == value:
+            return k
+        elif value in v["tile_variants"]:
+            return k
+    return None
+
+
+def get_color(name, tile=None, mod=None, force_index=None, force_color=None):
+    if force_color is not None:
+        return force_color
+    if tile:
+        base_tile = tile
+    else:
+        if name in json_data.data.tiles:
+            base_tile = json_data.data.tiles[name]
+        elif name in json_data.data.fighters:
+            base_tile = json_data.data.fighters[name]
+        else:
+            base_tile = {"colors": ["default"]}
+
+    colors = base_tile["colors"]
+    if force_index is not None:
+        return colors[force_index]
+    color = choice(colors)
+
+    if mod and "hue" in base_tile.keys() and not base_tile["hue"]:
+        # Pick random tone
+        if mod > 0:
+            color = (choice(["", "light", "lighter", "lightest"]) + " ").lstrip() + color
+        elif mod == 0 or mod == -1:
+            color = (choice(["", "dark", "light"]) + " ").lstrip() + color
+        elif mod < -1:
+            color = (choice(["", "dark", "darker"]) + " ").lstrip() + color
+
+    return color
+
+
+def get_tile_by_attribute(name, value):
+    tile = None
+    for k, v in json_data.data.tiles.items():
+        if v[name] == value:
+            tile = get_tile(k)
+            return tile
+
+    return tile
+
+
+def get_tiles_by_attribute(name, value):
+    tiles = []
+    for k, v in json_data.data.tiles.items():
+        if v[name] == value:
+            tiles.append(k)
 
     return tiles
+
+
+def get_fighters_by_attribute(name, value):
+    """
+    Get fighter name/char pairs based on attribute
+    :param name: attribute name
+    :param value: attribute value
+    :return: fighters: return a list of tuples with name/char pairs
+    """
+    fighters = []
+    for k, v in json_data.data.fighters.items():
+        if v[name] == value:
+            tile = get_tile(k)
+            fighters.append((k, tile))
+
+    return fighters

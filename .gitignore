@@ -121,3 +121,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/tilesets/
+/docs/
+/dump_tiles.py
+/resources/Zorbus_Vaults/

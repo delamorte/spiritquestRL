@@ -1,368 +1,357 @@
+import pickle
+from ctypes import addressof, c_uint32
 from math import floor
 
 from bearlibterminal import terminal as blt
 
+import options
+from actions import Actions
 from camera import Camera
+from components.abilities import Abilities
+from components.animations import Animations
+from components.entity import Entity
+from components.fighter import Fighter
 from components.inventory import Inventory
+from components.light_source import LightSource
+from components.menus.main_menu import MainMenu
 from components.player import Player
-from components.cursor import Cursor
-from death_functions import kill_monster, kill_player
-from draw import draw_all, draw_messages, draw_stats, draw_ui, clear_entities
-from entity import Entity, blocking_entity
-from fighter_stats import get_fighter_stats
-from fov import recompute_fov
+from components.status_effects import StatusEffects
+from components.summoner import Summoner
+from data import json_data
 from game_states import GameStates
-from helpers import get_article
 from input_handlers import handle_keys
-from map_objects.levels import level_change
-from map_objects.tilemap import init_tiles, tilemap
-from random import randint
-from ui.elements import init_ui
-from ui.game_messages import MessageLog
-from ui.menus import main_menu
-from ui.message_history import show_msg_history
-import variables
+from map_objects.levels import Levels
+from render_functions import RenderFunctions
+from ui.elements import UIElements
+from ui.menus import Menus, MenuData
+from ui.message_log import MessageLog
 
-"""
-TODO:
 
-- Move color lists in game_map to a palette
-  module
-- Add abilities on player and give them action cost
-- Add stealth
-- Items and inventory
-- Npcs
-- Minimap 
-- UI elements for displaying current game map name
-  and status effects
-- Level up system
-- Saving and loading
-- Examine/view mode
-- Generate levels with a seed
+class Engine:
+    def __init__(self):
+        self.debug = None
+        self.actions = None
+        self.render_functions = None
+        self.cursor = None
+        self.fov_recompute = None
+        self.game_state = None
+        self.time_counter = None
+        self.game_camera = None
+        self.message_log = None
+        self.ui = None
+        self.menus = None
+        self.levels = None
+        self.player = None
+        self.tilemap = None
+        self.data = None
+        self.animations_buffer = []
 
-FIX:
+    def initialize(self, debug=False):
+        self.debug = debug
+        # Initialize game data from external files
+        game_data = json_data.JsonData()
+        json_data.data = game_data
+        self.data = game_data
 
-- Text alignment when resizing window
-  
-"""
+        window_title = 'SpiritQuestRL'
+        size = 'size=200x80'
+        title = 'title=' + window_title
+        cellsize = 'cellsize=auto'
+        resizable = 'resizeable=true'
+        window = "window: " + size + "," + title + "," + cellsize + "," + resizable
 
-def blt_init():
+        blt.open()
 
-    blt.composition(True)
-
-    blt.open()
-
-    window_title = 'SpiritQuestRL'
-    size = 'size=128x50'
-    title = 'title=' + window_title
-    cellsize = 'cellsize=auto'
-    resizable = 'resizeable=false'
-    window = "window: " + size + "," + title + "," + cellsize + "," + resizable
-
-    blt.set(window)
-    blt.set("font: default")
-    init_tiles()
-
-def new_game(choice):
-    
-    # Create player
-    
-    inventory_component = Inventory(26)
-    fighter_component = get_fighter_stats("player")
-    player_component = Player(50)
-    player = Entity(
-        1, 1, 12, player_component.char["player"], None, "player", blocks=True, player=player_component, fighter=fighter_component, inventory=inventory_component)
-    player.player.avatar["player"] = fighter_component
-    player.player.avatar[choice] = get_fighter_stats(choice)
-    player.player.avatar[choice].owner = player
-    player.player.char[choice] = tilemap()["monsters"][choice]
-    
-    player.player.avatar[choice].max_hp += 20
-    player.player.avatar[choice].hp += 20
-    player.player.avatar[choice].power += 1
-    
-    blt.clear_area(2, variables.viewport_y +
-               variables.ui_offset_y + 1, variables.viewport_x, 1)
-    
-    if variables.gfx is "ascii":
-        player.char = tilemap()["player"]
-        player.color = "lightest green"
-    
-    fov_recompute = True
-    message_log = MessageLog(5)
-    
-    # Initialize game camera
-    variables.camera_width = int(floor(blt.state(blt.TK_WIDTH) / variables.ui_offset_x) * variables.camera_offset)
-    variables.camera_height = int(floor(blt.state(blt.TK_HEIGHT) / variables.ui_offset_y - 5) * variables.camera_offset)
-    game_camera = Camera(1, 1, variables.camera_width, variables.camera_height)
-
-    levels = {}
-    time_counter = variables.TimeCounter()
-    insights = 80
-    game_state = GameStates.PLAYER_TURN
-    
-    return game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute
-    
-def game_loop(main_menu_show=True, choice=None):
-    
-    msg_panel, msg_panel_borders, screen_borders = init_ui()
-    draw_ui(msg_panel, msg_panel_borders, screen_borders)
-    
-    if main_menu_show:
-        choice = main_menu()
-    game_camera, game_state, player, levels, message_log, time_counter, insights, fov_recompute = new_game(choice)
-
-    game_map, entities, player, fov_map = level_change(
-    "hub", levels, player)
-
-    key = None
-    while True:
-        if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, player.fighter.fov, True, 0)
-
-        draw_all(game_map, game_camera, entities, player,
-                 fov_map, fov_recompute)
-        draw_messages(msg_panel, message_log)
-        fov_recompute = False
+        blt.set(window)
+        blt.set("font: default")
+        blt.set("input: filter=[keyboard]")
+        #blt.composition(True)
+        # Needed to avoid insta-close and flush the input queue
         blt.refresh()
+        blt.read()
 
-        key = blt.read()
-        clear_entities(entities, game_camera)
-        action = handle_keys(key)
+        if debug:
+            global_options = options.Options(tile_height="24", tile_width="16", ui_size="32", debug=True)
+        else:
+            global_options = options.Options()
+        options.data = global_options
 
-        move = action.get('move')
-        pickup = action.get('pickup')
-        stairs = action.get('stairs')
-        fullscreen = action.get('fullscreen')
+        # Load tiles
+        self.init_tiles()
 
-        if not player.fighter.dead:
-            effect_msg, game_state = player.fighter.process_effects(time_counter, game_state)
+        levels = Levels()
+        self.levels = levels
+        self.levels.owner = self
 
-        message_log.send(effect_msg)
+        # Init UI
+        self.ui = UIElements()
+        self.ui.owner = self
 
-        if fullscreen:
-                blt.set("window.fullscreen=true")
-                
-        if game_state == GameStates.PLAYER_DEAD:
-            
-            if key == blt.TK_CLOSE:
-                break
+        self.actions = Actions()
+        self.actions.owner = self
 
-            if key == blt.TK_ESCAPE:
+        self.render_functions = RenderFunctions(self.ui.offset_x, self.ui.offset_y)
+        self.render_functions.owner = self
 
-                new_choice = main_menu(resume=True)
-                if not new_choice:
-                    draw_ui(msg_panel, msg_panel_borders, screen_borders)
-                    fov_recompute = True
-                else:
-                    game_loop(False, new_choice)
+        self.ui.draw()
 
-        if game_state == GameStates.PLAYER_TURN:
-            
-            if key == blt.TK_CLOSE:
-                break
+        # Call main menu and start game loop
+        main_menu_component = MainMenu(title_screen=True)
+        self.menus = Menus(main_menu=main_menu_component)
+        self.menus.owner = self
 
-            if key == blt.TK_ESCAPE:
+        self.menus.main_menu.show()
 
-                new_choice = main_menu(resume=True)
-                if not new_choice:
-                    draw_ui(msg_panel, msg_panel_borders, screen_borders)
-                    fov_recompute = True
-                else:
-                    game_loop(False, new_choice)
-            
-            if move:
-    
-                dx, dy = move
-                destination_x = player.x + dx
-                destination_y = player.y + dy
-                
-                # Handle player attack
-                if not game_map.is_blocked(destination_x, destination_y):
-                    target = blocking_entity(
-                        entities, destination_x, destination_y)
-                    if target:
-                        if len(player.fighter.abilities)>0 and randint(1,100) < player.fighter.abilities[0][1]:
-                            combat_msg = player.fighter.attack(target, player.fighter.abilities[0][0])
-                        else:                        
-                            combat_msg = player.fighter.attack(target)
-                        
-                        message_log.send(combat_msg)
-                        player.player.spirit_power -= 0.5
-                        time_counter.take_turn(1)
-                        draw_stats(player, target)
-    
-                    else:
-                        player.move(dx, dy)
-                        time_counter.take_turn(1 / player.fighter.mv_spd)
-                        fov_recompute = True
-    
-                    game_state = GameStates.ENEMY_TURN
-                
-                else:
-                    if "doors" in entities:
-                        for entity in entities["doors"]:
-                            if destination_x == entity.x and destination_y == entity.y and entity.door.status == "locked":
-                                message_log.send("The door is locked...")
-                                time_counter.take_turn(1)
-                                game_state = GameStates.ENEMY_TURN
-                            elif destination_x == entity.x and destination_y == entity.y and entity.door.status == "closed":
-                                entity.door.set_status("open", game_map)
-                                message_log.send("You open the door.")
-                                time_counter.take_turn(1)
-                                game_state = GameStates.ENEMY_TURN
-    
-                variables.old_stack = variables.stack    
-                variables.stack = []
-                
-    
-            elif pickup:
-                for entity in entities["items"]:
-                    if entity.x == player.x and entity.y == player.y:
-                        pickup_msg = player.inventory.add_item(entity)
-                        message_log.send(pickup_msg)
-                        for item in variables.stack:
-                            if entity.name == item.split(" ", 1)[1]:
-                                variables.stack.remove(item)
-                        entities["items"].remove(entity)
-                        time_counter.take_turn(1)
-                        game_state = GameStates.ENEMY_TURN
-                        break
-                else:
-                    message_log.send("There is nothing here to pick up.")
-    
-    
-    
-            elif key == blt.TK_PERIOD or key == blt.TK_KP_5:
-                time_counter.take_turn(1)
-                #player.player.spirit_power -= 1
-                message_log.send("You wait a turn.")
-                variables.old_stack = variables.stack
-                game_state = GameStates.ENEMY_TURN
-    
-            elif key == blt.TK_X:
-                game_state = GameStates.TARGETING
-                cursor_component = Cursor()
-                cursor = Entity(player.x, player.y, 255, 0xE100 + 1746, "lighter yellow", "cursor", cursor=cursor_component)
-                entities["cursor"] = [cursor]
-                
-            elif player.player.spirit_power <= 0:
-                game_map, entities, player, fov_map = level_change(
-                    "hub", levels, player, entities, game_map, fov_map)
-                message_log.clear()
-                message_log.send("I have no power to meditate longer..")
-                player.player.spirit_power = 50
-                player.fighter.hp = player.fighter.max_hp
+        self.menus.main_menu.title_screen = False
 
-            elif player.player.spirit_power >= insights:
-                insights += 10
-                message_log.clear()
-                message_log.send("My spirit has granted me new insights!")
-                message_log.send("I should explore around my home..")
-                game_map, entities, player, fov_map = level_change(
-                    "hub", levels, player, entities, game_map, fov_map)
+        self.game_loop()
 
-                # Currently opens the door in hub
-                for entity in entities["doors"]:
-                    if entity.door.name == "d_entrance":
-                        entity.door.set_status("open", game_map)
+    def init_gfx(self, f):
+        with open(f, 'rb') as gfx:
+            tileset = pickle.load(gfx)
 
-            elif stairs:
-                
-                for entity in entities["stairs"]:
-                    if player.x == entity.x and player.y == entity.y:
-                        game_map, entities, player, fov_map = level_change(
-                            entity.stairs.destination[0], levels, player, entities, game_map, fov_map, entity.stairs)
-                
-                variables.old_stack = variables.stack
-                
-                if game_map.name == "cavern" and game_map.dungeon_level == 1:
-                    message_log.clear()
-                    message_log.send(
-                        "A sense of impending doom fills you as you delve into the cavern.")
-                    message_log.send("RIBBIT!")
-                    
-                elif game_map.name == "dream":
-                    message_log.clear()
-                    message_log.send(
-                        "I'm dreaming... I feel my spirit power draining.")
-                    message_log.send("I'm hungry..")
-                draw_messages(msg_panel, message_log)
-                fov_recompute = True
+        arr = (c_uint32 * len(tileset))(*tileset)
+        return arr
 
-            elif key == blt.TK_M:
-                show_msg_history(
-                    message_log.history, "Message history")
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
-                fov_recompute = True
-    
-            elif key == blt.TK_I:
-                show_items = []
-                for item in player.inventory.items:
-                    show_items.append(get_article(item.name) + " " + item.name)
-                show_msg_history(
-                    show_items, "Inventory")
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
-                fov_recompute = True
+    def init_tiles(self,):
+        tilesize = options.data.tile_width + 'x' + options.data.tile_height
+
+        gfx1 = self.init_gfx('./gfx/gfx1')
+        gfx2 = self.init_gfx('./gfx/gfx2')
+        gfx3 = self.init_gfx('./gfx/gfx3')
+        gfx4 = self.init_gfx('./gfx/gfx4')
+        gfx5 = self.init_gfx('./gfx/gfx5')
+        gfx6 = self.init_gfx('./gfx/gfx6')
+
+        blt.set("U+E000: %d, \
+            size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx1), 304, 1184) +
+                tilesize + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+        blt.set("U+E400: %d, \
+            size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx2), 320, 1080) +
+                tilesize + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+        blt.set("U+E800: %d, \
+             size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx3), 288, 168) +
+                tilesize + ", resize-filter=nearest, spacing=4x4 align=top-left")
+
+        blt.set("U+F000: %d, \
+            size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx4), 176, 240) +
+                "32x48" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+        blt.set("U+F100: %d, \
+            size=32x32, raw-size=%dx%d, resize=" % (addressof(gfx5), 192, 448) +
+                "32x32" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+        # Big tiles
+        blt.set("U+F300: %d, \
+            size=16x24, raw-size=%dx%d, resize=" % (addressof(gfx6), 144, 48) +
+                "64x96" + ", resize-filter=nearest, spacing=4x4, align=top-left")
+
+        options.data.tile_offset_x = int(
+            int(options.data.tile_width) / blt.state(blt.TK_CELL_WIDTH))
+        options.data.tile_offset_y = int(
+            int(options.data.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
+
+        blt.clear()
+
+    def init_new_game(self, params):
+        choice = params
+        self.player = None
+        self.levels = None
+        self.time_counter = None
+        # Create player
+        inventory_component = Inventory(26)
+        f_data = self.data.fighters["player"]
+        fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
+                                    atk=f_data["atk"], mv_spd=f_data["mv_spd"],
+                                    atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
+
+        light_component = LightSource(radius=fighter_component.fov)
+        player_component = Player(50)
+        player_component.set_char("player", self.data.fighters["player"])
+        status_effects_component = StatusEffects("player")
+        summoner_component = Summoner()
+        animations_component = Animations()
+
+        player = Entity(
+            1, 1, 2, "default", "player", tile=f_data,
+            blocks=True, player=player_component, fighter=fighter_component, inventory=inventory_component,
+            light_source=light_component,
+            summoner=summoner_component, indicator_color="gray", animations=animations_component,
+            status_effects=status_effects_component, stand_on_messages=False,
+            visible=True)
+        player.player.avatar["player"] = fighter_component
+        avatar_f_data = self.data.fighters[choice]
+        a_fighter_component = Fighter(hp=avatar_f_data["hp"], ac=avatar_f_data["ac"], ev=avatar_f_data["ev"],
+                                      atk=avatar_f_data["atk"], mv_spd=avatar_f_data["mv_spd"],
+                                      atk_spd=avatar_f_data["atk_spd"], size=avatar_f_data["size"],
+                                      fov=avatar_f_data["fov"])
+        player.player.avatar[choice] = a_fighter_component
+        player.player.avatar[choice].owner = player
+        player.abilities = Abilities(player)
+        player.abilities.initialize_abilities(choice)
+        player.player.set_char(choice, self.data.fighters[choice])
+        player.player.char_exp[choice] = player.player.avatar_exp_lvl_intervals[0]
+        player.fighter.mv_spd = avatar_f_data["mv_spd"]
+
+        player.player.avatar[choice].max_hp += 20
+        player.player.avatar[choice].hp += 20
+        player.player.avatar[choice].atk += 1
+        player.player.insights = 200
         
-        elif game_state == GameStates.TARGETING:
+        self.player = player
 
-            if move:
-                dx, dy = move
-                destination_x = cursor.x + dx
-                destination_y = cursor.y + dy
-                x, y = game_camera.get_coordinates(destination_x, destination_y)
-                
-                if x > 0 and x < game_camera.width-1 and y > 0 and y < game_camera.height-1:
-                    cursor.move(dx, dy)
-                    fov_recompute = True
-                    variables.old_stack = variables.stack    
-                    variables.stack = []
-    
-            
-            elif key == blt.TK_ESCAPE or key == blt.TK_X:
-                game_state = GameStates.PLAYER_TURN
-                variables.old_stack = variables.stack    
-                variables.stack = []
-                del entities["cursor"]
+        character_menu = MenuData(name="avatar_info", params=self.player)
+        self.menus.create_or_show_menu(character_menu)
 
+        level_up_menu = MenuData(name="level_up", params=self.player)
+        self.menus.create_or_show_menu(level_up_menu)
 
-        if game_state == GameStates.ENEMY_TURN:
-            draw_messages(msg_panel, message_log)
-            for entity in entities["monsters"]:
-                if entity.fighter:
-                    effect_msg, game_state = entity.fighter.process_effects(time_counter, game_state)
-                    message_log.send(effect_msg)
-                
-                if player.fighter.dead:
-                    kill_msg, game_state = kill_player(player)
-                    message_log.send(kill_msg)
-                    draw_stats(player)
-                    break
-                if entity.ai:
-                    combat_msg = entity.ai.take_turn(
-                        player, fov_map, game_map, entities, time_counter)
-                    fov_recompute = True
-                    if combat_msg:
-                        message_log.send(combat_msg)
-                        draw_stats(player)
-                    if player.fighter.dead:
-                        kill_msg, game_state = kill_player(player)
-                        message_log.send(kill_msg)
-                        draw_stats(player)
+        skills_menu = MenuData(name="upgrade_skills", params=self.player)
+        self.menus.create_or_show_menu(skills_menu)
+
+        message_log = MessageLog(5)
+        self.message_log = message_log
+        self.message_log.owner = self
+
+        # Initialize game camera
+        game_camera = Camera(1, 1, self.ui.viewport.w, self.ui.viewport.h)
+        self.game_camera = game_camera
+        self.game_camera.owner = self
+
+        blt.clear_area(2, self.ui.viewport.offset_h +
+                       self.ui.offset_y + 1, self.ui.viewport.x, 1)
+
+        if options.data.gfx == "ascii":
+            player.color = "lightest green"
+
+        self.levels.change("hub")
+        self.fov_recompute = True
+        self.game_state = GameStates.PLAYER_TURN
+        self.time_counter = self.TimeCounter(owner=self)
+
+    def game_loop(self):
+
+        game_quit = False
+
+        while not game_quit:
+            if (blt.state(floor(blt.TK_WIDTH)) != self.ui.screen_w or
+                    blt.state(floor(blt.TK_HEIGHT)) != self.ui.screen_h):
+
+                self.ui = UIElements()
+                self.ui.owner = self
+                self.ui.draw()
+                self.render_functions.draw_side_panel_content()
+                blt.refresh()
+                self.fov_recompute = True
+
+            if self.fov_recompute:
+                self.levels.current_map.recompute_fov(self.player)
+                self.render_functions.draw_all()
+
+            self.render_functions.draw_messages()
+            self.render_functions.draw_turn_count()
+
+            self.fov_recompute = False
+            blt.refresh()
+
+            if self.animations_buffer and options.data.gfx == "oryx":
+                key = self.render_functions.draw_animations()
+
+            else:
+                key = blt.read()
+
+            action = handle_keys(key)
+
+            move = action.get('move')
+            debug_map = action.get('debug_map')
+            wait = action.get('wait')
+            pickup = action.get('pickup')
+            interact = action.get("interact")
+            stairs = action.get('stairs')
+            examine = action.get('examine')
+            # minimap = action.get('map')
+            fullscreen = action.get('fullscreen')
+            close = action.get('close')
+            main_menu = action.get('main_menu')
+            avatar_info = action.get('avatar_info')
+            level_up = action.get('level_up')
+            upgrade_skills = action.get('upgrade_skills')
+            inventory = action.get('inventory')
+            msg_history = action.get('msg_history')
+            switch_ability = action.get('switch_ability')
+            use_ability = action.get('use_ability')
+
+            if self.actions.window_actions(fullscreen=fullscreen, close=close):
+                continue
+
+            if self.game_state == GameStates.PLAYER_DEAD:
+                while self.game_state == GameStates.PLAYER_DEAD:
+                    if self.actions.dead_actions(key):
                         break
-                    if entity.fighter and entity.fighter.dead:
-                        player.player.spirit_power += 11
-                        player.fighter.hp += entity.fighter.power
-                        message_log.send(kill_monster(entity))
-                        message_log.send("I feel my power returning!")
+                    key = blt.read()
+                continue
 
-            if not game_state == GameStates.PLAYER_DEAD:
-                game_state = GameStates.PLAYER_TURN
+            if self.game_state == GameStates.PLAYER_TURN:
+                # Begin player turn
+                # Non-turn taking UI functions
 
-    blt.close()
+                if self.actions.menu_actions(main_menu=main_menu,
+                                             avatar_info=avatar_info,
+                                             inventory=inventory,
+                                             msg_history=msg_history,
+                                             level_up=level_up,
+                                             upgrade_skills=upgrade_skills,
+                                             debug_map=debug_map):
+                    continue
+
+                elif self.actions.ability_actions(switch=switch_ability, key=key):
+                    continue
+
+                # Turn taking functions
+                self.actions.turn_taking_actions(wait=wait,
+                                                 move=move,
+                                                 interact=interact,
+                                                 pickup=pickup,
+                                                 stairs=stairs,
+                                                 examine=examine,
+                                                 use_ability=use_ability,
+                                                 key=key)
+
+            elif self.game_state == GameStates.TARGETING:
+
+                if self.actions.targeting_actions(move=move,
+                                                  examine=examine,
+                                                  main_menu=main_menu,
+                                                  use_ability=use_ability,
+                                                  interact=interact):
+                    continue
+
+            if self.game_state == GameStates.ENEMY_TURN:
+                # Begin enemy turn
+                self.actions.enemy_actions()
+                self.actions.ally_actions()
+
+    class TimeCounter:
+        def __init__(self, turn=0, owner=None):
+            self.owner = owner
+            self.turn = turn
+            self.last_turn = 0
+
+        def take_turn(self, action_cost):
+            self.last_turn = self.turn
+            self.turn += action_cost
+
+        def get_turn(self):
+            return self.turn
+
+        def get_last_turn(self):
+            return self.last_turn
 
 
 if __name__ == '__main__':
-    blt_init()
-    game_loop()
+    engine = Engine()
+    engine.initialize(debug=True)
+    blt.close()
+

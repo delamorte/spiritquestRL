@@ -1,7 +1,6 @@
-from draw import clear_camera
-from bearlibterminal import terminal as blt
 from math import ceil
-import variables
+
+from bearlibterminal import terminal as blt
 
 padding_left = 10
 padding_right = 10
@@ -86,7 +85,7 @@ class FrameWithScrollbar(object):
         # Scroll bar
         blt.bkcolor("transparent")
         blt.clear_area(self.left + self.width, self.top, 1, self.height)
-        blt.bkcolor("none")
+        #blt.bkcolor("default")
         blt.color("dark orange")
         self.scrollbar_column = self.left + self.width
         self.scrollbar_offset = int(
@@ -98,34 +97,44 @@ class FrameWithScrollbar(object):
                         self.scrollbar_offset, 0x2588)
 
 
-def show_msg_history(message_log, name):
+def show_msg_history(message_log, name, viewport_w, viewport_h):
     messages = MessageList()
     frame = FrameWithScrollbar(messages)
+    message_log.reverse()
 
-    for msg in message_log:
-        messages.append(msg)
+    for message in message_log:
+        if isinstance(message, str):
+            messages.append(message)
+        else:
+            messages.append(message.msg)
 
     # Initial update
     frame.update_geometry(
-        padding_left+1,
+        padding_left + 1,
         padding_top,
-        variables.viewport_x +5- (padding_left + padding_right),
-        variables.viewport_y - (padding_top + padding_bottom))
+        viewport_w + 5 - (padding_left + padding_right),
+        viewport_h - (padding_top + padding_bottom))
 
-    if name == "Message history":
-        prompt = \
-            "Message history: \n"
+    prompt = \
+        "Message history: \n"
 
-    elif name == "Inventory":
+    if name == "Inventory":
         prompt = \
             "Inventory: \n"
 
     while True:
-        clear_camera(2)
+
         frame.draw()
         blt.color("white")
 
-        blt.layer(1)
+        blt.layer(0)
+        w = viewport_w
+        h = viewport_h
+        i = 0
+        while i < 5:
+            blt.layer(i)
+            blt.clear_area(1, 1, w, h)
+            i += 1
         current_line = 0
         blt.puts(padding_left, padding_top - frame.offset, prompt, frame.width)
         for text, height in messages:
@@ -149,7 +158,7 @@ def show_msg_history(message_log, name):
             blt.clear()
             break
 
-        elif key == blt.TK_I and name is "Inventory":
+        elif key == blt.TK_I and name == "Inventory":
             blt.clear()
             break
 

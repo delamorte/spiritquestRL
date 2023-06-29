@@ -1,285 +1,282 @@
+from math import floor
+
 from bearlibterminal import terminal as blt
-from descriptions import abilities, bestiary, meditate_params
-from draw import clear_camera, draw_ui
-from map_objects.tilemap import init_tiles, tilemap
-from ui.elements import init_ui
-import variables
-from random import sample
+
+import options
+from components.menus.avatar_info import AvatarInfo
+from components.menus.choose_animal import ChooseAnimal
+from components.menus.choose_level import ChooseLevel
+from components.menus.debug_map import DebugMap
+from components.menus.dialogue_menu import DialogueMenu
+from components.menus.level_up import LevelUp
+from components.menus.map_gen import MapGen
+from components.menus.upgrade_skills import UpgradeSkills
+from game_states import GameStates
+from map_objects.tilemap import get_color
+from ui.elements import UIElements
 
 
-def main_menu(resume=False):
+class Menus:
+    def __init__(self, main_menu=None, choose_animal=None, choose_level=None, avatar_info=None,
+                 level_up=None, upgrade_skills=None, dialogue=None, debug_map=None, map_gen=None):
+        self.owner = None
+        self.main_menu = main_menu
+        self.choose_animal = choose_animal
+        self.choose_level = choose_level
+        self.avatar_info = avatar_info
+        self.level_up = level_up
+        self.upgrade_skills = upgrade_skills
+        self.dialogue = dialogue
+        self.debug_map = debug_map
+        self.map_gen = map_gen
+        self.current_menu = None
+        self.text_wrap = 60
+        self.sel_index = 0
+        self.center_x = 0
+        self.center_y = 0
+        self.viewport_w = 0
+        self.viewport_h = 0
 
-    current_range = 0
-    center_x = int(variables.viewport_x / 2)
-    center_y = int(variables.viewport_y / 2)
-    while True:
+        if self.main_menu:
+            self.main_menu.owner = self
+        if self.choose_animal:
+            self.choose_animal.owner = self
+        if self.choose_level:
+            self.choose_level.owner = self
+        if self.avatar_info:
+            self.avatar_info.owner = self
+        if self.level_up:
+            self.level_up.owner = self
+        if self.upgrade_skills:
+            self.upgrade_skills.owner = self
+        if self.dialogue:
+            self.dialogue.owner = self
+        if self.debug_map:
+            self.debug_map.owner = self
+        if self.map_gen:
+            self.map_gen.owner = self
 
-        choices = ["New game", "Resize window",
-                   "Graphics: " + variables.gfx, "Tilesize: " + variables.tilesize + "x" + variables.tilesize, "Exit"]
-        if resume:
-            choices.insert(0, "Resume game")
-        blt.layer(0)
-        clear_camera(2)
-        blt.puts(center_x + 2, center_y,
-                 "[color=white]Spirit Quest RL", 0, 0, blt.TK_ALIGN_CENTER)
+    def refresh(self):
+        self.center_x = self.owner.ui.viewport.offset_center_x
+        self.center_y = self.owner.ui.viewport.offset_center_y - 5
+        self.viewport_w = self.owner.ui.viewport.offset_w
+        self.viewport_h = self.owner.ui.viewport.offset_h
 
-        for i, r in enumerate(choices):
-            selected = i == current_range
-            blt.color("orange" if selected else "light_gray")
-            blt.puts(center_x + 2, center_y + 2 + i, "%s%s" %
-                     ("[U+203A]" if selected else " ", r), 0, 0, blt.TK_ALIGN_CENTER)
+    def show(self, menu):
+        self.current_menu = menu
+        self.owner.game_state = GameStates.MENU
+        self.sel_index = 0
+        output = MenuData(name=self.current_menu.name)
+        self.refresh()
 
-        blt.refresh()
+        while output.menu_actions_left:
+            if (blt.state(floor(blt.TK_WIDTH)) != self.owner.ui.screen_w or
+                    blt.state(floor(blt.TK_HEIGHT)) != self.owner.ui.screen_h):
 
-        r = choices[current_range]
-
-        key = blt.read()
-        if key in (blt.TK_ESCAPE, blt.TK_CLOSE):
-            exit()
-
-
-        if key == blt.TK_ENTER and not resume and r == "Graphics: " + variables.gfx:
-            if variables.gfx is "tiles":
-                variables.gfx = "ascii"
-            elif variables.gfx is "ascii":
-                variables.gfx = "tiles"
-
-        if key == blt.TK_ENTER and r == "Tilesize: " + variables.tilesize + "x" + variables.tilesize:
-            if int(variables.tilesize) < 48:
-                variables.tilesize = str(int(variables.tilesize) + 16)
-                # blt.close()
-                init_tiles()
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
-            else:
-                variables.tilesize = str(16)
-                # blt.close()
-                init_tiles()
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
-
-        if key == blt.TK_ENTER and r is "New game":
-            key = None
-            current_range = 0
-            while True:
-                clear_camera(2)
-                animals = tilemap()["monsters"]
-                #exclude = {"frog"}
-                animals = {x: animals[x] for x in ("crow", "rat", "snake")}
-                blt.layer(0)
-                blt.puts(center_x, center_y - 5,
-                         "[color=white]Choose your spirit animal...", 0, 0, blt.TK_ALIGN_CENTER)
-                for i, (r, c) in enumerate(animals.items()):
-                    selected = i == current_range
-
-                    # Draw select symbol, monster name and description
-                    blt.color("orange" if selected else "default")
-                    blt.puts(center_x - 14, center_y - 2 + i * 5, "%s%s" %
-                             ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
-                    
-                    if r == "crow":
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "reveal: " + abilities()["utility"]["reveal"], 0, 0, blt.TK_ALIGN_LEFT)
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "swoop: " + abilities()["attack"]["swoop"][0], 0, 0, blt.TK_ALIGN_LEFT)
-                    
-                    if r == "rat":
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "paralyzing bite: " + abilities()["attack"]["paralyzing bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +3, "stealth", 0, 0, blt.TK_ALIGN_LEFT)
-                        
-                    if r == "snake":
-                        blt.puts(center_x - 14+1, center_y - 2 + i * 5 +2, "poison bite: " + abilities()["attack"]["poison bite"][0], 0, 0, blt.TK_ALIGN_LEFT)
-
-                    # Draw a bg tile
-                    blt.layer(0)
-                    blt.puts(center_x - 20 + 1, center_y - 2 + i *
-                             5, "[U+" + hex(0xE900 + 3) + "]", 0, 0)
-
-                    # Draw monster tile
-                    blt.layer(1)
-                    if variables.gfx is "ascii":
-                        blt.puts(center_x - 20 + 1,
-                                 center_y - 2 + i * 5, c, 0, 0)
-                    else:
-                        blt.puts(center_x - 20 + 1, center_y - 2 +
-                                 i * 5, "[U+" + hex(c + 2048) + "]", 0, 0)
-
-                    if selected:
-                        choice = r
-
+                self.owner.ui = UIElements()
+                self.owner.ui.owner = self.owner
+                self.refresh()
+                self.owner.ui.draw()
                 blt.refresh()
-                key = blt.read()
+                self.owner.fov_recompute = True
 
-                if key == blt.TK_ESCAPE:
-                    break
-                elif key == blt.TK_UP:
-                    if current_range > 0:
-                        current_range -= 1
-                elif key == blt.TK_DOWN:
-                    if current_range < len(animals) - 1:
-                        current_range += 1
-                elif key == blt.TK_ENTER:
-                    return choice
-
-        elif key == blt.TK_ENTER and r is "Exit":
-            exit()
-
-        elif key == blt.TK_ENTER and r is "Resize window":
-            blt.set("window: resizeable=true, minimum-size=60x20")
-            key = None
-            while key not in (blt.TK_CLOSE, blt.TK_ESCAPE, blt.TK_ENTER):
-                msg_panel, msg_panel_borders, screen_borders = init_ui()
-                center_x = int(variables.viewport_x / 2)
-                center_y = int(variables.viewport_y / 2)
-                h = blt.state(blt.TK_HEIGHT)
-                w = blt.state(blt.TK_WIDTH)
-                draw_ui(msg_panel, msg_panel_borders, screen_borders)
-                clear_camera(2)
-                blt.puts(center_x + 2, center_y,
-                         "[color=white]Use arrow keys or drag window borders to resize.\n Alt+Enter for fullscreen.\n Press Enter or Esc when done.", 0, 0, blt.TK_ALIGN_CENTER)
-                blt.refresh()
-
-                key = blt.read()
-                if key == blt.TK_FULLSCREEN:
-                    blt.set("window.fullscreen=true")
-                if key == blt.TK_UP:
-                    blt.set("window: size=" + str(w) + "x" +
-                            (str(h + variables.tile_offset_y)))
-                if key == blt.TK_DOWN:
-                    blt.set("window: size=" + str(w) + "x" +
-                            (str(h - variables.tile_offset_y)))
-                    if h <= 30:
-                        blt.set("window: size=" + str(w) + "x" + "30")
-                if key == blt.TK_RIGHT:
-                    blt.set("window: size=" +
-                            (str(w + variables.tile_offset_x)) + "x" + str(h))
-                if key == blt.TK_LEFT:
-                    blt.set("window: size=" +
-                            (str(w - variables.tile_offset_x)) + "x" + str(h))
-                    if w <= 60:
-                        blt.set("window: size=60" + "x" + str(h))
-
-            blt.set("window: resizeable=false")
-        elif key == blt.TK_UP:
-            if current_range > 0:
-                current_range -= 1
-        elif key == blt.TK_DOWN:
-            if current_range < len(choices) - 1:
-                current_range += 1
-
-        elif key == blt.TK_ENTER and r == "Resume game":
-            break
-
-
-def choose_avatar(player):
-
-    key = None
-    current_range = 0
-    center_x = int(variables.viewport_x / 2)
-    center_y = int(variables.viewport_y / 2)
-
-    while True:
-        clear_camera(2)
-        animals = player.player.char
-        exclude = {"player"}
-        avatars = {x: animals[x] for x in animals if x not in exclude}
-        blt.layer(0)
-        blt.puts(center_x, center_y - 5,
-                 "[color=white]Choose your spirit animal...", 0, 0, blt.TK_ALIGN_CENTER)
-        for i, (r, c) in enumerate(avatars.items()):
-            selected = i == current_range
-
-            # Draw select symbol, monster name and description
-            blt.color("orange" if selected else "default")
-            blt.puts(center_x - 14, center_y - 2 + i * 3, "%s%s" %
-                     ("[U+203A]" if selected else " ", r.capitalize() + ":" + "\n " + bestiary()[r]), 0, 0, blt.TK_ALIGN_LEFT)
-
-            # Draw a bg tile
             blt.layer(0)
-            blt.puts(center_x - 20 + 1, center_y - 2 + i *
-                     3, "[U+" + hex(0xE900 + 3) + "]", 0, 0)
+            self.owner.render_functions.clear_camera(3)
+            blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 5,
+                     menu.heading, self.text_wrap, 0, menu.align)
 
-            # Draw monster tile
-            blt.layer(1)
-            if variables.gfx is "ascii":
-                blt.puts(center_x - 20 + 1, center_y - 2 + i * 3, c, 0, 0)
+            if menu.sub_heading:
+                blt.color(None)
+                blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 3,
+                         menu.sub_heading, self.text_wrap, 0, menu.align)
+
+            for i, sel in enumerate(menu.items):
+                selected = i == self.sel_index
+                blt.color("orange" if selected else "light_gray")
+                blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + i * menu.margin_y, "%s%s" %
+                         ("[U+203A]" if selected else " ", sel), self.text_wrap, 0, menu.align)
+
+                blt.color(None)
+
+                if sel in menu.sub_items:
+                    for j, sub_sel in enumerate(menu.sub_items[sel]):
+                        blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + i * menu.margin_y + j + 1,
+                                 sub_sel, self.text_wrap, 0, menu.align)
+
+                if menu.items_icons:
+                    # Draw icon tile
+                    blt.layer(1)
+                    color = get_color(sel)
+                    if color is None or color == "default":
+                        color = "amber"
+                    blt.color(color)
+                    if options.data.gfx == "ascii":
+                        blt.puts(int(self.center_x / 2),
+                                 self.center_y + i * menu.margin_y, menu.items_icons[i], 0, 0, menu.align)
+                    else:
+                        blt.puts(int(self.center_x / 2), self.center_y +
+                                 i * menu.margin_y - 1, "[U+" + hex(menu.items_icons[i]) + "]", 0, 0, menu.align)
+
+            blt.refresh()
+
+            sel = menu.items[self.sel_index] if menu.items else None
+            key = blt.read()
+
+            output = self.handle_input(output, key, sel, menu.items)
+            if output.event == "break":
+                if menu.title_screen:
+                    exit()
+                else:
+                    self.owner.game_state = GameStates.PLAYER_TURN
+                    break
+            elif output.params or output.sub_menu or not output.menu_actions_left:
+                return output
+
+    def handle_input(self, output, key, sel, items):
+
+        if key == blt.TK_CLOSE:
+            exit()
+        elif key == blt.TK_ESCAPE:
+            output.event = "break"
+            return output
+        elif key == blt.TK_UP:
+            if self.sel_index > 0:
+                self.sel_index -= 1
+        elif key == blt.TK_DOWN:
+            if self.sel_index < len(items) - 1:
+                self.sel_index += 1
+        elif key == blt.TK_ENTER:
+            if sel == "Resume game":
+                output.event = "break"
+                return output
+            elif sel == "Exit":
+                exit()
+            elif sel == "New game":
+                output.name = "choose_animal"
+                output.sub_menu = True
+                output.prev_menu = self.current_menu
+            elif sel == "Map generator":
+                output.name = "map_gen"
+                output.sub_menu = True
+                output.prev_menu = self.current_menu
+            elif self.current_menu.name == "map_gen":
+                output.params = sel
+                output.event = "debug_map"
+                output.prev_menu = self.current_menu
+            elif self.current_menu.name == "choose_animal":
+                output.params = sel
+                output.event = "new_game"
+            elif self.current_menu.name == "level_up":
+                output.params = sel
+                output.event = "level_up"
+            elif self.current_menu.name == "upgrade_skills":
+                output.params = sel
+                output.event = "upgrade_skills"
+                output = self.current_menu.spend_points(output)
             else:
-                blt.puts(center_x - 20 + 1, center_y - 2 + i *
-                         3, "[U+" + hex(c + 2048) + "]", 0, 0)
+                output.params = sel
 
-            if selected:
-                choice = r
+        return output
 
-        blt.refresh()
-        key = blt.read()
+    def handle_output(self, data):
+        if data.sub_menu:
+            self.create_or_show_menu(data)
+            if self.current_menu.event == "show_prev_menu":
+                data.prev_menu.show()
+        elif data.event == "new_game":
+            self.owner.init_new_game(params=data.params)
+        elif data.event == "debug_map":
+            debug_map_data = MenuData(name="debug_map", params=data.params, sub_menu=True, prev_menu=self.current_menu)
+            self.owner.menus.create_or_show_menu(debug_map_data)
+            self.owner.render_functions.clear_camera(4)
+        elif self.current_menu.event == "level_change":
+            self.owner.levels.params = data.params
+        self.owner.game_state = GameStates.PLAYER_TURN
 
-        if key == blt.TK_ESCAPE:
-            break
-        elif key == blt.TK_UP:
-            if current_range > 0:
-                current_range -= 1
-        elif key == blt.TK_DOWN:
-            if current_range < len(avatars) - 1:
-                current_range += 1
-        elif key == blt.TK_ENTER:
-            player.fighter = player.player.avatar[choice]
-            player.char = player.player.char[choice]
-            choice_params = {}
-            for i in range (3):
-                
-                choice_param = set_up_level_params(i, choice_params)
-                choice_params.update(choice_param)
-            
-            return choice, choice_params
+    def create_or_show_menu(self, data):
 
-def set_up_level_params(question_number, prev_choices):
-    
-    key = None
-    current_range = 0
-    center_x = int(variables.viewport_x / 2)
-    center_y = int(variables.viewport_y / 2)
-    choice_params = dict(sample(meditate_params().items(), 3))
-    choice_params = {x: choice_params[x] for x in choice_params if x not in prev_choices}
+        if data.name == "choose_animal":
+            if self.choose_animal:
+                self.choose_animal.refresh()
+                self.choose_animal.show()
+            else:
+                choose_animal_menu = ChooseAnimal(sub_menu=data.sub_menu)
+                self.choose_animal = choose_animal_menu
+                self.choose_animal.owner = self
+                self.choose_animal.show()
+        elif data.name == "choose_level":
+            if self.choose_level:
+                self.choose_level.data = data.params
+                self.choose_level.refresh()
+                self.choose_level.show()
+            else:
+                choose_level_menu = ChooseLevel(data=data.params)
+                self.choose_level = choose_level_menu
+                self.choose_level.owner = self
+                self.choose_level.show()
+        elif data.name == "avatar_info":
+            if self.avatar_info:
+                self.avatar_info.data = data.params
+                self.avatar_info.refresh()
+                self.avatar_info.show()
+            else:
+                avatar_info_menu = AvatarInfo(data=data.params)
+                self.avatar_info = avatar_info_menu
+                self.avatar_info.owner = self
+                self.avatar_info.show()
+        elif data.name == "level_up":
+            if self.level_up:
+                self.level_up.data = data.params
+                self.level_up.refresh()
+            else:
+                level_up_menu = LevelUp(data=data.params)
+                self.level_up = level_up_menu
+                self.level_up.owner = self
+        elif data.name == "upgrade_skills":
+            if self.upgrade_skills:
+                self.upgrade_skills.data = data.params
+                self.upgrade_skills.refresh()
+            else:
+                upgrade_skills_menu = UpgradeSkills(data=data.params)
+                self.upgrade_skills = upgrade_skills_menu
+                self.upgrade_skills.owner = self
+        elif data.name == "dialogue":
+            if self.dialogue:
+                self.dialogue.data = data.params
+                self.dialogue.refresh()
+            else:
+                dialogue_menu = DialogueMenu(data=data.params)
+                self.dialogue = dialogue_menu
+                self.dialogue.owner = self
+        elif data.name == "map_gen":
+            if self.map_gen:
+                self.map_gen.data = data.params
+                self.map_gen.refresh()
+                self.map_gen.show()
+            else:
+                map_gen_menu = MapGen(sub_menu=data.sub_menu)
+                self.map_gen = map_gen_menu
+                self.map_gen.owner = self
+                self.map_gen.show()
+        elif data.name == "debug_map":
+            if self.debug_map:
+                self.debug_map.data = data.params
+                self.debug_map.show(self.owner.render_functions.draw_debug_map)
+            else:
+                debug_map = DebugMap(data=data.params, sub_menu=data.sub_menu)
+                self.debug_map = debug_map
+                self.debug_map.owner = self
+                self.debug_map.show(self.owner.render_functions.draw_debug_map)
 
-    while True:
-        clear_camera(2)
-        blt.layer(0)
-        if question_number == 0:
-            blt.puts(center_x, center_y - 5,
-                     "[color=white]You sit by the campfire to meditate. The world begins to drift away... ", 0, 0, blt.TK_ALIGN_CENTER)
-            blt.puts(center_x, center_y - 4,
-             "[color=white]Your mind gets visions of..", 0, 0, blt.TK_ALIGN_CENTER)
-        if question_number == 1:
-            blt.puts(center_x, center_y - 5,
-                     "[color=white]Pictures of " + list(prev_choices)[0] + " begin to form in your mind.", 0, 0, blt.TK_ALIGN_CENTER)
-            blt.puts(center_x, center_y - 4,
-             "[color=white]Then, a new image appears..", 0, 0, blt.TK_ALIGN_CENTER)
-            
-        if question_number == 2:
-            blt.puts(center_x, center_y - 5,
-                     "[color=white]You have dreamt about " + list(prev_choices)[0] + ", which shall bring about " + list(prev_choices)[1] + ".", 0, 0, blt.TK_ALIGN_CENTER)
-            blt.puts(center_x, center_y - 4,
-             "[color=white]The last thing that enters your mind is...", 0, 0, blt.TK_ALIGN_CENTER)
+        self.owner.game_state = GameStates.PLAYER_TURN
 
-        for i, r in enumerate(choice_params):
-            selected = i == current_range
-            blt.color("orange" if selected else "light_gray")
-            blt.puts(center_x + 2, center_y + 2 + i, "%s%s" %
-                     ("[U+203A]" if selected else " ", ".."+r+"."), 0, 0, blt.TK_ALIGN_CENTER)
 
-            if selected:
-                choice = {r: choice_params[r]}
-
-        blt.refresh()
-        key = blt.read()
-
-        if key == blt.TK_ESCAPE:
-            break
-        elif key == blt.TK_UP:
-            if current_range > 0:
-                current_range -= 1
-        elif key == blt.TK_DOWN:
-            if current_range < len(choice_params) - 1:
-                current_range += 1
-        elif key == blt.TK_ENTER:
-            return choice
-    
-    
+class MenuData:
+    def __init__(self, name=None, sub_menu=False, prev_menu=None, params=None, event=None, menu_actions_left=True):
+        self.name = name
+        self.sub_menu = sub_menu
+        self.prev_menu = prev_menu
+        self.params = params
+        self.event = event
+        self.menu_actions_left = menu_actions_left
+        self.messages = []

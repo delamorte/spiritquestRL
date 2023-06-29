@@ -1,29 +1,58 @@
-from bearlibterminal import terminal as blt
 from math import floor
-import variables
 
-def init_ui():
+from bearlibterminal import terminal as blt
 
-    screen_w = blt.state(floor(blt.TK_WIDTH))
-    screen_h = blt.state(floor(blt.TK_HEIGHT))
+from components.ui.message_panel import MessagePanel
+from components.ui.side_panel import SidePanel
+from components.ui.viewport import Viewport
+from map_objects.tilemap import get_tile_variant, get_color
 
-    w = floor(screen_w / variables.ui_offset_x)
-    h = floor(screen_h / variables.ui_offset_y - 5)
 
-    msg_panel = Panel(1, h + 1, w - 1, h + 4)
-    msg_panel_borders = Panel(0, h, w, h + 5)
-    screen_borders = Panel(0, 0, w, h)
+class UIElements:
+    def __init__(self):
+        self.owner = None
+        self.color = get_color("ui_block")
+        self.tile_horizontal = get_tile_variant("ui_block", variant_idx=0, no_ascii=True)
+        self.tile_vertical = get_tile_variant("ui_block", variant_idx=2, no_ascii=True)
+        self.tile_ne = get_tile_variant("ui_block", variant_idx=1, no_ascii=True)
+        self.tile_se = get_tile_variant("ui_block", variant_idx=3, no_ascii=True)
+        self.tile_sw = get_tile_variant("ui_block", variant_idx=5, no_ascii=True)
+        self.tile_nw = get_tile_variant("ui_block", variant_idx=7, no_ascii=True)
+        self.screen_w = blt.state(floor(blt.TK_WIDTH))
+        self.screen_h = blt.state(floor(blt.TK_HEIGHT))
+        self.elements = []
+        self.offset_y = 3
+        self.offset_x = 4
+        self.msg_panel = None
+        self.side_panel = None
+        self.viewport = None
 
-    viewport_x = w * variables.ui_offset_x - (variables.ui_offset_x + 1)
-    viewport_y = h * variables.ui_offset_y - (variables.ui_offset_y + 1)
-    variables.viewport_x = viewport_x
-    variables.viewport_y = viewport_y
-    return msg_panel, msg_panel_borders, screen_borders
+        self.init_ui()
 
-class Panel:
+    def init_ui(self):
 
-    def __init__(self, x, y, w, h):
-        self.x = int(x)
-        self.y = int(y)
-        self.w = int(w)
-        self.h = int(h)
+        w = floor(self.screen_w / self.offset_x)
+        h = floor(self.screen_h / self.offset_y)
+
+        # Side panel
+        side_panel_w = 10
+        side_panel_x = w - side_panel_w
+
+        self.side_panel = SidePanel(side_panel_x, 0, side_panel_w-1, h-1)
+        self.side_panel.owner = self
+        self.elements.append(self.side_panel)
+        self.side_panel.update_offset(self.offset_x, self.offset_y)
+
+        self.viewport = Viewport(0, 0, w-side_panel_w-1, h-6)
+        self.viewport.owner = self
+        self.elements.append(self.viewport)
+        self.viewport.update_offset(self.offset_x, self.offset_y)
+
+        self.msg_panel = MessagePanel(0, self.viewport.h+1, self.viewport.w, h-self.viewport.h)
+        self.msg_panel.owner = self
+        self.elements.append(self.msg_panel)
+        self.msg_panel.update_offset(self.offset_x, self.offset_y)
+
+    def draw(self):
+        for element in self.elements:
+            self.owner.render_functions.draw_ui(element)

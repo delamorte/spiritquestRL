@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="9" height="8" tilewidth="16" tileheight="24" infinite="0" nextlayerid="6" nextobjectid="1">
+ <editorsettings>
+  <export target="hub_shaman.tmx" format="tmx"/>
+ </editorsettings>
+ <tileset firstgid="1" name="terrain_objects_items_comb_2" tilewidth="16" tileheight="24" tilecount="900" columns="20">
+  <image source="../tilesets/terrain_objects_items_comb.png" width="320" height="1080"/>
+  <tile id="502">
+   <properties>
+    <property name="hidden" type="bool" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer id="4" name="2" width="9" height="8">
+  <data encoding="csv">
+218,232,232,183,232,183,232,232,218,
+218,0,0,0,182,0,0,0,218,
+218,0,0,521,0,521,0,164,218,
+218,503,0,0,17,0,0,0,218,
+218,0,0,521,0,521,0,0,218,
+218,0,0,0,0,0,524,667,218,
+231,231,233,233,328,231,231,233,233,
+130,130,130,76,0,76,130,130,130
+</data>
+ </layer>
+ <layer id="5" name="1" width="9" height="8" visible="0">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+412,412,412,412,412,412,412,412,412
+</data>
+ </layer>
+ <layer id="1" name="0" width="9" height="8" visible="0" opacity="0.38">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,
+0,278,278,278,278,278,278,278,0,
+0,278,278,278,278,278,278,278,0,
+0,278,278,278,278,278,278,278,0,
+0,278,278,278,278,278,278,278,0,
+0,278,278,278,278,278,278,278,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

@@ -1,0 +1,383 @@
+{
+    "crow talons": {
+        "name": "crow talons",
+        "description": "Attack with sharp talons",
+        "skill_type": "weapon",
+        "player_only": true,
+        "target_area": "melee",
+        "damage": ["2d3", "2d4", "2d5"],
+        "icon": 29,
+        "efx_icons": [2, 1, 0, 0, 1, 2]
+    },
+    "nasty bite": {
+        "name": "nasty bite",
+        "description": "Take a nasty bite",
+        "skill_type": "weapon",
+        "player_only": true,
+        "target_area": "melee",
+        "damage": ["1d4", "1d6", "1d8"],
+        "icon": 6,
+        "efx_icons": [1]
+    },
+    "snaketail whip": {
+        "name": "snaketail whip",
+        "description": "Lash your enemy with a whip resembling a living snake",
+        "skill_type": "weapon",
+        "player_only": true,
+        "target_area": "melee",
+        "damage": ["1d8", "1d10", "1d12"],
+        "icon": 7,
+        "efx_icons": [12],
+        "color": "yellow"
+    },
+    "talons": {
+        "name": "talons",
+        "description": "Attack with sharp talons",
+        "skill_type": "weapon",
+        "target_area": "melee",
+        "damage": ["2d3", "2d4", "2d5"],
+        "icon": 29,
+        "efx_icons": [0]
+    },
+    "bite": {
+        "name": "bite",
+        "description": "Ferocious bite with sharp teeth",
+        "skill_type": "weapon",
+        "target_area": "melee",
+        "damage": ["1d3", "1d6", "1d8"],
+        "icon": 6,
+        "efx_icons": [1]
+    },
+    "slap": {
+        "name": "slap",
+        "description": "Ouch!",
+        "skill_type": "weapon",
+        "target_area": "melee",
+        "damage": ["1d3", "1d4", "1d6"],
+        "icon": 22,
+        "efx_icons": [9]
+    },
+    "claws": {
+        "name": "claws",
+        "description": "Rends the enemy with sharp claws",
+        "skill_type": "weapon",
+        "target_area": "melee",
+        "damage": ["1d4", "1d6", "1d8"],
+        "icon": 29,
+        "efx_icons": [38]
+    },
+    "maul": {
+        "name": "maul",
+        "description": "Mauls the enemy with massive strength",
+        "skill_type": "weapon",
+        "target_area": "melee",
+        "damage": ["1d8", "1d10", "1d12"],
+        "icon": 54,
+        "efx_icons": [6]
+    },
+    "strike": {
+        "name": "strike",
+        "description": "Strikes the enemy with a forceful blow",
+        "skill_type": "weapon",
+        "target_area": "melee",
+        "damage": ["1d4", "1d6", "1d8"],
+        "icon": 22,
+        "efx_icons": [9]
+    },
+    "poison bite": {
+        "name": "poison bite",
+        "description": "may poison",
+        "skill_type": "attack",
+        "target_area": "melee",
+        "damage": ["1d6", "1d6", "1d8"],
+        "dps": [1],
+        "effect": ["poison"],
+        "duration": ["1d4"],
+        "chance": [
+            0.1,
+            0.2,
+            0.3
+        ],
+        "icon": 4,
+        "efx_icons": [1],
+        "color": "green"
+    },
+    "leeching bite": {
+        "name": "leeching bite",
+        "description": "may drain life",
+        "skill_type": "attack",
+        "target_area": "melee",
+        "damage": ["1d4", "1d6", "1d8"],
+        "chance": [
+            0.1,
+            0.2,
+            0.3
+        ],
+        "icon": 19,
+        "efx_icons": [1],
+        "color": "light red"
+    },
+    "paralyzing bite": {
+        "name": "paralyzing bite",
+        "description": "may paralyze",
+        "skill_type": "attack",
+        "damage": ["1d4"],
+        "target_area": "melee",
+        "effect": ["paralyze"],
+        "duration": ["1d2", "1d3", "1d4"],
+        "chance": [
+            0.1,
+            0.2,
+            0.3
+        ],
+        "icon": 18,
+        "efx_icons": [1]
+    },
+    "diseasing bite": {
+        "name": "diseasing bite",
+        "description": "may cause disease",
+        "skill_type": "attack",
+        "damage": ["1d4"],
+        "target_area": "melee",
+        "effect": ["disease"],
+        "duration": ["1d2", "1d3", "1d4"],
+        "chance": [
+            0.1,
+            0.2,
+            0.3
+        ],
+        "icon": 19,
+        "efx_icons": [1],
+        "color": "yellow"
+    },
+    "peck eyes": {
+        "name": "peck eyes",
+        "description": "may blind",
+        "target_area": "melee",
+        "skill_type": "attack",
+        "damage": ["1d4"],
+        "effect": ["blind"],
+        "duration": ["1d3", "1d4", "1d6"],
+        "chance": [
+            0.1,
+            0.2,
+            0.3
+        ],
+        "icon": 14,
+        "efx_icons": [90]
+    },
+    "swoop": {
+        "name": "swoop",
+        "description": "extra dmg on small targets",
+        "skill_type": "attack",
+        "target_area": "melee",
+        "damage": ["1d3", "1d4", "1d6"],
+        "chance": [
+            0.33,
+            0.5,
+            0.66
+        ],
+        
+        "icon": 13,
+        "efx_icons": [41]
+    },
+    "lacerate": {
+        "name": "lacerate",
+        "description": "extra dmg",
+        "skill_type": "attack",
+        "target_area": "melee",
+        "damage": ["1d3", "1d4", "1d5"],
+        "effect": ["bleed"],
+        "chance": [
+            0.1,
+            0.2,
+            0.3
+        ],
+        "icon": 10,
+        "efx_icons": [10]
+    },
+    "spit poison": {
+        "name": "spit poison",
+        "description": "spit slimy poison at the enemy. Yuck!",
+        "skill_type": "attack",
+        "damage": ["1d3", "1d6", "1d8"],
+        "duration": ["2d2", "2d3", "2d4"],
+        "effect": ["poison"],
+        "radius": [3, 4, 6],
+        "chance": [0.1, 0.15, 0.2],
+        "requires_targeting": true,
+        "target_area": "disc",
+        "icon": 4,
+        "efx_icons": [57],
+        "color": "green"
+    },
+    "leap": {
+        "name": "leap",
+        "description": "leap to a tile in a radius",
+        "skill_type": "utility",
+        "radius": [3, 5, 7],
+        "target_area": "square",
+        "chance": [
+            0.1,
+            0.2,
+            0.3
+        ],
+        "requires_targeting": true,
+        "target_self": true,
+        "icon": 41
+    },
+    "reveal": {
+        "name": "reveal",
+        "description": "reveal an area around you, may reveal secrets.",
+        "skill_type": "utility",
+        "target_area": "square",
+        "effect": ["reveal"],
+        "duration": [10, 15, 99],
+        "radius": [3, 7, 9],
+        "player_only": true,
+        "target_self": true,
+        "targets_fighters_only": false,
+        "icon": 48,
+        "efx_icons": [50]
+    },
+    "stunning roar": {
+        "name": "stunning roar",
+        "description": "stun enemies around you with a voracious roar",
+        "skill_type": "attack",
+        "target_area": "square",
+        "effect": ["stun"],
+        "radius": [2, 3, 4],
+        "chance": [0.1, 0.15, 0.2],
+        "icon": 33
+    },
+    "call allies": {
+        "name": "call allies",
+        "description": "make a loud beckoning noise calling friends",
+        "effect": ["summon"],
+        "duration": ["5d2", "10d2", "15d2"],
+        "skill_type": "utility",
+        "chance": [0.05, 0.07, 0.1],
+        "target_self": true,
+        "target_area": "square",
+        "icon": 34
+    },
+    "summon crow": {
+        "name": "summon crow",
+        "description": "Beckon to the skies and summon a friend to attack from above",
+        "effect": ["summon"],
+        "summoned_entities": ["crow"],
+        "duration": [10, 20, 99],
+        "skill_type": "utility",
+        "target_self": true,
+        "player_only": true,
+        "target_area": "square",
+        "icon": 51
+    },
+    "heal": {
+        "name": "heal",
+        "description": "cast a magical spell to heal one's wounds",
+        "skill_type": "utility",
+        "power": ["1d4", "1d6", "1d8"],
+        "target_area": "melee",
+        "duration": [0],
+        "effect": ["heal"],
+        "chance": [0.1, 0.15, 0.2],
+        "target_self": true,
+        "target_other": true,
+        "requires_targeting": true,
+        "icon": 36
+    },
+    "boost atk": {
+        "name": "boost atk",
+        "description": "cast a magical spell to temporarily raise one's strength",
+        "skill_type": "utility",
+        "effect": ["boost_atk"],
+        "target_area": "disc",
+        "duration": ["1d6"],
+        "chance": [0.1, 0.15, 0.2],
+        "radius": [3, 4, 5],
+        "target_self": true,
+        "target_other": true,
+        "requires_targeting": true,
+        "icon": 37
+    },
+    "drain atk": {
+        "name": "drain atk",
+        "description": "cast a magical spell to temporarily drain one's strength",
+        "skill_type": "utility",
+        "target_area": "disc",
+        "effect": ["drain_atk"],
+        "radius": [3, 4, 5],
+        "duration": ["1d4"],
+        "chance": [0.1, 0.15, 0.2],
+        "requires_targeting": true,
+        "icon": 40
+    },
+    "harm": {
+        "name": "harm",
+        "description": "cast a magical spell to drain one's life power",
+        "skill_type": "attack",
+        "damage": ["1d4", "1d6", "1d8"],
+        "radius": [3, 4, 5],
+        "chance": [0.1, 0.15, 0.2],
+        "requires_targeting": true,
+        "target_area": "disc",
+        "icon": 19
+    },
+    "fire breath": {
+        "name": "fire breath",
+        "description": "breathe a fiery cone in front of you",
+        "skill_type": "attack",
+        "damage": ["1d8", "1d10", "1d12"],
+        "radius": [3, 5, 7],
+        "chance": [0.1, 0.15, 0.2],
+        "requires_targeting": true,
+        "target_area": "disc",
+        "icon": 9
+    },
+    "invisibility": {
+        "name": "invisibility",
+        "description": "cast a magical spell to make yourself invisible",
+        "skill_type": "utility",
+        "effect": ["invisibility"],
+        "duration": ["4d2", "5d2", "6d2"],
+        "chance": [0.1, 0.15, 0.2],
+        "target_self": true,
+        "target_area": "square",
+        "icon": 35
+    },
+    "sneak": {
+        "name": "sneak",
+        "description": "Go into stealth mode",
+        "skill_type": "utility",
+        "effect": ["sneak"],
+        "radius": [3, 7, 9],
+        "duration": [10, 20, 99],
+        "player_only": true,
+        "target_self": true,
+        "target_area": "disc",
+        "icon": 21
+    },
+    "fly": {
+        "name": "fly",
+        "description": "focus your spirit power to spread magical wings and fly over objects",
+        "skill_type": "utility",
+        "effect": ["fly"],
+        "duration": [10, 15, 99],
+        "target_self": true,
+        "target_area": "square",
+        "icon": 58
+    },
+    "strangle": {
+        "name": "strangle",
+        "description": "wrap yourself around your enemy in a chokehold",
+        "skill_type": "attack",
+        "target_area": "melee",
+        "damage": ["1d4", "1d6", "1d8"],
+        "effect": ["strangle"],
+        "duration": ["1d3", "1d4", "1d6"],
+        "chance": [0.1, 0.15, 0.2],
+        "icon": 19,
+        "efx_icons": [47]
+    }
+}
