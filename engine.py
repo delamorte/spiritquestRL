@@ -20,7 +20,7 @@ from components.summoner import Summoner
 from data import json_data
 from game_states import GameStates
 from input_handlers import handle_keys
-from map_objects.levels import Levels
+from map_gen.levels import Levels
 from render_functions import RenderFunctions
 from ui.elements import UIElements
 from ui.menus import Menus, MenuData

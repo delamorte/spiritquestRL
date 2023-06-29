@@ -2,7 +2,7 @@ from bearlibterminal import terminal as blt
 
 import options
 from data import json_data
-from map_objects.tilemap import get_tile
+from map_gen.tilemap import get_tile
 
 
 class ChooseAnimal:

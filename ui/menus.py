@@ -12,7 +12,7 @@ from components.menus.level_up import LevelUp
 from components.menus.map_gen import MapGen
 from components.menus.upgrade_skills import UpgradeSkills
 from game_states import GameStates
-from map_objects.tilemap import get_color
+from map_gen.tilemap import get_color
 from ui.elements import UIElements
 
 

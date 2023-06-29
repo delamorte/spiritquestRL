@@ -1,6 +1,6 @@
 from random import randint
 
-from map_objects.tilemap import get_tile, get_color
+from map_gen.tilemap import get_tile, get_color
 
 
 class Tile:

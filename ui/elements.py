@@ -5,7 +5,7 @@ from bearlibterminal import terminal as blt
 from components.ui.message_panel import MessagePanel
 from components.ui.side_panel import SidePanel
 from components.ui.viewport import Viewport
-from map_objects.tilemap import get_tile_variant, get_color
+from map_gen.tilemap import get_tile_variant, get_color
 
 
 class UIElements:

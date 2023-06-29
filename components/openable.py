@@ -1,4 +1,4 @@
-from map_objects.tilemap import get_tile_object, get_tile
+from map_gen.tilemap import get_tile_object, get_tile
 from ui.message import Message
 
 

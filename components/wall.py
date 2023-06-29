@@ -1,4 +1,4 @@
-from map_objects.tilemap import get_tile_object
+from map_gen.tilemap import get_tile_object
 
 
 class Wall:

@@ -7,7 +7,7 @@ import tcod
 from components.animation import Animation
 from data import json_data
 from helpers import get_article
-from map_objects.tilemap import get_tile
+from map_gen.tilemap import get_tile
 from ui.message import Message
 
 

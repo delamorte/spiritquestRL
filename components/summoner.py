@@ -8,7 +8,7 @@ from components.fighter import Fighter
 from components.light_source import LightSource
 from components.status_effects import StatusEffects
 from data import json_data
-from map_objects.tilemap import get_color
+from map_gen.tilemap import get_color
 from ui.message import Message
 
 

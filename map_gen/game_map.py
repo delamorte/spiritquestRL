@@ -18,11 +18,14 @@ from components.openable import Openable
 from components.stairs import Stairs
 from components.status_effects import StatusEffects
 from components.wall import Wall
-from map_objects.tile import Tile
-from map_objects.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant, \
+from map_gen.algorithms.cellular import CellularAutomata
+from map_gen.algorithms.drunkards import DrunkardsWalk
+from map_gen.algorithms.maze_with_rooms import MazeWithRooms
+from map_gen.algorithms.messy_bsp import MessyBSPTree
+from map_gen.algorithms.room_addition import RoomAddition
+from map_gen.tile import Tile
+from map_gen.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant, \
     get_fighters_by_attribute
-from resources.dungeon_generation.dungeon_generator import DrunkardsWalk, MessyBSPTree, CellularAutomata, \
-    MazeWithRooms, RoomAddition
 
 
 class GameMap:
@@ -429,7 +432,7 @@ class GameMap:
 
         self.algorithm = map_algorithm
 
-        map_algorithm.generateLevel(self.width, self.height)
+        map_algorithm.generate_level(self.width, self.height)
         color = get_color("ground_soil")
         tree_color = get_color("tree", mod=self.owner.world_tendency)
         objects = []

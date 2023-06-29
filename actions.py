@@ -4,7 +4,7 @@ from components.cursor import Cursor
 from components.entity import Entity
 from game_states import GameStates
 from helpers import get_article
-from map_objects.tilemap import get_tile
+from map_gen.tilemap import get_tile
 from ui.menus import MenuData
 from ui.message import Message
 from ui.message_history import show_msg_history
