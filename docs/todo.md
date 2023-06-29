@@ -61,9 +61,12 @@ Here are some main features:
 - Ornithologist (building: wilderness? allows upgrading flying animal skills)
 
 #### Level generation ideas
-- Map debugging tool
-- room generator (rectangles, circles, prefabs, cellular automata blobs)
-- dijkstra maps
+~~- Map debugging tool~~
+~~- room generator (rectangles, circles, prefabs, cellular automata blobs)~~
+- themed dungeon rooms
+- dungeon post-processing
+- different biomes
+- (dijkstra maps)
 - 
 
 ### Alpha 0.0.1 roadmap
