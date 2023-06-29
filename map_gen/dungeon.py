@@ -15,15 +15,82 @@ Copyright (c) 2020 delamorte
 '''
 
 import random
+from math import sqrt
 
 
 class Dungeon:
-    def __init__(self):
-        pass
+    def __init__(self, map_width=None, map_height=None):
+        self.map_width = map_width
+        self.map_height = map_height
+        self._currentRegion = None
+        self._regions = None
+        self.rooms = []
+        self.level = []
 
-    def create_room(self):
-        pass
+    def create_room_rect(self, room, ext_walls=False, carve=False):
+        '''
+        :param room: Rectangle
+        :param ext_walls: If true, set outer tiles to 1 and interior to 0. If false, set all tiles to 0.
+        :param carve: Used for maze_with_rooms
+        '''
+        cave = set()
+        for x in range(room.x1, room.x2):
+            for y in range(room.y1, room.y2):
+                if carve:
+                    self.carve(x, y)
+                self.level[x][y] = 0
+                if ext_walls:
+                    if (y == room.y1 or y == room.y2 - 1) and 0 <= x <= room.x2 - 1:
+                        self.level[x][y] = 1
+                    elif (x == room.x1 or x == room.x2 - 1) and 0 <= y < room.y2 - 1:
+                        self.level[x][y] = 1
+                cave.add((x, y))
+        self.rooms.append(cave)
 
+    def carve(self, x, y):
+        self._regions[x][y] = self._currentRegion
+
+    def clean_up_map(self, map_width, map_height, smoothing=None, filling=None, iterations=5):
+        if smoothing:
+            for i in range(iterations):
+                # Look at each cell individually and check for smoothness
+                for x in range(1, map_width - 1):
+                    for y in range(1, map_height - 1):
+                        if (self.level[x][y] == 1) and (self.get_adjacent_walls_simple(x, y) <= smoothing):
+                            self.level[x][y] = 0
+
+                        if filling and (self.level[x][y] == 0) and (self.get_adjacent_walls_simple(x, y) >= filling):
+                            self.level[x][y] = 1
+
+    def get_adjacent_walls_simple(self, x, y):  # finds the walls in four directions
+        wall_counter = 0
+        # print("(",x,",",y,") = ",self.level[x][y])
+        if self.level[x][y - 1] == 1:  # Check north
+            wall_counter += 1
+        if self.level[x][y + 1] == 1:  # Check south
+            wall_counter += 1
+        if self.level[x - 1][y] == 1:  # Check west
+            wall_counter += 1
+        if self.level[x + 1][y] == 1:  # Check east
+            wall_counter += 1
+
+        return wall_counter
+
+    def get_adjacent_walls(self, tile_x, tile_y, room=None):  # finds the walls in 8 directions
+        wall_counter = 0
+        if room is None:
+            room = self.level
+        for x in range(tile_x - 1, tile_x + 2):
+            for y in range(tile_y - 1, tile_y + 2):
+                if room[x][y] == 1:
+                    if (x != tile_x) or (y != tile_y):  # exclude (tile_x,tile_y)
+                        wall_counter += 1
+        return wall_counter
+
+    @staticmethod
+    def distance_formula(point1, point2):
+        d = sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
+        return d
 
 # ==== Helper Classes ====
 class Rect:  # used for the tunneling algorithm
@@ -96,7 +163,7 @@ class Leaf:  # used for the BSP tree algorithm
 
         return True
 
-    def create_rooms(self, bsp_tree):
+    def create_rooms(self, bsp_tree, ext_walls=False):
         if self.child_1 or self.child_2:
             # recursively search for children until you hit the end of the branch
             if self.child_1:
@@ -115,7 +182,7 @@ class Leaf:  # used for the BSP tree algorithm
             x = random.randint(self.x, self.x + (self.width - 1) - w)
             y = random.randint(self.y, self.y + (self.height - 1) - h)
             self.room = Rect(x, y, w, h)
-            bsp_tree.createRoom(self.room)
+            bsp_tree.create_room_rect(self.room, ext_walls=ext_walls)
 
     def get_room(self):
         if self.room:

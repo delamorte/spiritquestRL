@@ -1,18 +1,19 @@
 import random
 from math import sqrt
 
-from map_gen.dungeon import Rect
+from map_gen.dungeon import Rect, Dungeon
 
 
 # ==== Maze With Rooms ====
-class MazeWithRooms:
+class MazeWithRooms(Dungeon):
     '''
     Python implimentation of the rooms and mazes algorithm found at
     http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
     by Bob Nystrom
     '''
 
-    def __init__(self):
+    def __init__(self, map_width=None, map_height=None):
+        super().__init__(map_width=map_width, map_height=map_height)
         self.level = []
 
         self.ROOM_MAX_SIZE = 13
@@ -136,7 +137,7 @@ class MazeWithRooms:
                 rooms.append(room)
 
                 self.startRegion()
-                self.createRoom(room)
+                self.create_room_rect(room, carve=True)
 
     def connectRegions(self, map_width, map_height):
         # Find all of the tiles that can connect two regions
@@ -247,11 +248,6 @@ class MazeWithRooms:
 
             connectors.difference_update(toBeRemoved)
 
-    def createRoom(self, room):
-        # set all tiles within a rectangle to 0
-        for x in range(int(room.x1), int(room.x2)):
-            for y in range(int(room.y1), int(room.y2)):
-                self.carve(x, y)
 
     def addJunction(self, pos):
         self.level[pos[0]][pos[1]] = 0
@@ -307,6 +303,3 @@ class MazeWithRooms:
     def startRegion(self):
         self._currentRegion += 1
 
-    def carve(self, x, y):
-        self.level[x][y] = 0
-        self._regions[x][y] = self._currentRegion

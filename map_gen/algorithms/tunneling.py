@@ -1,10 +1,10 @@
 # ==== Tunneling Algorithm ====
 import random
 
-from map_gen.dungeon import Rect
+from map_gen.dungeon import Rect, Dungeon
 
 
-class TunnelingAlgorithm:
+class TunnelingAlgorithm(Dungeon):
     '''
     This version of the tunneling algorithm is essentially
     identical to the tunneling algorithm in the Complete Roguelike
@@ -14,7 +14,8 @@ class TunnelingAlgorithm:
     Requires random.randint() and the Rect class defined below.
     '''
 
-    def __init__(self):
+    def __init__(self, map_width=None, map_height=None):
+        super().__init__(map_width=map_width, map_height=map_height)
         self.level = []
         self.ROOM_MAX_SIZE = 15
         self.ROOM_MIN_SIZE = 6
@@ -46,7 +47,7 @@ class TunnelingAlgorithm:
                     break
 
             if not failed:
-                self.createRoom(new_room)
+                self.create_room_rect(new_room)
                 (new_x, new_y) = new_room.center()
 
                 if num_rooms != 0:
@@ -70,12 +71,6 @@ class TunnelingAlgorithm:
                 num_rooms += 1
 
         return self.level
-
-    def createRoom(self, room):
-        # set all tiles within a rectangle to 0
-        for x in range(room.x1 + 1, room.x2):
-            for y in range(room.y1 + 1, room.y2):
-                self.level[x][y] = 0
 
     def createHorTunnel(self, x1, x2, y):
         y = int(y)

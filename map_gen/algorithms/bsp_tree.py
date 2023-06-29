@@ -1,11 +1,12 @@
 # ==== BSP Tree ====
 import random
 
-from map_gen.dungeon import Leaf
+from map_gen.dungeon import Leaf, Dungeon
 
 
-class BSPTree:
-    def __init__(self):
+class BSPTree(Dungeon):
+    def __init__(self, map_width=None, map_height=None):
+        super().__init__(map_width=map_width, map_height=map_height)
         self.level = []
         self.room = None
         self.MAX_LEAF_SIZE = 24
@@ -41,12 +42,6 @@ class BSPTree:
         rootLeaf.create_rooms(self)
 
         return self.level
-
-    def createRoom(self, room):
-        # set all tiles within a rectangle to 0
-        for x in range(room.x1 + 1, room.x2):
-            for y in range(room.y1 + 1, room.y2):
-                self.level[x][y] = 0
 
     def createHall(self, room1, room2):
         # connect two rooms by hallways

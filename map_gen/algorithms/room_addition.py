@@ -4,9 +4,11 @@ import random
 from tcod import libtcodpy
 from tcod import map as tcod_map
 
+from map_gen.dungeon import Dungeon
+
 
 # ==== Room Addition ====
-class RoomAddition:
+class RoomAddition(Dungeon):
     '''
     What I'm calling the Room Addition algorithm is an attempt to
     recreate the dungeon generation algorithm used in Brogue, as
@@ -19,7 +21,8 @@ class RoomAddition:
     but I think it's good enough to demonstrait the concept.
     '''
 
-    def __init__(self):
+    def __init__(self, map_width=None, map_height=None):
+        super().__init__(map_width=map_width, map_height=map_height)
         self.rooms = []
         self.level = []
 
@@ -36,7 +39,7 @@ class RoomAddition:
         self.cavernChance = 0.40  # probability that the first room will be a cavern
         self.CAVERN_MAX_SIZE = 35  # max height an width
 
-        self.wallProbability = 0.45
+        self.wall_probability = 0.45
         self.neighbors = 4
 
         self.squareRoomChance = 0.1
@@ -62,7 +65,7 @@ class RoomAddition:
 
         # generate the first room
         room = self.generateRoom()
-        roomWidth, roomHeight = self.get_roomDimensions(room)
+        roomWidth, roomHeight = self.get_room_dimensions(room)
         roomX = int((map_width / 2 - roomWidth / 2)) - 1
         roomY = int((map_height / 2 - roomHeight / 2)) - 1
         self.addRoom(roomX, roomY, room)
@@ -98,7 +101,7 @@ class RoomAddition:
                 elif self.squareRoomChance <= choice < (self.squareRoomChance + self.crossRoomChance):
                     room = self.generateRoomCross()
                 else:
-                    room = self.generateRoomCellularAutomata()
+                    room = self.generateRoomCavern(max_size=self.ROOM_MAX_SIZE)
 
         else:  # it's the first room
             choice = random.random()
@@ -106,7 +109,7 @@ class RoomAddition:
                 room = self.generateRandomVault()
             else:
                 if choice < self.cavernChance:
-                    room = self.generateRoomCavern()
+                    room = self.generateRoomCavern(max_size=self.CAVERN_MAX_SIZE)
                 else:
                     room = self.generateRoomSquare()
 
@@ -203,81 +206,46 @@ class RoomAddition:
 
         return room
 
-    def generateRoomCellularAutomata(self):
+    def generateRoomCavern(self, max_size=18):
         while True:
             # if a room is too small, generate another
             room = [[1
-                     for y in range(self.ROOM_MAX_SIZE)]
-                    for x in range(self.ROOM_MAX_SIZE)]
+                     for y in range(max_size)]
+                    for x in range(max_size)]
 
             # random fill map
-            for y in range(2, self.ROOM_MAX_SIZE - 2):
-                for x in range(2, self.ROOM_MAX_SIZE - 2):
-                    if random.random() >= self.wallProbability:
+            for y in range(2, max_size - 2):
+                for x in range(2, max_size - 2):
+                    if random.random() >= self.wall_probability:
                         room[x][y] = 0
 
             # create distinctive regions
             for i in range(4):
-                for y in range(1, self.ROOM_MAX_SIZE - 1):
-                    for x in range(1, self.ROOM_MAX_SIZE - 1):
+                for y in range(1, max_size - 1):
+                    for x in range(1, max_size - 1):
 
                         # if the cell's neighboring walls > self.neighbors, set it to 1
-                        if self.getAdjacentWalls(x, y, room) > self.neighbors:
+                        if self.get_adjacent_walls(x, y, room) > self.neighbors:
                             room[x][y] = 1
                         # otherwise, set it to 0
-                        elif self.getAdjacentWalls(x, y, room) < self.neighbors:
+                        elif self.get_adjacent_walls(x, y, room) < self.neighbors:
                             room[x][y] = 0
 
-            # floodfill to remove small caverns
-            room = self.floodFill(room)
+            # flood_fill to remove small caverns
+            room = self.flood_fill(room)
 
             # start over if the room is completely filled in
-            roomWidth, roomHeight = self.get_roomDimensions(room)
+            roomWidth, roomHeight = self.get_room_dimensions(room)
             for x in range(roomWidth):
                 for y in range(roomHeight):
                     if room[x][y] == 0:
                         return room
 
-    def generateRoomCavern(self):
-        while True:
-            # if a room is too small, generate another
-            room = [[1
-                     for y in range(self.CAVERN_MAX_SIZE)]
-                    for x in range(self.CAVERN_MAX_SIZE)]
-
-            # random fill map
-            for y in range(2, self.CAVERN_MAX_SIZE - 2):
-                for x in range(2, self.CAVERN_MAX_SIZE - 2):
-                    if random.random() >= self.wallProbability:
-                        room[x][y] = 0
-
-            # create distinctive regions
-            for i in range(4):
-                for y in range(1, self.CAVERN_MAX_SIZE - 1):
-                    for x in range(1, self.CAVERN_MAX_SIZE - 1):
-
-                        # if the cell's neighboring walls > self.neighbors, set it to 1
-                        if self.getAdjacentWalls(x, y, room) > self.neighbors:
-                            room[x][y] = 1
-                        # otherwise, set it to 0
-                        elif self.getAdjacentWalls(x, y, room) < self.neighbors:
-                            room[x][y] = 0
-
-            # floodfill to remove small caverns
-            room = self.floodFill(room)
-
-            # start over if the room is completely filled in
-            roomWidth, roomHeight = self.get_roomDimensions(room)
-            for x in range(roomWidth):
-                for y in range(roomHeight):
-                    if room[x][y] == 0:
-                        return room
-
-    def floodFill(self, room):
+    def flood_fill(self, room):
         '''
         Find the largest region. Fill in all other regions.
         '''
-        roomWidth, roomHeight = self.get_roomDimensions(room)
+        roomWidth, roomHeight = self.get_room_dimensions(room)
         largestRegion = set()
 
         for x in range(roomWidth):
@@ -285,9 +253,9 @@ class RoomAddition:
                 if room[x][y] == 0:
                     newRegion = set()
                     tile = (x, y)
-                    toBeFilled = set([tile])
-                    while toBeFilled:
-                        tile = toBeFilled.pop()
+                    to_be_filled = set([tile])
+                    while to_be_filled:
+                        tile = to_be_filled.pop()
 
                         if tile not in newRegion:
                             newRegion.add(tile)
@@ -305,8 +273,8 @@ class RoomAddition:
                             for direction in [north, south, east, west]:
 
                                 if room[direction[0]][direction[1]] == 0:
-                                    if direction not in toBeFilled and direction not in newRegion:
-                                        toBeFilled.add(direction)
+                                    if direction not in to_be_filled and direction not in newRegion:
+                                        to_be_filled.add(direction)
 
                     if len(newRegion) >= self.ROOM_MIN_SIZE:
                         if len(newRegion) > len(largestRegion):
@@ -322,7 +290,7 @@ class RoomAddition:
         roomX = None
         roomY = None
 
-        roomWidth, roomHeight = self.get_roomDimensions(room)
+        roomWidth, roomHeight = self.get_room_dimensions(room)
 
         # try n times to find a wall that lets you build room in that direction
         for i in range(self.placeRoomAttempts):
@@ -385,7 +353,7 @@ class RoomAddition:
         return None, None, None, None, None
 
     def addRoom(self, roomX, roomY, room):
-        roomWidth, roomHeight = self.get_roomDimensions(room)
+        roomWidth, roomHeight = self.get_room_dimensions(room)
         for x in range(roomWidth):
             for y in range(roomHeight):
                 if room[x][y] == 0:
@@ -410,7 +378,7 @@ class RoomAddition:
                     (y + direction[1]) == wallTile[1]):
                 break
 
-    def get_roomDimensions(self, room):
+    def get_room_dimensions(self, room):
         if room:
             roomWidth = len(room)
             roomHeight = len(room[0])
@@ -419,15 +387,6 @@ class RoomAddition:
             roomWidth = 0
             roomHeight = 0
             return roomWidth, roomHeight
-
-    def getAdjacentWalls(self, tile_x, tile_y, room):  # finds the walls in 8 directions
-        wallCounter = 0
-        for x in range(tile_x - 1, tile_x + 2):
-            for y in range(tile_y - 1, tile_y + 2):
-                if (room[x][y] == 1):
-                    if (x != tile_x) or (y != tile_y):  # exclude (tile_x,tile_y)
-                        wallCounter += 1
-        return wallCounter
 
     def getDirection(self):
         # direction = (dx,dy)
@@ -448,7 +407,7 @@ class RoomAddition:
         <> check for overlap with self.level
         <> check for out of bounds
         '''
-        roomWidth, roomHeight = self.get_roomDimensions(room)
+        roomWidth, roomHeight = self.get_room_dimensions(room)
         for x in range(roomWidth):
             for y in range(roomHeight):
                 if room[x][y] == 0:
@@ -574,7 +533,7 @@ class RoomAddition:
                 self.level[x][y] = 0
 
     def checkRoomExists(self, room):
-        roomWidth, roomHeight = self.get_roomDimensions(room)
+        roomWidth, roomHeight = self.get_room_dimensions(room)
         for x in range(roomWidth):
             for y in range(roomHeight):
                 if room[x][y] == 0:

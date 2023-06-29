@@ -1,10 +1,10 @@
 import random
 
-from map_gen.dungeon import Leaf
+from map_gen.dungeon import Leaf, Dungeon
 
 
 # ==== City Walls ====
-class CityWalls:
+class CityWalls(Dungeon):
     '''
     The City Walls algorithm is very similar to the BSP Tree
     above. In fact their main difference is in how they generate
@@ -15,7 +15,8 @@ class CityWalls:
     exterior of the rooms, then opens one wall for a door.
     '''
 
-    def __init__(self):
+    def __init__(self, map_width=None, map_height=None):
+        super().__init__(map_width=map_width, map_height=map_height)
         self.level = []
         self.room = None
         self.MAX_LEAF_SIZE = 30
@@ -49,21 +50,11 @@ class CityWalls:
                             self._leafs.append(l.child_2)
                             splitSuccessfully = True
 
-        rootLeaf.create_rooms(self)
+        rootLeaf.create_rooms(self, ext_walls=True)
         self.createDoors()
 
         return self.level
 
-    def createRoom(self, room):
-        # Build Walls
-        # set all tiles within a rectangle to 1
-        for x in range(room.x1 + 1, room.x2):
-            for y in range(room.y1 + 1, room.y2):
-                self.level[x][y] = 1
-        # Build Interior
-        for x in range(room.x1 + 2, room.x2 - 1):
-            for y in range(room.y1 + 2, room.y2 - 1):
-                self.level[x][y] = 0
 
     def createDoors(self):
         for room in self.rooms:

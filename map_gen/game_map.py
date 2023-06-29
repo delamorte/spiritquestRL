@@ -153,7 +153,7 @@ class GameMap:
         else:
             return list(filter(lambda entity: self.visible[entity.x, entity.y], entities))
 
-    def create_room(self, room, exclude_light_y=None):
+    def process_room(self, room, exclude_light_y=None):
         entities = []
         for y in range(room.y1, room.y2):
             for x in range(room.x1, room.x2):
@@ -343,14 +343,14 @@ class GameMap:
         w = h = 10
         # x1, y1 = self.get_rand_unoccupied_space(w, h)
         # home = Room(x1, y1, w, h, "#6b3d24", "#423023", wall="wall_brick", floor="floor_wood", name="home")
-        # objects = self.create_room(home)
+        # objects = self.process_room(home)
         # door_home = self.create_door(home, "open", random=True)
         objects = []
         shaman_room = TiledRoom(name="home", lightness=0.8, filename="hub_shaman")
         x1, y1 = self.get_random_unoccupied_space(w, h)
         shaman_room.update_coordinates(x1, y1)
         excludes_y = (shaman_room.y2-1,)
-        objects.extend(self.create_room(shaman_room, exclude_light_y=excludes_y))
+        objects.extend(self.process_room(shaman_room, exclude_light_y=excludes_y))
 
         # Generate dungeon entrance
         # Make sure room doesn't overlap with existing rooms
@@ -358,14 +358,14 @@ class GameMap:
         x1, y1 = self.get_random_unoccupied_space(w, h)
         d_entrance = Room(x1, y1, w, h, "dark amber", "darkest amber", wall="wall_brick", name="d_entrance")
 
-        objects.extend(self.create_room(d_entrance))
+        objects.extend(self.process_room(d_entrance))
         door_d_entrance = self.create_door(d_entrance, "locked", random=True)
 
         graveyard = TiledRoom(name="graveyard", lightness=0.5, filename="graveyard")
         x1, y1 = self.get_random_unoccupied_space(w, h)
         graveyard.update_coordinates(x1, y1)
         excludes_y = (graveyard.y2-1, graveyard.y1,)
-        objects.extend(self.create_room(graveyard, exclude_light_y=excludes_y))
+        objects.extend(self.process_room(graveyard, exclude_light_y=excludes_y))
 
         doors = [door_d_entrance]
 
@@ -417,11 +417,11 @@ class GameMap:
             entities = {}
 
         generators = {
-                      "random_walk": DrunkardsWalk(),
-                      "messy_bsp": MessyBSPTree(),
-                      "cellular": CellularAutomata(),
-                      "maze_with_rooms": MazeWithRooms(),
-                      "room_addition": RoomAddition()
+                      "random_walk": DrunkardsWalk(self.width, self.height),
+                      "messy_bsp": MessyBSPTree(self.width, self.height),
+                      "cellular": CellularAutomata(self.width, self.height),
+                      "maze_with_rooms": MazeWithRooms(self.width, self.height),
+                      "room_addition": RoomAddition(self.width, self.height)
                       }
 
         if not name:
@@ -432,7 +432,7 @@ class GameMap:
 
         self.algorithm = map_algorithm
 
-        map_algorithm.generate_level(self.width, self.height)
+        map_algorithm.generate_level()
         color = get_color("ground_soil")
         tree_color = get_color("tree", mod=self.owner.world_tendency)
         objects = []
@@ -443,7 +443,7 @@ class GameMap:
                 if map_algorithm.level[x][y] == 1:
                     self.tiles[x][y].spawnable = False
 
-                    # Don't make unvisible trees entities to save in performance
+                    # Don't make not visible trees entities to save in performance
                     if self.count_walls(1, x, y) < 8:
 
                         if self.owner.world_tendency < 0 and abs(self.owner.world_tendency) * 5 > randint(1, 100):

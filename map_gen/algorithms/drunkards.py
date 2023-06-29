@@ -1,9 +1,12 @@
 import random
 
+from map_gen.dungeon import Dungeon
+
 
 # ==== Drunkards Walk ====
-class DrunkardsWalk:
-    def __init__(self):
+class DrunkardsWalk(Dungeon):
+    def __init__(self, map_width=None, map_height=None):
+        super().__init__(map_width=map_width, map_height=map_height)
         self.level = []
         self.rooms = None
         self._percentGoal = .6
@@ -22,8 +25,8 @@ class DrunkardsWalk:
         self._filled = 0
         self._previousDirection = None
 
-        self.drunkardX = random.randint(2, map_width - 2)
-        self.drunkardY = random.randint(2, map_height - 2)
+        self.drunkard_x = random.randint(2, map_width - 2)
+        self.drunkard_y = random.randint(2, map_height - 2)
         self.filledGoal = map_width * map_height * self._percentGoal
 
         for i in range(self.walkIterations):
@@ -41,13 +44,13 @@ class DrunkardsWalk:
         west = 1.0
 
         # weight the random walk against edges
-        if self.drunkardX < map_width * 0.25:  # drunkard is at far left side of map
+        if self.drunkard_x < map_width * 0.25:  # drunkard is at far left side of map
             east += self.weightedTowardCenter
-        elif self.drunkardX > map_width * 0.75:  # drunkard is at far right side of map
+        elif self.drunkard_x > map_width * 0.75:  # drunkard is at far right side of map
             west += self.weightedTowardCenter
-        if self.drunkardY < map_height * 0.25:  # drunkard is at the top of the map
+        if self.drunkard_y < map_height * 0.25:  # drunkard is at the top of the map
             south += self.weightedTowardCenter
-        elif self.drunkardY > map_height * 0.75:  # drunkard is at the bottom of the map
+        elif self.drunkard_y > map_height * 0.75:  # drunkard is at the bottom of the map
             north += self.weightedTowardCenter
 
         # weight the random walk in favor of the previous direction
@@ -89,10 +92,10 @@ class DrunkardsWalk:
 
         # ==== Walk ====
         # check colision at edges TODO: change so it stops one tile from edge
-        if (0 < self.drunkardX + dx < map_width - 1) and (0 < self.drunkardY + dy < map_height - 1):
-            self.drunkardX += dx
-            self.drunkardY += dy
-            if self.level[self.drunkardX][self.drunkardY] == 1:
-                self.level[self.drunkardX][self.drunkardY] = 0
+        if (0 < self.drunkard_x + dx < map_width - 1) and (0 < self.drunkard_y + dy < map_height - 1):
+            self.drunkard_x += dx
+            self.drunkard_y += dy
+            if self.level[self.drunkard_x][self.drunkard_y] == 1:
+                self.level[self.drunkard_x][self.drunkard_y] = 0
                 self._filled += 1
             self._previousDirection = direction
