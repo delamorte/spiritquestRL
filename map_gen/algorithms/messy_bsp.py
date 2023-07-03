@@ -59,8 +59,8 @@ class MessyBSPTree(Dungeon):
     def createHall(self, room1, room2):
         # run a heavily weighted random Walk
         # from point2 to point1
-        drunkard_x, drunkard_y = room2.center()
-        goalX, goalY = room1.center()
+        drunkard_x, drunkard_y = room2.get_center()
+        goalX, goalY = room1.get_center()
         while not (room1.x1 <= drunkard_x <= room1.x2) or not (room1.y1 < drunkard_y < room1.y2):  #
             # ==== Choose Direction ====
             north = 1.0

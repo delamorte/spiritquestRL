@@ -58,7 +58,7 @@ class CityWalls(Dungeon):
 
     def createDoors(self):
         for room in self.rooms:
-            (x, y) = room.center()
+            (x, y) = room.get_center()
 
             wall = random.choice(["north", "south", "east", "west"])
             if wall == "north":

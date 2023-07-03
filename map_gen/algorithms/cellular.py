@@ -1,6 +1,6 @@
 import random
 
-from map_gen.dungeon import Dungeon
+from map_gen.dungeon import Dungeon, Room
 
 
 # ==== Cellular Automata ====
@@ -131,7 +131,8 @@ class CellularAutomata(Dungeon):
                     self.flood_fill(x, y)
 
         for room in self.rooms:
-            for tile in room:
+            cave = room.cave
+            for tile in cave:
                 self.level[tile[0]][tile[1]] = 0
 
     def flood_fill(self, x, y):
@@ -166,16 +167,28 @@ class CellularAutomata(Dungeon):
                             to_be_filled.add(direction)
 
         if self.ROOM_MIN_SIZE <= len(cave) <= self.ROOM_MAX_SIZE:
-            self.rooms.append(cave)
+
+            x1 = min(cave, key=lambda t: t[0])[0]
+            x2 = max(cave, key=lambda t: t[0])[0]
+            y1 = min(cave, key=lambda t: t[1])[1]
+            y2 = max(cave, key=lambda t: t[1])[1]
+            w = x2 - x1
+            h = y2 - y1
+            id_nr = len(self.rooms) + 1
+
+            room = Room(x1=x1, y1=y1, x2=x2, y2=y2, w=w, h=h, cave=cave, id_nr=id_nr)
+            self.rooms.append(room)
 
     def connect_caves(self):
         # Find the closest cave to the current cave
-        for current_cave in self.rooms:
+        for current_cave_room in self.rooms:
+            current_cave = current_cave_room.cave
             for point1 in current_cave:
                 break  # get an element from cave1
             point2 = None
             distance = None
-            for next_cave in self.rooms:
+            for next_cave_room in self.rooms:
+                next_cave = next_cave_room.cave
                 if next_cave != current_cave and not self.check_connectivity(current_cave, next_cave):
                     # choose a random point from next_cave
                     for next_point in next_cave:

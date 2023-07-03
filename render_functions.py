@@ -1,5 +1,4 @@
 from ctypes import c_uint32, addressof
-from random import randint
 from textwrap import fill
 
 import numpy as np
@@ -547,20 +546,10 @@ class RenderFunctions:
         y0 = 3
 
         # Fetch room coordinates for labeling
-        room_entry_points = []
-        room_colors = []
-        counter = 1
         has_rooms = False
+        room_entry_points = []
         if game_map.algorithm.rooms is not None:
             has_rooms = True
-            for room in game_map.algorithm.rooms:
-                room_entry_points.append(next(iter(room)))
-                a = 255
-                r = randint(1, 255)
-                g = randint(1, 255)
-                b = randint(1, 255)
-                color = blt.color_from_argb(a, r, g, b)
-                room_colors.append(color)
 
         for x in range(game_map.width):
             for y in range(game_map.height):
@@ -578,18 +567,16 @@ class RenderFunctions:
 
                     if has_rooms:
                         for i, room in enumerate(game_map.algorithm.rooms):
-                            if (x, y) in room:
-                                blt.color(room_colors[i])
+                            if (x, y) in room.cave:
+                                blt.color(room.id_color)
                                 blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
 
-                        for point in room_entry_points:
-
-                            if x == point[0] and y == point[1]:
+                        for room in game_map.algorithm.rooms:
+                            random_point = next(iter(room.cave))
+                            if x == random_point[0] and y == random_point[1]:
                                 blt.color(None)
-                                blt.puts(x0 + x * 2, y0 + y, "{0}".format(counter))
-                                counter += 1
+                                blt.puts(x0 + x * 2, y0 + y, "{0}".format(room.id_nr))
                                 break
-
 
     def draw_animations(self):
         game_map = self.owner.levels.current_map

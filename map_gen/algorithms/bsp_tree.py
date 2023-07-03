@@ -45,8 +45,8 @@ class BSPTree(Dungeon):
 
     def createHall(self, room1, room2):
         # connect two rooms by hallways
-        x1, y1 = room1.center()
-        x2, y2 = room2.center()
+        x1, y1 = room1.get_center()
+        x2, y2 = room2.get_center()
         # 50% chance that a tunnel will start horizontally
         if random.randint(0, 1) == 1:
             self.createHorTunnel(x1, x2, y1)

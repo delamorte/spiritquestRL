@@ -1,4 +1,7 @@
+from random import randint
+
 from bearlibterminal import terminal as blt
+
 
 # BLT colors by name:
 # grey (or gray), red, flame, orange,
@@ -20,3 +23,12 @@ def blend_colors(one, two):
     g = int(g1 * (1 - f) + g2 * f)
     b = int(b1 * (1 - f) + b2 * f)
     return blt.color_from_argb(a1, r, g, b)
+
+
+def random_color():
+    a = 255
+    r = randint(1, 255)
+    g = randint(1, 255)
+    b = randint(1, 255)
+    color = blt.color_from_argb(a, r, g, b)
+    return color

@@ -1,7 +1,7 @@
 # ==== Tunneling Algorithm ====
 import random
 
-from map_gen.dungeon import Rect, Dungeon
+from map_gen.dungeon import Room, Dungeon
 
 
 class TunnelingAlgorithm(Dungeon):
@@ -38,7 +38,7 @@ class TunnelingAlgorithm(Dungeon):
             x = random.randint(0, map_width - w - 1)
             y = random.randint(0, map_height - h - 1)
 
-            new_room = Rect(x, y, w, h)
+            new_room = Room(x, y, w, h)
             # check for overlap with previous rooms
             failed = False
             for other_room in rooms:
@@ -48,14 +48,14 @@ class TunnelingAlgorithm(Dungeon):
 
             if not failed:
                 self.create_room_rect(new_room)
-                (new_x, new_y) = new_room.center()
+                (new_x, new_y) = new_room.get_center()
 
                 if num_rooms != 0:
                     # all rooms after the first one
                     # connect to the previous room
 
                     # center coordinates of the previous room
-                    (prev_x, prev_y) = rooms[num_rooms - 1].center()
+                    (prev_x, prev_y) = rooms[num_rooms - 1].get_center()
 
                     # 50% chance that a tunnel will start horizontally
                     if random.randint(0, 1) == 1:

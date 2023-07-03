@@ -15,7 +15,10 @@ Copyright (c) 2020 delamorte
 '''
 
 import random
+import xml.etree.ElementTree as ET
 from math import sqrt
+
+from color_functions import random_color
 
 
 class Dungeon:
@@ -93,14 +96,61 @@ class Dungeon:
         return d
 
 # ==== Helper Classes ====
-class Rect:  # used for the tunneling algorithm
-    def __init__(self, x, y, w, h):
-        self.x1 = x
-        self.y1 = y
-        self.x2 = x + w
-        self.y2 = y + h
+class Room:
+    def __init__(self, x1=0, y1=0, x2=0, y2=0, w=0, h=0, wall_color="dark gray", floor_color="darkest amber",
+                 wall="wall_brick", floor="floor", tiled=False, name=None, lightness=1.0, cave=None,
+                 id_nr=1):
+        self.x1 = x1
+        self.y1 = y1
+        self.w = w
+        self.h = h
+        if cave:
+            self.x2 = x2
+            self.y2 = y2
+        else:
+            self.x2 = self.x1 + self.w
+            self.y2 = self.y1 + self.h
+        self.floor = floor
+        self.wall = wall
+        self.wall_color = wall_color
+        self.floor_color = floor_color
+        self.tiled = tiled
+        self.name = name
+        self.lightness = lightness
+        self.cave = cave
+        # ids used for labeling/maps
+        self.id_nr = id_nr
+        self.id_color = random_color()
 
-    def center(self):
+    def update_coordinates(self, x1, y1):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = self.x1 + self.w
+        self.y2 = self.y1 + self.h
+
+    def get_room_tiles(self):
+
+        area = []
+
+        for y in range(self.y1, self.y2):
+            for x in range(self.x1, self.x2):
+                area.append((x, y))
+
+        return area
+
+    def get_walls(self):
+
+        walls = []
+
+        for y in range(self.y1, self.y2):
+            for x in range(self.x1, self.x2):
+                if (x == self.x1 or x == self.x2 - 1 or
+                        y == self.y1 or y == self.y2 - 1):
+                    walls.append((x, y))
+
+        return walls
+
+    def get_center(self):
         center_x = (self.x1 + self.x2) / 2
         center_y = (self.y1 + self.y2) / 2
         return center_x, center_y
@@ -109,6 +159,50 @@ class Rect:  # used for the tunneling algorithm
         # returns true if this rectangle intersects with another one
         return (self.x1 <= other.x2 and self.x2 >= other.x1 and
                 self.y1 <= other.y2 and self.y2 >= other.y1)
+
+
+class TiledRoom(Room):
+    def __init__(self, x1=0, y1=0, w=0, h=0, wall_color="dark gray", floor_color="darkest amber",
+                 floor="floor", tiled=True, name=None, lightness=1.0, filename=None):
+        Room.__init__(self, x1=x1, y1=y1, w=w, h=h, wall_color=wall_color, floor_color=floor_color,
+                      floor=floor, tiled=tiled, name=name, lightness=lightness)
+        self.layers = None
+        self.tiled_reader(filename)
+
+    def tiled_reader(self, name):
+        tree = ET.parse("./maps/" + name + ".tmx")
+        root = tree.getroot()
+        layers = [None, None, None]
+
+        # Parse custom properties, not used atm
+        # custom_properties = {}
+        # for tile in root.iter("tile"):
+        #     tile_id = tile.get("id")
+        #     for tile_property in tile.findall("property"):
+        #         property_name = tile_property.get("name")
+        #         property_value = tile_property.get("value")
+        #         custom_properties[tile_id] = [property_name, property_value]
+
+        for layer in root.iter("layer"):
+
+            data = layer.find("data").text[1:-1].splitlines()
+            self.h = len(data)
+            self.w = len(data[0].split(",")) - 1
+            tiled_map = []
+            for row in data:
+                if row[-1] == ",":
+                    new_row = row.split(",")[:-1]
+                else:
+                    new_row = row.split(",")
+                for i, char in enumerate(new_row):
+                    value = int(char) - 1 if int(char) > 0 else 0
+                    new_row[i] = value
+
+                tiled_map.append(new_row)
+
+            layers[int(layer.attrib["name"])] = tiled_map
+
+        self.layers = layers
 
 
 class Leaf:  # used for the BSP tree algorithm
@@ -181,7 +275,7 @@ class Leaf:  # used for the BSP tree algorithm
             h = random.randint(bsp_tree.ROOM_MIN_SIZE, min(bsp_tree.ROOM_MAX_SIZE, self.height - 1))
             x = random.randint(self.x, self.x + (self.width - 1) - w)
             y = random.randint(self.y, self.y + (self.height - 1) - h)
-            self.room = Rect(x, y, w, h)
+            self.room = Room(x, y, w, h)
             bsp_tree.create_room_rect(self.room, ext_walls=ext_walls)
 
     def get_room(self):

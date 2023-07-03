@@ -1,4 +1,3 @@
-import xml.etree.ElementTree as ET
 from random import choice, choices, randint
 
 import numpy as np
@@ -23,6 +22,7 @@ from map_gen.algorithms.drunkards import DrunkardsWalk
 from map_gen.algorithms.maze_with_rooms import MazeWithRooms
 from map_gen.algorithms.messy_bsp import MessyBSPTree
 from map_gen.algorithms.room_addition import RoomAddition
+from map_gen.dungeon import TiledRoom, Room
 from map_gen.tile import Tile
 from map_gen.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant, \
     get_fighters_by_attribute
@@ -948,102 +948,3 @@ class GameMap:
                 if entity.x == x and entity.y == y:
                     result.append(entity)
         return result
-
-
-
-
-class Room:
-    def __init__(self, x1=0, y1=0, w=5, h=5, wall_color="dark gray", floor_color="darkest amber",
-                 wall="wall_brick", floor="floor", tiled=False, name=None, lightness=1.0):
-        self.x1 = x1
-        self.y1 = y1
-        self.w = w
-        self.h = h
-        self.x2 = self.x1 + self.w
-        self.y2 = self.y1 + self.h
-        self.floor = floor
-        self.wall = wall
-        self.wall_color = wall_color
-        self.floor_color = floor_color
-        self.tiled = tiled
-        self.name = name
-        self.lightness = lightness
-
-    def update_coordinates(self, x1, y1):
-        self.x1 = x1
-        self.y1 = y1
-        self.x2 = self.x1 + self.w
-        self.y2 = self.y1 + self.h
-
-    def get_room_tiles(self):
-
-        area = []
-
-        for y in range(self.y1, self.y2):
-            for x in range(self.x1, self.x2):
-                area.append((x, y))
-
-        return area
-
-    def get_walls(self):
-
-        walls = []
-
-        for y in range(self.y1, self.y2):
-            for x in range(self.x1, self.x2):
-                if (x == self.x1 or x == self.x2 - 1 or
-                        y == self.y1 or y == self.y2 - 1):
-                    walls.append((x, y))
-
-        return walls
-
-    def get_center(self):
-
-        center_x = int((self.x1 + self.x1 + self.w) / 2)
-        center_y = int((self.y1 + self.y1 + self.h) / 2)
-
-        return center_x, center_y
-
-
-class TiledRoom(Room):
-    def __init__(self, x1=0, y1=0, w=0, h=0, wall_color="dark gray", floor_color="darkest amber",
-                 floor="floor", tiled=True, name=None, lightness=1.0, filename=None):
-        Room.__init__(self, x1=x1, y1=y1, w=w, h=h, wall_color=wall_color, floor_color=floor_color,
-                      floor=floor, tiled=tiled, name=name, lightness=lightness)
-        self.layers = None
-        self.tiled_reader(filename)
-
-    def tiled_reader(self, name):
-        tree = ET.parse("./maps/" + name + ".tmx")
-        root = tree.getroot()
-        layers = [None, None, None]
-
-        # Parse custom properties, not used atm
-        # custom_properties = {}
-        # for tile in root.iter("tile"):
-        #     tile_id = tile.get("id")
-        #     for tile_property in tile.findall("property"):
-        #         property_name = tile_property.get("name")
-        #         property_value = tile_property.get("value")
-        #         custom_properties[tile_id] = [property_name, property_value]
-
-        for layer in root.iter("layer"):
-
-            data = layer.find("data").text[1:-1].splitlines()
-            self.h = len(data)
-            self.w = len(data[0].split(",")) - 1
-            tiled_map = []
-            for row in data:
-                if row[-1] == ",":
-                    new_row = row.split(",")[:-1]
-                else:
-                    new_row = row.split(",")
-                for i, char in enumerate(new_row):
-                    value = int(char) - 1 if int(char) > 0 else 0
-                    new_row[i] = value
-
-                tiled_map.append(new_row)
-
-            layers[int(layer.attrib["name"])] = tiled_map
-
-        self.layers = layers

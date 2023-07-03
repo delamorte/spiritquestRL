@@ -1,7 +1,7 @@
 import random
 from math import sqrt
 
-from map_gen.dungeon import Rect, Dungeon
+from map_gen.dungeon import Room, Dungeon
 
 
 # ==== Maze With Rooms ====
@@ -125,7 +125,7 @@ class MazeWithRooms(Dungeon):
             x = (random.randint(0, map_width - roomWidth - 1) / 2) * 2 + 1
             y = (random.randint(0, map_height - roomHeight - 1) / 2) * 2 + 1
 
-            room = Rect(x, y, roomWidth, roomHeight)
+            room = Room(x, y, roomWidth, roomHeight)
             # check for overlap with previous rooms
             failed = False
             for otherRoom in rooms:
