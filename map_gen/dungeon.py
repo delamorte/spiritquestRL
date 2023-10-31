@@ -48,7 +48,17 @@ class Dungeon:
                     elif (x == room.x1 or x == room.x2 - 1) and 0 <= y < room.y2 - 1:
                         self.level[x][y] = 1
                 cave.add((x, y))
-        self.rooms.append(cave)
+        #self.rooms.append(cave)
+        x1 = min(cave, key=lambda t: t[0])[0]
+        x2 = max(cave, key=lambda t: t[0])[0]
+        y1 = min(cave, key=lambda t: t[1])[1]
+        y2 = max(cave, key=lambda t: t[1])[1]
+        w = x2 - x1
+        h = y2 - y1
+        id_nr = len(self.rooms) + 1
+
+        room = Room(x1=x1, y1=y1, x2=x2, y2=y2, w=w, h=h, cave=cave, id_nr=id_nr)
+        self.rooms.append(room)
 
     def carve(self, x, y):
         self._regions[x][y] = self._currentRegion
@@ -97,7 +107,7 @@ class Dungeon:
 
 # ==== Helper Classes ====
 class Room:
-    def __init__(self, x1=0, y1=0, x2=0, y2=0, w=0, h=0, wall_color="dark gray", floor_color="darkest amber",
+    def __init__(self, x1=0, y1=0, w=0, h=0, x2=0, y2=0, wall_color="dark gray", floor_color="darkest amber",
                  wall="wall_brick", floor="floor", tiled=False, name=None, lightness=1.0, cave=None,
                  id_nr=1):
         self.x1 = x1
