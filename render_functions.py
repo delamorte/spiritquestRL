@@ -541,6 +541,7 @@ class RenderFunctions:
         else:
             game_map = self.owner.levels.current_map
 
+        blt.clear()
         blt.layer(4)
         x0 = 4
         y0 = 3
