@@ -53,7 +53,7 @@ class MessyBSPTree(Dungeon):
         rootLeaf.create_rooms(self)
         self.clean_up_map(self.map_width, self.map_height, smoothing=self.smoothing, filling=self.filling,
                           iterations=self.clean_up_iterations)
-
+        self.adjacent_rooms_path_scan(max_length=20)
         return self.level
 
     def createHall(self, room1, room2):

@@ -19,7 +19,6 @@ from components.status_effects import StatusEffects
 from components.wall import Wall
 from map_gen.algorithms.cellular import CellularAutomata
 from map_gen.algorithms.drunkards import DrunkardsWalk
-from map_gen.algorithms.maze_with_rooms import MazeWithRooms
 from map_gen.algorithms.messy_bsp import MessyBSPTree
 from map_gen.algorithms.room_addition import RoomAddition
 from map_gen.dungeon import TiledRoom, Room
@@ -420,9 +419,8 @@ class GameMap:
                       "random_walk": DrunkardsWalk(self.width, self.height),
                       "messy_bsp": MessyBSPTree(self.width, self.height),
                       "cellular": CellularAutomata(self.width, self.height),
-                      "maze_with_rooms": MazeWithRooms(self.width, self.height),
                       "room_addition": RoomAddition(self.width, self.height)
-                      }
+                     }
 
         if not name:
             map_algorithm = choice(list(generators.values()))

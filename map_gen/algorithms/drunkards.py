@@ -15,22 +15,22 @@ class DrunkardsWalk(Dungeon):
         self.weightedTowardPreviousDirection = 0.7
         self.name = "DrunkardsWalk"
 
-    def generate_level(self, map_width, map_height):
+    def generate_level(self):
         # Creates an empty 2D array or clears existing array
-        self.walkIterations = max(self.walkIterations, (map_width * map_height * 10))
+        self.walkIterations = max(self.walkIterations, (self.map_width * self.map_height * 10))
         self.level = [[1
-                       for y in range(map_height)]
-                      for x in range(map_width)]
+                       for y in range(self.map_height)]
+                      for x in range(self.map_width)]
 
         self._filled = 0
         self._previousDirection = None
 
-        self.drunkard_x = random.randint(2, map_width - 2)
-        self.drunkard_y = random.randint(2, map_height - 2)
-        self.filledGoal = map_width * map_height * self._percentGoal
+        self.drunkard_x = random.randint(2, self.map_width - 2)
+        self.drunkard_y = random.randint(2, self.map_height - 2)
+        self.filledGoal = self.map_width * self.map_height * self._percentGoal
 
         for i in range(self.walkIterations):
-            self.walk(map_width, map_height)
+            self.walk(self.map_width, self.map_height)
             if (self._filled >= self.filledGoal):
                 break
 
@@ -44,13 +44,13 @@ class DrunkardsWalk(Dungeon):
         west = 1.0
 
         # weight the random walk against edges
-        if self.drunkard_x < map_width * 0.25:  # drunkard is at far left side of map
+        if self.drunkard_x < self.map_width * 0.25:  # drunkard is at far left side of map
             east += self.weightedTowardCenter
-        elif self.drunkard_x > map_width * 0.75:  # drunkard is at far right side of map
+        elif self.drunkard_x > self.map_width * 0.75:  # drunkard is at far right side of map
             west += self.weightedTowardCenter
-        if self.drunkard_y < map_height * 0.25:  # drunkard is at the top of the map
+        if self.drunkard_y < self.map_height * 0.25:  # drunkard is at the top of the map
             south += self.weightedTowardCenter
-        elif self.drunkard_y > map_height * 0.75:  # drunkard is at the bottom of the map
+        elif self.drunkard_y > self.map_height * 0.75:  # drunkard is at the bottom of the map
             north += self.weightedTowardCenter
 
         # weight the random walk in favor of the previous direction
@@ -92,7 +92,7 @@ class DrunkardsWalk(Dungeon):
 
         # ==== Walk ====
         # check colision at edges TODO: change so it stops one tile from edge
-        if (0 < self.drunkard_x + dx < map_width - 1) and (0 < self.drunkard_y + dy < map_height - 1):
+        if (0 < self.drunkard_x + dx < self.map_width - 1) and (0 < self.drunkard_y + dy < self.map_height - 1):
             self.drunkard_x += dx
             self.drunkard_y += dy
             if self.level[self.drunkard_x][self.drunkard_y] == 1:

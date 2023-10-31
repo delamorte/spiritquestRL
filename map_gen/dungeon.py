@@ -18,6 +18,9 @@ import random
 import xml.etree.ElementTree as ET
 from math import sqrt
 
+import numpy as np
+from tcod import tcod
+
 from color_functions import random_color
 
 
@@ -30,17 +33,14 @@ class Dungeon:
         self.rooms = []
         self.level = []
 
-    def create_room_rect(self, room, ext_walls=False, carve=False):
+    def create_room_rect(self, room, ext_walls=False):
         '''
         :param room: Rectangle
         :param ext_walls: If true, set outer tiles to 1 and interior to 0. If false, set all tiles to 0.
-        :param carve: Used for maze_with_rooms
         '''
         cave = set()
         for x in range(room.x1, room.x2):
             for y in range(room.y1, room.y2):
-                if carve:
-                    self.carve(x, y)
                 self.level[x][y] = 0
                 if ext_walls:
                     if (y == room.y1 or y == room.y2 - 1) and 0 <= x <= room.x2 - 1:
@@ -48,7 +48,6 @@ class Dungeon:
                     elif (x == room.x1 or x == room.x2 - 1) and 0 <= y < room.y2 - 1:
                         self.level[x][y] = 1
                 cave.add((x, y))
-        #self.rooms.append(cave)
         x1 = min(cave, key=lambda t: t[0])[0]
         x2 = max(cave, key=lambda t: t[0])[0]
         y1 = min(cave, key=lambda t: t[1])[1]
@@ -59,9 +58,6 @@ class Dungeon:
 
         room = Room(x1=x1, y1=y1, x2=x2, y2=y2, w=w, h=h, cave=cave, id_nr=id_nr)
         self.rooms.append(room)
-
-    def carve(self, x, y):
-        self._regions[x][y] = self._currentRegion
 
     def clean_up_map(self, map_width, map_height, smoothing=None, filling=None, iterations=5):
         if smoothing:
@@ -100,6 +96,82 @@ class Dungeon:
                         wall_counter += 1
         return wall_counter
 
+    def adjacent_rooms_scan(self, max_length=20):
+        """
+        Scan for nearby rooms, then check if a walkable path shorter than 10 exists between the rooms and
+        add to adjacent rooms.
+        """
+        for current_room in self.rooms:
+            walls = current_room.get_walls()
+            for wall in walls:
+                wall_x, wall_y = wall[0], wall[1]
+                if self.level[wall_x][wall_y] == 0:
+                    for adjacent_room in self.rooms:
+                        if current_room != adjacent_room:
+                            north = (wall_x, wall_y - 3)
+                            south = (wall_x, wall_y + 3)
+                            east = (wall_x + 3, wall_y)
+                            west = (wall_x - 3, wall_y)
+
+                            for direction in [north, south, east, west]:
+                                dir_x, dir_y = direction[0], direction[1]
+                                if adjacent_room.x1 <= dir_x <= adjacent_room.x2 and adjacent_room.y1 <= dir_y <= adjacent_room.y2:
+                                    start, target = (wall_x, wall_y), (dir_x, dir_y)
+                                    path = self.get_path_to(start, target)
+                                    if path and len(path) < max_length:
+                                        if adjacent_room.id_nr not in current_room.adjacent_room_ids:
+                                            current_room.adjacent_room_ids.append(adjacent_room.id_nr)
+                                        if current_room.id_nr not in adjacent_room.adjacent_room_ids:
+                                            adjacent_room.adjacent_room_ids.append(current_room.id_nr)
+
+        for room in self.rooms:
+            print("current room: {0}, adjacent rooms: {1}".format(room.id_nr, room.adjacent_room_ids))
+
+    def adjacent_rooms_path_scan(self, max_length=20):
+        """
+        Compare room to other rooms, pick two random points and get the shortest path. If path < 10, add room to
+        adjacent rooms.
+        """
+        for current_room in self.rooms:
+            for adjacent_room in self.rooms:
+                if current_room != adjacent_room:
+                    for point1 in current_room.cave:
+                        break  # get an element from cave1
+                    for point2 in adjacent_room.cave:
+                        break  # get an element from cave1
+                    path = self.get_path_to(point1, point2)
+                    if path and len(path) < max_length:
+                        if adjacent_room.id_nr not in current_room.adjacent_room_ids:
+                            current_room.adjacent_room_ids.append(adjacent_room.id_nr)
+                        if current_room.id_nr not in adjacent_room.adjacent_room_ids:
+                            adjacent_room.adjacent_room_ids.append(current_room.id_nr)
+
+        for room in self.rooms:
+            print("current room: {0}, adjacent rooms: {1}".format(room.id_nr, room.adjacent_room_ids))
+
+    def get_path_to(self, start, target):
+        """Compute and return a path to the target position.
+        If there is no valid path then returns an empty list.
+        """
+        start_x, start_y = start[0], start[1]
+        target_x, target_y = target[0], target[1]
+        # Copy the walkable array.
+        game_map = np.array(self.level)
+        walkable = np.frompyfunc(lambda tile: tile == 0, 1, 1)
+        cost = np.array(walkable(game_map), dtype=np.int8)
+
+        # Create a graph from the cost array and pass that graph to a new pathfinder.
+        graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=3)
+        pathfinder = tcod.path.Pathfinder(graph)
+
+        pathfinder.add_root((start_x, start_y))  # Start position.
+
+        # Compute the path to the destination and remove the starting point.
+        path = list(pathfinder.path_to((target_x, target_y))[1:])
+
+        # Convert from List[List[int]] to List[Tuple[int, int]].
+        return [(int(index[0]), int(index[1])) for index in path]
+
     @staticmethod
     def distance_formula(point1, point2):
         d = sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
@@ -110,13 +182,13 @@ class Room:
     def __init__(self, x1=0, y1=0, w=0, h=0, x2=0, y2=0, wall_color="dark gray", floor_color="darkest amber",
                  wall="wall_brick", floor="floor", tiled=False, name=None, lightness=1.0, cave=None,
                  id_nr=1):
-        self.x1 = x1
-        self.y1 = y1
-        self.w = w
-        self.h = h
+        self.x1 = int(x1)
+        self.y1 = int(y1)
+        self.w = int(w)
+        self.h = int(h)
         if cave:
-            self.x2 = x2
-            self.y2 = y2
+            self.x2 = int(x2)
+            self.y2 = int(y2)
         else:
             self.x2 = self.x1 + self.w
             self.y2 = self.y1 + self.h
@@ -131,6 +203,7 @@ class Room:
         # ids used for labeling/maps
         self.id_nr = id_nr
         self.id_color = random_color()
+        self.adjacent_room_ids = []
 
     def update_coordinates(self, x1, y1):
         self.x1 = x1

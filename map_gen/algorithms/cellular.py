@@ -42,6 +42,7 @@ class CellularAutomata(Dungeon):
         self.get_caves()
         self.connect_caves()
         self.clean_up_map(self.map_width, self.map_height)
+        self.adjacent_rooms_path_scan(max_length=20)
         return self.level
 
     def random_fill_map(self):
