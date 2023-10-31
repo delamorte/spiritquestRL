@@ -57,24 +57,24 @@ class RoomAddition(Dungeon):
 
         self.name = "RoomAddition"
 
-    def generate_level(self, map_width, map_height):
+    def generate_level(self):
 
         self.level = [[1
-                       for y in range(map_height)]
-                      for x in range(map_width)]
+                       for y in range(self.map_height)]
+                      for x in range(self.map_width)]
 
         # generate the first room
         room = self.generateRoom()
         roomWidth, roomHeight = self.get_room_dimensions(room)
-        roomX = int((map_width / 2 - roomWidth / 2)) - 1
-        roomY = int((map_height / 2 - roomHeight / 2)) - 1
+        roomX = int((self.map_width / 2 - roomWidth / 2)) - 1
+        roomY = int((self.map_height / 2 - roomHeight / 2)) - 1
         self.addRoom(roomX, roomY, room)
 
         # generate other rooms
         for i in range(self.buildRoomAttempts):
             room = self.generateRoom()
             # try to position the room, get roomX and roomY
-            roomX, roomY, wallTile, direction, tunnelLength = self.placeRoom(room, map_width, map_height)
+            roomX, roomY, wallTile, direction, tunnelLength = self.placeRoom(room, self.map_width, self.map_height)
             if roomX and roomY:
                 self.addRoom(roomX, roomY, room)
                 self.addTunnel(wallTile, direction, tunnelLength)
@@ -82,7 +82,7 @@ class RoomAddition(Dungeon):
                     break
 
         if self.includeShortcuts == True:
-            self.addShortcuts(map_width, map_height)
+            self.addShortcuts(self.map_width, self.map_height)
 
         return self.level
 
