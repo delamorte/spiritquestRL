@@ -104,7 +104,7 @@ class MessyBSPTree(Dungeon):
 
             # ==== Walk ====
             # check colision at edges
-            if (0 < drunkard_x + dx < self.self.map_width - 1) and (0 < drunkard_y + dy < self.self.map_height - 1):
+            if (0 < drunkard_x + dx < self.map_width - 1) and (0 < drunkard_y + dy < self.map_height - 1):
                 drunkard_x += dx
                 drunkard_y += dy
                 if self.level[int(drunkard_x)][int(drunkard_y)] == 1:
