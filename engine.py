@@ -79,9 +79,11 @@ class Engine:
         # Load tiles
         self.init_tiles()
 
-        levels = Levels()
-        self.levels = levels
-        self.levels.owner = self
+        # Init levels for debug map view
+        if debug:
+            levels = Levels()
+            self.levels = levels
+            self.levels.owner = self
 
         # Init UI
         self.ui = UIElements()
@@ -158,6 +160,7 @@ class Engine:
     def init_new_game(self, params):
         choice = params
         self.player = None
+        self.levels = None
         self.time_counter = None
         # Create player
         inventory_component = Inventory(26)
@@ -218,6 +221,10 @@ class Engine:
         game_camera = Camera(1, 1, self.ui.viewport.w, self.ui.viewport.h)
         self.game_camera = game_camera
         self.game_camera.owner = self
+
+        levels = Levels()
+        self.levels = levels
+        self.levels.owner = self
 
         blt.clear_area(2, self.ui.viewport.offset_h +
                        self.ui.offset_y + 1, self.ui.viewport.x, 1)

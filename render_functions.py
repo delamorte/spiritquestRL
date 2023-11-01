@@ -600,7 +600,8 @@ class RenderFunctions:
                 if blt.has_input():
                     key = blt.read()
                     # if animation interrupted by key press, cache rest of the frames
-                    animation.cached_alpha = animation.cached_alpha[i:]
+                    if animation.cached_alpha.size > 0:
+                        animation.cached_alpha = animation.cached_alpha[i:]
                     if animation.dialog is None:
                         # Dialog doesn't have frame buffer
                         animation.cached_frames = animation.cached_frames[i:]
