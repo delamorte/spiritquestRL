@@ -93,14 +93,14 @@ class Menus:
             for i, sel in enumerate(menu.items):
                 selected = i == self.sel_index
                 blt.color("orange" if selected else "light_gray")
-                blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + i * menu.margin_y, "%s%s" %
+                blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + 1 + i * menu.margin_y, "%s%s" %
                          ("[U+203A]" if selected else " ", sel), self.text_wrap, 0, menu.align)
 
                 blt.color(None)
 
                 if sel in menu.sub_items:
                     for j, sub_sel in enumerate(menu.sub_items[sel]):
-                        blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + i * menu.margin_y + j + 1,
+                        blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + 1 + i * menu.margin_y + j + 1,
                                  sub_sel, self.text_wrap, 0, menu.align)
 
                 if menu.items_icons:
@@ -112,9 +112,9 @@ class Menus:
                     blt.color(color)
                     if options.data.gfx == "ascii":
                         blt.puts(int(self.center_x / 2),
-                                 self.center_y + i * menu.margin_y, menu.items_icons[i], 0, 0, menu.align)
+                                 self.center_y + 1 + i * menu.margin_y, menu.items_icons[i], 0, 0, menu.align)
                     else:
-                        blt.puts(int(self.center_x / 2), self.center_y +
+                        blt.puts(int(self.center_x / 2), self.center_y + 1 +
                                  i * menu.margin_y - 1, "[U+" + hex(menu.items_icons[i]) + "]", 0, 0, menu.align)
 
             blt.refresh()
@@ -242,8 +242,7 @@ class Menus:
                 self.upgrade_skills.owner = self
         elif data.name == "dialogue":
             if self.dialogue:
-                self.dialogue.data = data.params
-                self.dialogue.refresh()
+                self.dialogue.show()
             else:
                 dialogue_menu = DialogueMenu(data=data.params)
                 self.dialogue = dialogue_menu

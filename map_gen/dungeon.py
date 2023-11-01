@@ -234,8 +234,8 @@ class Room:
         return walls
 
     def get_center(self):
-        center_x = (self.x1 + self.x2) / 2
-        center_y = (self.y1 + self.y2) / 2
+        center_x = int((self.x1 + self.x2) / 2)
+        center_y = int((self.y1 + self.y2) / 2)
         return center_x, center_y
 
     def intersect(self, other):
@@ -253,7 +253,7 @@ class TiledRoom(Room):
         self.tiled_reader(filename)
 
     def tiled_reader(self, name):
-        tree = ET.parse("./maps/" + name + ".tmx")
+        tree = ET.parse("./resources/prefabs/" + name + ".tmx")
         root = tree.getroot()
         layers = [None, None, None]
 

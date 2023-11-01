@@ -9,18 +9,6 @@ from map_gen.dungeon import Dungeon, Room
 
 # ==== Room Addition ====
 class RoomAddition(Dungeon):
-    '''
-    What I'm calling the Room Addition algorithm is an attempt to
-    recreate the dungeon generation algorithm used in Brogue, as
-    discussed at https://www.rockpapershotgun.com/2015/07/28/how-do-roguelikes-generate-levels/
-    I don't think Brian Walker has ever given a name to his
-    dungeon generation algorithm, so I've taken to calling it the
-    Room Addition Algorithm, after the way in which it builds the
-    dungeon by adding rooms one at a time to the existing dungeon.
-    This isn't a perfect recreation of Brian Walker's algorithm,
-    but I think it's good enough to demonstrait the concept.
-    '''
-
     def __init__(self, map_width=None, map_height=None):
         super().__init__(map_width=map_width, map_height=map_height)
         self.rooms = []

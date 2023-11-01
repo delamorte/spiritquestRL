@@ -5,13 +5,6 @@ from map_gen.dungeon import Dungeon, Room
 
 # ==== Cellular Automata ====
 class CellularAutomata(Dungeon):
-    '''
-    Rather than implement a traditional cellular automata, I
-    decided to try my hand at a method discribed by "Evil
-    Scientist" Andy Stobirski that I recently learned about
-    on the Grid Sage Games blog.
-    '''
-
     def __init__(self, map_width=None, map_height=None):
         super().__init__(map_width=map_width, map_height=map_height)
         self.level = []

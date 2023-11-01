@@ -158,7 +158,6 @@ class Engine:
     def init_new_game(self, params):
         choice = params
         self.player = None
-        self.levels = None
         self.time_counter = None
         # Create player
         inventory_component = Inventory(26)
@@ -352,6 +351,6 @@ class Engine:
 
 if __name__ == '__main__':
     engine = Engine()
-    engine.initialize(debug=True)
+    engine.initialize(debug=False)
     blt.close()
 
