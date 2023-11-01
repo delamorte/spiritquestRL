@@ -26,7 +26,7 @@ class ChooseLevel:
         self.items_icons = []
         self.sub_items = {}
         for item in self.data:
-            name = item["title"]
+            name = item.title
             self.items.append(name)
             if options.data.gfx == "oryx":
                 self.items_icons.append(0xE000 + 399)

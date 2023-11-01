@@ -28,13 +28,14 @@ from map_gen.tilemap import get_tile, get_color, get_tile_by_value, get_tile_obj
 
 
 class GameMap:
-    def __init__(self, width, height, name, title=None, dungeon_level=0):
+    def __init__(self, width, height, name, biome=None, title=None, dungeon_level=0):
         self.algorithm = None
         self.owner = None
         self.entities = None
         self.width = width
         self.height = height
         self.name = name
+        self.biome = biome
         self.title = title if title is not None else name
         self.dungeon_level = dungeon_level
         self.rooms = {}
@@ -409,6 +410,9 @@ class GameMap:
 
         transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
         self.transparent = transparency(self.tiles)
+
+    def generate_biome(self):
+        pass
 
     def generate_map(self, entities=None, name=None):
 

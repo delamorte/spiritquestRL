@@ -1,0 +1,138 @@
+{
+  "forest": {
+    "biome_type": "forest",
+    "prefixes": [
+      "autumn",
+      "dark",
+      "lush",
+      "swampy",
+      "verdant",
+      "dying",
+      "spooky",
+      "dense",
+      "enchanted",
+      "serene",
+      "mysterious",
+      "ancient",
+      "towering",
+      "majestic",
+      "vibrant",
+      "tranquil",
+      "breathtaking",
+      "wild",
+      "peaceful",
+      "teeming",
+      "emerald",
+      "ethereal",
+      "pristine"
+    ],
+    "features": [
+      "Rat Laboratory",
+      "Bat Cave",
+      "Moon Altar",
+      "Goldilocks' House",
+      "Crow Sanctuary",
+      "Witch's Hut",
+      "Overgrown Cemetery",
+      "Mystic Snake Coven",
+      "Ancient Tree",
+      "Enchanted Pond",
+      "Druid Circle",
+      "Fairy Glen",
+      "Ranger's Lookout",
+      "Mystic Caverns",
+      "Herb Garden",
+      "Waterfall Oasis",
+      "Centaur's Clearing",
+      "Giant's Stump",
+      "Wisp-lit Trail",
+      "Wildlife Sanctuary",
+      "Sunlit Grove",
+      "Beast Tamer's Camp"
+    ],
+    "npcs": [
+      "blacksmith",
+      "druid",
+      "ranger",
+      "ornithologist",
+      "herbalist"
+    ],
+    "quests": [
+      "rescue",
+      "hunt"
+    ],
+    "quest_chances": [
+      0.5,
+      0.5
+    ],
+    "bosses": [
+      "albino rat",
+      "king kobra",
+      "black crow king"
+    ],
+    "tile": 126
+  },
+  "swamp": {
+    "biome_type": "swamp",
+    "prefixes": [
+      "murky",
+      "dank",
+      "oozing",
+      "soggy",
+      "mysterious",
+      "primordial",
+      "dense",
+      "intricate",
+      "lush",
+      "teeming",
+      "mossy",
+      "isolated",
+      "quaggy",
+      "dark",
+      "humid",
+      "serpentine",
+      "dreary",
+      "surreal",
+      "eerie",
+      "vast"
+    ],
+    "features": [
+      "Witch's Hut",
+      "Boggy Marshlands",
+      "Abandoned Ruins",
+      "Bioluminescent Glade",
+      "Sunken Village",
+      "Misty Clearing",
+      "Quicksand Pits",
+      "Goblin Encampment",
+      "Monster's Lair",
+      "Bubbling Pools",
+      "Sinking Shipwreck",
+      "Swamp Shaman's Circle",
+      "Overgrown Cemetery",
+      "Herbalist's Garden",
+      "Fairy Ring"
+    ],
+    "npcs": [
+      "blacksmith",
+      "druid",
+      "ranger",
+      "ornithologist",
+      "herbalist"
+    ],
+    "quests": [
+      "rescue",
+      "hunt"
+    ],
+    "quest_chances": [
+      0.5,
+      0.5
+    ],
+    "bosses": [
+      "albino rat",
+      "king kobra",
+      "black crow king"
+    ],
+    "tile": 411
+  }
+}

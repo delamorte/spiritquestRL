@@ -43,38 +43,3 @@ def abilities():
                  "utility":
                  {"reveal": "reveal an area of radius 8 around you, may reveal secrets."}}
     return abilities
-
-
-def meditate_params():
-    # negative integers represents chaos. positive ints harmony,
-    # zero is neutrality.
-    params = {"Death and Decay": -3,
-              "the Red Sun": -1,
-              "Pain, Suffering and Misery": -1,
-              "Winds of Ice": 0,
-              "Solitude": 2,
-              "the Mother Moon": 2,
-              "a Love that Never Dies": 3,
-              "Summer Skies of Love": 1,
-              "Happiness": +1,
-              "Sorrow": -1,
-              "Deadly Petals with Strange Power": -1,
-              "the Numbing Chill": 0,
-              "the Day of Judgement": 0,
-              "the Sapphire Haze": 1,
-              "Plastic Flowers and Melting Sun": -1,
-              "the Golden Chorus": 3
-              }
-    return params
-
-
-def level_biomes():
-
-    biomes = ["swamp",
-              "forest",
-              "lake",
-              "desert"
-              ]
-
-    return biomes
-

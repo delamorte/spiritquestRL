@@ -1,9 +1,6 @@
-from random import choice, random, choices
-
 import options
-from descriptions import level_biomes, meditate_params
+from map_gen.biome import Biome
 from map_gen.game_map import GameMap
-from map_gen.tilemap import get_fighters_by_attribute
 from ui.menus import MenuData
 
 
@@ -65,8 +62,11 @@ class Levels:
             self.player.light_source.initialize_fov(game_map)
 
         elif destination == "dream":
-            level_params = self.generate_level_params()
-            level_data = MenuData(name="choose_level", params=level_params)
+            level_choices = []
+            for i in range(5):
+                biome = Biome()
+                level_choices.append(biome)
+            level_data = MenuData(name="choose_level", params=level_choices)
             self.owner.menus.create_or_show_menu(level_data)
             if not self.owner.menus.choose_level.event:
                 return
@@ -84,72 +84,15 @@ class Levels:
             self.current_map.recompute_fov(self.player)
 
     def make_debug_map(self, algorithm):
-
-        game_map = GameMap(width=74,
-                           height=79,
+        biome = Biome(biome_modifier=self.world_tendency)
+        game_map = GameMap(width=50,
+                           height=50,
                            name="dream",
+                           biome=biome,
                            title=algorithm)
         game_map.owner = self
+        game_map.biome = biome
+        game_map.generate_biome()
         game_map.generate_map(name=algorithm)
         return game_map
 
-    def generate_level_params(self):
-
-        level_params = []
-        biomes = level_biomes()
-        biome_params = meditate_params()
-        for i in range(5):
-            level = {}
-            biome = choice(biomes)
-            biome_desc, biome_mod = choice(list(biome_params.items()))
-            level["biome"] = biome
-            level["modifier"] = biome_mod
-            level["freq_monster"] = None
-            # Generate level title
-            if random() > 0.7:
-                if self.world_tendency < 0:
-                    monsters = get_fighters_by_attribute("chaos", True)
-                elif self.world_tendency > 0:
-                    monsters = get_fighters_by_attribute("light", True)
-                else:
-                    monsters = get_fighters_by_attribute("neutral", True)
-                monsters.sort()
-                spawn_rates = self.get_spawn_rates(monsters)
-                monster_prefix = choice(choices(monsters, spawn_rates, k=5))[0]
-                level["title"] = "The " + monster_prefix.capitalize() + " " + biome.capitalize() + " of " + biome_desc
-                level["freq_monster"] = monster_prefix
-            else:
-                level["title"] = "The " + biome.capitalize() + " of " + biome_desc
-            level_params.append(level)
-
-        return level_params
-
-    @staticmethod
-    def get_spawn_rates(monsters):
-        rates = {"rat": 0.2,
-                 "crow": 0.2,
-                 "snake": 0.2,
-                 "frog": 0.15,
-                 "bear": 0.10,
-                 "felid": 0.20,
-                 "mosquito": 0.10,
-                 "chaos cat": 0.05,
-                 "chaos bear": 0.03,
-                 "cockroach": 0.20,
-                 "bone snake": 0.10,
-                 "chaos dog": 0.15,
-                 "bat": 0.2,
-                 "imp": 0.15,
-                 "leech": 0.15,
-                 "spirit": 0.15,
-                 "chaos spirit": 0.10,
-                 "ghost dog": 0.15,
-                 "gecko": 0.10,
-                 "serpent": 0.05,
-                 "fairy": 0.07}
-
-        spawn_rates = []
-        for mon in monsters:
-            spawn_rates.append(rates[mon[0]])
-
-        return spawn_rates
