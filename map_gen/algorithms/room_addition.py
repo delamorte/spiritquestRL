@@ -349,10 +349,16 @@ class RoomAddition(Dungeon):
 
     def addRoom(self, roomX, roomY, room):
         roomWidth, roomHeight = self.get_room_dimensions(room)
+        level_size_y = len(self.level)
+        level_size_x = len(self.level[0])
+
         for x in range(roomWidth):
             for y in range(roomHeight):
+                if int(roomY + y) > level_size_y or int(roomX + x) > level_size_x:
+                    continue
                 if room[x][y] == 0:
                     self.level[int(roomX + x)][int(roomY + y)] = 0
+
 
         self.rooms_list.append(room)
 

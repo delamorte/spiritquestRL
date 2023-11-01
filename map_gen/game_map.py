@@ -17,6 +17,7 @@ from components.openable import Openable
 from components.stairs import Stairs
 from components.status_effects import StatusEffects
 from components.wall import Wall
+from data import json_data
 from map_gen.algorithms.cellular import CellularAutomata
 from map_gen.algorithms.drunkards import DrunkardsWalk
 from map_gen.algorithms.messy_bsp import MessyBSPTree
@@ -411,9 +412,6 @@ class GameMap:
         transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
         self.transparent = transparency(self.tiles)
 
-    def generate_biome(self):
-        pass
-
     def generate_map(self, entities=None, name=None):
 
         if entities is None:
@@ -435,35 +433,26 @@ class GameMap:
         self.algorithm = map_algorithm
 
         map_algorithm.generate_level()
-        color = get_color("ground_soil")
-        tree_color = get_color("tree", mod=self.owner.world_tendency)
+        floor_tile = self.biome.biome_data["floor"]
+        wall_tile = self.biome.biome_data["wall"]
+        modifier = self.biome.biome_modifier
+        color = get_color(floor_tile)
+        wall_color = get_color(wall_tile, mod=modifier)
         objects = []
         for y in range(0, self.height):
             for x in range(0, self.width):
                 self.tiles[x][y].color = color
-                self.tiles[x][y].char = get_tile("ground_soil")
+                self.tiles[x][y].char = get_tile(floor_tile)
                 if map_algorithm.level[x][y] == 1:
                     self.tiles[x][y].spawnable = False
 
                     # Don't make not visible trees entities to save in performance
                     if self.count_walls(1, x, y) < 8:
-
-                        if self.owner.world_tendency < 0 and abs(self.owner.world_tendency) * 5 > randint(1, 100):
-                            name = "tree_dead"
-                            char = get_tile_variant(name)
-                            dead_tree_color = get_color(name)
-                            wall_component = Wall(name)
-                            wall = Entity(x, y, 1, dead_tree_color, "dead tree",
-                                          char=char, wall=wall_component)
-
-                        else:
-                            name = "tree"
-                            char = get_tile_variant(name)
-                            if (y == 0 and x == 0) or y % 5 == 0:
-                                tree_color = get_color(name)
-                            wall_component = Wall(name)
-                            wall = Entity(x, y, 1, tree_color, name,
-                                          char=char, wall=wall_component)
+                        name = wall_tile
+                        char = get_tile_variant(name)
+                        wall_component = Wall(name)
+                        wall = Entity(x, y, 1, wall_color, name,
+                                      char=char, wall=wall_component)
                         self.tiles[x][y].add_entity(wall)
                         wall_component.set_attributes(self)
                         objects.append(wall)
@@ -476,6 +465,32 @@ class GameMap:
         self.entities = entities
         transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
         self.transparent = transparency(self.tiles)
+
+    def process_rooms(self):
+        has_rooms = False
+
+        if self.algorithm.rooms is not None:
+            has_rooms = True
+        if has_rooms:
+            for room in self.algorithm.rooms:
+                feature_name = choice(self.biome.features)
+                feature_data = json_data.data.biome_features[feature_name]
+                room.feature = feature_name
+                wall_name = choice(feature_data["wall"])
+                floor_name = choice(feature_data["floor"])
+                wall_color = get_color(wall_name)
+                floor_color = get_color(floor_name)
+                wall = get_tile(wall_name)
+                floor = get_tile(floor_name)
+                cave = room.cave
+                for tile in cave:
+                    if self.algorithm.level[tile[0]][tile[1]] == 1:
+                        self.tiles[tile[0]][tile[1]].char = wall
+                        self.tiles[tile[0]][tile[1]].color = wall_color
+                    else:
+                        self.tiles[tile[0]][tile[1]].char = floor
+                        self.tiles[tile[0]][tile[1]].color = floor_color
+
 
     def generate_forest(self):
 

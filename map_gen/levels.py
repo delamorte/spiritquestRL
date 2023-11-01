@@ -92,7 +92,7 @@ class Levels:
                            title=algorithm)
         game_map.owner = self
         game_map.biome = biome
-        game_map.generate_biome()
         game_map.generate_map(name=algorithm)
+        game_map.process_rooms()
         return game_map
 

@@ -358,6 +358,6 @@ class Engine:
 
 if __name__ == '__main__':
     engine = Engine()
-    engine.initialize(debug=False)
+    engine.initialize(debug=True)
     blt.close()
 

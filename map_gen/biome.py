@@ -5,18 +5,18 @@ from map_gen.tilemap import get_fighters_by_attribute
 
 
 class Biome:
-    def __init__(self, title=None, biome_type=None, biome_data=None, biome_suffix=None, biome_modifier=0, biome_monster=None,
-                 biome_monster_chance=0.7,
-                 tags=None, features=None, secrets=None,
+    def __init__(self, title=None, biome_type=None, biome_data=None, biome_prefix=None,
+                 biome_suffix=None, biome_modifier=0, biome_monster=None,
+                 biome_monster_chance=0.7, features=None, secrets=None,
                  npcs=None, quests=None, bosses=None, generate_random=True):
         self.title = title
         self.biome_type = biome_type
         self.biome_data = biome_data
+        self.biome_prefix = biome_prefix
         self.biome_suffix = biome_suffix
         self.biome_modifier = biome_modifier
         self.biome_monster = biome_monster
         self.biome_monster_chance = biome_monster_chance
-        self.tags = tags
         self.features = features
         self.secrets = secrets
         self.npcs = npcs
@@ -30,23 +30,31 @@ class Biome:
         # Set biome type and modifier
         self.set_biome_type()
         self.set_biome_suffix_and_modifier()
+        self.set_biome_features()
         # Set level title, set dominant monster type
         if random() > self.biome_monster_chance:
             self.set_biome_monster()
-            self.title = ("The " + self.biome_monster.capitalize() + " " + self.biome_type.capitalize() + " of " +
-                          self.biome_suffix)
+            self.title = (
+                        "The " + self.biome_prefix + " " + self.biome_monster.capitalize() + " " +
+                        self.biome_type.capitalize() + " of " +
+                        self.biome_suffix)
         else:
-            self.title = "The " + self.biome_type.capitalize() + " of " + self.biome_suffix
+            self.title = "The " + self.biome_prefix + " " + self.biome_type.capitalize() + " of " + self.biome_suffix
 
     def set_biome_type(self, title=None):
+        biomes_json = json_data.data.biomes
         if title:
-            self.biome_data = json_data.data.biomes[title]
+            self.biome_data = biomes_json[title]
         else:
-            self.biome_data = choice(json_data.data.biomes)
-        self.biome_type = self.biome_data.biome_type
+            self.biome_data = choice(list(biomes_json.values()))
+        self.biome_type = self.biome_data["biome_type"]
+        self.biome_prefix = choice(self.biome_data["prefixes"])
 
     def set_biome_features(self):
-        pass
+        self.features = self.biome_data["features"]
+        self.quests = choice(self.biome_data["quests"])
+        self.npcs = choice(self.biome_data["npcs"])
+        self.bosses = choice(self.biome_data["bosses"])
 
 
     def set_biome_suffix_and_modifier(self, title=None):

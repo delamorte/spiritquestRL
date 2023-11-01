@@ -1188,6 +1188,29 @@
     "light_source": false,
     "stairs": false
   },
+  "wall_swamp": {
+    "name": "swamp",
+    "hex": "0xE400",
+    "tile": 5,
+    "tile_variants": [
+    ],
+    "ascii": "#",
+    "colors": [
+      "dark green"
+    ],
+    "corners": false,
+    "hue": true,
+    "blocks_sight": true,
+    "draw_floor": false,
+    "light": true,
+    "neutral": true,
+    "chaos": true,
+    "openable": false,
+    "interactable": false,
+    "pickable": false,
+    "light_source": false,
+    "stairs": false
+  },
   "throne": {
     "name": "throne",
     "hex": "0xE400",
@@ -1395,7 +1418,7 @@
       "lighter cyan",
       "lighter purple",
       "lighter han",
-      "lighter pink",
+      "lighter pink"
     ],
     "corners": false,
     "hue": true,

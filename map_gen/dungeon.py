@@ -177,9 +177,10 @@ class Dungeon:
         d = sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
         return d
 
-# ==== Helper Classes ====
+
 class Room:
     def __init__(self, x1=0, y1=0, w=0, h=0, x2=0, y2=0, wall_color="dark gray", floor_color="darkest amber",
+                 feature=None,
                  wall="wall_brick", floor="floor", tiled=False, name=None, lightness=1.0, cave=None,
                  id_nr=1):
         self.x1 = int(x1)
@@ -196,6 +197,7 @@ class Room:
         self.wall = wall
         self.wall_color = wall_color
         self.floor_color = floor_color
+        self.feature = feature
         self.tiled = tiled
         self.name = name
         self.lightness = lightness

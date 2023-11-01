@@ -564,19 +564,25 @@ class RenderFunctions:
 
                 else:
                     blt.color("darkest grey")
+                    blt.layer(4)
                     blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
 
                     if has_rooms:
                         for i, room in enumerate(game_map.algorithm.rooms):
                             if (x, y) in room.cave:
-                                blt.color(room.id_color)
+                                #blt.color(room.id_color)
+                                blt.color(game_map.tiles[x][y].color)
+
+                                blt.layer(4)
                                 blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
 
                         for room in game_map.algorithm.rooms:
                             random_point = next(iter(room.cave))
                             if x == random_point[0] and y == random_point[1]:
                                 blt.color(None)
-                                blt.puts(x0 + x * 2, y0 + y, "{0}".format(room.id_nr))
+                                blt.layer(6)
+                                blt.puts(x0 + x*2, y0 + y, "{0}: {1}".format(room.id_nr, room.feature))
+                                #blt.puts(x0 + x*2, y0 + y + 1, "{0}".format(room.feature))
                                 break
 
     def draw_animations(self):

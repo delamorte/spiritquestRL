@@ -16,7 +16,8 @@
       "bones",
       "pillar",
       "statue",
-      "coffin"
+      "coffin",
+      "cobweb"
     ],
     "floor": [
       "floor_stone"
@@ -35,7 +36,8 @@
     "objects": [
       "tree",
       "shrubs",
-      "birds nest"
+      "cobweb",
+      "feather"
     ],
     "floor": [
       "ground_moss"
@@ -262,7 +264,7 @@
       "ground_moss"
     ],
     "wall": [
-      "tree"
+      "tree_dead"
     ]
   },
   "Goldilocks' House": {
