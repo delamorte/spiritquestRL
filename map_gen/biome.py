@@ -1,15 +1,17 @@
 from random import choice, random, choices
 
+from data import json_data
 from map_gen.tilemap import get_fighters_by_attribute
 
 
 class Biome:
-    def __init__(self, title=None, biome_type=None, biome_suffix=None, biome_modifier=0, biome_monster=None,
+    def __init__(self, title=None, biome_type=None, biome_data=None, biome_suffix=None, biome_modifier=0, biome_monster=None,
                  biome_monster_chance=0.7,
                  tags=None, features=None, secrets=None,
                  npcs=None, quests=None, bosses=None, generate_random=True):
         self.title = title
         self.biome_type = biome_type
+        self.biome_data = biome_data
         self.biome_suffix = biome_suffix
         self.biome_modifier = biome_modifier
         self.biome_monster = biome_monster
@@ -37,30 +39,15 @@ class Biome:
             self.title = "The " + self.biome_type.capitalize() + " of " + self.biome_suffix
 
     def set_biome_type(self, title=None):
-        biomes = ["swamp",
-                  "forest",
-                  "lake",
-                  "desert"
-                  ]
         if title:
-            return title
+            self.biome_data = json_data.data.biomes[title]
         else:
-            biome = choice(biomes)
-
-        self.biome_type = biome
+            self.biome_data = choice(json_data.data.biomes)
+        self.biome_type = self.biome_data.biome_type
 
     def set_biome_features(self):
-        features = ["swamp",
-                  "forest",
-                  "lake",
-                  "desert"
-                  ]
-        if title:
-            return title
-        else:
-            biome = choice(biomes)
+        pass
 
-        self.biome_type = biome
 
     def set_biome_suffix_and_modifier(self, title=None):
         # negative integers represents chaos. positive ints harmony,

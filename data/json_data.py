@@ -18,3 +18,5 @@ class JsonData:
         self.remarks = fetch_data(self.root + "remarks.json")
         self.tiles = fetch_data(self.root + "tiles.json")
         self.dialogue = fetch_data(self.root + "dialogue.json")
+        self.biomes = fetch_data(self.root + "biomes.json")
+        self.biome_features = fetch_data(self.root + "biome_features.json")
