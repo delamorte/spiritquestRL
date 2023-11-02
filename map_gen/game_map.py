@@ -19,7 +19,6 @@ from components.status_effects import StatusEffects
 from components.wall import Wall
 from data import json_data
 from map_gen.algorithms.cellular import CellularAutomata
-from map_gen.algorithms.drunkards import DrunkardsWalk
 from map_gen.algorithms.messy_bsp import MessyBSPTree
 from map_gen.algorithms.room_addition import RoomAddition
 from map_gen.dungeon import TiledRoom, Room
@@ -417,12 +416,18 @@ class GameMap:
         if entities is None:
             entities = {}
         objects = []
+        # generators = {
+        #               "random_walk": DrunkardsWalk(self.width, self.height),
+        #               "messy_bsp": MessyBSPTree(self.width, self.height),
+        #               "cellular": CellularAutomata(self.width, self.height),
+        #               "room_addition": RoomAddition(self.width, self.height)
+        #             }
+
         generators = {
-                      "random_walk": DrunkardsWalk(self.width, self.height),
-                      "messy_bsp": MessyBSPTree(self.width, self.height),
-                      "cellular": CellularAutomata(self.width, self.height),
-                      "room_addition": RoomAddition(self.width, self.height)
-                     }
+            "messy_bsp": MessyBSPTree(self.width, self.height),
+            "cellular": CellularAutomata(self.width, self.height),
+            "room_addition": RoomAddition(self.width, self.height)
+        }
 
         if not name:
             map_algorithm = choice(list(generators.values()))
@@ -456,12 +461,12 @@ class GameMap:
                     self.tiles[x][y].spawnable = True
 
         #debug
-        for room in self.algorithm.rooms:
-            walls = room.cave_walls
-            for tile in walls:
-                x, y = tile[0], tile[1]
-                for entity in self.tiles[x][y].entities_on_tile:
-                    entity.color = "red"
+        # for room in self.algorithm.rooms:
+        #     walls = room.cave_walls
+        #     for tile in walls:
+        #         x, y = tile[0], tile[1]
+        #         for entity in self.tiles[x][y].entities_on_tile:
+        #             entity.color = "red"
 
         entities["objects"] = objects
         self.entities = entities
@@ -480,15 +485,18 @@ class GameMap:
                 floor_name = choice(feature_data["floor"])
                 wall_color = get_color(wall_name)
                 floor_color = get_color(floor_name)
-                floor = get_tile(floor_name)
+                floor_tile = get_tile(floor_name)
+                floor_object = get_tile_object(floor_name)
                 wall_tile = get_tile_object(wall_name)
                 cave = room.cave
                 walls = room.cave_walls
-                tunnels = room.tunnel
                 for tile in cave:
                     x, y = tile[0], tile[1]
-                    self.tiles[x][y].char = floor
-                    self.tiles[x][y].color = floor_color
+                    if not floor_object["draw_floor"]:
+                        self.tiles[x][y].char = floor_tile
+                        self.tiles[x][y].color = floor_color
+                    else:
+                        self.tiles[x][y].layers.append((floor_tile, floor_color))
                 for tile in walls:
                     x, y = tile[0], tile[1]
                     facing = None
@@ -498,29 +506,25 @@ class GameMap:
                     wall_component = Wall(wall_name)
                     wall = Entity(x, y, 1, wall_color, wall_name,
                                   char=char, wall=wall_component)
-                    if self.tiles[x][y].entities_on_tile:
-                        for entity in self.tiles[x][y].entities_on_tile:
-                            self.tiles[x][y].remove_entity(entity)
-                            if entity in self.entities["objects"]:
-                                self.entities["objects"].remove(entity)
                     self.tiles[x][y].add_entity(wall)
                     wall_component.set_attributes(self)
                     objects.append(wall)
 
             for room in self.algorithm.rooms:
                 tunnels = room.tunnel
-                feature_name = choice(self.biome.features)
-                feature_data = json_data.data.biome_features[feature_name]
-                floor_name = choice(feature_data["floor"])
-                floor = get_tile(floor_name)
+                entrances = room.entrances
                 for tile in tunnels:
                     x, y = tile[0], tile[1]
-                    if self.tiles[x][y].entities_on_tile:
-                        self.tiles[x][y].char = floor
+                    if self.tiles[x][y].entities_on_tile and tile not in room.cave_walls:
                         for entity in self.tiles[x][y].entities_on_tile:
                             self.tiles[x][y].remove_entity(entity)
                             if entity in self.entities["objects"]:
                                 self.entities["objects"].remove(entity)
+                for tile in entrances:
+                    x, y = tile[0], tile[1]
+                    if not room.has_door:
+                        self.create_door(state="closed", x=x, y=y)
+                        room.has_door = True
 
         self.entities["objects"].extend(objects)
         transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
@@ -864,8 +868,8 @@ class GameMap:
         make sure that door cannot be placed there.
         """
 
-        walls = room.get_walls()
         if random:
+            walls = room.get_walls()
             door_seed = randint(0, len(room.get_walls()) - 1)
 
             while walls[door_seed][0] == 1 or walls[door_seed][0] == room.w - 1 or walls[door_seed][1] == 1 or \

@@ -576,6 +576,13 @@ class RenderFunctions:
                                 blt.layer(4)
                                 blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
 
+                                if len(game_map.tiles[x][y].layers) > 0:
+                                    blt.layer(5)
+                                    char, color = game_map.tiles[x][y].layers[-1]
+                                    blt.color(color)
+                                    blt.put(x0 + x * 2, y0 + y, char)
+
+                        # draw room id and feature name
                         for room in game_map.algorithm.rooms:
                             random_point = next(iter(room.cave))
                             if x == random_point[0] and y == random_point[1]:

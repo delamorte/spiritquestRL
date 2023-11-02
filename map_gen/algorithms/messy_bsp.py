@@ -51,6 +51,7 @@ class MessyBSPTree(Dungeon):
                             splitSuccessfully = True
 
         rootLeaf.create_rooms(self)
+        self.connect_caves()
         self.clean_up_map(self.map_width, self.map_height, smoothing=self.smoothing, filling=self.filling,
                           iterations=self.clean_up_iterations)
         self.adjacent_rooms_path_scan(max_length=20)
@@ -109,3 +110,8 @@ class MessyBSPTree(Dungeon):
                 drunkard_y += dy
                 if self.level[int(drunkard_x)][int(drunkard_y)] == 1:
                     self.level[int(drunkard_x)][int(drunkard_y)] = 0
+                    wall = (int(drunkard_x), int(drunkard_y))
+                    if wall in room1.cave_walls:
+                        room1.entrances.add(wall)
+                    if wall in room2.cave_walls:
+                        room2.entrances.add(wall)

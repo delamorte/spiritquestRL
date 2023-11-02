@@ -229,7 +229,7 @@
     "corners": false,
     "hue": true,
     "blocks_sight": false,
-    "draw_floor": false,
+    "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
@@ -421,7 +421,7 @@
     "corners": false,
     "hue": true,
     "blocks_sight": false,
-    "draw_floor": false,
+    "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
@@ -511,7 +511,7 @@
     ],
     "ascii": ".",
     "colors": [
-      "darkest gray"
+      "dark gray"
     ],
     "corners": false,
     "hue": true,

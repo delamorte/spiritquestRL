@@ -39,14 +39,19 @@ class Dungeon:
         :param ext_walls: If true, set outer tiles to 1 and interior to 0. If false, set all tiles to 0.
         '''
         cave = set()
+        walls = set()
         for x in range(room.x1, room.x2):
             for y in range(room.y1, room.y2):
                 self.level[x][y] = 0
                 if ext_walls:
                     if (y == room.y1 or y == room.y2 - 1) and 0 <= x <= room.x2 - 1:
                         self.level[x][y] = 1
+                        wall = (x, y)
+                        walls.add(wall)
                     elif (x == room.x1 or x == room.x2 - 1) and 0 <= y < room.y2 - 1:
                         self.level[x][y] = 1
+                        wall = (x, y)
+                        walls.add(wall)
                 cave.add((x, y))
         x1 = min(cave, key=lambda t: t[0])[0]
         x2 = max(cave, key=lambda t: t[0])[0]
@@ -56,8 +61,10 @@ class Dungeon:
         h = y2 - y1
         id_nr = len(self.rooms) + 1
 
-        room = Room(x1=x1, y1=y1, x2=x2, y2=y2, w=w, h=h, cave=cave, id_nr=id_nr)
+        room = Room(x1=x1, y1=y1, x2=x2, y2=y2, w=w, h=h, cave=cave, id_nr=id_nr, cave_walls=walls)
         self.rooms.append(room)
+
+        return room
 
     def clean_up_map(self, map_width, map_height, smoothing=None, filling=None, iterations=5):
         if smoothing:
@@ -172,6 +179,196 @@ class Dungeon:
         # Convert from List[List[int]] to List[Tuple[int, int]].
         return [(int(index[0]), int(index[1])) for index in path]
 
+    def get_caves(self):
+        # locate all the caves within self.level and store them in self.rooms
+        for x in range(0, self.map_width):
+            for y in range(0, self.map_height):
+                if self.level[x][y] == 0:
+                    self.flood_fill(x, y)
+
+        for room in self.rooms:
+            cave = room.cave
+            for tile in cave:
+                self.level[tile[0]][tile[1]] = 0
+
+    def flood_fill(self, x, y):
+        '''
+        flood fill the separate regions of the level, discard
+        the regions that are smaller than a minimum size, and
+        create a reference for the rest.
+        '''
+        cave = set()
+        walls = set()
+        tile = (x, y)
+        to_be_filled = {tile}
+        while to_be_filled:
+            tile = to_be_filled.pop()
+
+            if tile not in cave:
+                cave.add(tile)
+
+                self.level[tile[0]][tile[1]] = 1
+
+                # check adjacent cells
+                x = tile[0]
+                y = tile[1]
+                north = (x, y - 1)
+                south = (x, y + 1)
+                east = (x + 1, y)
+                west = (x - 1, y)
+                northeast = (x + 1, y - 1)
+                southeast = (x + 1, y + 1)
+                southwest = (x - 1, y + 1)
+                northwest = (x - 1, y - 1)
+
+                for direction in [north, south, east, west, northeast, southeast, southwest, northwest]:
+
+                    if self.level[direction[0]][direction[1]] == 0:
+                        if direction not in to_be_filled and direction not in cave:
+                            to_be_filled.add(direction)
+                    elif self.level[direction[0]][direction[1]] == 1:
+                        if direction not in walls and direction not in to_be_filled and direction not in cave:
+                            walls.add(direction)
+
+        if self.ROOM_MIN_SIZE <= len(cave) <= 300:
+
+            x1 = min(cave, key=lambda t: t[0])[0]
+            x2 = max(cave, key=lambda t: t[0])[0]
+            y1 = min(cave, key=lambda t: t[1])[1]
+            y2 = max(cave, key=lambda t: t[1])[1]
+            w = x2 - x1
+            h = y2 - y1
+            id_nr = len(self.rooms) + 1
+
+            room = Room(x1=x1, y1=y1, x2=x2, y2=y2, w=w, h=h, cave=cave, cave_walls=walls, id_nr=id_nr)
+            self.rooms.append(room)
+
+    def connect_caves(self):
+        # Find the closest cave to the current cave
+        for current_cave_room in self.rooms:
+            current_cave = current_cave_room.cave
+            current_cave_walls = current_cave_room.cave_walls
+            for point1 in current_cave:
+                break  # get an element from cave1
+            point2 = None
+            distance = None
+            for next_cave_room in self.rooms:
+                next_cave = next_cave_room.cave
+                if next_cave != current_cave and not self.check_connectivity(current_cave, next_cave):
+                    # choose a random point from next_cave
+                    for next_point in next_cave:
+                        break  # get an element from cave2
+                    # compare distance of point1 to old and new point2
+                    new_distance = self.distance_formula(point1, next_point)
+                    if new_distance is not None and distance is not None and (
+                            new_distance < distance) or distance is None:
+                        point2 = next_point
+                        distance = new_distance
+
+            if point2:  # if all tunnels are connected, point2 == None
+                self.create_tunnel(point1, point2, current_cave_room)
+
+    def check_connectivity(self, cave1, cave2):
+        # floods cave1, then checks a point in cave2 for the flood
+
+        connected_region = set()
+        for start in cave1:
+            break  # get an element from cave1
+
+        to_be_filled = {start}
+        while to_be_filled:
+            tile = to_be_filled.pop()
+
+            if tile not in connected_region:
+                connected_region.add(tile)
+
+                # check adjacent cells
+                x = tile[0]
+                y = tile[1]
+                north = (x, y - 1)
+                south = (x, y + 1)
+                east = (x + 1, y)
+                west = (x - 1, y)
+
+                for direction in [north, south, east, west]:
+
+                    if self.level[direction[0]][direction[1]] == 0:
+                        if direction not in to_be_filled and direction not in connected_region:
+                            to_be_filled.add(direction)
+
+        for end in cave2:
+            break  # get an element from cave2
+
+        if end in connected_region:
+            return True
+
+        else:
+            return False
+
+    def create_tunnel(self, point1, point2, current_cave_room):
+        # run a heavily weighted random Walk
+        # from point1 to point2
+        drunkard_x = point2[0]
+        drunkard_y = point2[1]
+        current_cave = current_cave_room.cave
+        current_cave_walls = current_cave_room.cave_walls
+        current_cave_tunnel = current_cave_room.tunnel
+        current_cave_entrances = current_cave_room.entrances
+
+        while (drunkard_x, drunkard_y) not in current_cave:
+            # ==== Choose Direction ====
+            north = 1.0
+            south = 1.0
+            east = 1.0
+            west = 1.0
+
+            weight = 1
+
+            # weight the random walk against edges
+            if drunkard_x < point1[0]:  # drunkard is left of point1
+                east += weight
+            elif drunkard_x > point1[0]:  # drunkard is right of point1
+                west += weight
+            if drunkard_y < point1[1]:  # drunkard is above point1
+                south += weight
+            elif drunkard_y > point1[1]:  # drunkard is below point1
+                north += weight
+
+            # normalize probabilities so they form a range from 0 to 1
+            total = north + south + east + west
+            north /= total
+            south /= total
+            east /= total
+            west /= total
+
+            # choose the direction
+            choice = random.random()
+            if 0 <= choice < north:
+                dx = 0
+                dy = -1
+            elif north <= choice < (north + south):
+                dx = 0
+                dy = 1
+            elif (north + south) <= choice < (north + south + east):
+                dx = 1
+                dy = 0
+            else:
+                dx = -1
+                dy = 0
+
+            # ==== Walk ====
+            # check collision at edges
+            if (0 < drunkard_x + dx < self.map_width - 1) and (0 < drunkard_y + dy < self.map_height - 1):
+                drunkard_x += dx
+                drunkard_y += dy
+                if self.level[drunkard_x][drunkard_y] == 1:
+                    self.level[drunkard_x][drunkard_y] = 0
+                    wall = (drunkard_x, drunkard_y)
+                    current_cave_tunnel.add(wall)
+                    if wall in current_cave_walls:
+                        current_cave_entrances.add(wall)
+
+
     @staticmethod
     def distance_formula(point1, point2):
         d = sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
@@ -197,6 +394,8 @@ class Room:
         self.wall = wall
         self.cave_walls = cave_walls
         self.tunnel = set()
+        self.entrances = set()
+        self.has_door = False
         self.wall_color = wall_color
         self.floor_color = floor_color
         self.feature = feature
@@ -224,6 +423,9 @@ class Room:
                 area.append((x, y))
 
         return area
+
+    def set_walls(self):
+        self.cave_walls = self.get_walls()
 
     def get_walls(self):
 
@@ -291,6 +493,23 @@ class TiledRoom(Room):
 
         self.layers = layers
 
+class Rect: # used for the tunneling algorithm
+    def __init__(self, x, y, w, h):
+        self.x1 = x
+        self.y1 = y
+        self.x2 = x+w
+        self.y2 = y+h
+
+    def center(self):
+        centerX = (self.x1 + self.x2)/2
+        centerY = (self.y1 + self.y2)/2
+        return (centerX, centerY)
+
+    def intersect(self, other):
+        #returns true if this rectangle intersects with another one
+        return (self.x1 <= other.x2 and self.x2 >= other.x1 and
+            self.y1 <= other.y2 and self.y2 >= other.y1)
+
 
 class Leaf:  # used for the BSP tree algorithm
     def __init__(self, x, y, width, height):
@@ -344,7 +563,7 @@ class Leaf:  # used for the BSP tree algorithm
 
         return True
 
-    def create_rooms(self, bsp_tree, ext_walls=False):
+    def create_rooms(self, bsp_tree, ext_walls=True):
         if self.child_1 or self.child_2:
             # recursively search for children until you hit the end of the branch
             if self.child_1:
@@ -362,8 +581,8 @@ class Leaf:  # used for the BSP tree algorithm
             h = random.randint(bsp_tree.ROOM_MIN_SIZE, min(bsp_tree.ROOM_MAX_SIZE, self.height - 1))
             x = random.randint(self.x, self.x + (self.width - 1) - w)
             y = random.randint(self.y, self.y + (self.height - 1) - h)
-            self.room = Room(x, y, w, h)
-            bsp_tree.create_room_rect(self.room, ext_walls=ext_walls)
+            rect = Rect(x, y, w, h)
+            self.room = bsp_tree.create_room_rect(rect, ext_walls=ext_walls)
 
     def get_room(self):
         if self.room:
