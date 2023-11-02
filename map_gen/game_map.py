@@ -416,7 +416,7 @@ class GameMap:
 
         if entities is None:
             entities = {}
-
+        objects = []
         generators = {
                       "random_walk": DrunkardsWalk(self.width, self.height),
                       "messy_bsp": MessyBSPTree(self.width, self.height),
@@ -426,49 +426,49 @@ class GameMap:
 
         if not name:
             map_algorithm = choice(list(generators.values()))
-
         else:
             map_algorithm = generators[name]
 
         self.algorithm = map_algorithm
-
         map_algorithm.generate_level()
-        floor_tile = self.biome.biome_data["floor"]
-        wall_tile = self.biome.biome_data["wall"]
+
+        floor_name = self.biome.biome_data["floor"]
+        wall_name = self.biome.biome_data["wall"]
+        floor_tile = get_tile(floor_name)
+        wall_tile = get_tile(wall_name)
         modifier = self.biome.biome_modifier
-        color = get_color(floor_tile)
-        wall_color = get_color(wall_tile, mod=modifier)
-        objects = []
+        floor_color = get_color(floor_name)
+        wall_color = get_color(wall_name, mod=modifier)
         for y in range(0, self.height):
             for x in range(0, self.width):
-                self.tiles[x][y].color = color
-                self.tiles[x][y].char = get_tile(floor_tile)
+                self.tiles[x][y].color = floor_color
+                self.tiles[x][y].char = floor_tile
                 if map_algorithm.level[x][y] == 1:
                     self.tiles[x][y].spawnable = False
-
-                    # Don't make not visible trees entities to save in performance
-                    if self.count_walls(1, x, y) < 8:
-                        name = wall_tile
-                        char = get_tile_variant(name)
-                        wall_component = Wall(name)
-                        wall = Entity(x, y, 1, wall_color, name,
-                                      char=char, wall=wall_component)
-                        self.tiles[x][y].add_entity(wall)
-                        wall_component.set_attributes(self)
-                        objects.append(wall)
+                    wall_component = Wall(wall_name)
+                    wall = Entity(x, y, 1, wall_color, wall_name,
+                                  char=wall_tile, wall=wall_component)
+                    self.tiles[x][y].add_entity(wall)
+                    wall_component.set_attributes(self)
+                    objects.append(wall)
 
                 else:
                     self.tiles[x][y].spawnable = True
 
-        entities["objects"] = objects
+        #debug
+        for room in self.algorithm.rooms:
+            walls = room.cave_walls
+            for tile in walls:
+                x, y = tile[0], tile[1]
+                for entity in self.tiles[x][y].entities_on_tile:
+                    entity.color = "red"
 
+        entities["objects"] = objects
         self.entities = entities
-        transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
-        self.transparent = transparency(self.tiles)
 
     def process_rooms(self):
         has_rooms = False
-
+        objects = []
         if self.algorithm.rooms is not None:
             has_rooms = True
         if has_rooms:
@@ -480,17 +480,51 @@ class GameMap:
                 floor_name = choice(feature_data["floor"])
                 wall_color = get_color(wall_name)
                 floor_color = get_color(floor_name)
-                wall = get_tile(wall_name)
                 floor = get_tile(floor_name)
+                wall_tile = get_tile_object(wall_name)
                 cave = room.cave
+                walls = room.cave_walls
+                tunnels = room.tunnel
                 for tile in cave:
-                    if self.algorithm.level[tile[0]][tile[1]] == 1:
-                        self.tiles[tile[0]][tile[1]].char = wall
-                        self.tiles[tile[0]][tile[1]].color = wall_color
-                    else:
-                        self.tiles[tile[0]][tile[1]].char = floor
-                        self.tiles[tile[0]][tile[1]].color = floor_color
+                    x, y = tile[0], tile[1]
+                    self.tiles[x][y].char = floor
+                    self.tiles[x][y].color = floor_color
+                for tile in walls:
+                    x, y = tile[0], tile[1]
+                    facing = None
+                    if wall_tile["corners"]:
+                        facing = self.get_tile_direction(x, y)
+                    char = get_tile_variant(name=wall_name, facing=facing)
+                    wall_component = Wall(wall_name)
+                    wall = Entity(x, y, 1, wall_color, wall_name,
+                                  char=char, wall=wall_component)
+                    if self.tiles[x][y].entities_on_tile:
+                        for entity in self.tiles[x][y].entities_on_tile:
+                            self.tiles[x][y].remove_entity(entity)
+                            if entity in self.entities["objects"]:
+                                self.entities["objects"].remove(entity)
+                    self.tiles[x][y].add_entity(wall)
+                    wall_component.set_attributes(self)
+                    objects.append(wall)
 
+            for room in self.algorithm.rooms:
+                tunnels = room.tunnel
+                feature_name = choice(self.biome.features)
+                feature_data = json_data.data.biome_features[feature_name]
+                floor_name = choice(feature_data["floor"])
+                floor = get_tile(floor_name)
+                for tile in tunnels:
+                    x, y = tile[0], tile[1]
+                    if self.tiles[x][y].entities_on_tile:
+                        self.tiles[x][y].char = floor
+                        for entity in self.tiles[x][y].entities_on_tile:
+                            self.tiles[x][y].remove_entity(entity)
+                            if entity in self.entities["objects"]:
+                                self.entities["objects"].remove(entity)
+
+        self.entities["objects"].extend(objects)
+        transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
+        self.transparent = transparency(self.tiles)
 
     def generate_forest(self):
 
@@ -965,3 +999,71 @@ class GameMap:
                 if entity.x == x and entity.y == y:
                     result.append(entity)
         return result
+
+    def get_tile_direction(self, x, y):
+        # Define the neighboring tile positions in the cardinal directions
+        directions_idx_map = {
+            "north": 0,
+            "south": 4,
+            "west": 6,
+            "east": 2,
+            "northwest": 7,
+            "northeast": 1,
+            "southwest": 5,
+            "southeast": 3
+        }
+        if x - 1 <= 0:
+            return directions_idx_map["west"]
+        if y - 1 <= 0:
+            return directions_idx_map["north"]
+        if x + 1 > len(self.tiles) - 1:
+            return directions_idx_map["east"]
+        if y + 1 > len(self.tiles[0]) - 1:
+            return directions_idx_map["south"]
+
+        # Determine and return the correct facing based on the neighboring tiles
+        if self.tiles[x][y - 1].blocked and self.tiles[x - 1][y].blocked and \
+                not self.tiles[x - 1][y - 1].blocked:
+            return directions_idx_map["southeast"]
+        elif self.tiles[x][y - 1].blocked and self.tiles[x + 1][y].blocked and \
+                not self.tiles[x + 1][y - 1].blocked:
+            return directions_idx_map["southwest"]
+        elif self.tiles[x][y + 1].blocked and self.tiles[x - 1][y].blocked and \
+                not self.tiles[x - 1][y + 1].blocked:
+            return directions_idx_map["northeast"]
+        elif self.tiles[x][y + 1].blocked and self.tiles[x + 1][y].blocked and \
+                not self.tiles[x + 1][y + 1].blocked:
+            return directions_idx_map["northwest"]
+
+        elif self.tiles[x - 1][y].blocked and self.tiles[x][y + 1].blocked and \
+                not self.tiles[x + 1][y].blocked and not self.tiles[x][y - 1].blocked:
+            return directions_idx_map["northeast"]
+
+        elif self.tiles[x - 1][y].blocked and self.tiles[x][y - 1].blocked and \
+                not self.tiles[x + 1][y].blocked and not self.tiles[x][y + 1].blocked:
+            return directions_idx_map["southeast"]
+
+        elif self.tiles[x + 1][y].blocked and self.tiles[x][y - 1].blocked and \
+                not self.tiles[x - 1][y].blocked and not self.tiles[x][y + 1].blocked:
+            return directions_idx_map["southwest"]
+
+        elif self.tiles[x + 1][y].blocked and self.tiles[x][y + 1].blocked and \
+                not self.tiles[x - 1][y].blocked and not self.tiles[x][y - 1].blocked:
+            return directions_idx_map["northwest"]
+
+        elif self.tiles[x][y - 1].blocked and self.tiles[x][y + 1].blocked and \
+                not self.tiles[x - 1][y].blocked:
+            return directions_idx_map["east"]
+        elif self.tiles[x][y - 1].blocked and self.tiles[x][y + 1].blocked and \
+                not self.tiles[x + 1][y].blocked:
+            return directions_idx_map["west"]
+        elif self.tiles[x - 1][y].blocked and self.tiles[x + 1][y].blocked and \
+                not self.tiles[x][y + 1].blocked:
+            return directions_idx_map["north"]
+        elif self.tiles[x - 1][y].blocked and self.tiles[x + 1][y].blocked and \
+                not self.tiles[x][y - 1].blocked:
+            return directions_idx_map["south"]
+
+        # If no specific facing is determined, return a default facing
+        return 0
+

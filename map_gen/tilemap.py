@@ -29,7 +29,7 @@ def get_tile(name, tile=None, state=None):
     return hex_tile
 
 
-def get_tile_variant(name, variant_idx=None, variant_char=None, no_ascii=False):
+def get_tile_variant(name, variant_idx=None, facing=None, variant_char=None, no_ascii=False):
     base_tile = json_data.data.tiles[name]
     if options.data.gfx == "ascii" and not no_ascii:
         variants = choice(base_tile["ascii_variants"]) if "ascii_variants" in base_tile.keys() else base_tile["ascii"]
@@ -39,6 +39,8 @@ def get_tile_variant(name, variant_idx=None, variant_char=None, no_ascii=False):
         return get_tile(name)
     if variant_idx is not None:
         tile = variants[variant_idx]
+    elif base_tile["corners"] and facing is not None:
+        tile = variants[facing]
     elif variant_char:
         tile = variant_char
     else:

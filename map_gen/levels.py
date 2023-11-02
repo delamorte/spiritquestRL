@@ -85,8 +85,8 @@ class Levels:
 
     def make_debug_map(self, algorithm):
         biome = Biome(biome_modifier=self.world_tendency)
-        game_map = GameMap(width=50,
-                           height=50,
+        game_map = GameMap(width=70,
+                           height=70,
                            name="dream",
                            biome=biome,
                            title=algorithm)

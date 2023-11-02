@@ -14,13 +14,7 @@
       "t"
     ],
     "colors": [
-      "green",
-      "flame",
-      "amber",
-      "orange",
-      "yellow",
-      "lime",
-      "crimson"
+      "green"
     ],
     "corners": false,
     "hue": false,
@@ -380,7 +374,7 @@
     "corners": false,
     "hue": true,
     "blocks_sight": false,
-    "draw_floor": false,
+    "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
@@ -403,7 +397,7 @@
     "corners": false,
     "hue": true,
     "blocks_sight": false,
-    "draw_floor": false,
+    "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
@@ -562,7 +556,7 @@
     "corners": false,
     "hue": false,
     "blocks_sight": false,
-    "draw_floor": false,
+    "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
@@ -1137,7 +1131,7 @@
   "wall_wood": {
     "name": "wooden wall",
     "hex": "0xE400",
-    "tile": 230,
+    "tile": 231,
     "tile_variants": [
       231,
       217,
@@ -1173,7 +1167,9 @@
     ],
     "ascii": "#",
     "colors": [
-      "dark green"
+      "dark green",
+      "darker green",
+      "darkest green"
     ],
     "corners": false,
     "hue": true,

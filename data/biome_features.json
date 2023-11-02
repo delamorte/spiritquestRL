@@ -102,7 +102,7 @@
       "ground_moss"
     ],
     "wall": [
-      "shrubs"
+      "flowers"
     ]
   },
   "Boggy Marshlands": {
@@ -124,7 +124,7 @@
       "ground_swampy"
     ],
     "wall": [
-      "shrubs"
+      "wall_moss"
     ]
   },
   "Bubbling Pools": {
@@ -205,7 +205,7 @@
       "water"
     ],
     "wall": [
-      "shrubs"
+      "ground_moss"
     ]
   },
   "Fairy Glen": {
@@ -225,7 +225,7 @@
       "ground_moss"
     ],
     "wall": [
-      "shrubs"
+      "flowers"
     ]
   },
   "Fairy Ring": {
@@ -502,7 +502,7 @@
       "plants"
     ],
     "wall": [
-      "shrubs"
+      "ground_soil"
     ]
   },
   "Swamp Shaman's Circle": {

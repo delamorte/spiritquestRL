@@ -17,7 +17,7 @@ class RoomAddition(Dungeon):
 
         self.ROOM_MAX_SIZE = 18  # max height and width for cellular automata rooms
         self.ROOM_MIN_SIZE = 16  # min size in number of floor tiles, not height and width
-        self.MAX_NUM_ROOMS = 30
+        self.MAX_NUM_ROOMS = 20
 
         self.SQUARE_ROOM_MAX_SIZE = 12
         self.SQUARE_ROOM_MIN_SIZE = 6
@@ -35,9 +35,9 @@ class RoomAddition(Dungeon):
         self.crossRoomChance = 0.15
         self.vaultChance = 0.40
 
-        self.buildRoomAttempts = 500
-        self.placeRoomAttempts = 20
-        self.maxTunnelLength = 12
+        self.buildRoomAttempts = 400
+        self.placeRoomAttempts = 10
+        self.maxTunnelLength = 20
 
         self.includeShortcuts = True
         self.shortcutAttempts = 500
@@ -53,8 +53,10 @@ class RoomAddition(Dungeon):
                       for x in range(self.map_width)]
 
         # generate the first room
-        room = self.generateRoom()
-        roomWidth, roomHeight = self.get_room_dimensions(room)
+        roomWidth, roomHeight = self.map_width, self.map_height
+        while roomWidth >= self.map_width or roomHeight >= self.map_height:
+            room = self.generateRoom()
+            roomWidth, roomHeight = self.get_room_dimensions(room)
         roomX = int((self.map_width / 2 - roomWidth / 2)) - 1
         roomY = int((self.map_height / 2 - roomHeight / 2)) - 1
         self.addRoom(roomX, roomY, room)
@@ -413,28 +415,28 @@ class RoomAddition(Dungeon):
             for y in range(roomHeight):
                 if room[x][y] == 0:
                     # Check to see if the room is out of bounds
-                    if ((1 <= (x + roomX) < map_width - 1) and
-                            (1 <= (y + roomY) < map_height - 1)):
+                    if ((1 <= (x + 1 + roomX) < map_width - 1) and
+                            (1 <= (y + 1 + roomY) < map_height - 1)):
                         # Check for overlap with a one tile buffer
-                        if self.level[x + roomX - 1][y + roomY - 1] == 0:  # top left
+                        if self.level[x + roomX - 1][y + roomY - 1] == 0 or self.level[x + roomX - 2][y + roomY - 2] == 0:  # top left
                             return False
-                        if self.level[x + roomX][y + roomY - 1] == 0:  # top center
+                        if self.level[x + roomX][y + roomY - 1] == 0 or self.level[x + roomX][y + roomY - 2] == 0:  # top center
                             return False
-                        if self.level[x + roomX + 1][y + roomY - 1] == 0:  # top right
+                        if self.level[x + roomX + 1][y + roomY - 1] == 0 or self.level[x + roomX + 2][y + roomY - 2] == 0:  # top right
                             return False
 
-                        if self.level[x + roomX - 1][y + roomY] == 0:  # left
+                        if self.level[x + roomX - 1][y + roomY] == 0 or self.level[x + roomX - 2][y + roomY] == 0:  # left
                             return False
                         if self.level[x + roomX][y + roomY] == 0:  # center
                             return False
-                        if self.level[x + roomX + 1][y + roomY] == 0:  # right
+                        if self.level[x + roomX + 1][y + roomY] == 0 or self.level[x + roomX + 2][y + roomY] == 0:  # right
                             return False
 
-                        if self.level[x + roomX - 1][y + roomY + 1] == 0:  # bottom left
+                        if self.level[x + roomX - 1][y + roomY + 1] == 0 or self.level[x + roomX - 2][y + roomY + 2] == 0:  # bottom left
                             return False
-                        if self.level[x + roomX][y + roomY + 1] == 0:  # bottom center
+                        if self.level[x + roomX][y + roomY + 1] == 0 or self.level[x + roomX][y + roomY + 2] == 0:  # bottom center
                             return False
-                        if self.level[x + roomX + 1][y + roomY + 1] == 0:  # bottom right
+                        if self.level[x + roomX + 1][y + roomY + 1] == 0 or self.level[x + roomX + 2][y + roomY + 2] == 0:  # bottom right
                             return False
 
                     else:  # room is out of bounds
@@ -560,6 +562,7 @@ class RoomAddition(Dungeon):
         create a reference for the rest.
         '''
         cave = set()
+        walls = set()
         tile = (x, y)
         to_be_filled = {tile}
         while to_be_filled:
@@ -577,12 +580,19 @@ class RoomAddition(Dungeon):
                 south = (x, y + 1)
                 east = (x + 1, y)
                 west = (x - 1, y)
+                northeast = (x + 1, y - 1)
+                southeast = (x + 1, y + 1)
+                southwest = (x - 1, y + 1)
+                northwest = (x - 1, y - 1)
 
-                for direction in [north, south, east, west]:
+                for direction in [north, south, east, west, northeast, southeast, southwest, northwest]:
 
                     if self.level[direction[0]][direction[1]] == 0:
                         if direction not in to_be_filled and direction not in cave:
                             to_be_filled.add(direction)
+                    elif self.level[direction[0]][direction[1]] == 1:
+                        if direction not in walls and direction not in to_be_filled and direction not in cave:
+                            walls.add(direction)
 
         if self.ROOM_MIN_SIZE <= len(cave) <= 300:
 
@@ -594,13 +604,14 @@ class RoomAddition(Dungeon):
             h = y2 - y1
             id_nr = len(self.rooms) + 1
 
-            room = Room(x1=x1, y1=y1, x2=x2, y2=y2, w=w, h=h, cave=cave, id_nr=id_nr)
+            room = Room(x1=x1, y1=y1, x2=x2, y2=y2, w=w, h=h, cave=cave, cave_walls=walls, id_nr=id_nr)
             self.rooms.append(room)
 
     def connect_caves(self):
         # Find the closest cave to the current cave
         for current_cave_room in self.rooms:
             current_cave = current_cave_room.cave
+            current_cave_walls = current_cave_room.cave_walls
             for point1 in current_cave:
                 break  # get an element from cave1
             point2 = None
@@ -619,7 +630,7 @@ class RoomAddition(Dungeon):
                         distance = new_distance
 
             if point2:  # if all tunnels are connected, point2 == None
-                self.create_tunnel(point1, point2, current_cave)
+                self.create_tunnel(point1, point2, current_cave_room)
 
     def check_connectivity(self, cave1, cave2):
         # floods cave1, then checks a point in cave2 for the flood
@@ -658,11 +669,17 @@ class RoomAddition(Dungeon):
         else:
             return False
 
-    def create_tunnel(self, point1, point2, current_cave):
+    def create_tunnel(self, point1, point2, current_cave_room):
         # run a heavily weighted random Walk
-        # from point1 to point1
+        # from point1 to point2
         drunkard_x = point2[0]
         drunkard_y = point2[1]
+        current_cave = current_cave_room.cave
+        current_cave_walls = current_cave_room.cave_walls
+        current_cave_tunnel = current_cave_room.tunnel
+        current_cave_tunnel.add(point1)
+        current_cave_tunnel.add(point2)
+
         while (drunkard_x, drunkard_y) not in current_cave:
             # ==== Choose Direction ====
             north = 1.0
@@ -711,3 +728,8 @@ class RoomAddition(Dungeon):
                 drunkard_y += dy
                 if self.level[drunkard_x][drunkard_y] == 1:
                     self.level[drunkard_x][drunkard_y] = 0
+                    wall = (drunkard_x, drunkard_y)
+                    current_cave_tunnel.add(wall)
+                    if wall in current_cave_walls:
+                        current_cave_walls.remove(wall)
+

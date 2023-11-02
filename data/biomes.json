@@ -149,6 +149,6 @@
     ],
     "tile": 411,
     "wall": "wall_swamp",
-    "floor": "ground_swampy"
+    "floor": "ground_soil"
   }
 }
