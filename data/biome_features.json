@@ -2,7 +2,7 @@
   "Abandoned Ruins": {
     "name": "Abandoned Ruins",
     "description": "Crumbling structures overrun by nature, potentially holding ancient artifacts or hidden dangers.",
-    "creatures": [
+    "monsters": [
       "rat",
       "bone snake",
       "imp",
@@ -29,7 +29,7 @@
   "Ancient Tree": {
     "name": "Ancient Tree",
     "description": "A colossal tree of immense age, often considered a sacred or mystical landmark.",
-    "creatures": [
+    "monsters": [
       "crow",
       "spirit"
     ],
@@ -49,7 +49,7 @@
   "Bat Cave": {
     "name": "Bat Cave",
     "description": "A dark and mysterious cave where a colony of bats reside, rumored to guard ancient secrets.",
-    "creatures": [
+    "monsters": [
       "bat"
     ],
     "objects": [
@@ -67,7 +67,7 @@
   "Beast Tamer's Camp": {
     "name": "Beast Tamer's Camp",
     "description": "A campsite where skilled trainers tame and nurture forest-dwelling beasts.",
-    "creatures": [
+    "monsters": [
       "bear",
       "felid"
     ],
@@ -88,15 +88,15 @@
   },
   "Bioluminescent Glade": {
     "name": "Bioluminescent Glade",
-    "description": "A beautiful area where luminescent plants or creatures light up the surroundings at night.",
-    "creatures": [
+    "description": "A beautiful area where luminescent plants or monsters light up the surroundings at night.",
+    "monsters": [
       "fairy"
     ],
     "objects": [
       "plants",
       "flowers",
-      "water_lily",
-      "glowing_orb"
+      "water lily",
+      "glowing orb"
     ],
     "floor": [
       "ground_moss"
@@ -108,7 +108,7 @@
   "Boggy Marshlands": {
     "name": "Boggy Marshlands",
     "description": "Vast stretches of murky, unstable land that could hide secrets or rare flora and fauna.",
-    "creatures": [
+    "monsters": [
       "frog",
       "snake",
       "mosquito"
@@ -130,7 +130,7 @@
   "Bubbling Pools": {
     "name": "Bubbling Pools",
     "description": "Natural hot springs or pools with unique properties, perhaps healing or poisonous.",
-    "creatures": [
+    "monsters": [
       "snake"
     ],
     "objects": [
@@ -149,7 +149,7 @@
   "Crow Sanctuary": {
     "name": "Crow Sanctuary",
     "description": "A peaceful haven for crows, where these intelligent birds gather, possibly led by a wise and enigmatic crow.",
-    "creatures": [
+    "monsters": [
       "crow"
     ],
     "objects": [
@@ -170,11 +170,11 @@
   "Druid Circle": {
     "name": "Druid Circle",
     "description": "A sacred space where druids perform rituals and commune with nature spirits.",
-    "creatures": [
+    "monsters": [
       "spirit"
     ],
     "objects": [
-      "stones",
+      "rocks",
       "plants",
       "shrine",
       "holy symbol"
@@ -189,16 +189,15 @@
   "Enchanted Pond": {
     "name": "Enchanted Pond",
     "description": "A mystical pond rumored to have healing or transformative properties.",
-    "creatures": [
+    "monsters": [
       "frog",
       "fairy"
     ],
     "objects": [
-      "water",
       "water lily",
       "plants",
       "candle",
-      "glowing_orb",
+      "glowing orb",
       "butterfly"
     ],
     "floor": [
@@ -210,8 +209,8 @@
   },
   "Fairy Glen": {
     "name": "Fairy Glen",
-    "description": "A serene, flower-filled glade believed to be a meeting place for whimsical woodland creatures.",
-    "creatures": [
+    "description": "A serene, flower-filled glade believed to be a meeting place for whimsical woodland monsters.",
+    "monsters": [
       "fairy"
     ],
     "objects": [
@@ -231,14 +230,14 @@
   "Fairy Ring": {
     "name": "Fairy Ring",
     "description": "A mysterious circular formation of mushrooms or plants, believed to be a gateway to another realm or hold mystical properties.",
-    "creatures": [
+    "monsters": [
       "fairy"
     ],
     "objects": [
       "mushrooms",
       "plants",
       "fairy_figurine",
-      "glowing_orb",
+      "glowing orb",
       "butterfly"
     ],
     "floor": [
@@ -250,8 +249,8 @@
   },
   "Giant's Stump": {
     "name": "Giant's Stump",
-    "description": "The remnant of a massive fallen tree, now a gathering spot or shelter for forest creatures.",
-    "creatures": [
+    "description": "The remnant of a massive fallen tree, now a gathering spot or shelter for forest monsters.",
+    "monsters": [
       "bear"
     ],
     "objects": [
@@ -270,7 +269,7 @@
   "Goldilocks' House": {
     "name": "Goldilocks' House",
     "description": "A cozy cottage inhabited by the curious and adventurous Goldilocks, filled with remnants of her past escapades.",
-    "creatures": ["bear"],
+    "monsters": ["bear"],
     "objects": [
       "door",
       "window",
@@ -288,7 +287,7 @@
   "Herb Garden": {
     "name": "Herb Garden",
     "description": "A cultivated area housing rare and potent herbs, tended by healers or witches.",
-    "creatures": [
+    "monsters": [
       "snake"
     ],
     "objects": [
@@ -306,7 +305,7 @@
   "Herbalist's Garden": {
     "name": "Herbalist's Garden",
     "description": "A carefully tended area with unique and potent herbs for alchemical purposes.",
-    "creatures": [
+    "monsters": [
       "snake"
     ],
     "objects": [
@@ -325,7 +324,7 @@
   "Misty Clearing": {
     "name": "Misty Clearing",
     "description": "A fog-covered area that might be the site of eerie occurrences or mystic rituals.",
-    "creatures": [
+    "monsters": [
       "spirit"
     ],
     "objects": [
@@ -343,7 +342,7 @@
   "Monster's Lair": {
     "name": "Monster's Lair",
     "description": "A cavern or lair inhabited by a legendary or terrifying swamp creature.",
-    "creatures": [
+    "monsters": [
       "king kobra",
       "chaos bear",
       "bear",
@@ -365,7 +364,7 @@
   "Moon Altar": {
     "name": "Moon Altar",
     "description": "An enchanted altar that harnesses the power of the moon, often visited by mystics for blessings or rituals.",
-    "creatures": [
+    "monsters": [
       "spirit"
     ],
     "objects": [
@@ -385,8 +384,8 @@
   },
   "Mystic Caverns": {
     "name": "Mystic Caverns",
-    "description": "Underground passages rumored to hold ancient relics or be home to secretive forest-dwelling creatures.",
-    "creatures": [
+    "description": "Underground passages rumored to hold ancient relics or be home to secretive forest-dwelling monsters.",
+    "monsters": [
       "snake"
     ],
     "objects": [
@@ -405,7 +404,7 @@
   "Mystic Snake Coven": {
     "name": "Mystic Snake Coven",
     "description": "A gathering of mystical serpents known for their ancient wisdom and magical prowess, performing secretive rituals.",
-    "creatures": [
+    "monsters": [
       "snake"
     ],
     "objects": [
@@ -424,7 +423,7 @@
   "Overgrown Cemetery": {
     "name": "Overgrown Cemetery",
     "description": "A graveyard consumed by the swamp, possibly haunted or hiding lost artifacts.",
-    "creatures": [
+    "monsters": [
       "bone snake",
       "ghost dog",
       "chaos cat",
@@ -448,7 +447,7 @@
   "Ranger's Lookout": {
     "name": "Ranger's Lookout",
     "description": "A high vantage point used by rangers to surveil the forest and protect its inhabitants.",
-    "creatures": [
+    "monsters": [
       "crow"
     ],
     "objects": [
@@ -467,7 +466,7 @@
   "Rat Laboratory": {
     "name": "Rat Laboratory",
     "description": "A laboratory run by intelligent rats conducting experiments and inventing peculiar contraptions.",
-    "creatures": [
+    "monsters": [
       "rat"
     ],
     "objects": [
@@ -489,7 +488,7 @@
   "Sunlit Grove": {
     "name": "Sunlit Grove",
     "description": "A radiant grove basking in sunlight, exuding tranquility and often used for ceremonies.",
-    "creatures": [
+    "monsters": [
       "fairy"
     ],
     "objects": [
@@ -508,7 +507,7 @@
   "Swamp Shaman's Circle": {
     "name": "Swamp Shaman's Circle",
     "description": "A sacred site used for spiritual gatherings or rituals by the local tribes or shamans.",
-    "creatures": [
+    "monsters": [
       "snake"
     ],
     "objects": [
@@ -532,7 +531,7 @@
   "Waterfall Oasis": {
     "name": "Waterfall Oasis",
     "description": "A hidden, picturesque waterfall surrounded by lush foliage, serving as a tranquil resting place.",
-    "creatures": [
+    "monsters": [
       "frog"
     ],
     "objects": [
@@ -552,8 +551,8 @@
   },
   "Wildlife Sanctuary": {
     "name": "Wildlife Sanctuary",
-    "description": "A protected area thriving with diverse creatures, guarded by nature-loving druids or rangers.",
-    "creatures": [
+    "description": "A protected area thriving with diverse monsters, guarded by nature-loving druids or rangers.",
+    "monsters": [
       "bear",
       "snake",
       "crow",
@@ -575,13 +574,13 @@
   "Wisp-lit Trail": {
     "name": "Wisp-lit Trail",
     "description": "A trail illuminated by mystical wisps, said to guide travelers but also lead them astray.",
-    "creatures": [
+    "monsters": [
       "spirit",
       "imp"
     ],
     "objects": [
       "tree",
-      "glowing orbs",
+      "glowing orb",
       "footprints"
     ],
     "floor": [
@@ -594,7 +593,7 @@
   "Witch's Hut": {
     "name": "Witch's Hut",
     "description": "A secluded dwelling inhabited by a mystical figure rumored to possess powerful knowledge or magical items.",
-    "creatures": [
+    "monsters": [
       "spirit",
       "imp",
       "felid",
@@ -605,7 +604,7 @@
       "cauldron",
       "flask",
       "crystal",
-      "glowing_orb",
+      "glowing orb",
       "moon_symbol",
       "book",
       "skull",

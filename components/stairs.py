@@ -1,4 +1,3 @@
-from components.light_source import LightSource
 from ui.message import Message
 
 
@@ -18,13 +17,6 @@ class Stairs:
         self.source = source
         self.destination = destination
         self.floor = floor
-
-    def set_attributes(self, game_map):
-        if self.name == "holy symbol":
-            light_component = LightSource(name=self.name, light_walls=False)
-            self.owner.light_source = light_component
-            self.owner.light_source.owner = self.owner
-            self.owner.light_source.initialize_fov(game_map)
 
     def interaction(self, levels):
         levels.change(self.destination[0])

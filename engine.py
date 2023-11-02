@@ -12,7 +12,6 @@ from components.animations import Animations
 from components.entity import Entity
 from components.fighter import Fighter
 from components.inventory import Inventory
-from components.light_source import LightSource
 from components.menus.main_menu import MainMenu
 from components.player import Player
 from components.status_effects import StatusEffects
@@ -169,7 +168,6 @@ class Engine:
                                     atk=f_data["atk"], mv_spd=f_data["mv_spd"],
                                     atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
 
-        light_component = LightSource(radius=fighter_component.fov)
         player_component = Player(50)
         player_component.set_char("player", self.data.fighters["player"])
         status_effects_component = StatusEffects("player")
@@ -179,7 +177,7 @@ class Engine:
         player = Entity(
             1, 1, 2, "default", "player", tile=f_data,
             blocks=True, player=player_component, fighter=fighter_component, inventory=inventory_component,
-            light_source=light_component,
+            light_source=True,
             summoner=summoner_component, indicator_color="gray", animations=animations_component,
             status_effects=status_effects_component, stand_on_messages=False,
             visible=True)

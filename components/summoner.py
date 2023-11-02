@@ -5,7 +5,6 @@ from components.abilities import Abilities
 from components.animations import Animations
 from components.entity import Entity
 from components.fighter import Fighter
-from components.light_source import LightSource
 from components.status_effects import StatusEffects
 from data import json_data
 from map_gen.tilemap import get_color
@@ -43,7 +42,6 @@ class Summoner:
                                         atk=f_data["atk"], mv_spd=f_data["mv_spd"],
                                         atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
             ai_component = AIBasic(ally=True)
-            light_component = LightSource(radius=fighter_component.fov)
 
             status_effects_component = StatusEffects(name)
             animations_component = Animations()
@@ -52,7 +50,7 @@ class Summoner:
             entity_name = name + " (ally)"
             monster = Entity(summon_tile.x, summon_tile.y, 1,
                              color, entity_name, tile=f_data, blocks=True, fighter=fighter_component, ai=ai_component,
-                             light_source=light_component, status_effects=status_effects_component, remarks=remarks,
+                             light_source=True, status_effects=status_effects_component, remarks=remarks,
                              indicator_color="light green", animations=animations_component)
             monster.abilities = Abilities(monster, name)
             monster.light_source.initialize_fov(game_map)

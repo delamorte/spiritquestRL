@@ -5,6 +5,10 @@ import numpy as np
 import tcod
 
 from components.animation import Animation
+from components.item import Item
+from components.light_source import LightSource
+from components.openable import Openable
+from components.wall import Wall
 from data import json_data
 from helpers import get_article
 from map_gen.tilemap import get_tile
@@ -17,7 +21,8 @@ class Entity:
     """
 
     def __init__(self, x, y, layer, color, name, tile=None, char=None, blocks=False, player=None,
-                 fighter=None, ai=None, item=None, inventory=None, stairs=None, summoner=None,
+                 fighter=None, ai=None, interactable=None, pickable=None, openable=None,
+                 item=None, inventory=None, stairs=None, summoner=None,
                  wall=None, door=None, cursor=None, light_source=None, abilities=None,
                  status_effects=None, stand_on_messages=True, boss=False, hidden=False, remarks=None,
                  indicator_color="dark red", animations=None, visible=False, dialogue=None, npc=None):
@@ -38,6 +43,9 @@ class Entity:
         self.summoner = summoner
         self.player = player
         self.ai = ai
+        self.interactable = interactable
+        self.pickable = pickable
+        self.openable = openable
         self.item = item
         self.inventory = inventory
         self.stairs = stairs
@@ -87,13 +95,30 @@ class Entity:
         if self.wall:
             self.wall.owner = self
 
-        if self.door:
+        if self.blocks and not self.fighter:
+            wall_component = Wall(name=name, tile=tile)
+            self.wall = wall_component
+            self.wall.owner = self
+
+        if self.openable:
+            door_component = Openable(name, self.tile.char)
+            self.door = door_component
             self.door.owner = self
+
+        if self.interactable or self.pickable:
+            item_component = Item(name, pickable=self.tile["pickable"], interactable=self.tile["interactable"],
+                                  light_source=self.tile["light_source"])
+            self.item = item_component
+            self.item.owner = self
 
         if self.cursor:
             self.cursor.owner = self
 
         if self.light_source:
+            light_component = LightSource(name=self.name, light_walls=False)
+            if self.fighter:
+                light_component.radius = self.fighter.fov
+            self.light_source = light_component
             self.light_source.owner = self
 
         if self.abilities:

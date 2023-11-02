@@ -546,51 +546,44 @@ class RenderFunctions:
         x0 = 4
         y0 = 3
 
-        # Fetch room coordinates for labeling
-        has_rooms = False
-        room_entry_points = []
-        if game_map.algorithm.rooms is not None:
-            has_rooms = True
-
         for x in range(game_map.width):
             for y in range(game_map.height):
 
+                blt.color("darkest grey")
+                blt.layer(4)
+                blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
+
+                for i, room in enumerate(game_map.algorithm.rooms):
+                    if (x, y) in room.cave:
+                        #blt.color(room.id_color)
+                        blt.color(game_map.tiles[x][y].color)
+
+                        blt.layer(4)
+                        blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
+
+                        if len(game_map.tiles[x][y].layers) > 0:
+                            blt.layer(5)
+                            char, color = game_map.tiles[x][y].layers[-1]
+                            blt.color(color)
+                            blt.put(x0 + x * 2, y0 + y, char)
+
                 if len(game_map.tiles[x][y].entities_on_tile) > 0:
+                    blt.layer(6)
                     blt.color(game_map.tiles[x][y].entities_on_tile[-1].color)
                     blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].entities_on_tile[-1].char)
                     # if game_map.tiles[x][y].entities_on_tile[-1].name == "player":
                     #     blt.color("green")
                     #     blt.put(x0 + x * 2, y0 + y, "@")
 
-                else:
-                    blt.color("darkest grey")
-                    blt.layer(4)
-                    blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
-
-                    if has_rooms:
-                        for i, room in enumerate(game_map.algorithm.rooms):
-                            if (x, y) in room.cave:
-                                #blt.color(room.id_color)
-                                blt.color(game_map.tiles[x][y].color)
-
-                                blt.layer(4)
-                                blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
-
-                                if len(game_map.tiles[x][y].layers) > 0:
-                                    blt.layer(5)
-                                    char, color = game_map.tiles[x][y].layers[-1]
-                                    blt.color(color)
-                                    blt.put(x0 + x * 2, y0 + y, char)
-
-                        # draw room id and feature name
-                        for room in game_map.algorithm.rooms:
-                            random_point = next(iter(room.cave))
-                            if x == random_point[0] and y == random_point[1]:
-                                blt.color(None)
-                                blt.layer(6)
-                                blt.puts(x0 + x*2, y0 + y, "{0}: {1}".format(room.id_nr, room.feature))
-                                #blt.puts(x0 + x*2, y0 + y + 1, "{0}".format(room.feature))
-                                break
+                # draw room id and feature name
+                for room in game_map.algorithm.rooms:
+                    random_point = next(iter(room.cave))
+                    if x == random_point[0] and y == random_point[1]:
+                        blt.color(None)
+                        blt.layer(7)
+                        blt.puts(x0 + x*2, y0 + y, "{0}: {1}".format(room.id_nr, room.feature))
+                        #blt.puts(x0 + x*2, y0 + y + 1, "{0}".format(room.feature))
+                        break
 
     def draw_animations(self):
         game_map = self.owner.levels.current_map

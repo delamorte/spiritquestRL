@@ -11,7 +11,6 @@ from components.dialogue import Dialogue
 from components.entity import Entity
 from components.fighter import Fighter
 from components.item import Item
-from components.light_source import LightSource
 from components.npc import Npc
 from components.openable import Openable
 from components.stairs import Stairs
@@ -513,6 +512,12 @@ class GameMap:
             for room in self.algorithm.rooms:
                 tunnels = room.tunnel
                 entrances = room.entrances
+                feature_data = json_data.data.biome_features[room.feature]
+                room_objects = feature_data["objects"]
+                room_monsters = feature_data["monsters"]
+                room_size = len(room.cave)
+                nr_of_objects_to_place = int(room_size / 5)
+                objects_to_place = choices(room_objects, k=nr_of_objects_to_place)
                 for tile in tunnels:
                     x, y = tile[0], tile[1]
                     if self.tiles[x][y].entities_on_tile and tile not in room.cave_walls:
@@ -525,6 +530,23 @@ class GameMap:
                     if not room.has_door:
                         self.create_door(state="closed", x=x, y=y)
                         room.has_door = True
+
+                for tile in objects_to_place:
+                    tile_object = get_tile_object(tile)
+                    char = get_tile(tile)
+                    color = get_color(tile, mod=self.owner.world_tendency)
+                    x, y = choice(list(room.cave))
+                    while self.tiles[x][y].entities_on_tile:
+                        x, y = choice(list(room.cave))
+
+                    entity = Entity(x, y, 1,
+                           color, tile, char=char, tile=tile_object, door=tile_object["openable"],
+                           pickable=tile_object["pickable"], interactable=tile_object["interactable"],
+                           light_source=tile_object["light_source"], stairs=tile_object["stairs"],
+                           blocks=tile_object["blocks"]
+                           )
+                    self.tiles[x][y].add_entity(entity)
+                    objects.append(entity)
 
         self.entities["objects"].extend(objects)
         transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
@@ -858,6 +880,10 @@ class GameMap:
 
         self.tiles[player.x][player.y].add_entity(player)
 
+        for k, v in self.entities.items():
+            if v.light_source:
+                v.light_source.initialize_fov(self)
+
     def create_door(self, room=None, state="open", tile=None, char=None,
                     name="door", color=None, random=False, x=None, y=None):
 
@@ -970,14 +996,13 @@ class GameMap:
                     ai_component = AIBasic()
                 if "dialogue" in f_data.keys() and f_data["dialogue"]:
                     dialogue_component = Dialogue(name)
-                light_component = LightSource(radius=fighter_component.fov)
                 status_effects_component = StatusEffects(name)
                 animations_component = Animations()
                 monster = Entity(x, y, 1,
                                  color, name,
                                  char=char,
                                  blocks=True, fighter=fighter_component, ai=ai_component,
-                                 light_source=light_component,
+                                 light_source=True,
                                  status_effects=status_effects_component, remarks=remarks,
                                  animations=animations_component, dialogue=dialogue_component, npc=npc_component)
                 monster.abilities = Abilities(monster)
