@@ -9,10 +9,6 @@ class Openable:
         self.char = char
         self.state = state
         self.tile = get_tile_object(name)
-        if char == self.tile["locked"]:
-            self.state = "locked"
-        elif char == self.tile["closed"]:
-            self.state = "closed"
 
     def set_state(self, state, game_map):
         self.state = state

@@ -1,6 +1,9 @@
+from random import choice
+
 from bearlibterminal import terminal as blt
 
 import options
+from map_gen.tilemap import get_tile
 
 
 class ChooseLevel:
@@ -29,10 +32,16 @@ class ChooseLevel:
             name = item.title
             self.items.append(name)
             if options.data.gfx == "oryx":
-                self.items_icons.append(0xE000 + 399)
+                self.items_icons.append(get_tile(item.biome_data["wall"]))
             else:
                 self.items_icons.append("#")
-            self.sub_items[name] = ["Rescue: Blacksmith"]
+            quest = choice(item.biome_data["quests"])
+            if quest == "rescue":
+                npc = choice(item.biome_data["npcs"])
+            else:
+                npc = choice(item.biome_data["monsters"])
+            quest_title = quest.capitalize() + ":" + " " + npc.capitalize()
+            self.sub_items[name] = [quest_title]
 
     def show(self):
         output = self.owner.show(self)

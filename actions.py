@@ -129,7 +129,8 @@ class Actions:
         elif examine:
             self.owner.game_state = GameStates.TARGETING
             cursor_component = Cursor()
-            cursor = Entity(self.owner.player.x, self.owner.player.y, 3, "light yellow", "cursor", char=0xF000 + 9,
+            cursor = Entity(self.owner.player.x, self.owner.player.y, "light yellow", "cursor", layer=3,
+                            char=0xF000 + 9,
                             cursor=cursor_component, stand_on_messages=False)
             self.owner.cursor = cursor
             self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].add_entity(self.owner.cursor)
@@ -242,7 +243,8 @@ class Actions:
                 for ability in self.owner.player.abilities.utility_skills:
                     if key == ability.blt_input:
                         self.owner.player.player.sel_utility = ability
-                        self.owner.player.player.sel_utility_idx = ability.blt_input - 30  # get list index, 30 == blt.TK_1
+                        self.owner.player.player.sel_utility_idx = ability.blt_input - 30  # get list index,
+                        # 30 == blt.TK_1
                         break
             self.owner.ui.side_panel.draw_content()
             return True
@@ -266,7 +268,7 @@ class Actions:
         if key == blt.TK_ESCAPE:
             self.owner.menus.main_menu.show()
             self.owner.fov_recompute = True
-            #self.owner.game_state = GameStates.PLAYER_DEAD
+            # self.owner.game_state = GameStates.PLAYER_DEAD
             return True
 
         return False
@@ -280,7 +282,8 @@ class Actions:
                 radius = self.owner.cursor.cursor.targeting_ability.get_range()
                 area = self.owner.cursor.cursor.targeting_ability.target_area
                 entities = self.owner.levels.current_map.get_neighbours(self.owner.player, radius,
-                                          include_self=include_self, fighters=True, mark_area=True, algorithm=area)
+                                                                        include_self=include_self, fighters=True,
+                                                                        mark_area=True, algorithm=area)
                 msg = self.owner.cursor.cursor.select_next(entities, self.owner.levels.current_map.tiles)
                 if msg:
                     self.owner.message_log.send(msg)
@@ -313,7 +316,8 @@ class Actions:
             target = self.owner.levels.current_map.tiles[self.owner.cursor.x][self.owner.cursor.y].blocking_entity
 
             result, target, targeting = self.owner.player.player.use_ability(self.owner.levels.current_map,
-                                                             self.owner.cursor.cursor.targeting_ability, target)
+                                                                             self.owner.cursor.cursor.targeting_ability,
+                                                                             target)
             if target:
                 self.owner.render_functions.draw_stats(target)
             self.owner.time_counter.take_turn(1)

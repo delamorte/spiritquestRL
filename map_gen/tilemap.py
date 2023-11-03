@@ -5,7 +5,10 @@ from data import json_data
 
 
 def get_tile_object(name):
-    base_tile = json_data.data.tiles[name]
+    if name in json_data.data.tiles:
+        base_tile = json_data.data.tiles[name]
+    else:
+        base_tile = json_data.data.fighters[name]
     return base_tile
 
 

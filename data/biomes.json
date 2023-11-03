@@ -1,5 +1,35 @@
 {
+  "hub": {
+    "name": "hub",
+    "biome_type": "prefab",
+    "prefixes": [
+      "prefab"
+    ],
+    "features": [
+      "Shaman's Retreat",
+      "Druid Altar",
+      "Alchemist Laboratory",
+      "Ranger's Cabin",
+      "Hermit's Garden",
+      "Ornithologist's Watchtower",
+      "Overgrown Cemetery"
+    ],
+    "monsters": [
+    ],
+    "npcs": [
+    ],
+    "quests": [
+    ],
+    "quest_chances": [
+    ],
+    "bosses": [
+    ],
+    "tile": 181,
+    "wall": "tree",
+    "floor": "ground_soil"
+  },
   "forest": {
+    "name": "forest",
     "biome_type": "forest",
     "prefixes": [
       "autumn",
@@ -83,6 +113,7 @@
     "floor": "ground_soil"
   },
   "swamp": {
+    "name": "swamp",
     "biome_type": "swamp",
     "prefixes": [
       "murky",

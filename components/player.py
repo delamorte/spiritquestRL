@@ -6,7 +6,7 @@ from ui.message import Message
 
 
 class Player:
-    def __init__(self, spirit_power):
+    def __init__(self, spirit_power=50):
         self.owner = None
         self.spirit_power = spirit_power
         self.char = {}
@@ -29,6 +29,15 @@ class Player:
     def set_char(self, name, tile):
         self.char[name] = get_tile(name, tile)
 
+    def set_avatar(self, fighter_name):
+        fighter = json_data.data.fighters[fighter_name]
+        fighter_component = Fighter(hp=fighter["hp"], ac=fighter["ac"], ev=fighter["ev"],
+                                      atk=fighter["atk"], mv_spd=fighter["mv_spd"],
+                                      atk_spd=fighter["atk_spd"], size=fighter["size"],
+                                      fov=fighter["fov"])
+        self.avatar[fighter_name] = fighter_component
+        self.avatar[fighter_name].owner = self
+
     def handle_player_exp(self, killed_fighter):
         exp_messages = []
         self.spirit_power += killed_fighter.max_hp
@@ -43,14 +52,9 @@ class Player:
             else:
                 self.char_exp[entity_name] = 0
                 exp_to_spend = 10
-                avatar_f_data = json_data.data.fighters[entity_name]
-                self.set_char(entity_name, avatar_f_data)
-                a_fighter_component = Fighter(hp=avatar_f_data["hp"], ac=avatar_f_data["ac"], ev=avatar_f_data["ev"],
-                                              atk=avatar_f_data["atk"], mv_spd=avatar_f_data["mv_spd"],
-                                              atk_spd=avatar_f_data["atk_spd"], size=avatar_f_data["size"],
-                                              fov=avatar_f_data["fov"], level=0)
-                self.avatar[entity_name] = a_fighter_component
-                self.avatar[entity_name].owner = self.owner
+                fighter = json_data.data.fighters[entity_name]
+                self.set_char(entity_name, fighter)
+                self.set_avatar(entity_name)
                 self.owner.abilities.set_learnable(entity_name)
 
             lvl_up_msg = self.handle_avatar_exp(entity_name, exp_to_spend)

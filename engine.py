@@ -7,14 +7,8 @@ from bearlibterminal import terminal as blt
 import options
 from actions import Actions
 from camera import Camera
-from components.abilities import Abilities
-from components.animations import Animations
 from components.entity import Entity
-from components.fighter import Fighter
-from components.inventory import Inventory
 from components.menus.main_menu import MainMenu
-from components.player import Player
-from components.status_effects import StatusEffects
 from components.summoner import Summoner
 from data import json_data
 from game_states import GameStates
@@ -162,38 +156,18 @@ class Engine:
         self.levels = None
         self.time_counter = None
         # Create player
-        inventory_component = Inventory(26)
         f_data = self.data.fighters["player"]
-        fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
-                                    atk=f_data["atk"], mv_spd=f_data["mv_spd"],
-                                    atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
-
-        player_component = Player(50)
-        player_component.set_char("player", self.data.fighters["player"])
-        status_effects_component = StatusEffects("player")
         summoner_component = Summoner()
-        animations_component = Animations()
-
         player = Entity(
-            1, 1, 2, "default", "player", tile=f_data,
-            blocks=True, player=player_component, fighter=fighter_component, inventory=inventory_component,
-            light_source=True,
-            summoner=summoner_component, indicator_color="gray", animations=animations_component,
-            status_effects=status_effects_component, stand_on_messages=False,
-            visible=True)
-        player.player.avatar["player"] = fighter_component
-        avatar_f_data = self.data.fighters[choice]
-        a_fighter_component = Fighter(hp=avatar_f_data["hp"], ac=avatar_f_data["ac"], ev=avatar_f_data["ev"],
-                                      atk=avatar_f_data["atk"], mv_spd=avatar_f_data["mv_spd"],
-                                      atk_spd=avatar_f_data["atk_spd"], size=avatar_f_data["size"],
-                                      fov=avatar_f_data["fov"])
-        player.player.avatar[choice] = a_fighter_component
-        player.player.avatar[choice].owner = player
-        player.abilities = Abilities(player)
+            1, 1, "default", "player", layer=2,  tile=f_data,
+            blocks=True, light_source=True, category="player", indicator_color="gray", stand_on_messages=False,
+            visible=True, inventory=True, summoner=summoner_component)
+
+        player.player.set_avatar(choice)
         player.abilities.initialize_abilities(choice)
         player.player.set_char(choice, self.data.fighters[choice])
         player.player.char_exp[choice] = player.player.avatar_exp_lvl_intervals[0]
-        player.fighter.mv_spd = avatar_f_data["mv_spd"]
+        player.fighter.mv_spd = player.player.avatar[choice].mv_spd
 
         player.player.avatar[choice].max_hp += 20
         player.player.avatar[choice].hp += 20

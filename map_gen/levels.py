@@ -24,15 +24,13 @@ class Levels:
         self.player.status_effects.remove_all()
 
         if not self.items:
-            game_map = GameMap(40, 40, "hub")
-            game_map.owner = self
-            game_map.generate_hub()
+            game_map = self.create_biome_and_map(name="hub", biome_title="hub", width=40, height=40, generate_random=False)
             self.items[game_map.name] = game_map
             self.current_map = game_map
 
         if destination in self.items:
             game_map = self.items[destination]
-            game_map.place_entities()
+            #game_map.place_entities()
             self.current_map = game_map
             self.player.fighter = self.player.player.avatar["player"]
             self.current_map.recompute_fov(self.player)
@@ -53,11 +51,7 @@ class Levels:
         if destination == "debug":
             game_map = GameMap(20, 20, "debug")
             game_map.owner = self
-            # game_map.generate_trees(0, 0, game_map.width,
-            #                        game_map.height, 20, block_sight=True)
-            # game_map.generate_forest()
-            # game_map.generate_cavern()
-            game_map.place_entities()
+
             # Initialize field of view
             self.player.light_source.initialize_fov(game_map)
 
@@ -70,29 +64,31 @@ class Levels:
             self.owner.menus.create_or_show_menu(level_data)
             if not self.owner.menus.choose_level.event:
                 return
-            self.world_tendency = self.params["modifier"]
-            game_map = GameMap(width=50,
-                               height=50,
-                               name="dream",
-                               title=self.params["title"])
-            game_map.owner = self
-            game_map.generate_map()
+            self.world_tendency = self.params.biome_modifier
+
+            game_map = self.create_biome_and_map(name="dream", biome_title=self.params.title, width=70, height=70)
             self.items[game_map.name] = game_map
             self.current_map = game_map
-            game_map.place_entities()
+
             # Initialize field of view
             self.current_map.recompute_fov(self.player)
 
     def make_debug_map(self, algorithm):
-        biome = Biome(biome_modifier=self.world_tendency)
-        game_map = GameMap(width=70,
-                           height=70,
-                           name="dream",
-                           biome=biome,
-                           title=algorithm)
+        game_map = self.create_biome_and_map(name="debug", width=70, height=70, algorithm=algorithm)
+        return game_map
+
+    def create_biome_and_map(self, name, width, height, biome_title=None, algorithm=None, generate_random=True):
+        biome = Biome(biome_modifier=self.world_tendency, title=biome_title, generate_random=generate_random)
+        game_map = GameMap(width=width,
+                           height=height,
+                           name=name,
+                           biome=biome)
         game_map.owner = self
         game_map.biome = biome
         game_map.generate_map(name=algorithm)
         game_map.process_rooms()
+        game_map.process_prefabs()
+        if not self.owner.debug:
+            game_map.place_player()
+            game_map.init_light_sources()
         return game_map
-

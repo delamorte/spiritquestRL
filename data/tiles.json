@@ -14,10 +14,10 @@
       "t"
     ],
     "colors": [
-      "green"
+      "dark green"
     ],
     "corners": false,
-    "hue": false,
+    "hue": true,
     "blocks": true,
     "blocks_sight": true,
     "draw_floor": true,
@@ -137,7 +137,7 @@
     "light": true,
     "neutral": true,
     "chaos": true,
-    "openable": true,
+    "openable": false,
     "interactable": false,
     "pickable": false,
     "light_source": false,
@@ -267,7 +267,7 @@
     ],
     "corners": true,
     "hue": true,
-    "blocks": false,
+    "blocks": true,
     "blocks_sight": false,
     "draw_floor": true,
     "light": true,
@@ -510,7 +510,7 @@
     "hue": false,
     "blocks": true,
     "blocks_sight": false,
-    "draw_floor": true,
+    "draw_floor": false,
     "light": true,
     "neutral": true,
     "chaos": true,
@@ -1737,6 +1737,30 @@
     "ascii": "@",
     "colors": [
       "default"
+    ],
+    "corners": false,
+    "hue": true,
+    "blocks": false,
+    "blocks_sight": false,
+    "draw_floor": true,
+    "light": false,
+    "neutral": false,
+    "chaos": false,
+    "openable": false,
+    "interactable": false,
+    "pickable": false,
+    "light_source": false,
+    "stairs": false
+  },
+  "cursor": {
+    "name": "cursor",
+    "hex": "0xF000",
+    "tile": 9,
+    "tile_variants": [
+    ],
+    "ascii": "X",
+    "colors": [
+      "yellow"
     ],
     "corners": false,
     "hue": true,

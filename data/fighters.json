@@ -1,6 +1,6 @@
 {
   "player": {
-    "hp": 20,
+    "hp": 2000,
     "ac": 1,
     "ev": 5,
     "atk": 5,
@@ -13,6 +13,121 @@
     "ascii": "@",
     "colors": [
       "default"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [],
+    "remarks": [
+      "Hmm."
+    ]
+  },
+  "druid": {
+    "hp": 20,
+    "ac": 1,
+    "ev": 5,
+    "atk": 5,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 470,
+    "ascii": "@",
+    "colors": [
+      "yellow"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [],
+    "remarks": [
+      "Hmm."
+    ]
+  },
+  "alchemist": {
+    "hp": 20,
+    "ac": 1,
+    "ev": 5,
+    "atk": 5,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 461,
+    "ascii": "@",
+    "colors": [
+      "green"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [],
+    "remarks": [
+      "Hmm."
+    ]
+  },
+  "ranger": {
+    "hp": 20,
+    "ac": 1,
+    "ev": 5,
+    "atk": 5,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 478,
+    "ascii": "@",
+    "colors": [
+      "blue"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [],
+    "remarks": [
+      "Hmm."
+    ]
+  },
+  "hermit": {
+    "hp": 20,
+    "ac": 1,
+    "ev": 5,
+    "atk": 5,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 483,
+    "ascii": "@",
+    "colors": [
+      "orange"
+    ],
+    "light": false,
+    "neutral": false,
+    "chaos": false,
+    "abilities": [],
+    "remarks": [
+      "Hmm."
+    ]
+  },
+  "ornithologist": {
+    "hp": 20,
+    "ac": 1,
+    "ev": 5,
+    "atk": 5,
+    "mv_spd": 1,
+    "atk_spd": 1,
+    "size": "normal",
+    "fov": 6,
+    "hex": "0xE000",
+    "tile": 540,
+    "ascii": "@",
+    "colors": [
+      "azure"
     ],
     "light": false,
     "neutral": false,

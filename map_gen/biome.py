@@ -17,47 +17,54 @@ class Biome:
         self.biome_modifier = biome_modifier
         self.biome_monster = biome_monster
         self.biome_monster_chance = biome_monster_chance
+        self.home = None
         self.features = features
         self.secrets = secrets
         self.npcs = npcs
         self.quests = quests
         self.bosses = bosses
-        if generate_random:
-            self.generate_biome_params()
+        self.generate_random = generate_random
+        self.generate_biome_params(title)
 
-    def generate_biome_params(self):
+    def generate_biome_params(self, title):
 
         # Set biome type and modifier
-        self.set_biome_type()
-        self.set_biome_suffix_and_modifier()
+        self.set_biome_type(title)
         self.set_biome_features()
-        # Set level title, set dominant monster type
-        if random() > self.biome_monster_chance:
-            self.set_biome_monster()
-            self.title = (
-                        "The " + self.biome_prefix + " " + self.biome_monster.capitalize() + " " +
-                        self.biome_type.capitalize() + " of " +
-                        self.biome_suffix)
-        else:
-            self.title = "The " + self.biome_prefix + " " + self.biome_type.capitalize() + " of " + self.biome_suffix
+        if not title:
+            self.set_biome_suffix_and_modifier()
+            # Set level title, set dominant monster type
+            if random() > self.biome_monster_chance:
+                self.set_biome_monster()
+                self.title = (
+                            "The " + self.biome_prefix.capitalize() + " " + self.biome_monster.capitalize() + " " +
+                            self.biome_type.capitalize() + " of " +
+                            self.biome_suffix)
+            else:
+                self.title = "The " + self.biome_prefix.capitalize() + " " + self.biome_type.capitalize() + " of " + self.biome_suffix
 
     def set_biome_type(self, title=None):
         biomes_json = json_data.data.biomes
-        if title:
+        if title and not self.generate_random:
             self.biome_data = biomes_json[title]
         else:
-            self.biome_data = choice(list(biomes_json.values()))
+            biomes_list = list(biomes_json.values())
+            biome_choices = [x for x in biomes_list if x["biome_type"] != "prefab"]
+            self.biome_data = choice(biome_choices)
         self.biome_type = self.biome_data["biome_type"]
         self.biome_prefix = choice(self.biome_data["prefixes"])
 
     def set_biome_features(self):
-        self.features = self.biome_data["features"]
-        self.quests = choice(self.biome_data["quests"])
-        self.npcs = choice(self.biome_data["npcs"])
-        self.bosses = choice(self.biome_data["bosses"])
+        if self.biome_data["features"]:
+            self.features = self.biome_data["features"]
+        if self.biome_data["quests"]:
+            self.quests = choice(self.biome_data["quests"])
+        if self.biome_data["npcs"]:
+            self.npcs = choice(self.biome_data["npcs"])
+        if self.biome_data["bosses"]:
+            self.bosses = choice(self.biome_data["bosses"])
 
-
-    def set_biome_suffix_and_modifier(self, title=None):
+    def set_biome_suffix_and_modifier(self):
         # negative integers represents chaos. positive ints harmony,
         # zero is neutrality.
         params = {"Death and Decay": -3,
@@ -77,11 +84,7 @@ class Biome:
                   "Plastic Flowers and Melting Sun": -1,
                   "the Golden Chorus": 3
                   }
-        if title:
-            biome_mod = params[title]
-        else:
-            title, biome_mod = choice(list(params.items()))
-
+        title, biome_mod = choice(list(params.items()))
         self.biome_suffix = title
         self.biome_modifier += biome_mod
 

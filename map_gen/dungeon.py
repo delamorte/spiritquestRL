@@ -378,7 +378,7 @@ class Dungeon:
 class Room:
     def __init__(self, x1=0, y1=0, w=0, h=0, x2=0, y2=0, wall_color="dark gray", floor_color="darkest amber",
                  feature=None, cave_walls=None,
-                 wall="wall_brick", floor="floor", tiled=False, name=None, lightness=1.0, cave=None,
+                 wall_type="wall_brick", floor_type="floor", tiled=False, name=None, lightness=1.0, cave=None,
                  id_nr=1):
         self.x1 = int(x1)
         self.y1 = int(y1)
@@ -390,8 +390,8 @@ class Room:
         else:
             self.x2 = self.x1 + self.w
             self.y2 = self.y1 + self.h
-        self.floor = floor
-        self.wall = wall
+        self.floor_type = floor_type
+        self.wall_type = wall_type
         self.cave_walls = cave_walls
         self.tunnel = set()
         self.entrances = set()

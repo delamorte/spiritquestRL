@@ -60,6 +60,7 @@ class Tile:
             self.items_on_tile.remove(entity)
         if entity == self.blocking_entity:
             self.blocking_entity = None
+            self.blocked = False
         if entity.door:
             self.door = None
             self.is_door = False

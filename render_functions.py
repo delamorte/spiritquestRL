@@ -568,12 +568,13 @@ class RenderFunctions:
                             blt.put(x0 + x * 2, y0 + y, char)
 
                 if len(game_map.tiles[x][y].entities_on_tile) > 0:
-                    blt.layer(6)
-                    blt.color(game_map.tiles[x][y].entities_on_tile[-1].color)
-                    blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].entities_on_tile[-1].char)
-                    # if game_map.tiles[x][y].entities_on_tile[-1].name == "player":
-                    #     blt.color("green")
-                    #     blt.put(x0 + x * 2, y0 + y, "@")
+                    for entity in game_map.tiles[x][y].entities_on_tile:
+                        blt.layer(6)
+                        blt.color(entity.color)
+                        blt.put(x0 + x * 2, y0 + y, entity.char)
+                        # if game_map.tiles[x][y].entities_on_tile[-1].name == "player":
+                        #     blt.color("green")
+                        #     blt.put(x0 + x * 2, y0 + y, "@")
 
                 # draw room id and feature name
                 for room in game_map.algorithm.rooms:
