@@ -33,8 +33,8 @@ class RoomAddition(Dungeon):
         self.vaultChance = 0.40
 
         self.buildRoomAttempts = 400
-        self.placeRoomAttempts = 10
-        self.maxTunnelLength = 20
+        self.place_room_attempts = 10
+        self.max_tunnel_length = 20
 
         self.includeShortcuts = True
         self.shortcutAttempts = 500
@@ -50,21 +50,23 @@ class RoomAddition(Dungeon):
                       for x in range(self.map_width)]
 
         # generate the first room
-        roomWidth, roomHeight = self.map_width, self.map_height
-        while roomWidth >= self.map_width or roomHeight >= self.map_height:
-            room = self.generateRoom()
-            roomWidth, roomHeight = self.get_room_dimensions(room)
-        roomX = int((self.map_width / 2 - roomWidth / 2)) - 1
-        roomY = int((self.map_height / 2 - roomHeight / 2)) - 1
-        self.addRoom(roomX, roomY, room)
+        room, room_x, room_y = None, None, None
+        room_width, room_height = self.map_width, self.map_height
+        while room_width >= self.map_width or room_height >= self.map_height and room_x > 1 and room_y > 1:
+            room = self.generate_room()
+            room_width, room_height = self.get_room_dimensions(room)
+            room_x = int((self.map_width / 2 - room_width / 2)) - 1
+            room_y = int((self.map_height / 2 - room_height / 2)) - 1
+        self.add_room(room_x, room_y, room)
 
         # generate other rooms
         for i in range(self.buildRoomAttempts):
-            room = self.generateRoom()
-            # try to position the room, get roomX and roomY
-            roomX, roomY, wallTile, direction, tunnelLength = self.placeRoom(room, self.map_width, self.map_height)
-            if roomX and roomY:
-                self.addRoom(roomX, roomY, room)
+            room = self.generate_room()
+            # try to position the room, get room_x and room_y
+            room_x, room_y, wall_tile, direction, tunnel_length = self.place_room(room, self.map_width, self.map_height)
+            if room_x and room_y:
+                print(room_x, room_y)
+                self.add_room(room_x, room_y, room)
                 if len(self.rooms_list) >= self.MAX_NUM_ROOMS:
                     break
 
@@ -75,36 +77,36 @@ class RoomAddition(Dungeon):
 
         return self.level
 
-    def generateRoom(self):
+    def generate_room(self):
         # select a room type to generate and return that room
         if self.rooms_list:
             # There is at least one room already
             choice = random.random()
 
             if choice < self.vaultChance:
-                room = self.generateRandomVault()
+                room = self.generate_random_vault()
 
             else:
                 if choice < self.squareRoomChance:
-                    room = self.generateRoomSquare()
+                    room = self.generate_room_square()
                 elif self.squareRoomChance <= choice < (self.squareRoomChance + self.crossRoomChance):
-                    room = self.generateRoomCross()
+                    room = self.generate_room_cross()
                 else:
-                    room = self.generateRoomCavern(max_size=self.ROOM_MAX_SIZE)
+                    room = self.generate_room_cavern(max_size=self.ROOM_MAX_SIZE)
 
         else:  # it's the first room
             choice = random.random()
             if choice < self.vaultChance:
-                room = self.generateRandomVault()
+                room = self.generate_random_vault()
             else:
                 if choice < self.cavernChance:
-                    room = self.generateRoomCavern(max_size=self.CAVERN_MAX_SIZE)
+                    room = self.generate_room_cavern(max_size=self.CAVERN_MAX_SIZE)
                 else:
-                    room = self.generateRoomSquare()
+                    room = self.generate_room_square()
 
         return room
 
-    def generateRoomCross(self):
+    def generate_room_cross(self):
         room_hor_width = int((random.randint(self.CROSS_ROOM_MIN_SIZE + 2, self.CROSS_ROOM_MAX_SIZE)) / 2 * 2)
         room_ver_height = int((random.randint(self.CROSS_ROOM_MIN_SIZE + 2, self.CROSS_ROOM_MAX_SIZE)) / 2 * 3)
         room_hor_height = int((random.randint(self.CROSS_ROOM_MIN_SIZE, room_ver_height - 2)) / 2 * 2)
@@ -128,7 +130,7 @@ class RoomAddition(Dungeon):
 
         return room
 
-    def generateRandomVault(self):
+    def generate_random_vault(self):
         '''
         Parse vaults from Zorbus format into rooms
         Vault prefabs kindly provided by joonas@zorbus.net under the CC0 Creative Commons License:
@@ -184,18 +186,18 @@ class RoomAddition(Dungeon):
 
         return room
 
-    def generateRoomSquare(self):
-        roomWidth = random.randint(self.SQUARE_ROOM_MIN_SIZE, self.SQUARE_ROOM_MAX_SIZE)
-        roomHeight = random.randint(max(int(roomWidth * 0.5), self.SQUARE_ROOM_MIN_SIZE),
-                                    min(int(roomWidth * 1.5), self.SQUARE_ROOM_MAX_SIZE))
+    def generate_room_square(self):
+        room_width = random.randint(self.SQUARE_ROOM_MIN_SIZE, self.SQUARE_ROOM_MAX_SIZE)
+        room_height = random.randint(max(int(room_width * 0.5), self.SQUARE_ROOM_MIN_SIZE),
+                                    min(int(room_width * 1.5), self.SQUARE_ROOM_MAX_SIZE))
 
         room = [[0
-                 for y in range(1, roomHeight - 1)]
-                for x in range(1, roomWidth - 1)]
+                 for y in range(1, room_height - 1)]
+                for x in range(1, room_width - 1)]
 
         return room
 
-    def generateRoomCavern(self, max_size=18):
+    def generate_room_cavern(self, max_size=18):
         while True:
             # if a room is too small, generate another
             room = [[1
@@ -224,9 +226,9 @@ class RoomAddition(Dungeon):
             room = self.flood_fill_remove(room)
 
             # start over if the room is completely filled in
-            roomWidth, roomHeight = self.get_room_dimensions(room)
-            for x in range(roomWidth):
-                for y in range(roomHeight):
+            room_width, room_height = self.get_room_dimensions(room)
+            for x in range(room_width):
+                for y in range(room_height):
                     if room[x][y] == 0:
                         return room
 
@@ -275,19 +277,19 @@ class RoomAddition(Dungeon):
 
         return room
 
-    def placeRoom(self, room, map_width, map_height):  # (self,room,direction,)
-        roomX = None
-        roomY = None
+    def place_room(self, room, map_width, map_height):  # (self,room,direction,)
 
-        roomWidth, roomHeight = self.get_room_dimensions(room)
+        room_width, room_height = self.get_room_dimensions(room)
+        if room_width >= map_width or room_height >= map_height:
+            return None, None, None, None, None
 
         # try n times to find a wall that lets you build room in that direction
-        for i in range(self.placeRoomAttempts):
+        for i in range(self.place_room_attempts):
             # try to place the room against the tile, else connected by a tunnel of length i
 
-            wallTile = None
-            direction = self.getDirection()
-            while not wallTile:
+            wall_tile = None
+            direction = self.get_direction()
+            while not wall_tile:
                 '''
                 randomly select tiles until you find
                 a wall that has another wall in the
@@ -295,53 +297,51 @@ class RoomAddition(Dungeon):
                 opposite direction.
                 '''
                 # direction == tuple(dx,dy)
-                tile_x = random.randint(1, map_width - 2)
-                tile_y = random.randint(1, map_height - 2)
+                tile_x = random.randint(2, map_width - 2)
+                tile_y = random.randint(2, map_height - 2)
                 if ((self.level[tile_x][tile_y] == 1) and
                         (self.level[tile_x + direction[0]][tile_y + direction[1]] == 1) and
                         (self.level[tile_x - direction[0]][tile_y - direction[1]] == 0)):
-                    wallTile = (tile_x, tile_y)
+                    wall_tile = (tile_x, tile_y)
 
-            # spawn the room touching wallTile
-            startRoomX = None
-            startRoomY = None
+            # spawn the room touching wall_tile
+            start_room_x = None
+            start_room_y = None
             '''
             TODO: replace this with a method that returns a 
             random floor tile instead of the top left floor tile
             '''
-            while not startRoomX and not startRoomY:
-                x = random.randint(0, roomWidth - 1)
-                y = random.randint(0, roomHeight - 1)
+            while not start_room_x and not start_room_y:
+                x = random.randint(0, room_width - 1)
+                y = random.randint(0, room_height - 1)
                 if room[x][y] == 0:
-                    startRoomX = wallTile[0] - x
-                    startRoomY = wallTile[1] - y
+                    start_room_x = wall_tile[0] - x
+                    start_room_y = wall_tile[1] - y
 
             # then slide it until it doesn't touch anything
-            for tunnelLength in range(self.maxTunnelLength):
-                possibleRoomX = startRoomX + direction[0] * tunnelLength
-                possibleRoomY = startRoomY + direction[1] * tunnelLength
+            for tunnel_length in range(self.max_tunnel_length):
+                possible_room_x = start_room_x + direction[0] * tunnel_length
+                possible_room_y = start_room_y + direction[1] * tunnel_length
 
-                enoughRoom = self.getOverlap(room, possibleRoomX, possibleRoomY, map_width, map_height)
+                enough_room = self.get_overlap(room, possible_room_x, possible_room_y, map_width, map_height)
 
-                if enoughRoom:
-                    roomX = possibleRoomX
-                    roomY = possibleRoomY
-
+                if enough_room:
+                    room_x = possible_room_x
+                    room_y = possible_room_y
                     # build connecting tunnel
                     # Attempt 1
                     '''
-                    for i in range(tunnelLength+1):
-                        x = wallTile[0] + direction[0]*i
-                        y = wallTile[1] + direction[1]*i
+                    for i in range(tunnel_length+1):
+                        x = wall_tile[0] + direction[0]*i
+                        y = wall_tile[1] + direction[1]*i
                         self.level[x][y] = 0
                     '''
                     # moved tunnel code into self.generate_level()
-
-                    return roomX, roomY, wallTile, direction, tunnelLength
+                    return room_x, room_y, wall_tile, direction, tunnel_length
 
         return None, None, None, None, None
 
-    def addRoom(self, roomX, roomY, room):
+    def add_room(self, roomX, roomY, room):
         roomWidth, roomHeight = self.get_room_dimensions(room)
         level_size_y = len(self.level)
         level_size_x = len(self.level[0])
@@ -366,7 +366,7 @@ class RoomAddition(Dungeon):
             roomHeight = 0
             return roomWidth, roomHeight
 
-    def getDirection(self):
+    def get_direction(self):
         # direction = (dx,dy)
         north = (0, -1)
         south = (0, 1)
@@ -376,7 +376,7 @@ class RoomAddition(Dungeon):
         direction = random.choice([north, south, east, west])
         return direction
 
-    def getOverlap(self, room, roomX, roomY, map_width, map_height):
+    def get_overlap(self, room, roomX, roomY, map_width, map_height):
         '''
         for each 0 in room, check the cooresponding tile in
         self.level and the eight tiles around it. Though slow,
@@ -390,8 +390,8 @@ class RoomAddition(Dungeon):
             for y in range(roomHeight):
                 if room[x][y] == 0:
                     # Check to see if the room is out of bounds
-                    if ((1 <= (x + 1 + roomX) < map_width - 1) and
-                            (1 <= (y + 1 + roomY) < map_height - 1)):
+                    if ((3 <= (x + 1 + roomX) < map_width - 1) and
+                            (3 <= (y + 1 + roomY) < map_height - 1)):
                         # Check for overlap with a one tile buffer
                         if self.level[x + roomX - 1][y + roomY - 1] == 0 or self.level[x + roomX - 2][y + roomY - 2] == 0:  # top left
                             return False

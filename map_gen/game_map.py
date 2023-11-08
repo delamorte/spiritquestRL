@@ -343,7 +343,9 @@ class GameMap:
             "room_addition": RoomAddition(self.width, self.height)
         }
 
-        if not name:
+        if not name and self.name == "debug":
+            map_algorithm = generators["room_addition"]
+        elif not name:
             map_algorithm = choice(list(generators.values()))
         else:
             map_algorithm = generators[name]
