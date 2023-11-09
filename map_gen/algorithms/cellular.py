@@ -17,8 +17,8 @@ class CellularAutomata(Dungeon):
         # recommended to be between .35 and .55
         self.wall_probability = 0.45
 
-        self.ROOM_MIN_SIZE = 16  # size in total number of cells, not dimensions
-        self.ROOM_MAX_SIZE = 500  # size in total number of cells, not dimensions
+        self.room_min_size = 16  # size in total number of cells, not dimensions
+        self.room_max_size = 500  # size in total number of cells, not dimensions
 
         self.smoothing = 1
         self.clean_up_iterations = 5
@@ -33,7 +33,7 @@ class CellularAutomata(Dungeon):
         self.random_fill_map()
         self.create_caves()
         self.get_caves()
-        self.connect_caves()
+        self.connect_caves_old()
         self.clean_up_map(self.map_width, self.map_height)
         self.adjacent_rooms_path_scan(max_length=20)
         return self.level

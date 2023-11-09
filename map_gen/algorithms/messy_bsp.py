@@ -16,8 +16,8 @@ class MessyBSPTree(Dungeon):
         self.level = []
         self.rooms = []
         self.MAX_LEAF_SIZE = 24
-        self.ROOM_MAX_SIZE = 15
-        self.ROOM_MIN_SIZE = 6
+        self.room_max_size = 15
+        self.room_min_size = 6
         self.smoothing = 1
         self.filling = 3
         self.clean_up_iterations = 3
@@ -51,7 +51,7 @@ class MessyBSPTree(Dungeon):
                             splitSuccessfully = True
 
         rootLeaf.create_rooms(self)
-        self.connect_caves()
+        self.connect_caves_old()
         self.clean_up_map(self.map_width, self.map_height, smoothing=self.smoothing, filling=self.filling,
                           iterations=self.clean_up_iterations)
         self.adjacent_rooms_path_scan(max_length=20)
@@ -60,8 +60,8 @@ class MessyBSPTree(Dungeon):
     def createHall(self, room1, room2):
         # run a heavily weighted random Walk
         # from point2 to point1
-        drunkard_x, drunkard_y = room2.get_center()
-        goalX, goalY = room1.get_center()
+        drunkard_x, drunkard_y = room2.center()
+        goalX, goalY = room1.center()
         while not (room1.x1 <= drunkard_x <= room1.x2) or not (room1.y1 < drunkard_y < room1.y2):  #
             # ==== Choose Direction ====
             north = 1.0

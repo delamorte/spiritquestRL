@@ -365,7 +365,7 @@ class GameMap:
             for x in range(0, self.width):
                 self.tiles[x][y].color = floor_color
                 self.tiles[x][y].char = floor_tile
-                if map_algorithm.level[x][y] == 1:
+                if map_algorithm.level[y][x] == 1:
                     self.tiles[x][y].spawnable = False
                     wall = Entity(x, y, wall_color, wall_name, tile=wall_tile_object,
                                   char=wall_tile)
@@ -378,7 +378,7 @@ class GameMap:
 
         #debug
         # for room in self.algorithm.rooms:
-        #     walls = room.cave_walls
+        #     walls = room.inner
         #     for tile in walls:
         #         x, y = tile[0], tile[1]
         #         for entity in self.tiles[x][y].entities_on_tile:
@@ -402,8 +402,8 @@ class GameMap:
             floor_tile = get_tile(floor_name)
             floor_object = get_tile_object(floor_name)
             wall_tile = get_tile_object(wall_name)
-            cave = room.cave
-            walls = room.cave_walls
+            cave = room.inner
+            walls = room.outer
             room.floor_type = floor_name
             room.wall_type = wall_name
             for tile in cave:
@@ -428,6 +428,7 @@ class GameMap:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
                 self.add_entity(wall)
+            #print(room.feature)
 
         for room in self.algorithm.rooms:
             tunnels = room.tunnel
@@ -435,7 +436,7 @@ class GameMap:
 
             for tile in tunnels:
                 x, y = tile[0], tile[1]
-                if self.tiles[x][y].entities_on_tile and tile not in room.cave_walls:
+                if self.tiles[x][y].entities_on_tile and tile not in room.outer:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
             for tile in entrances:
@@ -458,9 +459,9 @@ class GameMap:
                 if room.feature == "Shaman's Retreat":
                     self.biome.home = room
                     break
-            x, y = choice(list(self.biome.home.cave))
+            x, y = choice(list(self.biome.home.inner))
             while self.tiles[x][y].blocking_entity:
-                x, y = choice(list(self.biome.home.cave))
+                x, y = choice(list(self.biome.home.inner))
             name = "holy symbol"
             portal = get_tile_object(name)
             color = get_color(name)
@@ -618,7 +619,7 @@ class GameMap:
 
         for room in self.algorithm.rooms:
 
-            room_size = len(room.cave)
+            room_size = len(room.inner)
             feature_data = json_data.data.biome_features[room.feature]
             room_entities = feature_data["entities"]
             for category, entities in room_entities.items():
@@ -630,13 +631,13 @@ class GameMap:
                 for entity_name in entities_to_place:
                     # Choose random empty location in room
                     if category == "monsters" and room.floor_type == "water" and not room.wall_type == "water":
-                        cave = list(room.cave)
-                        walls = list(room.cave_walls)
+                        cave = list(room.inner)
+                        walls = list(room.outer)
                         locations = cave + walls
                     elif entity_name == "window":
-                        locations = list(room.cave_walls)
+                        locations = list(room.outer)
                     else:
-                        locations = list(room.cave)
+                        locations = list(room.inner)
                     x, y = choice(locations)
                     if entity_name == "window":
                         pass

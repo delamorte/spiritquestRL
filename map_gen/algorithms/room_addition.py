@@ -1,7 +1,11 @@
 import os
 import random
 
-from map_gen.dungeon import Dungeon
+import numpy as np
+from scipy.ndimage import label
+from scipy.signal import convolve2d
+
+from map_gen.dungeon import Dungeon, Room
 
 
 # ==== Room Addition ====
@@ -12,25 +16,27 @@ class RoomAddition(Dungeon):
         self.rooms_list = []
         self.level = []
 
-        self.ROOM_MAX_SIZE = 18  # max height and width for cellular automata rooms
-        self.ROOM_MIN_SIZE = 16  # min size in number of floor tiles, not height and width
-        self.MAX_NUM_ROOMS = 20
+        self.room_max_size = 300  # max height and width for cellular automata rooms
+        self.room_min_size = 16  # min size in number of floor tiles, not height and width
+        self.max_rooms = 500
 
-        self.SQUARE_ROOM_MAX_SIZE = 12
-        self.SQUARE_ROOM_MIN_SIZE = 6
+        self.SQUARE_room_max_size = 12
+        self.SQUARE_room_min_size = 6
 
-        self.CROSS_ROOM_MAX_SIZE = 14
-        self.CROSS_ROOM_MIN_SIZE = 4
+        self.CROSS_room_max_size = 14
+        self.CROSS_room_min_size = 4
 
         self.cavernChance = 0.30  # probability that the first room will be a cavern
-        self.CAVERN_MAX_SIZE = 18  # max height an width
+        self.CAVERN_MAX_SIZE = 16  # max height an width
+
+        self.vault_max_size = 1200
 
         self.wall_probability = 0.45
         self.neighbors = 4
 
         self.squareRoomChance = 0.1
         self.crossRoomChance = 0.15
-        self.vaultChance = 0.40
+        self.vaultChance = 0.4
 
         self.buildRoomAttempts = 400
         self.place_room_attempts = 10
@@ -45,18 +51,58 @@ class RoomAddition(Dungeon):
 
     def generate_level(self):
 
-        self.level = [[1
-                       for y in range(self.map_height)]
-                      for x in range(self.map_width)]
+        self.level = np.ones((self.map_height, self.map_width), dtype=int)
+
+        for r in range(self.max_rooms):
+            room_arr, vault = self.generate_room()
+
+            room_height, room_width = room_arr.shape
+            if room_height >= self.map_height - 1 or room_width >= self.map_width - 1:
+                continue
+            x = random.randint(1, self.map_width - room_width - 1)
+            y = random.randint(1, self.map_height - room_height - 1)
+            id_nr = len(self.rooms) + 1
+            new_room = Room(x, y, room_width, room_height, room_arr, id_nr=id_nr)
+            # Run through the other rooms and see if they intersect with this one.
+            if any(new_room.intersects(other_room) for other_room in self.rooms):
+                continue  # This room intersects, so go to the next attempt.
+            # If there are no intersections then the room is valid.
+
+            self.add_room(new_room)
+
+            # A vault is a prefab which may consist of multiple rooms, use flood fill to add inner rooms
+            if vault:
+                rooms = self.get_rooms_by_flood_fill(new_room)
+                if rooms:
+                    for room in rooms:
+                        self.add_room(room)
+                        # Connect rooms
+
+        # self.get_caves()
+        self.connect_caves_old()
+        # self.connect_caves()
+        # self.clean_up_map(self.map_width, self.map_height)
+        # Connect rooms
+        # self.connect_rooms()
+        self.adjacent_rooms_scan()
+
+        return self.level
+
+    def generate_level_old(self):
+
+        # self.level = [[1
+        #                for y in range(self.map_height)]
+        #               for x in range(self.map_width)]
+
+        self.level = np.ones((self.map_height, self.map_width), dtype=int)
 
         # generate the first room
         room, room_x, room_y = None, None, None
         room_width, room_height = self.map_width, self.map_height
         while room_width >= self.map_width or room_height >= self.map_height and room_x > 1 and room_y > 1:
             room = self.generate_room()
-            room_width, room_height = self.get_room_dimensions(room)
-            room_x = int((self.map_width / 2 - room_width / 2)) - 1
-            room_y = int((self.map_height / 2 - room_height / 2)) - 1
+            room_height, room_width = self.get_room_dimensions(room)
+
         self.add_room(room_x, room_y, room)
 
         # generate other rooms
@@ -71,20 +117,25 @@ class RoomAddition(Dungeon):
                     break
 
         self.get_caves()
-        self.connect_caves()
+        self.connect_caves_old()
         self.clean_up_map(self.map_width, self.map_height)
         self.adjacent_rooms_scan()
 
         return self.level
 
     def generate_room(self):
+        vault = False
         # select a room type to generate and return that room
-        if self.rooms_list:
+        if self.rooms:
             # There is at least one room already
             choice = random.random()
 
             if choice < self.vaultChance:
-                room = self.generate_random_vault()
+                vault_size = self.vault_max_size
+                while vault_size >= self.vault_max_size:
+                    room = self.generate_random_vault()
+                    vault_size = room.size
+                vault = True
 
             else:
                 if choice < self.squareRoomChance:
@@ -92,41 +143,51 @@ class RoomAddition(Dungeon):
                 elif self.squareRoomChance <= choice < (self.squareRoomChance + self.crossRoomChance):
                     room = self.generate_room_cross()
                 else:
-                    room = self.generate_room_cavern(max_size=self.ROOM_MAX_SIZE)
+                    room = self.convolve()
 
         else:  # it's the first room
             choice = random.random()
             if choice < self.vaultChance:
-                room = self.generate_random_vault()
+                vault_size = self.vault_max_size
+                while vault_size >= self.vault_max_size:
+                    room = self.generate_random_vault()
+                    vault_size = room.size
+                vault = True
+
             else:
                 if choice < self.cavernChance:
-                    room = self.generate_room_cavern(max_size=self.CAVERN_MAX_SIZE)
+                    room = self.convolve()
                 else:
                     room = self.generate_room_square()
 
-        return room
+        return room, vault
 
     def generate_room_cross(self):
-        room_hor_width = int((random.randint(self.CROSS_ROOM_MIN_SIZE + 2, self.CROSS_ROOM_MAX_SIZE)) / 2 * 2)
-        room_ver_height = int((random.randint(self.CROSS_ROOM_MIN_SIZE + 2, self.CROSS_ROOM_MAX_SIZE)) / 2 * 3)
-        room_hor_height = int((random.randint(self.CROSS_ROOM_MIN_SIZE, room_ver_height - 2)) / 2 * 2)
-        room_ver_width = int((random.randint(self.CROSS_ROOM_MIN_SIZE, room_hor_width - 2)) / 2 * 1)
+        room_hor_width = int((random.randint(self.CROSS_room_min_size + 2, self.CROSS_room_max_size)) / 2 * 2)
+        room_ver_height = int((random.randint(self.CROSS_room_min_size + 2, self.CROSS_room_max_size)) / 2 * 3)
+        room_hor_height = int((random.randint(self.CROSS_room_min_size, room_ver_height - 2)) / 2 * 2)
+        room_ver_width = int((random.randint(self.CROSS_room_min_size, room_hor_width - 2)) / 2 * 1)
 
-        room = [[1
-                 for y in range(int(room_ver_height))]
-                for x in range(int(room_hor_width))]
+        # room = [[1
+        #          for y in range(int(room_ver_height))]
+        #         for x in range(int(room_hor_width))]
+        room = np.ones((room_ver_height, room_hor_width), dtype=int)
+
+        ver_offset = int(room_ver_height / 2 - room_hor_height / 2)
+        hor_offset = int(room_hor_width / 2 - room_ver_width / 2)
 
         # Fill in vertical space
-        ver_offset = int(room_ver_height / 2 - room_hor_height / 2)
-        for y in range(ver_offset, room_hor_height + ver_offset):
-            for x in range(0, int(room_hor_width)):
-                room[x][y] = 0
+        room[ver_offset:room_hor_height + ver_offset, 0:room_hor_width] = 0
+        room[0:room_ver_height, hor_offset:room_ver_width + hor_offset] = 0
 
-        # Fill in horizontal space
-        hor_offset = int(room_hor_width / 2 - room_ver_width / 2)
-        for y in range(0, room_ver_height):
-            for x in range(hor_offset, room_ver_width + hor_offset):
-                room[x][y] = 0
+        # for y in range(ver_offset, room_hor_height + ver_offset):
+        #     for x in range(0, int(room_hor_width)):
+        #         room[x][y] = 0
+        #
+        # # Fill in horizontal space
+        # for y in range(0, room_ver_height):
+        #     for x in range(hor_offset, room_ver_width + hor_offset):
+        #         room[x][y] = 0
 
         return room
 
@@ -175,29 +236,116 @@ class RoomAddition(Dungeon):
         for row in trimmed_file:
             new_room_row = []
             trimmed_row = row[trimmable_space:]
-            for i in range(vault_width - 1):
+            for i in range(vault_width):
                 if i >= len(trimmed_row):
-                    new_room_row.append(0)
-                elif trimmed_row[i] == "#":
                     new_room_row.append(1)
-                else:
+                elif trimmed_row[i] == ".":
                     new_room_row.append(0)
+                else:
+                    new_room_row.append(1)
             room.append(new_room_row)
 
+        return np.array(room, dtype=int)
+
+    def generate_room_square(self, padding=1):
+        room_width = random.randint(self.SQUARE_room_min_size, self.SQUARE_room_max_size)
+        room_height = random.randint(max(int(room_width * 0.5), self.SQUARE_room_min_size),
+                                     min(int(room_width * 1.5), self.SQUARE_room_max_size))
+
+        # room = [[0
+        #          for y in range(1, room_height - 1)]
+        #         for x in range(1, room_width - 1)]
+        room = np.zeros((room_height, room_width), dtype=int)
+        # If padding > 0, pad the room with walls
+        if padding > 0:
+            padded_room = np.pad(room, 1, constant_values=1)
+        else:
+            padded_room = room
+
+        return padded_room
+
+    def get_rooms_by_flood_fill(self, vault_room):
+
+        rooms = []
+        room_arr = vault_room.nd_array
+
+        # Use scipy.ndimage.label to label all separated clusters (rooms) in an array
+        col, row = np.where(room_arr == 0)
+        y, x = col[0], row[0]
+        labeled_rooms, num_of_rooms = label(room_arr == room_arr[y, x])
+
+        # No rooms found
+        if num_of_rooms <= 1:
+            return rooms
+
+        # Get the largest cluster/room
+        largest_i = np.argmax(np.unique(labeled_rooms, return_counts=True)[1][1:]) + 1
+
+        for i in range(1, num_of_rooms + 1):
+            if i == largest_i:
+                continue
+            room = np.where(labeled_rooms == i, 0, 1)
+            floors = np.where(room == 0)
+            trimmed_room = room[floors[0].min():floors[0].max() + 1,
+                           floors[1].min():floors[1].max() + 1]
+            padded_room = np.pad(trimmed_room, 1, constant_values=1)
+            id_nr = len(self.rooms) + 1
+            room_height, room_width = padded_room.shape
+            new_room = Room(vault_room.x1 + padded_room[1][0], vault_room.y1 + padded_room[0][0], room_width,
+                            room_height, padded_room, id_nr=id_nr)
+            rooms.append(new_room)
+
+        return rooms
+
+    def floodfill_by_xy_scipy(self, room, padding=1):
+
+        # Use scipy.ndimage.label to label all separated clusters (rooms) in an array
+        col, row = np.where(room == 0)
+        y, x = col[0], row[0]
+        labeled_rooms = label(room == room[y, x])[0]
+
+        # Get the largest cluster/room
+        i = np.argmax(np.unique(labeled_rooms, return_counts=True)[1][1:]) + 1
+        largest_room = np.where(labeled_rooms == i, 0, 1)
+
+        # Slice extra walls around the room (all rows & cols where all values == 1)
+        floors = np.where(largest_room == 0)
+        trimmed_room = largest_room[floors[0].min():floors[0].max() + 1,
+                       floors[1].min():floors[1].max() + 1]
+
+        # If padding > 0, pad the room with walls
+        if padding > 0:
+            padded_room = np.pad(trimmed_room, 1, constant_values=1)
+        else:
+            padded_room = trimmed_room
+
+        return padded_room
+
+    def convolve(self, max_size=15, wall_rule=5):
+        """Return the next step of the cave generation algorithm.
+
+        `tiles` is the input array. (0: wall, 1: floor)
+
+        If the 3x3 area around a tile (including itself) has `wall_rule` number of
+        walls then the tile will become a wall.
+        """
+        convolve_steps = 4
+        rng = np.random.default_rng()
+        arr = rng.choice(2, (max_size - 2, max_size - 2), p=[1 - self.wall_probability, self.wall_probability])
+        room = np.pad(arr, 1, constant_values=1)
+
+        for _ in range(convolve_steps):
+            neighbors = convolve2d(room == 0, [[1, 1, 1], [1, 1, 1], [1, 1, 1]], "same")
+            room = np.where(neighbors < wall_rule, 0, 1)  # Apply the wall rule.
+            room[[0, -1], :] = 1  # Ensure surrounding wall.
+            room[:, [0, -1]] = 1
+
+        # Remove isolated cells with flood fill
+        room = self.floodfill_by_xy_scipy(room)
+
         return room
 
-    def generate_room_square(self):
-        room_width = random.randint(self.SQUARE_ROOM_MIN_SIZE, self.SQUARE_ROOM_MAX_SIZE)
-        room_height = random.randint(max(int(room_width * 0.5), self.SQUARE_ROOM_MIN_SIZE),
-                                    min(int(room_width * 1.5), self.SQUARE_ROOM_MAX_SIZE))
-
-        room = [[0
-                 for y in range(1, room_height - 1)]
-                for x in range(1, room_width - 1)]
-
-        return room
-
-    def generate_room_cavern(self, max_size=18):
+    def generate_room_cavern2(self, max_size=18):
         while True:
             # if a room is too small, generate another
             room = [[1
@@ -226,7 +374,7 @@ class RoomAddition(Dungeon):
             room = self.flood_fill_remove(room)
 
             # start over if the room is completely filled in
-            room_width, room_height = self.get_room_dimensions(room)
+            room_height, room_width = self.get_room_dimensions(room)
             for x in range(room_width):
                 for y in range(room_height):
                     if room[x][y] == 0:
@@ -236,11 +384,11 @@ class RoomAddition(Dungeon):
         '''
         Find the largest region. Fill in all other regions.
         '''
-        roomWidth, roomHeight = self.get_room_dimensions(room)
+        room_height, room_width = self.get_room_dimensions(room)
         largestRegion = set()
 
-        for x in range(roomWidth):
-            for y in range(roomHeight):
+        for x in range(room_width):
+            for y in range(room_height):
                 if room[x][y] == 0:
                     newRegion = set()
                     tile = (x, y)
@@ -267,7 +415,7 @@ class RoomAddition(Dungeon):
                                     if direction not in to_be_filled and direction not in newRegion:
                                         to_be_filled.add(direction)
 
-                    if len(newRegion) >= self.ROOM_MIN_SIZE:
+                    if len(newRegion) >= self.room_min_size:
                         if len(newRegion) > len(largestRegion):
                             largestRegion.clear()
                             largestRegion.update(newRegion)
@@ -279,7 +427,7 @@ class RoomAddition(Dungeon):
 
     def place_room(self, room, map_width, map_height):  # (self,room,direction,)
 
-        room_width, room_height = self.get_room_dimensions(room)
+        room_height, room_width = self.get_room_dimensions(room)
         if room_width >= map_width or room_height >= map_height:
             return None, None, None, None, None
 
@@ -341,30 +489,10 @@ class RoomAddition(Dungeon):
 
         return None, None, None, None, None
 
-    def add_room(self, roomX, roomY, room):
-        roomWidth, roomHeight = self.get_room_dimensions(room)
-        level_size_y = len(self.level)
-        level_size_x = len(self.level[0])
+    def add_room(self, room):
 
-        for x in range(roomWidth):
-            for y in range(roomHeight):
-                if int(roomY + y) > level_size_y or int(roomX + x) > level_size_x:
-                    continue
-                if room[x][y] == 0:
-                    self.level[int(roomX + x)][int(roomY + y)] = 0
-
-
-        self.rooms_list.append(room)
-
-    def get_room_dimensions(self, room):
-        if room:
-            roomWidth = len(room)
-            roomHeight = len(room[0])
-            return roomWidth, roomHeight
-        else:
-            roomWidth = 0
-            roomHeight = 0
-            return roomWidth, roomHeight
+        self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
+        self.rooms.append(room)
 
     def get_direction(self):
         # direction = (dx,dy)
@@ -385,33 +513,41 @@ class RoomAddition(Dungeon):
         <> check for overlap with self.level
         <> check for out of bounds
         '''
-        roomWidth, roomHeight = self.get_room_dimensions(room)
-        for x in range(roomWidth):
-            for y in range(roomHeight):
+        room_width, room_height = self.get_room_dimensions(room)
+        for x in range(room_width):
+            for y in range(room_height):
                 if room[x][y] == 0:
                     # Check to see if the room is out of bounds
                     if ((3 <= (x + 1 + roomX) < map_width - 1) and
                             (3 <= (y + 1 + roomY) < map_height - 1)):
                         # Check for overlap with a one tile buffer
-                        if self.level[x + roomX - 1][y + roomY - 1] == 0 or self.level[x + roomX - 2][y + roomY - 2] == 0:  # top left
+                        if self.level[x + roomX - 1][y + roomY - 1] == 0 or self.level[x + roomX - 2][
+                            y + roomY - 2] == 0:  # top left
                             return False
-                        if self.level[x + roomX][y + roomY - 1] == 0 or self.level[x + roomX][y + roomY - 2] == 0:  # top center
+                        if self.level[x + roomX][y + roomY - 1] == 0 or self.level[x + roomX][
+                            y + roomY - 2] == 0:  # top center
                             return False
-                        if self.level[x + roomX + 1][y + roomY - 1] == 0 or self.level[x + roomX + 2][y + roomY - 2] == 0:  # top right
+                        if self.level[x + roomX + 1][y + roomY - 1] == 0 or self.level[x + roomX + 2][
+                            y + roomY - 2] == 0:  # top right
                             return False
 
-                        if self.level[x + roomX - 1][y + roomY] == 0 or self.level[x + roomX - 2][y + roomY] == 0:  # left
+                        if self.level[x + roomX - 1][y + roomY] == 0 or self.level[x + roomX - 2][
+                            y + roomY] == 0:  # left
                             return False
                         if self.level[x + roomX][y + roomY] == 0:  # center
                             return False
-                        if self.level[x + roomX + 1][y + roomY] == 0 or self.level[x + roomX + 2][y + roomY] == 0:  # right
+                        if self.level[x + roomX + 1][y + roomY] == 0 or self.level[x + roomX + 2][
+                            y + roomY] == 0:  # right
                             return False
 
-                        if self.level[x + roomX - 1][y + roomY + 1] == 0 or self.level[x + roomX - 2][y + roomY + 2] == 0:  # bottom left
+                        if self.level[x + roomX - 1][y + roomY + 1] == 0 or self.level[x + roomX - 2][
+                            y + roomY + 2] == 0:  # bottom left
                             return False
-                        if self.level[x + roomX][y + roomY + 1] == 0 or self.level[x + roomX][y + roomY + 2] == 0:  # bottom center
+                        if self.level[x + roomX][y + roomY + 1] == 0 or self.level[x + roomX][
+                            y + roomY + 2] == 0:  # bottom center
                             return False
-                        if self.level[x + roomX + 1][y + roomY + 1] == 0 or self.level[x + roomX + 2][y + roomY + 2] == 0:  # bottom right
+                        if self.level[x + roomX + 1][y + roomY + 1] == 0 or self.level[x + roomX + 2][
+                            y + roomY + 2] == 0:  # bottom right
                             return False
 
                     else:  # room is out of bounds
