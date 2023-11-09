@@ -1,10 +1,10 @@
-import os
 import random
 
 import numpy as np
 from scipy.ndimage import label
 from scipy.signal import convolve2d
 
+import options
 from map_gen.dungeon import Dungeon, Room
 
 
@@ -16,36 +16,35 @@ class RoomAddition(Dungeon):
         self.rooms_list = []
         self.level = []
 
-        self.room_max_size = 300  # max height and width for cellular automata rooms
         self.room_min_size = 16  # min size in number of floor tiles, not height and width
-        self.max_rooms = 500
+        self.room_max_size = 300  # min size in number of floor tiles, not height and width
+        self.max_rooms = 20
 
-        self.SQUARE_room_max_size = 12
-        self.SQUARE_room_min_size = 6
+        self.build_room_attempts = 400
+        self.place_room_attempts = 10
+        self.max_tunnel_length = 20
 
-        self.CROSS_room_max_size = 14
-        self.CROSS_room_min_size = 4
+        self.cellular_room_max_size = 18  # max height and width for cellular automata rooms
 
-        self.cavernChance = 0.30  # probability that the first room will be a cavern
-        self.CAVERN_MAX_SIZE = 16  # max height an width
+        self.square_room_max_size = 12
+        self.square_room_min_size = 6
+
+        self.cross_room_max_size = 14
+        self.cross_room_min_size = 4
+
+        self.cavern_chance = 0.30  # probability that the first room will be a cavern
+        self.cavern_max_size = 16  # max height an width
+
+        self.conjoined_room_chance = 0.0  # chance to make room conjoined with other rooms
 
         self.vault_max_size = 1200
 
         self.wall_probability = 0.45
         self.neighbors = 4
 
-        self.squareRoomChance = 0.1
-        self.crossRoomChance = 0.15
-        self.vaultChance = 0.4
-
-        self.buildRoomAttempts = 400
-        self.place_room_attempts = 10
-        self.max_tunnel_length = 20
-
-        self.includeShortcuts = True
-        self.shortcutAttempts = 500
-        self.shortcutLength = 5
-        self.minPathfindingDistance = 50
+        self.square_room_chance = 0.1
+        self.cross_room_chance = 0.15
+        self.vault_chance = 0.4
 
         self.name = "RoomAddition"
 
@@ -53,7 +52,7 @@ class RoomAddition(Dungeon):
 
         self.level = np.ones((self.map_height, self.map_width), dtype=int)
 
-        for r in range(self.max_rooms):
+        for r in range(self.build_room_attempts):
             room_arr, vault = self.generate_room()
 
             room_height, room_width = room_arr.shape
@@ -63,8 +62,18 @@ class RoomAddition(Dungeon):
             y = random.randint(1, self.map_height - room_height - 1)
             id_nr = len(self.rooms) + 1
             new_room = Room(x, y, room_width, room_height, room_arr, id_nr=id_nr)
+
+            # Discard too small or too large rooms
+            if len(new_room.inner) > self.room_max_size or len(new_room.inner) < self.room_min_size:
+                continue
+
+            conjoined_rooms = False
+            choice = random.random()
+            if choice < self.conjoined_room_chance:
+                conjoined_rooms = True
+
             # Run through the other rooms and see if they intersect with this one.
-            if any(new_room.intersects(other_room) for other_room in self.rooms):
+            if any(new_room.intersects(other_room, inner=conjoined_rooms) for other_room in self.rooms):
                 continue  # This room intersects, so go to the next attempt.
             # If there are no intersections then the room is valid.
 
@@ -77,6 +86,9 @@ class RoomAddition(Dungeon):
                     for room in rooms:
                         self.add_room(room)
                         # Connect rooms
+
+            if len(self.rooms) > self.max_rooms:
+                break
 
         # self.get_caves()
         self.connect_caves_old()
@@ -106,7 +118,7 @@ class RoomAddition(Dungeon):
         self.add_room(room_x, room_y, room)
 
         # generate other rooms
-        for i in range(self.buildRoomAttempts):
+        for i in range(self.build_room_attempts):
             room = self.generate_room()
             # try to position the room, get room_x and room_y
             room_x, room_y, wall_tile, direction, tunnel_length = self.place_room(room, self.map_width, self.map_height)
@@ -130,43 +142,37 @@ class RoomAddition(Dungeon):
             # There is at least one room already
             choice = random.random()
 
-            if choice < self.vaultChance:
-                vault_size = self.vault_max_size
-                while vault_size >= self.vault_max_size:
-                    room = self.generate_random_vault()
-                    vault_size = room.size
+            if choice < self.vault_chance:
+                room = self.generate_random_vault()
                 vault = True
 
             else:
-                if choice < self.squareRoomChance:
+                if choice < self.square_room_chance:
                     room = self.generate_room_square()
-                elif self.squareRoomChance <= choice < (self.squareRoomChance + self.crossRoomChance):
+                elif self.square_room_chance <= choice < (self.square_room_chance + self.cross_room_chance):
                     room = self.generate_room_cross()
                 else:
-                    room = self.convolve()
+                    room = self.generate_room_cellular()
 
         else:  # it's the first room
             choice = random.random()
-            if choice < self.vaultChance:
-                vault_size = self.vault_max_size
-                while vault_size >= self.vault_max_size:
-                    room = self.generate_random_vault()
-                    vault_size = room.size
+            if choice < self.vault_chance:
+                room = self.generate_random_vault()
                 vault = True
 
             else:
-                if choice < self.cavernChance:
-                    room = self.convolve()
+                if choice < self.cavern_chance:
+                    room = self.generate_room_cellular()
                 else:
                     room = self.generate_room_square()
 
         return room, vault
 
     def generate_room_cross(self):
-        room_hor_width = int((random.randint(self.CROSS_room_min_size + 2, self.CROSS_room_max_size)) / 2 * 2)
-        room_ver_height = int((random.randint(self.CROSS_room_min_size + 2, self.CROSS_room_max_size)) / 2 * 3)
-        room_hor_height = int((random.randint(self.CROSS_room_min_size, room_ver_height - 2)) / 2 * 2)
-        room_ver_width = int((random.randint(self.CROSS_room_min_size, room_hor_width - 2)) / 2 * 1)
+        room_hor_width = int((random.randint(self.cross_room_min_size + 2, self.cross_room_max_size)) / 2 * 2)
+        room_ver_height = int((random.randint(self.cross_room_min_size + 2, self.cross_room_max_size)) / 2 * 3)
+        room_hor_height = int((random.randint(self.cross_room_min_size, room_ver_height - 2)) / 2 * 2)
+        room_ver_width = int((random.randint(self.cross_room_min_size, room_hor_width - 2)) / 2 * 1)
 
         # room = [[1
         #          for y in range(int(room_ver_height))]
@@ -198,59 +204,16 @@ class RoomAddition(Dungeon):
         http://dungeon.zorbus.net/
         '''
 
-        # 1. open random vault and trim empty lines
-        vaults_path = 'resources/Zorbus_Vaults/Separate_files/'
-        vault_filename = random.choice(os.listdir(vaults_path))
-        vault_file = vaults_path + vault_filename
-        with open(vault_file) as file:
-            file_lines = file.readlines()
-        # with open('resources/Zorbus_Vaults/Separate_files/sp_0118.txt') as file:
-        #    file_lines = file.readlines()
-        trimmed_file = [line for line in file_lines if line.strip()]
+        if options.data.vault_thread:
+            options.data.vault_thread.join()
+        room = random.choice([x for x in options.data.vaults_data if x.size < self.vault_max_size])
 
-        # 2. check all rows and get trimmable whitespace, get room width and height
-        trimmable_space = 0
-        row_trimmable = 0
-        vault_width = 0
-
-        for row in trimmed_file:
-            if trimmable_space == 0 or row_trimmable < trimmable_space:
-                trimmable_space = row_trimmable
-            row_empty_space_before_char = 0
-            row_trimmable = 0
-            row_characters_width = len(row.strip())
-            if vault_width == 0 or row_characters_width > vault_width:
-                vault_width = row_characters_width
-            for tile in row:
-                if tile == "#" or tile == ".":
-                    row_trimmable = row_empty_space_before_char
-                    break
-                elif row_trimmable == 0:
-                    row_empty_space_before_char += 1
-
-        # make new room as array
-        # loop all rows and trim shortest row length of characters from each
-        # fill new array, replace whitespace with dashes until room width
-        room = []
-
-        for row in trimmed_file:
-            new_room_row = []
-            trimmed_row = row[trimmable_space:]
-            for i in range(vault_width):
-                if i >= len(trimmed_row):
-                    new_room_row.append(1)
-                elif trimmed_row[i] == ".":
-                    new_room_row.append(0)
-                else:
-                    new_room_row.append(1)
-            room.append(new_room_row)
-
-        return np.array(room, dtype=int)
+        return room
 
     def generate_room_square(self, padding=1):
-        room_width = random.randint(self.SQUARE_room_min_size, self.SQUARE_room_max_size)
-        room_height = random.randint(max(int(room_width * 0.5), self.SQUARE_room_min_size),
-                                     min(int(room_width * 1.5), self.SQUARE_room_max_size))
+        room_width = random.randint(self.square_room_min_size, self.square_room_max_size)
+        room_height = random.randint(max(int(room_width * 0.5), self.square_room_min_size),
+                                     min(int(room_width * 1.5), self.square_room_max_size))
 
         # room = [[0
         #          for y in range(1, room_height - 1)]
@@ -321,7 +284,7 @@ class RoomAddition(Dungeon):
 
         return padded_room
 
-    def convolve(self, max_size=15, wall_rule=5):
+    def generate_room_cellular(self, wall_rule=5):
         """Return the next step of the cave generation algorithm.
 
         `tiles` is the input array. (0: wall, 1: floor)
@@ -331,7 +294,7 @@ class RoomAddition(Dungeon):
         """
         convolve_steps = 4
         rng = np.random.default_rng()
-        arr = rng.choice(2, (max_size - 2, max_size - 2), p=[1 - self.wall_probability, self.wall_probability])
+        arr = rng.choice(2, (self.cellular_room_max_size - 1, self.cellular_room_max_size - 1), p=[1 - self.wall_probability, self.wall_probability])
         room = np.pad(arr, 1, constant_values=1)
 
         for _ in range(convolve_steps):

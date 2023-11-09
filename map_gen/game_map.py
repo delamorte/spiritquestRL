@@ -402,11 +402,9 @@ class GameMap:
             floor_tile = get_tile(floor_name)
             floor_object = get_tile_object(floor_name)
             wall_tile = get_tile_object(wall_name)
-            cave = room.inner
-            walls = room.outer
             room.floor_type = floor_name
             room.wall_type = wall_name
-            for tile in cave:
+            for tile in room.inner:
                 x, y = tile[0], tile[1]
                 if not floor_object["draw_floor"]:
                     self.tiles[x][y].char = floor_tile
@@ -415,7 +413,7 @@ class GameMap:
                         self.tiles[x][y].blocked = True
                 else:
                     self.tiles[x][y].layers.append((floor_tile, floor_color))
-            for tile in walls:
+            for tile in room.outer:
                 x, y = tile[0], tile[1]
                 facing = None
                 if wall_tile["corners"]:
@@ -428,7 +426,6 @@ class GameMap:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
                 self.add_entity(wall)
-            #print(room.feature)
 
         for room in self.algorithm.rooms:
             tunnels = room.tunnel

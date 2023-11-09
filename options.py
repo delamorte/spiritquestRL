@@ -14,3 +14,6 @@ class Options:
         self.indicator = 0xE000 + 672
         self.initial_animals = ("crow", "rat", "snake")
         self.debug = debug
+        self.vaults_path = 'resources/Zorbus_Vaults/Separate_files/'
+        self.vaults_data = None
+        self.vaults_thread = None

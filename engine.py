@@ -1,7 +1,10 @@
+import os
 import pickle
+import threading
 from ctypes import addressof, c_uint32
 from math import floor
 
+import numpy as np
 from bearlibterminal import terminal as blt
 
 import options
@@ -68,6 +71,11 @@ class Engine:
         else:
             global_options = options.Options()
         options.data = global_options
+
+        #self.parse_vaults_from_txt()
+        x = threading.Thread(target=self.parse_vaults_from_txt, daemon=True)
+        options.data.vault_thread = x
+        x.start()
 
         # Load tiles
         self.init_tiles()
@@ -327,6 +335,37 @@ class Engine:
         def get_last_turn(self):
             return self.last_turn
 
+    @staticmethod
+    def parse_vaults_from_txt():
+        '''
+        Parse vaults from Zorbus format into rooms
+        Vault prefabs kindly provided by joonas@zorbus.net under the CC0 Creative Commons License:
+        http://dungeon.zorbus.net/
+        '''
+
+        vaults = []
+        vaults_path = options.data.vaults_path
+
+        for filename in os.listdir(vaults_path):
+            if filename.endswith(".txt"):
+                vault_file = vaults_path + filename
+                with open(vault_file) as file:
+                    file_lines = file.readlines()
+
+                    numpy_vault = np.array([list(i) for i in file_lines], dtype=str)[:, :-1]
+                    numpy_vault = np.where(numpy_vault == ' ', "1", numpy_vault)
+                    numpy_vault = np.where(numpy_vault == '#', "1", numpy_vault)
+                    numpy_vault = np.where(numpy_vault == '.', "0", numpy_vault)
+                    numpy_vault = numpy_vault.astype(int)
+
+                    floors = np.where(numpy_vault == 0)
+                    trimmed_room = numpy_vault[floors[0].min():floors[0].max() + 1,
+                                   floors[1].min():floors[1].max() + 1]
+
+                    room = np.pad(trimmed_room, 1, constant_values=1)
+                    vaults.append(room)
+
+        options.data.vaults_data = vaults
 
 if __name__ == '__main__':
     engine = Engine()

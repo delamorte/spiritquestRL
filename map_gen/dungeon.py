@@ -458,8 +458,13 @@ class Room:
             y, x = outer[0][i], outer[1][i]
             self.outer.add((x+self.x1, y+self.y1))
 
-    def intersects(self, other):
-        """Return True if this room overlaps with another RectangularRoom."""
+    def intersects(self, other, inner=False):
+        """Return True if this room overlaps with another room.
+        :param other: other room
+        :param inner: if true, check intersection of inner (floor) tiles
+        """
+        if inner:
+            return bool(self.inner.intersection(other.inner))
         return (
             self.x1 <= other.x2
             and self.x2 >= other.x1
