@@ -11,7 +11,6 @@ from components.openable import Openable
 from components.stairs import Stairs
 from components.wall import Wall
 from data import json_data
-from map_gen.algorithms.cellular import CellularAutomata
 from map_gen.algorithms.messy_bsp import MessyBSPTree
 from map_gen.algorithms.room_addition import RoomAddition
 from map_gen.tile import Tile
@@ -340,13 +339,12 @@ class GameMap:
 
         generators = {
             "messy_bsp": MessyBSPTree(self.width, self.height),
-            "cellular": CellularAutomata(self.width, self.height),
-            "room_addition": RoomAddition(self.width, self.height)
+            "cellular": RoomAddition(self.width, self.height, only_cellular=True),
+            "room_addition": RoomAddition(self.width, self.height),
+            "vaults": RoomAddition(self.width, self.height, only_vaults=True)
         }
 
-        if not name and self.name == "debug":
-            map_algorithm = generators["room_addition"]
-        elif not name:
+        if not name:
             map_algorithm = choice(list(generators.values()))
         else:
             map_algorithm = generators[name]
@@ -407,10 +405,11 @@ class GameMap:
             room.wall_type = wall_name
             for tile in room.inner:
                 x, y = tile[0], tile[1]
+                self.tiles[x][y].natural_light_level = room.lightness
                 if self.tiles[x][y].entities_on_tile:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
-                if not floor_object["draw_floor"]:
+                if floor_object["draw_floor"]:
                     self.tiles[x][y].char = floor_tile
                     self.tiles[x][y].color = floor_color
                     if floor_object["blocks"]:
@@ -419,6 +418,7 @@ class GameMap:
                     self.tiles[x][y].layers.append((floor_tile, floor_color))
             for tile in room.outer:
                 x, y = tile[0], tile[1]
+                self.tiles[x][y].natural_light_level = room.lightness
                 if self.tiles[x][y].entities_on_tile:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
@@ -437,6 +437,11 @@ class GameMap:
 
             for tile in tunnels:
                 x, y = tile[0], tile[1]
+                floor_name = room.floor_type
+                floor_color = room.floor_color
+                floor_tile = get_tile(floor_name)
+                self.tiles[x][y].char = floor_tile
+                self.tiles[x][y].color = floor_color
                 if self.tiles[x][y].entities_on_tile and tile not in room.outer:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
@@ -450,9 +455,6 @@ class GameMap:
                 #     room.has_door = True
 
         self.create_entities_in_rooms()
-
-        transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
-        self.transparent = transparency(self.tiles)
 
     def process_prefabs(self):
         if self.biome.biome_data["name"] == "hub":
@@ -559,9 +561,9 @@ class GameMap:
         player = self.owner.player
         px, py = 0, 0
         if self.biome.biome_data["name"] == "hub":
-            px, py = choice(list(self.biome.home.cave))
+            px, py = choice(list(self.biome.home.inner))
             while self.tiles[px][py].blocking_entity:
-                px, py = choice(list(self.biome.home.cave))
+                px, py = choice(list(self.biome.home.inner))
         if self.name == "dream":
             px, py = randint(1, self.width - 1), \
                      randint(1, self.height - 1)
@@ -634,6 +636,8 @@ class GameMap:
                 entities_to_place = choices(entities, k=nr_of_entities_to_place)
 
                 for entity_name in entities_to_place:
+                    if entity_count >= room_max_entities:
+                        break
                     # Choose random empty location in room
                     if category == "monsters" and room.floor_type == "water" and not room.wall_type == "water":
                         cave = list(room.inner)
@@ -682,7 +686,6 @@ class GameMap:
         if masked:
             return neighbours_masked
         return neighbors
-
 
     def get_tile_direction(self, x, y):
         # Define the neighboring tile positions in the cardinal directions

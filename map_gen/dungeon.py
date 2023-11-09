@@ -34,38 +34,9 @@ class Dungeon:
         self.rooms = []
         self.level = []
 
-    def create_room_rect(self, room, ext_walls=False):
-        '''
-        :param room: Rectangle
-        :param ext_walls: If true, set outer tiles to 1 and interior to 0. If false, set all tiles to 0.
-        '''
-        cave = set()
-        walls = set()
-        for x in range(room.x1, room.x2):
-            for y in range(room.y1, room.y2):
-                self.level[x][y] = 0
-                if ext_walls:
-                    if (y == room.y1 or y == room.y2 - 1) and 0 <= x <= room.x2 - 1:
-                        self.level[x][y] = 1
-                        wall = (x, y)
-                        walls.add(wall)
-                    elif (x == room.x1 or x == room.x2 - 1) and 0 <= y < room.y2 - 1:
-                        self.level[x][y] = 1
-                        wall = (x, y)
-                        walls.add(wall)
-                cave.add((x, y))
-        x1 = min(cave, key=lambda t: t[0])[0]
-        x2 = max(cave, key=lambda t: t[0])[0]
-        y1 = min(cave, key=lambda t: t[1])[1]
-        y2 = max(cave, key=lambda t: t[1])[1]
-        w = x2 - x1
-        h = y2 - y1
-        id_nr = len(self.rooms) + 1
-
-        room = Room(x1=x1, y1=y1, x2=x2, y2=y2, w=w, h=h, cave=cave, id_nr=id_nr, cave_walls=walls)
+    def add_room(self, room):
+        self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
         self.rooms.append(room)
-
-        return room
 
     def clean_up_map(self, map_width, map_height, smoothing=None, filling=None, iterations=5):
         if smoothing:
@@ -73,36 +44,17 @@ class Dungeon:
                 # Look at each cell individually and check for smoothness
                 for x in range(1, map_width - 1):
                     for y in range(1, map_height - 1):
-                        if (self.level[x][y] == 1) and (self.get_adjacent_walls_simple(x, y) <= smoothing):
-                            self.level[x][y] = 0
+                        if (self.level[y][x] == 1) and (self.get_adjacent_walls_simple(x, y) <= smoothing):
+                            self.level[y][x] = 0
 
                         if filling and (self.level[x][y] == 0) and (self.get_adjacent_walls_simple(x, y) >= filling):
-                            self.level[x][y] = 1
+                            self.level[y][x] = 1
 
     def get_adjacent_walls_simple(self, x, y):  # finds the walls in four directions
-        wall_counter = 0
-        # print("(",x,",",y,") = ",self.level[x][y])
-        if self.level[x][y - 1] == 1:  # Check north
-            wall_counter += 1
-        if self.level[x][y + 1] == 1:  # Check south
-            wall_counter += 1
-        if self.level[x - 1][y] == 1:  # Check west
-            wall_counter += 1
-        if self.level[x + 1][y] == 1:  # Check east
-            wall_counter += 1
+        return self.get_neighbours(x, y, wall_count=True)
 
-        return wall_counter
-
-    def get_adjacent_walls(self, tile_x, tile_y, room=None):  # finds the walls in 8 directions
-        wall_counter = 0
-        if room is None:
-            room = self.level
-        for x in range(tile_x - 1, tile_x + 2):
-            for y in range(tile_y - 1, tile_y + 2):
-                if room[x][y] == 1:
-                    if (x != tile_x) or (y != tile_y):  # exclude (tile_x,tile_y)
-                        wall_counter += 1
-        return wall_counter
+    def get_adjacent_walls(self, x, y, room=None):  # finds the walls in 8 directions
+        return self.get_neighbours(x, y, pattern="8bit", wall_count=True)
 
     def adjacent_rooms_scan(self, max_length=20):
         """
@@ -321,10 +273,10 @@ class Dungeon:
                 west = (x - 1, y)
 
                 for direction in [north, south, east, west]:
-
-                    if self.level[direction[1]][direction[0]] == 0:
-                        if direction not in to_be_filled and direction not in connected_region:
-                            to_be_filled.add(direction)
+                    if direction[1] < self.map_height and direction[0] < self.map_width:
+                        if self.level[direction[1]][direction[0]] == 0:
+                            if direction not in to_be_filled and direction not in connected_region:
+                                to_be_filled.add(direction)
 
         for end in cave2:
             break  # get an element from cave2
@@ -335,7 +287,7 @@ class Dungeon:
         else:
             return False
 
-    def get_neighbours(self, x, y, a=None, radius=1, pattern="4bit"):
+    def get_neighbours(self, x, y, a=None, radius=1, pattern="4bit", wall_count=False):
         if not a:
             a = self.level
         patterns_map = {
@@ -354,6 +306,8 @@ class Dungeon:
 
         # boolean indexing
         neighbors = a[convolve2d(mask, kernel, mode='same').astype(bool)]
+        if wall_count:
+            return np.count_nonzero(neighbors)
         return neighbors
 
     def create_tunnel(self, point1, point2, current_cave_room):
@@ -428,7 +382,7 @@ class Dungeon:
 class Room:
     def __init__(self, x1=0, y1=0, w=0, h=0, nd_array=None,
                  wall_color="dark gray", floor_color="darkest amber", feature=None,
-                 wall_type="wall_brick", floor_type="floor", tiled=False, name=None, lightness=0.8,
+                 wall_type="wall_brick", floor_type="floor", tiled=False, name=None, lightness=1.0,
                  id_nr=1):
         self.x1 = int(x1)
         self.y1 = int(y1)
@@ -469,14 +423,14 @@ class Room:
         inner = np.where(self.nd_array == 0)
         for i in range(inner[0].size):
             y, x = inner[0][i], inner[1][i]
-            self.inner.add((x+self.x1, y+self.y1))
+            self.inner.add((int(x+self.x1), int(y+self.y1)))
 
     def set_outer(self):
         """Save the outer area (walls) of this room as a set of coordinates."""
         outer = np.where(self.nd_array == 1)
         for i in range(outer[0].size):
             y, x = outer[0][i], outer[1][i]
-            self.outer.add((x+self.x1, y+self.y1))
+            self.outer.add((int(x+self.x1), int(y+self.y1)))
 
     def intersects(self, other, inner=False):
         """Return True if this room overlaps with another room.
@@ -639,12 +593,7 @@ class Leaf:  # used for the BSP tree algorithm
 
         else:
             # Create rooms in the end branches of the bsp tree
-            w = random.randint(bsp_tree.room_min_size, min(bsp_tree.room_max_size, self.width - 1))
-            h = random.randint(bsp_tree.room_min_size, min(bsp_tree.room_max_size, self.height - 1))
-            x = random.randint(self.x, self.x + (self.width - 1) - w)
-            y = random.randint(self.y, self.y + (self.height - 1) - h)
-            rect = Rect(x, y, w, h)
-            self.room = bsp_tree.create_room_rect(rect, ext_walls=ext_walls)
+            self.room = bsp_tree.create_room_from_rectangle(self)
 
     def get_room(self):
         if self.room:

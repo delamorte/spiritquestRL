@@ -232,7 +232,7 @@ class Entity:
         walkable = np.frompyfunc(lambda tile: not tile.blocked, 1, 1)
         cost = np.array(walkable(game_map.tiles), dtype=np.int8)
 
-        blocking_entities = entities["monsters"] + entities["allies"] + entities["player"]
+        blocking_entities = entities["monsters"] + entities["allies"] + entities["player"] + entities["npcs"] + entities["objects"]
 
         for entity in blocking_entities:
             # Check that an entity blocks movement and the cost isn't zero (blocking.)
@@ -250,7 +250,7 @@ class Entity:
         pathfinder.add_root((self.x, self.y))  # Start position.
 
         # Compute the path to the destination and remove the starting point.
-        path = list(pathfinder.path_to((target.x, target.y))[1:])
+        path = pathfinder.path_to((target.x, target.y))[1:].tolist()
 
         # Convert from List[List[int]] to List[Tuple[int, int]].
         return [(int(index[0]), int(index[1])) for index in path]

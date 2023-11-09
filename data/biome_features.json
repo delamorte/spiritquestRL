@@ -296,7 +296,6 @@
     "description": "A cozy cottage inhabited by the curious and adventurous Goldilocks, filled with remnants of her past escapades.",
     "entities": {
       "objects": [
-        "door",
         "window",
         "chair",
         "table",

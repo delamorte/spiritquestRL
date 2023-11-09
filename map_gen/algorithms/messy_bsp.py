@@ -1,6 +1,8 @@
 import random
 
-from map_gen.dungeon import Leaf, Dungeon
+import numpy as np
+
+from map_gen.dungeon import Leaf, Dungeon, Room
 
 
 # ==== Messy BSP Tree ====
@@ -27,13 +29,10 @@ class MessyBSPTree(Dungeon):
         # Creates an empty 2D array or clears existing array
         self.map_width = self.map_width
         self.map_height = self.map_height
-        self.level = [[1
-                       for y in range(self.map_height)]
-                      for x in range(self.map_width)]
-
+        self.level = np.ones((self.map_height, self.map_width), dtype=np.int32)
         self._leafs = []
 
-        rootLeaf = Leaf(0, 0, self.map_width, self.map_height)
+        rootLeaf = Leaf(1, 1, self.map_width-1, self.map_height-1)
         self._leafs.append(rootLeaf)
 
         splitSuccessfully = True
@@ -54,14 +53,40 @@ class MessyBSPTree(Dungeon):
         self.connect_caves()
         self.clean_up_map(self.map_width, self.map_height, smoothing=self.smoothing, filling=self.filling,
                           iterations=self.clean_up_iterations)
-        self.adjacent_rooms_path_scan(max_length=20)
+        #self.adjacent_rooms_path_scan(max_length=20)
         return self.level
+
+    def create_room_from_rectangle(self, leaf, padding=1):
+        w = random.randint(self.room_min_size, min(self.room_max_size, leaf.width - 1))
+        h = random.randint(self.room_min_size, min(self.room_max_size, leaf.height - 1))
+        x = random.randint(leaf.x, leaf.x + (leaf.width - 1) - w)
+        y = random.randint(leaf.y, leaf.y + (leaf.height - 1) - h)
+
+        if x + w >= self.map_width - 1:
+            x2 = self.map_width - 2
+            w = x2 - x
+        if y + h >= self.map_height - 1:
+            y2 = self.map_height - 2
+            h = y2 - y
+
+        room_arr = np.zeros((h, w), dtype=np.int32)
+        # If padding > 0, pad the room with walls
+        if padding > 0:
+            padded_room = np.pad(room_arr, 1, constant_values=1)
+        else:
+            padded_room = room_arr
+        id_nr = len(self.rooms) + 1
+        p_height, p_width = padded_room.shape
+        room = Room(x1=x, y1=y, w=p_width, h=p_height, nd_array=padded_room,
+                    id_nr=id_nr)
+        self.add_room(room)
+        return room
 
     def createHall(self, room1, room2):
         # run a heavily weighted random Walk
         # from point2 to point1
-        drunkard_x, drunkard_y = room2.center()
-        goalX, goalY = room1.center()
+        drunkard_x, drunkard_y = room2.center
+        goal_x, goal_y = room1.center
         while not (room1.x1 <= drunkard_x <= room1.x2) or not (room1.y1 < drunkard_y < room1.y2):  #
             # ==== Choose Direction ====
             north = 1.0
@@ -72,13 +97,13 @@ class MessyBSPTree(Dungeon):
             weight = 1
 
             # weight the random walk against edges
-            if drunkard_x < goalX:  # drunkard is left of point1
+            if drunkard_x < goal_x:  # drunkard is left of point1
                 east += weight
-            elif drunkard_x > goalX:  # drunkard is right of point1
+            elif drunkard_x > goal_x:  # drunkard is right of point1
                 west += weight
-            if drunkard_y < goalY:  # drunkard is above point1
+            if drunkard_y < goal_y:  # drunkard is above point1
                 south += weight
-            elif drunkard_y > goalY:  # drunkard is below point1
+            elif drunkard_y > goal_y:  # drunkard is below point1
                 north += weight
 
             # normalize probabilities so they form a range from 0 to 1
@@ -104,14 +129,14 @@ class MessyBSPTree(Dungeon):
                 dy = 0
 
             # ==== Walk ====
-            # check colision at edges
+            # check collision at edges
             if (0 < drunkard_x + dx < self.map_width - 1) and (0 < drunkard_y + dy < self.map_height - 1):
                 drunkard_x += dx
                 drunkard_y += dy
-                if self.level[int(drunkard_x)][int(drunkard_y)] == 1:
-                    self.level[int(drunkard_x)][int(drunkard_y)] = 0
+                if self.level[int(drunkard_y)][int(drunkard_x)] == 1:
+                    self.level[int(drunkard_y)][int(drunkard_x)] = 0
                     wall = (int(drunkard_x), int(drunkard_y))
-                    if wall in room1.cave_walls:
+                    if wall in room1.outer and wall not in room1.entrances:
                         room1.entrances.add(wall)
-                    if wall in room2.cave_walls:
+                    if wall in room2.outer and wall not in room2.entrances:
                         room2.entrances.add(wall)

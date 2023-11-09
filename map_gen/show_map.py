@@ -14,7 +14,7 @@ def test_dynamic_sprites(game_map, ui_elements, options):
 
     def make_minimap():
 
-        minimap = np.ones_like(game_map.tiles, dtype=int)
+        minimap = np.ones_like(game_map.tiles, dtype=np.int32)
         for x in range(game_map.width):
             for y in range(game_map.height):
                 minimap[y][x] = blt.color_from_name("dark gray")
