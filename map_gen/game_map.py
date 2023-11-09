@@ -2,6 +2,7 @@ from math import ceil
 from random import choice, choices, randint
 
 import numpy as np
+from scipy.signal import convolve2d
 from tcod.map import compute_fov
 
 from components.entity import Entity
@@ -406,6 +407,9 @@ class GameMap:
             room.wall_type = wall_name
             for tile in room.inner:
                 x, y = tile[0], tile[1]
+                if self.tiles[x][y].entities_on_tile:
+                    for entity in self.tiles[x][y].entities_on_tile:
+                        self.remove_entity(entity)
                 if not floor_object["draw_floor"]:
                     self.tiles[x][y].char = floor_tile
                     self.tiles[x][y].color = floor_color
@@ -415,6 +419,9 @@ class GameMap:
                     self.tiles[x][y].layers.append((floor_tile, floor_color))
             for tile in room.outer:
                 x, y = tile[0], tile[1]
+                if self.tiles[x][y].entities_on_tile:
+                    for entity in self.tiles[x][y].entities_on_tile:
+                        self.remove_entity(entity)
                 facing = None
                 if wall_tile["corners"]:
                     facing = self.get_tile_direction(x, y)
@@ -422,9 +429,6 @@ class GameMap:
                 wall = Entity(x, y, wall_color, wall_name, tile=wall_tile, char=char)
                 if wall.wall:
                     wall.wall.set_attributes(self)
-                if self.tiles[x][y].entities_on_tile:
-                    for entity in self.tiles[x][y].entities_on_tile:
-                        self.remove_entity(entity)
                 self.add_entity(wall)
 
         for room in self.algorithm.rooms:
@@ -617,11 +621,15 @@ class GameMap:
         for room in self.algorithm.rooms:
 
             room_size = len(room.inner)
+            room_max_entities = int(room_size / 3)
+            entity_count = 0
             feature_data = json_data.data.biome_features[room.feature]
             room_entities = feature_data["entities"]
             for category, entities in room_entities.items():
                 if not self.biome.biome_data["monsters"] and category == "monsters":
                     continue
+                if entity_count >= room_max_entities:
+                    break
                 nr_of_entities_to_place = self.get_room_population(room_size, category)
                 entities_to_place = choices(entities, k=nr_of_entities_to_place)
 
@@ -648,8 +656,33 @@ class GameMap:
                     tile = get_tile_object(entity_name)
                     color = get_color(entity_name, mod=self.owner.world_tendency)
                     entity = Entity(x, y, color, entity_name, tile, category=category)
-
                     self.add_entity(entity)
+                    entity_count += 1
+
+    def get_cornering_tiles(self, x, y, a=None, radius=1, pattern="4bit", masked=False):
+        if not a:
+            a = self.tiles
+        patterns_map = {
+            "4bit": [[0, 1, 0],
+                     [1, 0, 1],
+                     [0, 1, 0]],
+            "8bit": [[1, 1, 1],
+                     [1, 0, 1],
+                     [1, 1, 1]]
+        }
+        kernel = patterns_map[pattern]
+        if radius > 1:
+            kernel = np.pad(kernel, radius-1, mode='edge')
+        mask = np.zeros_like(a, dtype=bool)  # build empty mask
+        mask[x, y] = True  # set target(s)
+
+        # boolean indexing
+        neighbors = a[convolve2d(mask, kernel, mode='same').astype(bool)]
+        neighbours_masked = [1 if x.blocked else 0 for x in neighbors]
+        if masked:
+            return neighbours_masked
+        return neighbors
+
 
     def get_tile_direction(self, x, y):
         # Define the neighboring tile positions in the cardinal directions
@@ -663,57 +696,43 @@ class GameMap:
             "southwest": 5,
             "southeast": 3
         }
-        if x - 1 <= 0:
-            return directions_idx_map["west"]
-        if y - 1 <= 0:
-            return directions_idx_map["north"]
-        if x + 1 > len(self.tiles) - 1:
-            return directions_idx_map["east"]
-        if y + 1 > len(self.tiles[0]) - 1:
-            return directions_idx_map["south"]
+        # if x - 1 <= 0:
+        #     return directions_idx_map["west"]
+        # if y - 1 <= 0:
+        #     return directions_idx_map["north"]
+        # if x + 1 > len(self.tiles) - 1:
+        #     return directions_idx_map["east"]
+        # if y + 1 > len(self.tiles[0]) - 1:
+        #     return directions_idx_map["south"]
+
+        neighbors = self.get_cornering_tiles(x, y, pattern="8bit", masked=True)
 
         # Determine and return the correct facing based on the neighboring tiles
-        if self.tiles[x][y - 1].blocked and self.tiles[x - 1][y].blocked and \
-                not self.tiles[x - 1][y - 1].blocked:
-            return directions_idx_map["southeast"]
-        elif self.tiles[x][y - 1].blocked and self.tiles[x + 1][y].blocked and \
-                not self.tiles[x + 1][y - 1].blocked:
-            return directions_idx_map["southwest"]
-        elif self.tiles[x][y + 1].blocked and self.tiles[x - 1][y].blocked and \
-                not self.tiles[x - 1][y + 1].blocked:
-            return directions_idx_map["northeast"]
-        elif self.tiles[x][y + 1].blocked and self.tiles[x + 1][y].blocked and \
-                not self.tiles[x + 1][y + 1].blocked:
+        if neighbors[4] and neighbors[6] and not neighbors[7]:
             return directions_idx_map["northwest"]
-
-        elif self.tiles[x - 1][y].blocked and self.tiles[x][y + 1].blocked and \
-                not self.tiles[x + 1][y].blocked and not self.tiles[x][y - 1].blocked:
-            return directions_idx_map["northeast"]
-
-        elif self.tiles[x - 1][y].blocked and self.tiles[x][y - 1].blocked and \
-                not self.tiles[x + 1][y].blocked and not self.tiles[x][y + 1].blocked:
-            return directions_idx_map["southeast"]
-
-        elif self.tiles[x + 1][y].blocked and self.tiles[x][y - 1].blocked and \
-                not self.tiles[x - 1][y].blocked and not self.tiles[x][y + 1].blocked:
-            return directions_idx_map["southwest"]
-
-        elif self.tiles[x + 1][y].blocked and self.tiles[x][y + 1].blocked and \
-                not self.tiles[x - 1][y].blocked and not self.tiles[x][y - 1].blocked:
-            return directions_idx_map["northwest"]
-
-        elif self.tiles[x][y - 1].blocked and self.tiles[x][y + 1].blocked and \
-                not self.tiles[x - 1][y].blocked:
-            return directions_idx_map["east"]
-        elif self.tiles[x][y - 1].blocked and self.tiles[x][y + 1].blocked and \
-                not self.tiles[x + 1][y].blocked:
-            return directions_idx_map["west"]
-        elif self.tiles[x - 1][y].blocked and self.tiles[x + 1][y].blocked and \
-                not self.tiles[x][y + 1].blocked:
+        elif neighbors[1] and neighbors[6] and not neighbors[4]:
             return directions_idx_map["north"]
-        elif self.tiles[x - 1][y].blocked and self.tiles[x + 1][y].blocked and \
-                not self.tiles[x][y - 1].blocked:
+        elif neighbors[1] and neighbors[4] and not neighbors[2]:
+            return directions_idx_map["northeast"]
+        elif neighbors[3] and neighbors[4] and not neighbors[1]:
+            return directions_idx_map["east"]
+        elif neighbors[1] and neighbors[3] and not neighbors[0]:
+            return directions_idx_map["southeast"]
+        elif neighbors[1] and neighbors[6] and not neighbors[3]:
             return directions_idx_map["south"]
+        elif neighbors[3] and neighbors[6] and not neighbors[5]:
+            return directions_idx_map["southwest"]
+        elif neighbors[3] and neighbors[4] and not neighbors[6]:
+            return directions_idx_map["west"]
+
+        elif neighbors[4] and neighbors[6] and not neighbors[1] and not neighbors[3]:
+            return directions_idx_map["northwest"]
+        elif neighbors[1] and neighbors[4] and not neighbors[3] and not neighbors[6]:
+            return directions_idx_map["northeast"]
+        elif neighbors[3] and neighbors[6] and not neighbors[1] and not neighbors[4]:
+            return directions_idx_map["southwest"]
+        elif neighbors[1] and neighbors[3] and not neighbors[4] and not neighbors[6]:
+            return directions_idx_map["southeast"]
 
         # If no specific facing is determined, return a default facing
         return 0

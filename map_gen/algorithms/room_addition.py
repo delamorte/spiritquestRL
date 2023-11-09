@@ -20,7 +20,7 @@ class RoomAddition(Dungeon):
         self.room_max_size = 300  # min size in number of floor tiles, not height and width
         self.max_rooms = 20
 
-        self.build_room_attempts = 400
+        self.build_room_attempts = 500
         self.place_room_attempts = 10
         self.max_tunnel_length = 20
 
@@ -35,25 +35,29 @@ class RoomAddition(Dungeon):
         self.cavern_chance = 0.30  # probability that the first room will be a cavern
         self.cavern_max_size = 16  # max height an width
 
-        self.conjoined_room_chance = 0.0  # chance to make room conjoined with other rooms
+        self.conjoined_room_chance = 0.1  # chance to make room conjoined with other rooms
 
-        self.vault_max_size = 1200
+        self.first_vault_max_size = 1600
+        self.vault_max_size = 1100
+        self.vault_size_offset = 200  # After enough rooms are placed, fetch smaller vaults
 
         self.wall_probability = 0.45
         self.neighbors = 4
 
         self.square_room_chance = 0.1
         self.cross_room_chance = 0.15
-        self.vault_chance = 0.4
+        self.vault_chance = 0.2
 
         self.name = "RoomAddition"
 
     def generate_level(self):
 
         self.level = np.ones((self.map_height, self.map_width), dtype=int)
-
+        vault_size_offset = 0
         for r in range(self.build_room_attempts):
-            room_arr, vault = self.generate_room()
+            if len(self.rooms) > 4:
+                vault_size_offset = self.vault_size_offset
+            room_arr, vault = self.generate_room(vault_size_offset)
 
             room_height, room_width = room_arr.shape
             if room_height >= self.map_height - 1 or room_width >= self.map_width - 1:
@@ -90,14 +94,10 @@ class RoomAddition(Dungeon):
             if len(self.rooms) > self.max_rooms:
                 break
 
-        # self.get_caves()
-        self.connect_caves_old()
-        # self.connect_caves()
-        # self.clean_up_map(self.map_width, self.map_height)
-        # Connect rooms
-        # self.connect_rooms()
-        self.adjacent_rooms_scan()
-
+        self.connect_caves()
+        #self.adjacent_rooms_scan()
+        fill_percentage = 1 - np.count_nonzero(self.level) / self.level.size
+        print(fill_percentage)
         return self.level
 
     def generate_level_old(self):
@@ -129,13 +129,13 @@ class RoomAddition(Dungeon):
                     break
 
         self.get_caves()
-        self.connect_caves_old()
+        self.connect_caves()
         self.clean_up_map(self.map_width, self.map_height)
         self.adjacent_rooms_scan()
 
         return self.level
 
-    def generate_room(self):
+    def generate_room(self, vault_size_offset=0):
         vault = False
         # select a room type to generate and return that room
         if self.rooms:
@@ -143,7 +143,8 @@ class RoomAddition(Dungeon):
             choice = random.random()
 
             if choice < self.vault_chance:
-                room = self.generate_random_vault()
+                vault_size = self.vault_max_size - vault_size_offset
+                room = self.generate_random_vault(vault_size)
                 vault = True
 
             else:
@@ -157,7 +158,7 @@ class RoomAddition(Dungeon):
         else:  # it's the first room
             choice = random.random()
             if choice < self.vault_chance:
-                room = self.generate_random_vault()
+                room = self.generate_random_vault(self.first_vault_max_size)
                 vault = True
 
             else:
@@ -197,13 +198,9 @@ class RoomAddition(Dungeon):
 
         return room
 
-    def generate_random_vault(self):
-        '''
-        Parse vaults from Zorbus format into rooms
-        Vault prefabs kindly provided by joonas@zorbus.net under the CC0 Creative Commons License:
-        http://dungeon.zorbus.net/
-        '''
-
+    def generate_random_vault(self, max_size=None):
+        if not max_size:
+            max_size = self.vault_max_size
         if options.data.vault_thread:
             options.data.vault_thread.join()
         room = random.choice([x for x in options.data.vaults_data if x.size < self.vault_max_size])
@@ -254,7 +251,9 @@ class RoomAddition(Dungeon):
             padded_room = np.pad(trimmed_room, 1, constant_values=1)
             id_nr = len(self.rooms) + 1
             room_height, room_width = padded_room.shape
-            new_room = Room(vault_room.x1 + padded_room[1][0], vault_room.y1 + padded_room[0][0], room_width,
+            y1_offset = floors[0][0] - 1
+            x1_offset = floors[1][0] - 1
+            new_room = Room(vault_room.x1 + x1_offset, vault_room.y1 + y1_offset, room_width,
                             room_height, padded_room, id_nr=id_nr)
             rooms.append(new_room)
 
@@ -297,8 +296,11 @@ class RoomAddition(Dungeon):
         arr = rng.choice(2, (self.cellular_room_max_size - 1, self.cellular_room_max_size - 1), p=[1 - self.wall_probability, self.wall_probability])
         room = np.pad(arr, 1, constant_values=1)
 
+        kernel = [[1, 1, 1], [1, 1, 1], [1, 1, 1]]  # 8-bit
+        # kernel = np.array([[0, 1, 0], [1, 1, 1],[0, 1, 0]])  # 4-bit
+
         for _ in range(convolve_steps):
-            neighbors = convolve2d(room == 0, [[1, 1, 1], [1, 1, 1], [1, 1, 1]], "same")
+            neighbors = convolve2d(room == 0, kernel, "same")
             room = np.where(neighbors < wall_rule, 0, 1)  # Apply the wall rule.
             room[[0, -1], :] = 1  # Ensure surrounding wall.
             room[:, [0, -1]] = 1

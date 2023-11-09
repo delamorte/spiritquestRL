@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 from math import sqrt
 
 import numpy as np
+from scipy.signal import convolve2d
 from tcod import tcod
 
 from color_functions import random_color
@@ -273,11 +274,10 @@ class Dungeon:
         for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
             yield x, y
 
-    def connect_caves_old(self):
+    def connect_caves(self):
         # Find the closest cave to the current cave
         for current_cave_room in self.rooms:
             current_cave = current_cave_room.inner
-            current_cave_walls = current_cave_room.outer
             for point1 in current_cave:
                 break  # get an element from cave1
             point2 = None
@@ -334,6 +334,27 @@ class Dungeon:
 
         else:
             return False
+
+    def get_neighbours(self, x, y, a=None, radius=1, pattern="4bit"):
+        if not a:
+            a = self.level
+        patterns_map = {
+            "4bit": [[0, 1, 0],
+                     [1, 0, 1],
+                     [0, 1, 0]],
+            "8bit": [[1, 1, 1],
+                     [1, 0, 1],
+                     [1, 1, 1]]
+        }
+        kernel = patterns_map[pattern]
+        if radius > 1:
+            kernel = np.pad(kernel, radius-1, mode='edge')
+        mask = np.zeros_like(a, dtype=bool)  # build empty mask
+        mask[x, y] = True  # set target(s)
+
+        # boolean indexing
+        neighbors = a[convolve2d(mask, kernel, mode='same').astype(bool)]
+        return neighbors
 
     def create_tunnel(self, point1, point2, current_cave_room):
         # run a heavily weighted random Walk
@@ -395,9 +416,8 @@ class Dungeon:
                     self.level[drunkard_y][drunkard_x] = 0
                     wall = (drunkard_x, drunkard_y)
                     current_cave_tunnel.add(wall)
-                    if wall in current_cave_walls:
+                    if wall in current_cave_walls and wall not in current_cave_entrances:
                         current_cave_entrances.add(wall)
-
 
     @staticmethod
     def distance_formula(point1, point2):
@@ -464,7 +484,13 @@ class Room:
         :param inner: if true, check intersection of inner (floor) tiles
         """
         if inner:
-            return bool(self.inner.intersection(other.inner))
+            intersection = self.inner.intersection(other.inner)
+            if intersection:
+                self.outer -= other.inner
+                self.outer -= other.outer
+                self.inner -= other.inner
+                self.inner -= other.outer
+            return bool(intersection)
         return (
             self.x1 <= other.x2
             and self.x2 >= other.x1

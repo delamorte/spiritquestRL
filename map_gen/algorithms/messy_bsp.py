@@ -51,7 +51,7 @@ class MessyBSPTree(Dungeon):
                             splitSuccessfully = True
 
         rootLeaf.create_rooms(self)
-        self.connect_caves_old()
+        self.connect_caves()
         self.clean_up_map(self.map_width, self.map_height, smoothing=self.smoothing, filling=self.filling,
                           iterations=self.clean_up_iterations)
         self.adjacent_rooms_path_scan(max_length=20)
