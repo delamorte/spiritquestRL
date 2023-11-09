@@ -44,7 +44,6 @@ class Tile:
         elif entity.blocks:
             self.blocking_entity = entity
             self.occupied = True
-            self.blocked = True
 
         elif entity.stairs:
             self.stairs = entity.stairs

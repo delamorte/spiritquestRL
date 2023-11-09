@@ -551,7 +551,9 @@ class GameMap:
 
         if x >= self.width - 1 or x <= 0 or y >= self.height - 1 or y <= 0:
             return True
-        if self.tiles[x][y].blocked:
+        elif self.tiles[x][y].blocked:
+            return True
+        elif self.tiles[x][y].blocking_entity:
             return True
 
         return False

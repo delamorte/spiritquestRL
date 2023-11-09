@@ -34,6 +34,40 @@ class Dungeon:
         self.rooms = []
         self.level = []
 
+
+    def create_room_rect(self, room, ext_walls=False):
+        '''
+        :param room: Rectangle
+        :param ext_walls: If true, set outer tiles to 1 and interior to 0. If false, set all tiles to 0.
+        '''
+        cave = set()
+        walls = set()
+        for x in range(room.x1, room.x2):
+            for y in range(room.y1, room.y2):
+                self.level[x][y] = 0
+                if ext_walls:
+                    if (y == room.y1 or y == room.y2 - 1) and 0 <= x <= room.x2 - 1:
+                        self.level[x][y] = 1
+                        wall = (x, y)
+                        walls.add(wall)
+                    elif (x == room.x1 or x == room.x2 - 1) and 0 <= y < room.y2 - 1:
+                        self.level[x][y] = 1
+                        wall = (x, y)
+                        walls.add(wall)
+                cave.add((x, y))
+        x1 = min(cave, key=lambda t: t[0])[0]
+        x2 = max(cave, key=lambda t: t[0])[0]
+        y1 = min(cave, key=lambda t: t[1])[1]
+        y2 = max(cave, key=lambda t: t[1])[1]
+        w = x2 - x1
+        h = y2 - y1
+        id_nr = len(self.rooms) + 1
+
+        room = Room(x1=x1, y1=y1, w=w, h=h, id_nr=id_nr)
+        self.rooms.append(room)
+
+        return room
+
     def add_room(self, room):
         self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
         self.rooms.append(room)
@@ -593,7 +627,12 @@ class Leaf:  # used for the BSP tree algorithm
 
         else:
             # Create rooms in the end branches of the bsp tree
-            self.room = bsp_tree.create_room_from_rectangle(self)
+            w = random.randint(bsp_tree.room_min_size, min(bsp_tree.room_min_size, self.width - 1))
+            h = random.randint(bsp_tree.room_min_size, min(bsp_tree.room_min_size, self.height - 1))
+            x = random.randint(self.x, self.x + (self.width - 1) - w)
+            y = random.randint(self.y, self.y + (self.height - 1) - h)
+            rect = Rect(x, y, w, h)
+            self.room = bsp_tree.create_room_rect(rect, ext_walls=ext_walls)
 
     def get_room(self):
         if self.room:
