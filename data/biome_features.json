@@ -257,14 +257,15 @@
         "plants",
         "fairy_figurine",
         "glowing orb",
-        "butterfly"
+        "butterfly",
+        "ground_moss"
       ],
       "monsters": [
         "fairy"
       ]
     },
     "floor": [
-      "ground_moss"
+      "ground_soil"
     ],
     "wall": [
       "mushrooms"
@@ -473,7 +474,8 @@
         "cobweb",
         "skull",
         "shrine",
-        "remains_player"
+        "remains_player",
+        "ground_moss"
       ],
       "monsters": [
         "bone snake",
@@ -483,7 +485,7 @@
       ]
     },
     "floor": [
-      "ground_moss"
+      "ground_soil"
     ],
     "wall": [
       "fence"

@@ -185,10 +185,10 @@ class RenderFunctions:
                     elif player.status_effects.has_effect(name="reveal") and game_map.tiles[map_x][map_y].targeting_zone:
                         light_level = 1.5
                     else:
-                        # light_level = 1.0
-                        dist = float(cityblock(center, np.array([map_y, map_x])))
-                        light_level = game_map.tiles[map_x][map_y].natural_light_level * \
-                                      (1.0 / (1.05 + 0.035 * dist + 0.015 * dist * dist))
+                        light_level = 1.5
+                        #dist = float(cityblock(center, np.array([map_y, map_x])))
+                        #light_level = game_map.tiles[map_x][map_y].natural_light_level * \
+                        #              (1.0 / (1.05 + 0.035 * dist + 0.015 * dist * dist))
 
                     if player.status_effects.has_effect(name="sneak") and game_map.tiles[map_x][map_y].targeting_zone:
                         light_level *= 0.5

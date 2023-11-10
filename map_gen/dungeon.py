@@ -416,7 +416,7 @@ class Dungeon:
 class Room:
     def __init__(self, x1=0, y1=0, w=0, h=0, nd_array=None,
                  wall_color="dark gray", floor_color="darkest amber", feature=None,
-                 wall_type="wall_brick", floor_type="floor", tiled=False, name=None, lightness=1.0,
+                 wall_type="wall_brick", floor_type="floor", tiled=False, name=None, lightness=0.8,
                  id_nr=1):
         self.x1 = int(x1)
         self.y1 = int(y1)

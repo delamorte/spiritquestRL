@@ -529,7 +529,7 @@
     ],
     "ascii": ".",
     "colors": [
-      "dark gray"
+      "darkest gray"
     ],
     "corners": false,
     "hue": true,
@@ -998,7 +998,7 @@
     "openable": false,
     "interactable": false,
     "pickable": true,
-    "light_source": true,
+    "light_source": false,
     "stairs": false
   },
   "snake_figurine": {

@@ -11,7 +11,6 @@ from components.openable import Openable
 from components.stairs import Stairs
 from components.wall import Wall
 from data import json_data
-from map_gen.algorithms.messy_bsp import MessyBSPTree
 from map_gen.algorithms.room_addition import RoomAddition
 from map_gen.tile import Tile
 from map_gen.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant
@@ -338,7 +337,6 @@ class GameMap:
         #             }
 
         generators = {
-            "messy_bsp": MessyBSPTree(self.width, self.height),
             "cellular": RoomAddition(self.width, self.height, only_cellular=True),
             "room_addition": RoomAddition(self.width, self.height),
             "vaults": RoomAddition(self.width, self.height, only_vaults=True)
@@ -418,6 +416,9 @@ class GameMap:
                     self.tiles[x][y].layers.append((floor_tile, floor_color))
             for tile in room.outer:
                 x, y = tile[0], tile[1]
+                if wall_tile["draw_floor"]:
+                    self.tiles[x][y].char = floor_tile
+                    self.tiles[x][y].color = floor_color
                 self.tiles[x][y].natural_light_level = room.lightness
                 if self.tiles[x][y].entities_on_tile:
                     for entity in self.tiles[x][y].entities_on_tile:
@@ -553,7 +554,7 @@ class GameMap:
             return True
         elif self.tiles[x][y].blocked:
             return True
-        elif self.tiles[x][y].blocking_entity:
+        elif self.tiles[x][y].blocking_entity and not self.tiles[x][y].blocking_entity.fighter:
             return True
 
         return False
@@ -653,7 +654,7 @@ class GameMap:
                     if entity_name == "window":
                         pass
                     elif category == "objects" and not entity_name == "window":
-                        while self.tiles[x][y].blocking_entity:
+                        while self.tiles[x][y].entities_on_tile:
                             x, y = choice(locations)
                     else:
                         while self.tiles[x][y].blocking_entity or self.tiles[x][y].blocked:
