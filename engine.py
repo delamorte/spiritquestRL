@@ -79,6 +79,7 @@ class Engine:
 
         # Load tiles
         self.init_tiles()
+        self.init_colors()
 
         # Init levels for debug map view
         if debug:
@@ -157,6 +158,12 @@ class Engine:
             int(options.data.tile_height) / blt.state(blt.TK_CELL_HEIGHT))
 
         blt.clear()
+
+    def init_colors(self):
+        blt.set("palette.brown = #402316")
+        blt.set("palette.sienna = #A0522D")
+        blt.set("palette.tan = #D2B48C")
+        blt.set("palette.wood = #DEB887")
 
     def init_new_game(self, params):
         choice = params
@@ -369,6 +376,6 @@ class Engine:
 
 if __name__ == '__main__':
     engine = Engine()
-    engine.initialize(debug=False)
+    engine.initialize(debug=True)
     blt.close()
 

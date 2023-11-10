@@ -9,6 +9,7 @@ import options
 from color_functions import argb_from_color
 from game_states import GameStates
 from helpers import get_article
+from map_gen.tilemap import get_color
 from ui.message import Message
 
 
@@ -46,7 +47,8 @@ class RenderFunctions:
         # Cursor needs some offset in ascii
         if options.data.gfx == "ascii" and entity.name == "cursor":
             blt.put_ext(x * options.data.tile_offset_x, y *
-                        options.data.tile_offset_y, -3 * options.data.tile_offset_x, -5 * options.data.tile_offset_y, entity.char)
+                        options.data.tile_offset_y, -3 * options.data.tile_offset_x, -5 * options.data.tile_offset_y,
+                        entity.char)
         else:
             if entity.boss and not entity.fighter:
                 blt.put((x - 1) * options.data.tile_offset_x, (y - 1) *
@@ -88,13 +90,15 @@ class RenderFunctions:
                             self.draw_stats(entity)
 
                 elif (entity.x == cursor.x and entity.y == cursor.y and not
-                      entity.cursor and game_map.explored[entity.x, entity.y] and not entity.hidden):
+                entity.cursor and game_map.explored[entity.x, entity.y] and not entity.hidden):
 
                     results.append(Message(get_article(entity.name).capitalize() + " " + entity.name + "."))
-                    results.append(Message(msg=str("x: " + (str(cursor.x) + ", y: " + str(cursor.y))), extend_line=True))
+                    results.append(
+                        Message(msg=str("x: " + (str(cursor.x) + ", y: " + str(cursor.y))), extend_line=True))
                     results.append(Message(str(", color: " + entity.color), extend_line=True))
                     results.append(Message(str(", layer: " + str(entity.layer)), extend_line=True))
-                    results.append(Message(str(", light: " + str(game_map.light_map[entity.x, entity.y])), extend_line=True))
+                    results.append(
+                        Message(str(", light: " + str(game_map.light_map[entity.x, entity.y])), extend_line=True))
                     print(str(game_map.tiles[entity.x][entity.y].natural_light_level))
 
                     if entity.xtra_info:
@@ -182,12 +186,13 @@ class RenderFunctions:
                             not game_map.tiles[map_x][map_y].targeting_zone and
                             self.owner.cursor.cursor.targeting_ability is not None):
                         light_level = 0.5
-                    elif player.status_effects.has_effect(name="reveal") and game_map.tiles[map_x][map_y].targeting_zone:
+                    elif player.status_effects.has_effect(name="reveal") and game_map.tiles[map_x][
+                        map_y].targeting_zone:
                         light_level = 1.5
                     else:
                         light_level = 1.5
-                        #dist = float(cityblock(center, np.array([map_y, map_x])))
-                        #light_level = game_map.tiles[map_x][map_y].natural_light_level * \
+                        # dist = float(cityblock(center, np.array([map_y, map_x])))
+                        # light_level = game_map.tiles[map_x][map_y].natural_light_level * \
                         #              (1.0 / (1.05 + 0.035 * dist + 0.015 * dist * dist))
 
                     if player.status_effects.has_effect(name="sneak") and game_map.tiles[map_x][map_y].targeting_zone:
@@ -205,31 +210,11 @@ class RenderFunctions:
 
                     blt.put(x, y, game_map.tiles[map_x][map_y].char)
 
-                    if len(game_map.tiles[map_x][map_y].layers) > 0:
-                        i = 1
-                        for tile in game_map.tiles[map_x][map_y].layers:
-                            blt.layer(i)
-                            c = blt.color_from_name(tile[1])
-                            argb = argb_from_color(c)
-                            a = argb[0]
-                            r = min(int(argb[1] * light_level), 255)
-                            g = min(int(argb[2] * light_level), 255)
-                            b = min(int(argb[3] * light_level), 255)
-                            blt.color(blt.color_from_argb(a, r, g, b))
-                            blt.put(x, y, tile[0])
-                            i += 1
-
                 # Gray out explored tiles
                 elif game_map.explored[map_x, map_y]:
                     blt.layer(0)
                     blt.color("darkest gray")
                     blt.put(x, y, game_map.tiles[map_x][map_y].char)
-                    if len(game_map.tiles[map_x][map_y].layers) > 0:
-                        i = 1
-                        for tile in game_map.tiles[map_x][map_y].layers:
-                            blt.layer(i)
-                            blt.put(x, y, tile[0])
-                            i += 1
 
                 if len(game_map.tiles[map_x][map_y].entities_on_tile) > 0:
                     for n in game_map.tiles[map_x][map_y].entities_on_tile:
@@ -275,21 +260,6 @@ class RenderFunctions:
             blt.put(cam_x * options.data.tile_offset_x, cam_y * options.data.tile_offset_y,
                     game_map.tiles[x][y].char)
 
-            if len(game_map.tiles[x][y].layers) > 0:
-                i = 1
-                for tile in game_map.tiles[x][y].layers:
-                    blt.layer(i)
-                    c = blt.color_from_name(tile[1])
-                    argb = argb_from_color(c)
-                    a = argb[0]
-                    r = min(int(argb[1] * game_map.light_map[x, y]), 255)
-                    g = min(int(argb[2] * game_map.light_map[x, y]), 255)
-                    b = min(int(argb[3] * game_map.light_map[x, y]), 255)
-                    blt.color(blt.color_from_argb(a, r, g, b))
-                    blt.put(cam_x * options.data.tile_offset_x, cam_y * options.data.tile_offset_y,
-                            tile[0])
-                    i += 1
-
             if len(game_map.tiles[x][y].entities_on_tile) > 0:
                 for entity in game_map.tiles[x][y].entities_on_tile:
 
@@ -321,7 +291,7 @@ class RenderFunctions:
                 if message.stacked > 1:
                     msg = msg + " x{0}".format(str(message.stacked))
                 blt.puts(msg_panel.border_offset, msg_panel.offset_y + msg_panel.border_offset + i * 2,
-                        "[offset=0,-35]" + msg, msg_panel.offset_w - 2, 1, align=blt.TK_ALIGN_LEFT)
+                         "[offset=0,-35]" + msg, msg_panel.offset_w - 2, 1, align=blt.TK_ALIGN_LEFT)
                 i -= 1
             message_log.new_msgs = False
 
@@ -343,7 +313,7 @@ class RenderFunctions:
         if self.owner.ui.viewport.offset_w > 90:
             blt.color("default")
             blt.puts(self.owner.ui.viewport.offset_center_x,
-                     self.owner.ui.viewport.offset_h + self.ui_offset_y-1, "[offset=0,0]" + power_msg, 0, 0,
+                     self.owner.ui.viewport.offset_h + self.ui_offset_y - 1, "[offset=0,0]" + power_msg, 0, 0,
                      blt.TK_ALIGN_CENTER)
         else:
             blt.color("default")
@@ -366,9 +336,10 @@ class RenderFunctions:
 
         active_effects = []
         for x in player.status_effects.items:
-            active_effects.append("[color={0}]{1} ({2} turns)".format(x.color, x.description, str(x.duration+1)))
+            active_effects.append("[color={0}]{1} ({2} turns)".format(x.color, x.description, str(x.duration + 1)))
             if x.name == "poison":
-                hp_player = "[color={0}]HP:{1}/{2}  ".format(x.color, str(player.fighter.hp), str(player.fighter.max_hp))
+                hp_player = "[color={0}]HP:{1}/{2}  ".format(x.color, str(player.fighter.hp),
+                                                             str(player.fighter.max_hp))
             elif x.name == "fly":
                 ev_player = "[color={0}]EV:{1}  ".format(x.color, str(player.fighter.ev))
 
@@ -407,9 +378,10 @@ class RenderFunctions:
             active_effects = []
             for x in target.status_effects.items:
                 if x.duration > 0:
-                    active_effects.append("[color={0}]{1} ({2})".format(x.color, x.description, str(x.duration+1)))
+                    active_effects.append("[color={0}]{1} ({2})".format(x.color, x.description, str(x.duration + 1)))
                     if x.name == "poison":
-                        hp_target = "[color={0}]HP:{1}/{2}  ".format(x.color, str(target.fighter.hp), str(target.fighter.max_hp))
+                        hp_target = "[color={0}]HP:{1}/{2}  ".format(x.color, str(target.fighter.hp),
+                                                                     str(target.fighter.max_hp))
                     elif x.name == "fly":
                         ev_target = "[color={0}]EV:{1}  ".format(x.color, str(target.fighter.ev))
 
@@ -421,7 +393,7 @@ class RenderFunctions:
             ac_target = "[color=default]AC:" + str(target.fighter.ac) + "  "
             power_target = "ATK:" + str(target.fighter.atk) + " "
 
-            blt.puts(self.owner.ui.viewport.offset_w-1, self.owner.ui.viewport.offset_h + self.ui_offset_y + 1,
+            blt.puts(self.owner.ui.viewport.offset_w - 1, self.owner.ui.viewport.offset_h + self.ui_offset_y + 1,
                      "[offset=0,-2]" + target.colored_name + ":  " + hp_target + ac_target + ev_target + power_target,
                      0, 0, blt.TK_ALIGN_RIGHT)
 
@@ -432,9 +404,9 @@ class RenderFunctions:
     def draw_ui(self, element):
         self.clear_camera(1, element.w, element.h)
         blt.color(element.owner.color)
-        blt.layer(1)
+        blt.layer(2)
 
-        for x in range(element.offset_x+1, element.offset_x2):
+        for x in range(element.offset_x + 1, element.offset_x2):
             blt.put(x, element.offset_y, element.owner.tile_horizontal)
             blt.put(x, element.offset_y2, element.owner.tile_horizontal)
             if x == element.offset_x + 1:
@@ -444,7 +416,7 @@ class RenderFunctions:
                 blt.put(x, element.offset_y, element.owner.tile_ne)
                 blt.put(x, element.offset_y2, element.owner.tile_se)
 
-        for y in range(element.offset_y+2, element.offset_y2-1):
+        for y in range(element.offset_y + 2, element.offset_y2 - 1):
             blt.put(element.offset_x, y, element.owner.tile_vertical)
             blt.put(element.offset_x2, y, element.owner.tile_vertical)
 
@@ -548,24 +520,18 @@ class RenderFunctions:
 
         for x in range(game_map.width):
             for y in range(game_map.height):
-
-                blt.color("darkest grey")
+                color = get_color(game_map.biome.biome_data["floor"])
+                blt.color(color)
                 blt.layer(4)
                 blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
 
                 for i, room in enumerate(game_map.algorithm.rooms):
                     if (x, y) in room.inner:
-                        #blt.color(room.id_color)
+                        # blt.color(room.id_color)
                         blt.color(game_map.tiles[x][y].color)
 
                         blt.layer(4)
                         blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
-
-                        if len(game_map.tiles[x][y].layers) > 0:
-                            blt.layer(5)
-                            char, color = game_map.tiles[x][y].layers[-1]
-                            blt.color(color)
-                            blt.put(x0 + x * 2, y0 + y, char)
 
                 if len(game_map.tiles[x][y].entities_on_tile) > 0:
                     for entity in game_map.tiles[x][y].entities_on_tile:
@@ -580,11 +546,14 @@ class RenderFunctions:
                 for room in game_map.algorithm.rooms:
                     random_point = next(iter(room.inner))
                     if x == random_point[0] and y == random_point[1]:
-                        print("Room: {0}, x1: {1}, y1: {2}, size: {3}".format(room.feature, room.x1, room.y1, room.nd_array.size))
+                        print("Room: {0}, x1: {1}, y1: {2}, size: {3}, algorithm: {4}".format(room.feature, room.x1,
+                                                                                              room.y1,
+                                                                                              room.nd_array.size,
+                                                                                              room.algorithm))
                         blt.color(None)
                         blt.layer(7)
-                        blt.puts(x0 + x*2, y0 + y, "{0}: {1}".format(room.id_nr, room.feature))
-                        #blt.puts(x0 + x*2, y0 + y + 1, "{0}".format(room.feature))
+                        blt.puts(x0 + x * 2, y0 + y, "{0}: {1}".format(room.id_nr, room.feature))
+                        # blt.puts(x0 + x*2, y0 + y + 1, "{0}".format(room.feature))
                         break
         return
 
@@ -617,11 +586,11 @@ class RenderFunctions:
                     return key
 
                 if (animation.target.dead or animation.target.fighter is None or animation.target.dead or not
-                        animation.target.visible):
+                animation.target.visible):
                     animation.finish(self.owner.animations_buffer)
                     continue
                 elif (animation.owner.dead or animation.owner.fighter is None or animation.owner.dead or not
-                        animation.owner.visible):
+                animation.owner.visible):
                     animation.finish(self.owner.animations_buffer)
                     continue
 
@@ -660,7 +629,7 @@ class RenderFunctions:
                             offset = 1
                         blt.puts(x * options.data.tile_offset_x - 13, y *
                                  options.data.tile_offset_y + offset,
-                                 animation.dialog, 30, 0, blt.TK_ALIGN_CENTER+blt.TK_ALIGN_MIDDLE)
+                                 animation.dialog, 30, 0, blt.TK_ALIGN_CENTER + blt.TK_ALIGN_MIDDLE)
                     elif animation.cached_frames is not None:
                         blt.put_ext(x * options.data.tile_offset_x, y *
                                     options.data.tile_offset_y, animation.offset_x, animation.offset_y,
@@ -741,7 +710,8 @@ class RenderFunctions:
 
                 # name of the selected skill
                 blt.color(None)
-                skill_str = "{0}, {1}+{2} dmg".format(wpn.name.capitalize(), wpn.damage[wpn.rank], player.fighter.str_bonus)
+                skill_str = "{0}, {1}+{2} dmg".format(wpn.name.capitalize(), wpn.damage[wpn.rank],
+                                                      player.fighter.str_bonus)
                 blt.puts(side_panel.offset_x + x_margin,
                          side_panel.offset_y + first_heading_y + 2, fill(skill_str, fill_chars), 0, 0,
                          blt.TK_ALIGN_LEFT)
@@ -783,7 +753,8 @@ class RenderFunctions:
                 if atk.duration:
                     duration_str = atk.duration[atk.rank] + " turns"
                 if atk.damage:
-                    atk_str = ", " + atk.damage[atk.rank] + "+" + str(player.fighter.str_bonus) + " dmg" if duration_str \
+                    atk_str = ", " + atk.damage[atk.rank] + "+" + str(player.fighter.str_bonus) + " dmg" if (
+                        duration_str) \
                         else atk.damage[atk.rank] + "+" + str(player.fighter.str_bonus) + " dmg"
                 skill_str += chance_str + effect_str + duration_str + atk_str
 
@@ -837,7 +808,7 @@ class RenderFunctions:
             blt.put(side_panel.offset_x + x_margin + 1 + i * 6,
                     side_panel.offset_y + third_heading_y + 5 + y_margin, utl.icon)
             blt.put_ext(side_panel.offset_x + x_margin + i * 6,
-                        side_panel.offset_y + third_heading_y + 5 + y_margin, -2, -14, str(i+1))
+                        side_panel.offset_y + third_heading_y + 5 + y_margin, -2, -14, str(i + 1))
             blt.color(None)
 
     def draw_all(self):
@@ -849,8 +820,6 @@ class RenderFunctions:
         self.draw_map()
         self.draw_stats()
         self.draw_minimap()
-
-
 
     def clear(self, entity, x, y):
         # Clear the entity from the screen
@@ -874,9 +843,9 @@ class RenderFunctions:
         :param h: height of area to clear
         """
         if not w:
-            w = self.owner.ui.viewport.offset_w-1
+            w = self.owner.ui.viewport.offset_w - 1
         if not h:
-            h = self.owner.ui.viewport.offset_h-1
+            h = self.owner.ui.viewport.offset_h - 1
         i = 0
         while i <= n:
             blt.layer(i)

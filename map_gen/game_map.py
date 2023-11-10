@@ -11,6 +11,7 @@ from components.openable import Openable
 from components.stairs import Stairs
 from components.wall import Wall
 from data import json_data
+from map_gen.algorithms.messy_bsp import MessyBSPTree
 from map_gen.algorithms.room_addition import RoomAddition
 from map_gen.tile import Tile
 from map_gen.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant
@@ -173,8 +174,11 @@ class GameMap:
                     if ground_top != 0:
                         name = get_tile_by_value(ground_top)
                         ground_top_char = get_tile(name)
+                        ground_top_tile = get_tile_object(name)
                         color = get_color(name, mod=self.owner.world_tendency)
-                        self.tiles[x][y].layers.append((ground_top_char, color))
+                        top_tile = Entity(x, y,
+                               color, name, tile=ground_top_tile, char=ground_top_char)
+                        self.add_entity(top_tile)
 
                     if entity != 0:
                         name = get_tile_by_value(entity)
@@ -187,7 +191,7 @@ class GameMap:
                             door_component = Openable(name, char)
                             door = Entity(x, y, 1,
                                           color, name, tile=tile, door=door_component, stand_on_messages=False)
-                            self.tiles[x][y].add_entity(door)
+                            self.add_entity(door)
                             self.tiles[x][y].is_door = True
                             self.tiles[x][y].door = door_component
                             door_component.set_state(door_component.state, self)
@@ -195,26 +199,26 @@ class GameMap:
                         elif tile["interactable"] or tile["pickable"]:
                             item_component = Item(name, pickable=tile["pickable"], interactable=tile["interactable"],
                                                   light_source=tile["light_source"])
-                            item = Entity(x, y, 1,
+                            item = Entity(x, y,
                                           color, name, tile=tile, item=item_component)
                             if item.name == "flask":  # For testing "reveal" skill
                                 item.hidden = True
-                            self.tiles[x][y].add_entity(item)
+                            self.add_entity(item)
                             item_component.set_attributes(self)
                             entities.append(item)
                         elif tile["stairs"]:
                             stairs_component = Stairs(("hub", x, y), ["dream"], name)
-                            portal = Entity(x, y, 1, color, name, tile=tile,
+                            portal = Entity(x, y, color, name, tile=tile,
                                             stairs=stairs_component)
-                            self.tiles[x][y].add_entity(portal)
+                            self.add_entity(portal)
                             stairs_component.set_attributes(self)
                             portal.xtra_info = "Meditate and go to dream world with '<' or '>'"
                             entities.append(portal)
                         else:
                             wall_component = Wall(name=name, tile=tile)
-                            wall = Entity(x, y, 1,
+                            wall = Entity(x, y,
                                           color, name, char=char, tile=tile, wall=wall_component)
-                            self.tiles[x][y].add_entity(wall)
+                            self.add_entity(wall)
                             wall_component.set_attributes(self)
                             entities.append(wall)
 
@@ -274,58 +278,9 @@ class GameMap:
         tile_char = get_tile_variant(name, index)
         wall = Entity(x, y, 1,
                       color, name, tile=tile, char=tile_char, wall=wall_component)
-        self.tiles[x][y].add_entity(wall)
+        self.add_entity(wall)
         wall_component.set_attributes(self)
         return wall
-
-    def count_walls(self, n, x, y):
-        wall_count = 0
-
-        for r in range(-n, n + 1):
-            for c in range(-n, n + 1):
-                if x + r >= self.width or x + r <= 0 or y + c >= self.height or y + c <= 0:
-                    wall_count += 1
-                elif self.tiles[x + r][y + c].blocked:
-                    wall_count += 1
-
-        return wall_count
-
-    def get_random_unoccupied_space(self, w, h):
-        x1 = randint(2, self.width - w - 2)
-        y1 = randint(2, self.height - h - 2)
-        x2 = x1 + w
-        y2 = y1 + h
-        while (self.tiles[x1][y1].occupied or
-               self.tiles[x2][y2].occupied or
-               self.tiles[x2][y1].occupied or
-               self.tiles[x1][y2].occupied):
-            x1 = randint(1, self.width - w - 1)
-            y1 = randint(1, self.height - h - 1)
-            x2 = x1 + w
-            y2 = y1 + h
-
-        return x1, y1
-
-    # TODO: Think of a better way to do this
-    def get_random_unoccupied_space_near_room(self, room, radius=2):
-        x = randint(room.x1 - radius, room.x2 + radius)
-        y = randint(room.y1 - radius, room.y2 + radius)
-
-        while self.tiles[x][y].occupied or self.tiles[x][y].entities_on_tile or len(self.tiles[x][y].layers) > 0:
-            x = randint(room.x1 - radius, room.x2 + radius)
-            y = randint(room.y1 - radius, room.y2 + radius)
-
-        if radius == 2:
-            x2 = x + 1
-            y2 = y + 1
-            self.tiles[x2][y].entities_on_tile = []
-            self.tiles[x2][y].layers = []
-            self.tiles[x2][y2].entities_on_tile = []
-            self.tiles[x2][y2].layers = []
-            self.tiles[x][y2].entities_on_tile = []
-            self.tiles[x][y2].layers = []
-
-        return x, y
 
     def generate_map(self, name=None):
 
@@ -337,9 +292,13 @@ class GameMap:
         #             }
 
         generators = {
+            "messy_bsp": MessyBSPTree(self.width, self.height),
+            "drunkard": RoomAddition(self.width, self.height, drunkard=True),
             "cellular": RoomAddition(self.width, self.height, only_cellular=True),
             "room_addition": RoomAddition(self.width, self.height),
-            "vaults": RoomAddition(self.width, self.height, only_vaults=True)
+            "vaults": RoomAddition(self.width, self.height, only_vaults=True),
+            "squares": RoomAddition(self.width, self.height, only_squares=True),
+            "squares_and_crosses": RoomAddition(self.width, self.height, squares_and_crosses=True),
         }
 
         if not name:
@@ -393,12 +352,14 @@ class GameMap:
             feature_data = json_data.data.biome_features[feature_name]
             room.feature = feature_name
             wall_name = choice(feature_data["wall"])
-            floor_name = choice(feature_data["floor"])
-            wall_color = get_color(wall_name)
-            floor_color = get_color(floor_name)
-            floor_tile = get_tile(floor_name)
-            floor_object = get_tile_object(floor_name)
             wall_tile = get_tile_object(wall_name)
+            wall_color = get_color(wall_name)
+            floor_name = choice(feature_data["floor"])
+            if "floor_colors" in feature_data.keys():
+                floor_color = choice(feature_data["floor_colors"])
+            else:
+                floor_color = get_color(floor_name)
+            floor_tile = get_tile(floor_name)
             room.floor_type = floor_name
             room.wall_type = wall_name
             for tile in room.inner:
@@ -407,13 +368,10 @@ class GameMap:
                 if self.tiles[x][y].entities_on_tile:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
-                if floor_object["draw_floor"]:
-                    self.tiles[x][y].char = floor_tile
-                    self.tiles[x][y].color = floor_color
-                    if floor_object["blocks"]:
-                        self.tiles[x][y].blocked = True
-                else:
-                    self.tiles[x][y].layers.append((floor_tile, floor_color))
+
+                self.tiles[x][y].char = floor_tile
+                self.tiles[x][y].color = floor_color
+
             for tile in room.outer:
                 x, y = tile[0], tile[1]
                 if wall_tile["draw_floor"]:
@@ -423,10 +381,7 @@ class GameMap:
                 if self.tiles[x][y].entities_on_tile:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
-                facing = None
-                if wall_tile["corners"]:
-                    facing = self.get_tile_direction(x, y)
-                char = get_tile_variant(name=wall_name, facing=facing)
+                char = get_tile(wall_name)
                 wall = Entity(x, y, wall_color, wall_name, tile=wall_tile, char=char)
                 if wall.wall:
                     wall.wall.set_attributes(self)
@@ -455,7 +410,22 @@ class GameMap:
                 #     self.create_door(state="closed", x=x, y=y)
                 #     room.has_door = True
 
-        self.create_entities_in_rooms()
+            for tile in room.outer:
+                x, y = tile[0], tile[1]
+                wall_name = room.wall_type
+                wall_tile = get_tile_object(wall_name)
+                facing = None
+                if wall_tile["corners"]:
+                    facing = self.get_tile_direction(x, y)
+                    if not facing:
+                        continue
+                    char = get_tile_variant(name=wall_name, facing=facing)
+                    if self.tiles[x][y].entities_on_tile:
+                        for entity in self.tiles[x][y].entities_on_tile:
+                            if entity.name == wall_name:
+                                entity.char = char
+
+        #self.create_entities_in_rooms()
 
     def process_prefabs(self):
         if self.biome.biome_data["name"] == "hub":
@@ -542,7 +512,7 @@ class GameMap:
                             wall_component = Wall(name)
                             wall = Entity(x, y, 1, tree_color, name,
                                           char=char, wall=wall_component)
-                        self.tiles[x][y].add_entity(wall)
+                        self.add_entity(wall)
                         wall_component.set_attributes(self)
                         entities.append(wall)
 
@@ -702,34 +672,27 @@ class GameMap:
             "southwest": 5,
             "southeast": 3
         }
-        # if x - 1 <= 0:
-        #     return directions_idx_map["west"]
-        # if y - 1 <= 0:
-        #     return directions_idx_map["north"]
-        # if x + 1 > len(self.tiles) - 1:
-        #     return directions_idx_map["east"]
-        # if y + 1 > len(self.tiles[0]) - 1:
-        #     return directions_idx_map["south"]
 
         neighbors = self.get_cornering_tiles(x, y, pattern="8bit", masked=True)
 
         # Determine and return the correct facing based on the neighboring tiles
-        if neighbors[4] and neighbors[6] and not neighbors[7]:
-            return directions_idx_map["northwest"]
-        elif neighbors[1] and neighbors[6] and not neighbors[4]:
+        if neighbors[1] and neighbors[6] and not neighbors[4]:
             return directions_idx_map["north"]
-        elif neighbors[1] and neighbors[4] and not neighbors[2]:
-            return directions_idx_map["northeast"]
         elif neighbors[3] and neighbors[4] and not neighbors[1]:
             return directions_idx_map["east"]
-        elif neighbors[1] and neighbors[3] and not neighbors[0]:
-            return directions_idx_map["southeast"]
         elif neighbors[1] and neighbors[6] and not neighbors[3]:
             return directions_idx_map["south"]
-        elif neighbors[3] and neighbors[6] and not neighbors[5]:
-            return directions_idx_map["southwest"]
         elif neighbors[3] and neighbors[4] and not neighbors[6]:
             return directions_idx_map["west"]
+
+        elif neighbors[4] and neighbors[6] and not neighbors[7]:
+            return directions_idx_map["northwest"]
+        elif neighbors[1] and neighbors[4] and not neighbors[2]:
+            return directions_idx_map["northeast"]
+        elif neighbors[1] and neighbors[3] and not neighbors[0]:
+            return directions_idx_map["southeast"]
+        elif neighbors[3] and neighbors[6] and not neighbors[5]:
+            return directions_idx_map["southwest"]
 
         elif neighbors[4] and neighbors[6] and not neighbors[1] and not neighbors[3]:
             return directions_idx_map["northwest"]
@@ -739,9 +702,10 @@ class GameMap:
             return directions_idx_map["southwest"]
         elif neighbors[1] and neighbors[3] and not neighbors[4] and not neighbors[6]:
             return directions_idx_map["southeast"]
+        elif neighbors[4] and not neighbors[1] and not neighbors[3] and not neighbors[6]:
+            return directions_idx_map["east"]
 
-        # If no specific facing is determined, return a default facing
-        return 0
+        return None
 
     @staticmethod
     def entity_at_coordinates(entities, x, y):

@@ -80,7 +80,7 @@ class Levels:
             game_map = self.create_biome_and_map(name="debug", biome_title="hub", width=70, height=70,
                                                  generate_random=False)
         else:
-            game_map = self.create_biome_and_map(name="debug", width=70, height=70, algorithm=algorithm)
+            game_map = self.create_biome_and_map(name="debug", width=40, height=40, algorithm=algorithm)
         return game_map
 
     def create_biome_and_map(self, name, width, height, biome_title=None, algorithm=None, generate_random=True):

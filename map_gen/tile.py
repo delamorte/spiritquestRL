@@ -23,7 +23,6 @@ class Tile:
         self.visited = False
         self.seed = randint(1, 100)
         self.char = get_tile("floor")
-        self.layers = []
         self.color = get_color("floor")
         self.name = None
         self.spawnable = False
@@ -61,6 +60,7 @@ class Tile:
         if entity == self.blocking_entity:
             self.blocking_entity = None
             self.blocked = False
+            self.block_sight = False
         if entity.door:
             self.door = None
             self.is_door = False

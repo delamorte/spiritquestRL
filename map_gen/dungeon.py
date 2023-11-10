@@ -34,40 +34,6 @@ class Dungeon:
         self.rooms = []
         self.level = []
 
-
-    def create_room_rect(self, room, ext_walls=False):
-        '''
-        :param room: Rectangle
-        :param ext_walls: If true, set outer tiles to 1 and interior to 0. If false, set all tiles to 0.
-        '''
-        cave = set()
-        walls = set()
-        for x in range(room.x1, room.x2):
-            for y in range(room.y1, room.y2):
-                self.level[x][y] = 0
-                if ext_walls:
-                    if (y == room.y1 or y == room.y2 - 1) and 0 <= x <= room.x2 - 1:
-                        self.level[x][y] = 1
-                        wall = (x, y)
-                        walls.add(wall)
-                    elif (x == room.x1 or x == room.x2 - 1) and 0 <= y < room.y2 - 1:
-                        self.level[x][y] = 1
-                        wall = (x, y)
-                        walls.add(wall)
-                cave.add((x, y))
-        x1 = min(cave, key=lambda t: t[0])[0]
-        x2 = max(cave, key=lambda t: t[0])[0]
-        y1 = min(cave, key=lambda t: t[1])[1]
-        y2 = max(cave, key=lambda t: t[1])[1]
-        w = x2 - x1
-        h = y2 - y1
-        id_nr = len(self.rooms) + 1
-
-        room = Room(x1=x1, y1=y1, w=w, h=h, id_nr=id_nr)
-        self.rooms.append(room)
-
-        return room
-
     def add_room(self, room):
         self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
         self.rooms.append(room)
@@ -417,7 +383,7 @@ class Room:
     def __init__(self, x1=0, y1=0, w=0, h=0, nd_array=None,
                  wall_color="dark gray", floor_color="darkest amber", feature=None,
                  wall_type="wall_brick", floor_type="floor", tiled=False, name=None, lightness=0.8,
-                 id_nr=1):
+                 id_nr=1, algorithm=None):
         self.x1 = int(x1)
         self.y1 = int(y1)
         self.w = int(w)
@@ -440,6 +406,7 @@ class Room:
         self.id_nr = id_nr
         self.id_color = random_color()
         self.adjacent_room_ids = []
+        self.algorithm = algorithm
         self.inner = set()
         self.outer = set()
         self.set_inner()
@@ -559,105 +526,3 @@ class Rect:
             and self.y1 <= other.y2
             and self.y2 >= other.y1
         )
-
-
-class Leaf:  # used for the BSP tree algorithm
-    def __init__(self, x, y, width, height):
-        self.room_2 = None
-        self.room_1 = None
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.MIN_LEAF_SIZE = 10
-        self.child_1 = None
-        self.child_2 = None
-        self.room = None
-        self.hall = None
-
-    def split_leaf(self):
-        # begin splitting the leaf into two children
-        if (self.child_1 is not None) or (self.child_2 is not None):
-            return False  # This leaf has already been split
-
-        '''
-        ==== Determine the direction of the split ====
-        If the width of the leaf is >25% larger than the height,
-        split the leaf vertically.
-        If the height of the leaf is >25 larger than the width,
-        split the leaf horizontally.
-        Otherwise, choose the direction at random.
-        '''
-        split_horizontally = random.choice([True, False])
-        if self.width / self.height >= 1.25:
-            split_horizontally = False
-        elif self.height / self.width >= 1.25:
-            split_horizontally = True
-
-        if split_horizontally:
-            max_size = self.height - self.MIN_LEAF_SIZE
-        else:
-            max_size = self.width - self.MIN_LEAF_SIZE
-
-        if max_size <= self.MIN_LEAF_SIZE:
-            return False  # the leaf is too small to split further
-
-        split = random.randint(self.MIN_LEAF_SIZE, max_size)  # determine where to split the leaf
-
-        if split_horizontally:
-            self.child_1 = Leaf(self.x, self.y, self.width, split)
-            self.child_2 = Leaf(self.x, self.y + split, self.width, self.height - split)
-        else:
-            self.child_1 = Leaf(self.x, self.y, split, self.height)
-            self.child_2 = Leaf(self.x + split, self.y, self.width - split, self.height)
-
-        return True
-
-    def create_rooms(self, bsp_tree, ext_walls=True):
-        if self.child_1 or self.child_2:
-            # recursively search for children until you hit the end of the branch
-            if self.child_1:
-                self.child_1.create_rooms(bsp_tree)
-            if self.child_2:
-                self.child_2.create_rooms(bsp_tree)
-
-            if self.child_1 and self.child_2:
-                bsp_tree.createHall(self.child_1.get_room(),
-                                    self.child_2.get_room())
-
-        else:
-            # Create rooms in the end branches of the bsp tree
-            w = random.randint(bsp_tree.room_min_size, min(bsp_tree.room_min_size, self.width - 1))
-            h = random.randint(bsp_tree.room_min_size, min(bsp_tree.room_min_size, self.height - 1))
-            x = random.randint(self.x, self.x + (self.width - 1) - w)
-            y = random.randint(self.y, self.y + (self.height - 1) - h)
-            rect = Rect(x, y, w, h)
-            self.room = bsp_tree.create_room_rect(rect, ext_walls=ext_walls)
-
-    def get_room(self):
-        if self.room:
-            return self.room
-
-        else:
-            if self.child_1:
-                self.room_1 = self.child_1.get_room()
-            if self.child_2:
-                self.room_2 = self.child_2.get_room()
-
-            if not self.child_1 and not self.child_2:
-                # neither room_1 nor room_2
-                return None
-
-            elif not self.room_2:
-                # room_1 and !room_2
-                return self.room_1
-
-            elif not self.room_1:
-                # room_2 and !room_1
-                return self.room_2
-
-            # If both room_1 and room_2 exist, pick one
-            elif random.random() < 0.5:
-                return self.room_1
-            else:
-                return self.room_2

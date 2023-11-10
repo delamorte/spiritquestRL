@@ -1,5 +1,7 @@
 import random
 
+import numpy as np
+
 from map_gen.dungeon import Dungeon
 
 
@@ -18,9 +20,8 @@ class DrunkardsWalk(Dungeon):
     def generate_level(self):
         # Creates an empty 2D array or clears existing array
         self.walkIterations = max(self.walkIterations, (self.map_width * self.map_height * 10))
-        self.level = [[1
-                       for y in range(self.map_height)]
-                      for x in range(self.map_width)]
+
+        self.level = np.ones((self.map_height, self.map_width), dtype=np.int32)
 
         self._filled = 0
         self._previousDirection = None

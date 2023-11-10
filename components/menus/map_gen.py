@@ -10,7 +10,8 @@ class MapGen:
         self.sub_menu = sub_menu
         self.heading = None
         self.sub_heading = None
-        self.items = ["messy_bsp", "cellular", "random_walk", "hub", "room_addition"]
+        self.items = ["messy_bsp", "drunkard", "cellular", "random_walk", "hub", "room_addition", "squares",
+                      "squares_and_crosses"]
         self.items_icons = []
         self.sub_items = {}
         self.margin_x = 0
@@ -22,7 +23,7 @@ class MapGen:
     def refresh(self):
         pass
 
-    def show(self,):
+    def show(self, ):
         output = self.owner.show(self)
         if not output and self.sub_menu:
             self.event = "show_prev_menu"

@@ -34,7 +34,6 @@
     "entities": {
       "objects": [
         "tree",
-        "shrubs",
         "cobweb",
         "feather"
       ],
@@ -102,14 +101,15 @@
         "plants",
         "flowers",
         "water lily",
-        "glowing orb"
+        "glowing orb",
+        "ground_moss"
       ],
       "monsters": [
         "fairy"
       ]
     },
     "floor": [
-      "ground_moss"
+      "ground_soil"
     ],
     "wall": [
       "flowers"
@@ -124,7 +124,7 @@
         "plants",
         "rocks",
         "mushrooms",
-        "shrubs"
+        "ground_swampy"
       ],
       "monsters": [
         "frog",
@@ -133,7 +133,7 @@
       ]
     },
     "floor": [
-      "ground_swampy"
+      "ground_soil"
     ],
     "wall": [
       "wall_moss"
@@ -235,14 +235,15 @@
         "plants",
         "tree",
         "fairy_figurine",
-        "butterfly"
+        "butterfly",
+        "ground_moss"
       ],
       "monsters": [
         "fairy"
       ]
     },
     "floor": [
-      "ground_moss"
+      "ground_soil"
     ],
     "wall": [
       "flowers"
@@ -279,14 +280,15 @@
         "tree",
         "ground_moss",
         "rocks",
-        "throne"
+        "throne",
+        "ground_moss"
       ],
       "monsters": [
         "bear"
       ]
     },
     "floor": [
-      "ground_moss"
+      "ground_soil"
     ],
     "wall": [
       "tree_dead"
@@ -362,14 +364,15 @@
       "objects": [
         "tree",
         "shrine",
-        "candle"
+        "candle",
+        "fog"
       ],
       "monsters": [
         "spirit"
       ]
     },
     "floor": [
-      "fog"
+      "ground_soil"
     ],
     "wall": [
       "tree"
@@ -451,14 +454,15 @@
         "shrine",
         "snake_figurine",
         "cauldron",
-        "candle"
+        "candle",
+        "ground_moss"
       ],
       "monsters": [
         "snake"
       ]
     },
     "floor": [
-      "ground_moss"
+      "ground_soil"
     ],
     "wall": [
       "wall_moss"
@@ -487,6 +491,7 @@
     "floor": [
       "ground_soil"
     ],
+    "floor_colors": ["brown"],
     "wall": [
       "fence"
     ]
@@ -499,14 +504,15 @@
         "tree",
         "cross",
         "feather",
-        "lantern"
+        "lantern",
+        "ground_moss"
       ],
       "monsters": [
         "crow"
       ]
     },
     "floor": [
-      "ground_moss"
+      "ground_soil"
     ],
     "wall": [
       "tree"
@@ -570,14 +576,15 @@
         "sun_symbol",
         "cauldron",
         "feather",
-        "book"
+        "book",
+        "ground_swampy"
       ],
       "monsters": [
         "snake"
       ]
     },
     "floor": [
-      "ground_swampy"
+      "ground_soil"
     ],
     "wall": [
       "mushrooms"
@@ -593,14 +600,15 @@
         "rocks",
         "plants",
         "flowers",
-        "cross"
+        "cross",
+        "ground_swampy"
       ],
       "monsters": [
         "frog"
       ]
     },
     "floor": [
-      "ground_swampy"
+      "ground_soil"
     ],
     "wall": [
       "water"
@@ -768,7 +776,7 @@
       "monsters": []
     },
     "floor": ["ground_soil"],
-    "wall": ["shrubs"]
+    "wall": ["flowers"]
   },
   "Ornithologist's Watchtower": {
     "name": "Ornithologist's Watchtower",

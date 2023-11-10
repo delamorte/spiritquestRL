@@ -347,15 +347,10 @@
     ],
     "ascii": ".",
     "colors": [
-      "#402316",
-      "#4f3a28",
-      "#4f3a28",
-      "#33221a",
-      "#30170b",
-      "#361c18"
+      "brown"
     ],
     "corners": false,
-    "hue": true,
+    "hue": false,
     "blocks": false,
     "blocks_sight": false,
     "draw_floor": true,
@@ -376,12 +371,8 @@
     ],
     "ascii": ".",
     "colors": [
-      "#402316",
-      "#4f3a28",
-      "#4f3a28",
-      "#33221a",
-      "#30170b",
-      "#361c18"
+      "brown",
+      "sienna"
     ],
     "corners": false,
     "hue": true,
@@ -529,7 +520,7 @@
     ],
     "ascii": ".",
     "colors": [
-      "darkest gray"
+      "darker tan"
     ],
     "corners": false,
     "hue": true,
@@ -1159,7 +1150,7 @@
     "hue": true,
     "blocks": true,
     "blocks_sight": true,
-    "draw_floor": false,
+    "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
@@ -1191,7 +1182,7 @@
     "hue": true,
     "blocks": true,
     "blocks_sight": true,
-    "draw_floor": false,
+    "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
@@ -1217,7 +1208,7 @@
     "hue": true,
     "blocks": true,
     "blocks_sight": true,
-    "draw_floor": false,
+    "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
@@ -1241,7 +1232,7 @@
     "hue": true,
     "blocks": true,
     "blocks_sight": true,
-    "draw_floor": false,
+    "draw_floor": true,
     "light": true,
     "neutral": true,
     "chaos": true,
@@ -1645,13 +1636,13 @@
     "tile": 411,
     "tile_variants": [
       411,
-      412,
-      432,
-      452,
-      451,
       450,
+      432,
+      410,
+      451,
+      412,
       430,
-      410
+      452
     ],
     "ascii": "`",
     "colors": [

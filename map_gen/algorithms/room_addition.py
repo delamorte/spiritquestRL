@@ -5,12 +5,14 @@ from scipy.ndimage import label
 from scipy.signal import convolve2d
 
 import options
+from map_gen.algorithms.drunkards import DrunkardsWalk
 from map_gen.dungeon import Dungeon, Room
 
 
 # ==== Room Addition ====
 class RoomAddition(Dungeon):
-    def __init__(self, map_width=None, map_height=None, only_cellular=False, only_vaults=False):
+    def __init__(self, map_width=None, map_height=None, only_cellular=False, only_vaults=False,
+                 only_squares=False, squares_and_crosses=False, drunkard=False):
         super().__init__(map_width=map_width, map_height=map_height)
         self.rooms = []
         self.rooms_list = []
@@ -24,18 +26,17 @@ class RoomAddition(Dungeon):
         self.place_room_attempts = 10
         self.max_tunnel_length = 20
 
-        self.cellular_room_max_size = 18  # max height and width for cellular automata rooms
-
         self.square_room_max_size = 12
         self.square_room_min_size = 6
 
         self.cross_room_max_size = 14
         self.cross_room_min_size = 4
 
-        self.cavern_chance = 0.30  # probability that the first room will be a cavern
-        self.cavern_max_size = 16  # max height an width
+        self.cellular_chance = 0.30  # probability that the first room will be a cavern
+        self.cellular_room_min_size = 6  # max height and width for cellular automata rooms
+        self.cellular_room_max_size = 14  # max height and width for cellular automata rooms
 
-        self.conjoined_room_chance = 0.1  # chance to make room conjoined with other rooms
+        self.conjoined_room_chance = 0.0  # chance to make room conjoined with other rooms
 
         self.first_vault_max_size = 1600
         self.vault_max_size = 1100
@@ -51,19 +52,25 @@ class RoomAddition(Dungeon):
 
         self.only_cellular = only_cellular
         self.only_vaults = only_vaults
+        self.only_squares = only_squares
+        self.squares_and_crosses = squares_and_crosses
+        self.drunkard = drunkard
 
         self.name = "RoomAddition"
 
     def generate_level(self):
 
-        self.level = np.ones((self.map_height, self.map_width), dtype=np.int32)
+        if self.drunkard:
+            self.level = DrunkardsWalk(self.map_width, self.map_height).generate_level()
+        else:
+            self.level = np.ones((self.map_height, self.map_width), dtype=np.int32)
         vault_size_offset = 0
         for r in range(self.build_room_attempts):
             if r == 0:
                 vault_size_offset = self.first_vault_max_size
             elif len(self.rooms) > 4:
                 vault_size_offset = self.vault_size_offset
-            room_arr, vault = self.generate_room(vault_size_offset)
+            room_arr, algorithm = self.generate_room(vault_size_offset)
 
             room_height, room_width = room_arr.shape
             if room_height >= self.map_height - 1 or room_width >= self.map_width - 1:
@@ -71,7 +78,7 @@ class RoomAddition(Dungeon):
             x = random.randint(1, self.map_width - room_width - 1)
             y = random.randint(1, self.map_height - room_height - 1)
             id_nr = len(self.rooms) + 1
-            new_room = Room(x, y, room_width, room_height, room_arr, id_nr=id_nr)
+            new_room = Room(x, y, room_width, room_height, room_arr, id_nr=id_nr, algorithm=algorithm)
 
             # Discard too small or too large rooms
             if len(new_room.inner) > self.room_max_size or len(new_room.inner) < self.room_min_size:
@@ -90,7 +97,7 @@ class RoomAddition(Dungeon):
             self.add_room(new_room)
 
             # A vault is a prefab which may consist of multiple rooms, use flood fill to add inner rooms
-            if vault:
+            if algorithm == "vault":
                 rooms = self.get_rooms_by_flood_fill(new_room)
                 if rooms:
                     for room in rooms:
@@ -106,16 +113,28 @@ class RoomAddition(Dungeon):
         return self.level
 
     def generate_room(self, vault_size_offset=0):
-        vault = False
+        algorithm = None
         # select a room type to generate and return that room
         if self.only_cellular:
             self.conjoined_room_chance = 1.0
             room = self.generate_room_cellular()
-            return room, vault
+            return room, "cellular"
         if self.only_vaults:
             vault_size = self.vault_max_size - vault_size_offset
             room = self.generate_random_vault(vault_size)
-            return room, True
+            return room, "vault"
+        if self.only_squares:
+            room = self.generate_room_square()
+            return room, "square"
+        if self.squares_and_crosses:
+            choice = random.random()
+            if choice < self.vault_chance:
+                room = self.generate_room_square()
+                algorithm = "square"
+            else:
+                room = self.generate_room_cross()
+                algorithm = "cross"
+            return room, algorithm
         if self.rooms:
             # There is at least one room already
             choice = random.random()
@@ -123,29 +142,34 @@ class RoomAddition(Dungeon):
             if choice < self.vault_chance:
                 vault_size = self.vault_max_size - vault_size_offset
                 room = self.generate_random_vault(vault_size)
-                vault = True
+                algorithm = "vault"
 
             else:
                 if choice < self.square_room_chance:
                     room = self.generate_room_square()
+                    algorithm = "square"
                 elif self.square_room_chance <= choice < (self.square_room_chance + self.cross_room_chance):
                     room = self.generate_room_cross()
+                    algorithm = "cross"
                 else:
                     room = self.generate_room_cellular()
+                    algorithm = "cellular"
 
         else:  # it's the first room
             choice = random.random()
             if choice < self.vault_chance:
                 room = self.generate_random_vault(self.first_vault_max_size)
-                vault = True
+                algorithm = "vault"
 
             else:
-                if choice < self.cavern_chance:
+                if choice < self.cellular_chance:
                     room = self.generate_room_cellular()
+                    algorithm = "cellular"
                 else:
                     room = self.generate_room_square()
+                    algorithm = "square"
 
-        return room, vault
+        return room, algorithm
 
     def generate_room_cross(self):
         room_hor_width = int((random.randint(self.cross_room_min_size + 2, self.cross_room_max_size)) / 2 * 2)
@@ -217,7 +241,7 @@ class RoomAddition(Dungeon):
             y1_offset = floors[0][0] - 1
             x1_offset = floors[1][0] - 1
             new_room = Room(vault_room.x1 + x1_offset, vault_room.y1 + y1_offset, room_width,
-                            room_height, padded_room, id_nr=id_nr)
+                            room_height, padded_room, id_nr=id_nr, algorithm="vault")
             rooms.append(new_room)
 
         return rooms
@@ -255,8 +279,10 @@ class RoomAddition(Dungeon):
         """
         convolve_steps = self.cellular_iterations
         rng = np.random.default_rng()
-        arr = rng.choice(2, (self.cellular_room_max_size - 1, self.cellular_room_max_size - 1),
-                        p=[1 - self.cellular_wall_probability, self.cellular_wall_probability])
+        h = random.randint(self.cross_room_min_size, self.cellular_room_max_size)
+        w = random.randint(self.cross_room_min_size, self.cellular_room_max_size)
+        arr = rng.choice(2, (h, w),
+                         p=[1 - self.cellular_wall_probability, self.cellular_wall_probability])
         room = np.pad(arr, 1, constant_values=1)
 
         kernel = [[1, 1, 1], [1, 1, 1], [1, 1, 1]]  # 8-bit

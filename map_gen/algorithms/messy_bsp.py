@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from map_gen.dungeon import Leaf, Dungeon, Room
+from map_gen.dungeon import Dungeon, Room, Rect
 
 
 # ==== Messy BSP Tree ====
@@ -56,28 +56,17 @@ class MessyBSPTree(Dungeon):
         #self.adjacent_rooms_path_scan(max_length=20)
         return self.level
 
-    def create_room_from_rectangle(self, leaf, padding=1):
+    def create_room_from_rectangle(self, leaf):
         w = random.randint(self.room_min_size, min(self.room_max_size, leaf.width - 1))
         h = random.randint(self.room_min_size, min(self.room_max_size, leaf.height - 1))
         x = random.randint(leaf.x, leaf.x + (leaf.width - 1) - w)
         y = random.randint(leaf.y, leaf.y + (leaf.height - 1) - h)
 
-        if x + w >= self.map_width - 1:
-            x2 = self.map_width - 2
-            w = x2 - x
-        if y + h >= self.map_height - 1:
-            y2 = self.map_height - 2
-            h = y2 - y
-
-        room_arr = np.zeros((h, w), dtype=np.int32)
-        # If padding > 0, pad the room with walls
-        if padding > 0:
-            padded_room = np.pad(room_arr, 1, constant_values=1)
-        else:
-            padded_room = room_arr
+        room_arr = np.ones((h, w), dtype=np.int32)
+        room_arr[1:-1, 1:-1] = 0
         id_nr = len(self.rooms) + 1
-        p_height, p_width = padded_room.shape
-        room = Room(x1=x, y1=y, w=p_width, h=p_height, nd_array=padded_room,
+
+        room = Room(x1=x, y1=y, w=w, h=h, nd_array=room_arr,
                     id_nr=id_nr)
         self.add_room(room)
         return room
@@ -140,3 +129,105 @@ class MessyBSPTree(Dungeon):
                         room1.entrances.add(wall)
                     if wall in room2.outer and wall not in room2.entrances:
                         room2.entrances.add(wall)
+
+
+class Leaf:  # used for the BSP tree algorithm
+    def __init__(self, x, y, width, height):
+        self.room_2 = None
+        self.room_1 = None
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.MIN_LEAF_SIZE = 10
+        self.child_1 = None
+        self.child_2 = None
+        self.room = None
+        self.hall = None
+
+    def split_leaf(self):
+        # begin splitting the leaf into two children
+        if (self.child_1 is not None) or (self.child_2 is not None):
+            return False  # This leaf has already been split
+
+        '''
+        ==== Determine the direction of the split ====
+        If the width of the leaf is >25% larger than the height,
+        split the leaf vertically.
+        If the height of the leaf is >25 larger than the width,
+        split the leaf horizontally.
+        Otherwise, choose the direction at random.
+        '''
+        split_horizontally = random.choice([True, False])
+        if self.width / self.height >= 1.25:
+            split_horizontally = False
+        elif self.height / self.width >= 1.25:
+            split_horizontally = True
+
+        if split_horizontally:
+            max_size = self.height - self.MIN_LEAF_SIZE
+        else:
+            max_size = self.width - self.MIN_LEAF_SIZE
+
+        if max_size <= self.MIN_LEAF_SIZE:
+            return False  # the leaf is too small to split further
+
+        split = random.randint(self.MIN_LEAF_SIZE, max_size)  # determine where to split the leaf
+
+        if split_horizontally:
+            self.child_1 = Leaf(self.x, self.y, self.width, split)
+            self.child_2 = Leaf(self.x, self.y + split, self.width, self.height - split)
+        else:
+            self.child_1 = Leaf(self.x, self.y, split, self.height)
+            self.child_2 = Leaf(self.x + split, self.y, self.width - split, self.height)
+
+        return True
+
+    def create_rooms(self, bsp_tree):
+        if self.child_1 or self.child_2:
+            # recursively search for children until you hit the end of the branch
+            if self.child_1:
+                self.child_1.create_rooms(bsp_tree)
+            if self.child_2:
+                self.child_2.create_rooms(bsp_tree)
+
+            if self.child_1 and self.child_2:
+                bsp_tree.createHall(self.child_1.get_room(),
+                                    self.child_2.get_room())
+
+        else:
+            # Create rooms in the end branches of the bsp tree
+            w = random.randint(bsp_tree.room_min_size, min(bsp_tree.room_min_size, self.width - 1))
+            h = random.randint(bsp_tree.room_min_size, min(bsp_tree.room_min_size, self.height - 1))
+            x = random.randint(self.x, self.x + (self.width - 1) - w)
+            y = random.randint(self.y, self.y + (self.height - 1) - h)
+            rect = Rect(x, y, w, h)
+            self.room = bsp_tree.create_room_from_rectangle(self)
+
+    def get_room(self):
+        if self.room:
+            return self.room
+
+        else:
+            if self.child_1:
+                self.room_1 = self.child_1.get_room()
+            if self.child_2:
+                self.room_2 = self.child_2.get_room()
+
+            if not self.child_1 and not self.child_2:
+                # neither room_1 nor room_2
+                return None
+
+            elif not self.room_2:
+                # room_1 and !room_2
+                return self.room_1
+
+            elif not self.room_1:
+                # room_2 and !room_1
+                return self.room_2
+
+            # If both room_1 and room_2 exist, pick one
+            elif random.random() < 0.5:
+                return self.room_1
+            else:
+                return self.room_2
