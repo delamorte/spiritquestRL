@@ -369,9 +369,10 @@ class Dungeon:
                 if self.level[drunkard_y][drunkard_x] == 1:
                     self.level[drunkard_y][drunkard_x] = 0
                     wall = (drunkard_x, drunkard_y)
-                    current_cave_tunnel.add(wall)
                     if wall in current_cave_walls and wall not in current_cave_entrances:
                         current_cave_entrances.add(wall)
+                    else:
+                        current_cave_tunnel.add(wall)
 
     @staticmethod
     def distance_formula(point1, point2):

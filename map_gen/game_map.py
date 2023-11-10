@@ -24,6 +24,7 @@ class GameMap:
         self.entities = {
             "monsters": [],
             "objects": [],
+            "decorations": [],
             "npcs": [],
             "player": [],
             "allies": [],
@@ -351,6 +352,8 @@ class GameMap:
                 feature_name = choice(self.biome.features)
             feature_data = json_data.data.biome_features[feature_name]
             room.feature = feature_name
+            if feature_data["has_door"]:
+                room.has_door = True
             wall_name = choice(feature_data["wall"])
             wall_tile = get_tile_object(wall_name)
             wall_color = get_color(wall_name)
@@ -406,9 +409,9 @@ class GameMap:
                 if self.tiles[x][y].entities_on_tile:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
-                # if not room.has_door:
-                #     self.create_door(state="closed", x=x, y=y)
-                #     room.has_door = True
+                if room.has_door:
+                    self.create_door(state="closed", x=x, y=y)
+                    break
 
             for tile in room.outer:
                 x, y = tile[0], tile[1]
@@ -425,7 +428,7 @@ class GameMap:
                             if entity.name == wall_name:
                                 entity.char = char
 
-        #self.create_entities_in_rooms()
+        self.create_entities_in_rooms()
 
     def process_prefabs(self):
         if self.biome.biome_data["name"] == "hub":
@@ -592,7 +595,6 @@ class GameMap:
         """
         Creates and adds monsters to all rooms in the map from the given pool.
         """
-
         for room in self.algorithm.rooms:
 
             room_size = len(room.inner)
@@ -601,6 +603,8 @@ class GameMap:
             feature_data = json_data.data.biome_features[room.feature]
             room_entities = feature_data["entities"]
             for category, entities in room_entities.items():
+                if not entities:
+                    continue
                 if not self.biome.biome_data["monsters"] and category == "monsters":
                     continue
                 if entity_count >= room_max_entities:
@@ -719,10 +723,12 @@ class GameMap:
     @staticmethod
     def get_room_population(room_size, category):
         if category == "monsters":
-            return int(ceil(room_size / 50) * randint(1, 3))
+            return int(ceil(room_size / 50) * randint(1, 3)) - 1
         elif category == "npcs":
             return 1
         elif category == "allies":
             return 1
+        elif category == "objects":
+            return randint(1, 3)
         else:
-            return int(room_size / 5)
+            return 1

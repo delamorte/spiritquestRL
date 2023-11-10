@@ -3,7 +3,8 @@
     "name": "Abandoned Ruins",
     "description": "Crumbling structures overrun by nature, potentially holding ancient artifacts or hidden dangers.",
     "entities": {
-      "objects": [
+      "objects": [],
+      "decorations": [
         "tree",
         "mushrooms",
         "rocks",
@@ -26,16 +27,20 @@
     ],
     "wall": [
       "wall_stone"
-    ]
+    ],
+    "has_door": true,
+    "may_spawn_boss": false
   },
   "Ancient Tree": {
     "name": "Ancient Tree",
     "description": "A colossal tree of immense age, often considered a sacred or mystical landmark.",
     "entities": {
-      "objects": [
+      "objects": [],
+      "decorations": [
         "tree",
         "cobweb",
-        "feather"
+        "feather",
+        "ground_moss"
       ],
       "monsters": [
         "crow",
@@ -43,43 +48,45 @@
       ]
     },
     "floor": [
-      "ground_moss"
+      "ground_soil"
     ],
     "wall": [
       "tree"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Bat Cave": {
     "name": "Bat Cave",
     "description": "A dark and mysterious cave where a colony of bats reside, rumored to guard ancient secrets.",
     "entities": {
-      "objects": [
+      "objects": [],
+      "decorations": [
         "rocks",
         "cobweb",
-        "candle"
+        "ground_moss"
       ],
       "monsters": [
         "bat"
       ]
     },
     "floor": [
-      "ground_moss"
+      "ground_soil"
     ],
     "wall": [
       "wall_stone"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Beast Tamer's Camp": {
     "name": "Beast Tamer's Camp",
     "description": "A campsite where skilled trainers tame and nurture forest-dwelling beasts.",
     "entities": {
-      "objects": [
+      "objects": ["table_with_chair", "cage", "weapon_rack", "chair"],
+      "decorations": [
         "fence",
-        "tree",
-        "chair",
-        "table_with_chair",
-        "cage",
-        "weapon_rack"
+        "tree"
       ],
       "monsters": [
         "bear",
@@ -91,17 +98,19 @@
     ],
     "wall": [
       "wall_wood"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Bioluminescent Glade": {
     "name": "Bioluminescent Glade",
     "description": "A beautiful area where luminescent plants or monsters light up the surroundings at night.",
     "entities": {
-      "objects": [
+      "objects": ["glowing orb"],
+      "decorations": [
         "plants",
         "flowers",
         "water lily",
-        "glowing orb",
         "ground_moss"
       ],
       "monsters": [
@@ -113,18 +122,22 @@
     ],
     "wall": [
       "flowers"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Boggy Marshlands": {
     "name": "Boggy Marshlands",
     "description": "Vast stretches of murky, unstable land that could hide secrets or rare flora and fauna.",
     "entities": {
-      "objects": [
+      "objects": [],
+      "decorations": [
         "water",
         "plants",
         "rocks",
         "mushrooms",
-        "ground_swampy"
+        "ground_swampy",
+        "fog"
       ],
       "monsters": [
         "frog",
@@ -137,17 +150,19 @@
     ],
     "wall": [
       "wall_moss"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Bubbling Pools": {
     "name": "Bubbling Pools",
     "description": "Natural hot springs or pools with unique properties, perhaps healing or poisonous.",
     "entities": {
-      "objects": [
+      "objects": ["flask"],
+      "decorations": [
         "water",
         "rocks",
-        "plants",
-        "flask"
+        "plants"
       ],
       "monsters": [
         "snake"
@@ -158,19 +173,18 @@
     ],
     "wall": [
       "tree"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Crow Sanctuary": {
     "name": "Crow Sanctuary",
     "description": "A peaceful haven for crows, where these intelligent birds gather, possibly led by a wise and enigmatic crow.",
     "entities": {
-      "objects": [
+      "objects": ["skull", "shrine", "statue", "candelabra", "feather"],
+      "decorations": [
         "tree",
-        "shrine",
-        "statue",
-        "skull",
-        "candelabra",
-        "feather"
+        "ground_moss"
       ],
       "monsters": [
         "crow"
@@ -181,17 +195,18 @@
     ],
     "wall": [
       "tree"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": ["black crow king"]
   },
   "Druid Circle": {
     "name": "Druid Circle",
     "description": "A sacred space where druids perform rituals and commune with nature spirits.",
     "entities": {
-      "objects": [
+      "objects": ["holy symbol", "shrine"],
+      "decorations": [
         "rocks",
-        "plants",
-        "shrine",
-        "holy symbol"
+        "plants"
       ],
       "monsters": [
         "spirit"
@@ -202,17 +217,18 @@
     ],
     "wall": [
       "tree"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Enchanted Pond": {
     "name": "Enchanted Pond",
     "description": "A mystical pond rumored to have healing or transformative properties.",
     "entities": {
-      "objects": [
+      "objects": ["glowing orb", "butterfly"],
+      "decorations": [
         "water lily",
-        "plants",
-        "glowing orb",
-        "butterfly"
+        "plants"
       ],
       "monsters": [
         "frog",
@@ -224,18 +240,21 @@
     ],
     "wall": [
       "ground_moss"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Fairy Glen": {
     "name": "Fairy Glen",
     "description": "A serene, flower-filled glade believed to be a meeting place for whimsical woodland monsters.",
     "entities": {
-      "objects": [
+      "objects": ["fairy_figurine",
+        "butterfly"
+      ],
+      "decorations": [
         "flowers",
         "plants",
         "tree",
-        "fairy_figurine",
-        "butterfly",
         "ground_moss"
       ],
       "monsters": [
@@ -247,18 +266,21 @@
     ],
     "wall": [
       "flowers"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Fairy Ring": {
     "name": "Fairy Ring",
     "description": "A mysterious circular formation of mushrooms or plants, believed to be a gateway to another realm or hold mystical properties.",
     "entities": {
-      "objects": [
+      "objects": ["fairy_figurine",
+        "glowing orb",
+        "butterfly"
+      ],
+      "decorations": [
         "mushrooms",
         "plants",
-        "fairy_figurine",
-        "glowing orb",
-        "butterfly",
         "ground_moss"
       ],
       "monsters": [
@@ -270,17 +292,19 @@
     ],
     "wall": [
       "mushrooms"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Giant's Stump": {
     "name": "Giant's Stump",
     "description": "The remnant of a massive fallen tree, now a gathering spot or shelter for forest monsters.",
     "entities": {
-      "objects": [
+      "objects": [        "throne"],
+      "decorations": [
         "tree",
         "ground_moss",
         "rocks",
-        "throne",
         "ground_moss"
       ],
       "monsters": [
@@ -292,7 +316,9 @@
     ],
     "wall": [
       "tree_dead"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Goldilocks' House": {
     "name": "Goldilocks' House",
@@ -304,6 +330,7 @@
         "table",
         "bed"
       ],
+      "decorations": [],
       "monsters": [
         "bear"
       ]
@@ -313,17 +340,19 @@
     ],
     "wall": [
       "wall_wood"
-    ]
+    ],
+    "has_door": true,
+    "may_spawn_boss": false
   },
   "Herb Garden": {
     "name": "Herb Garden",
     "description": "A cultivated area housing rare and potent herbs, tended by healers or witches.",
     "entities": {
-      "objects": [
+      "objects": [        "shrine",
+        "cauldron"],
+      "decorations": [
         "plants",
-        "flowers",
-        "shrine",
-        "cauldron"
+        "flowers"
       ],
       "monsters": [
         "snake"
@@ -334,17 +363,19 @@
     ],
     "wall": [
       "flowers"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Herbalist's Garden": {
     "name": "Herbalist's Garden",
     "description": "A carefully tended area with unique and potent herbs for alchemical purposes.",
     "entities": {
-      "objects": [
+      "objects": [        "table_with_chair",
+        "flask"],
+      "decorations": [
         "plants",
-        "flowers",
-        "table_with_chair",
-        "flask"
+        "flowers"
       ],
       "monsters": [
         "snake"
@@ -355,16 +386,19 @@
     ],
     "wall": [
       "wall_wood"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Misty Clearing": {
     "name": "Misty Clearing",
     "description": "A fog-covered area that might be the site of eerie occurrences or mystic rituals.",
     "entities": {
-      "objects": [
+      "objects": [        "shrine",
+        "candle"
+      ],
+      "decorations": [
         "tree",
-        "shrine",
-        "candle",
         "fog"
       ],
       "monsters": [
@@ -376,20 +410,21 @@
     ],
     "wall": [
       "tree"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Monster's Lair": {
     "name": "Monster's Lair",
     "description": "A cavern or lair inhabited by a legendary or terrifying swamp creature.",
     "entities": {
-      "objects": [
+      "objects": [        "skull"],
+      "decorations": [
         "rocks",
         "bones",
-        "cobweb",
-        "skull"
+        "cobweb"
       ],
       "monsters": [
-        "king kobra",
         "chaos bear",
         "bear",
         "serpent"
@@ -400,18 +435,21 @@
     ],
     "wall": [
       "wall_stone"
-    ]
+    ],
+    "has_door": true,
+    "may_spawn_boss": ["king kobra", "albino rat"]
   },
   "Moon Altar": {
     "name": "Moon Altar",
     "description": "An enchanted altar that harnesses the power of the moon, often visited by mystics for blessings or rituals.",
     "entities": {
-      "objects": [
-        "rocks",
-        "shrine",
+      "objects": ["shrine",
         "moon_symbol",
         "candle",
-        "statue",
+        "statue"
+      ],
+      "decorations": [
+        "rocks",
         "pillar"
       ],
       "monsters": [
@@ -423,17 +461,19 @@
     ],
     "wall": [
       "fence"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Mystic Caverns": {
     "name": "Mystic Caverns",
     "description": "Underground passages rumored to hold ancient relics or be home to secretive forest-dwelling monsters.",
     "entities": {
-      "objects": [
+      "objects": ["torch",
+        "crystal"],
+      "decorations": [
         "rocks",
-        "bones",
-        "torch",
-        "crystal"
+        "bones"
       ],
       "monsters": [
         "snake"
@@ -444,17 +484,20 @@
     ],
     "wall": [
       "wall_moss"
-    ]
+    ],
+    "has_door": true,
+    "may_spawn_boss": false
   },
   "Mystic Snake Coven": {
     "name": "Mystic Snake Coven",
     "description": "A gathering of mystical serpents known for their ancient wisdom and magical prowess, performing secretive rituals.",
     "entities": {
-      "objects": [
-        "shrine",
+      "objects": [        "shrine",
         "snake_figurine",
         "cauldron",
-        "candle",
+        "candle"
+      ],
+      "decorations": [
         "ground_moss"
       ],
       "monsters": [
@@ -466,19 +509,24 @@
     ],
     "wall": [
       "wall_moss"
-    ]
+    ],
+    "has_door": true,
+    "may_spawn_boss": ["king kobra"]
   },
   "Overgrown Cemetery": {
     "name": "Overgrown Cemetery",
     "description": "A graveyard consumed by the swamp, possibly haunted or hiding lost artifacts.",
     "entities": {
       "objects": [
-        "coffin",
-        "bones",
-        "cobweb",
         "skull",
         "shrine",
         "remains_player",
+        "candelabra"
+      ],
+      "decorations": [
+        "coffin",
+        "cobweb",
+        "bones",
         "ground_moss"
       ],
       "monsters": [
@@ -491,20 +539,23 @@
     "floor": [
       "ground_soil"
     ],
-    "floor_colors": ["brown"],
+    "floor_colors": ["brown", "dark brown"],
     "wall": [
       "fence"
-    ]
+    ],
+    "has_door": true,
+    "may_spawn_boss": false
   },
   "Ranger's Lookout": {
     "name": "Ranger's Lookout",
     "description": "A high vantage point used by rangers to surveil the forest and protect its inhabitants.",
     "entities": {
-      "objects": [
-        "tree",
-        "cross",
+      "objects": ["cross",
         "feather",
-        "lantern",
+        "lantern"
+      ],
+      "decorations": [
+        "tree",
         "ground_moss"
       ],
       "monsters": [
@@ -516,20 +567,23 @@
     ],
     "wall": [
       "tree"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Rat Laboratory": {
     "name": "Rat Laboratory",
     "description": "A laboratory run by intelligent rats conducting experiments and inventing peculiar contraptions.",
     "entities": {
-      "objects": [
-        "table",
+      "objects": ["table",
         "chair",
         "table_with_chair",
         "flask",
         "skull",
         "book",
         "remains_player"
+      ],
+      "decorations": [
       ],
       "monsters": [
         "rat"
@@ -540,17 +594,19 @@
     ],
     "wall": [
       "wall_brick"
-    ]
+    ],
+    "has_door": true,
+    "may_spawn_boss": ["albino rat"]
   },
   "Sunlit Grove": {
     "name": "Sunlit Grove",
     "description": "A radiant grove basking in sunlight, exuding tranquility and often used for ceremonies.",
     "entities": {
-      "objects": [
-        "flowers",
-        "sun_symbol",
+      "objects": ["sun_symbol",
         "butterfly",
-        "fairy_figurine"
+        "fairy_figurine"],
+      "decorations": [
+        "flowers"
       ],
       "monsters": [
         "fairy"
@@ -561,22 +617,25 @@
     ],
     "wall": [
       "ground_soil"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Swamp Shaman's Circle": {
     "name": "Swamp Shaman's Circle",
     "description": "A sacred site used for spiritual gatherings or rituals by the local tribes or shamans.",
     "entities": {
-      "objects": [
-        "rocks",
-        "bones",
-        "shrine",
+      "objects": ["shrine",
         "snake_figurine",
         "moon_symbol",
         "sun_symbol",
         "cauldron",
         "feather",
-        "book",
+        "book"
+      ],
+      "decorations": [
+        "rocks",
+        "bones",
         "ground_swampy"
       ],
       "monsters": [
@@ -588,19 +647,21 @@
     ],
     "wall": [
       "mushrooms"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Waterfall Oasis": {
     "name": "Waterfall Oasis",
     "description": "A hidden, picturesque waterfall surrounded by lush foliage, serving as a tranquil resting place.",
     "entities": {
-      "objects": [
+      "objects": ["cross"],
+      "decorations": [
         "water",
         "water lily",
         "rocks",
         "plants",
         "flowers",
-        "cross",
         "ground_swampy"
       ],
       "monsters": [
@@ -612,17 +673,20 @@
     ],
     "wall": [
       "water"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Wildlife Sanctuary": {
     "name": "Wildlife Sanctuary",
     "description": "A protected area thriving with diverse monsters, guarded by nature-loving druids or rangers.",
     "entities": {
-      "objects": [
+      "objects": ["cross"],
+      "decorations": [
         "tree",
         "flowers",
         "plants",
-        "cross"
+        "water"
       ],
       "monsters": [
         "bear",
@@ -636,16 +700,19 @@
     ],
     "wall": [
       "tree"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Wisp-lit Trail": {
     "name": "Wisp-lit Trail",
     "description": "A trail illuminated by mystical wisps, said to guide travelers but also lead them astray.",
     "entities": {
-      "objects": [
+      "objects": ["glowing orb"],
+      "decorations": [
         "tree",
-        "glowing orb",
-        "footprints"
+        "footprints",
+        "fog"
       ],
       "monsters": [
         "spirit",
@@ -657,7 +724,9 @@
     ],
     "wall": [
       "tree"
-    ]
+    ],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Witch's Hut": {
     "name": "Witch's Hut",
@@ -673,6 +742,7 @@
         "skull",
         "table_with_chair"
       ],
+      "decorations": [],
       "monsters": [
         "spirit",
         "imp",
@@ -686,43 +756,47 @@
     ],
     "wall": [
       "wall_wood"
-    ]
+    ],
+    "has_door": true,
+    "may_spawn_boss": false
   },
   "Shaman's Retreat": {
     "name": "Shaman's Retreat",
     "description": "A secluded sanctuary where shamans commune with spirits and perform sacred rituals.",
     "entities": {
-      "objects": [
-        "throne",
+      "objects": ["throne",
         "book",
         "skull",
         "cauldron",
         "table_with_chair",
         "candle",
-        "window"
+        "window"],
+      "decorations": [
       ],
       "monsters": []
     },
     "floor": ["floor_wood"],
-    "wall": ["wall_wood"]
+    "wall": ["wall_wood"],
+    "has_door": true,
+    "may_spawn_boss": false
   },
-  "Druid Altar": {
+"Druid Altar": {
     "name": "Druid Altar",
     "description": "An ancient stone altar used by druids to honor nature and channel its energy.",
     "entities": {
       "objects": [
         "shrine",
-        "plants",
-        "holy symbol",
-        "rocks",
-        "tree"
+        "cross"
       ],
+      "decorations": ["tree", "rocks", "plants"],
       "npcs": ["druid"],
       "allies": ["crow"],
       "monsters": []
     },
     "floor": ["ground_soil"],
-    "wall": ["tree"]
+    "wall": ["tree"],
+    "has_door": true,
+    "may_spawn_boss": false
   },
   "Alchemist Laboratory": {
     "name": "Alchemist Laboratory",
@@ -736,12 +810,15 @@
         "cauldron",
         "window"
       ],
+      "decorations": [],
       "npcs": ["alchemist"],
       "allies": ["imp"],
       "monsters": []
     },
     "floor": ["floor_stone"],
-    "wall": ["wall_stone"]
+    "wall": ["wall_stone"],
+    "has_door": true,
+    "may_spawn_boss": false
   },
   "Ranger's Cabin": {
     "name": "Ranger's Cabin",
@@ -754,29 +831,35 @@
         "table_with_chair",
         "lantern"
       ],
+      "decorations": [],
       "npcs": ["ranger"],
       "allies": ["crow", "bear"],
       "monsters": []
     },
     "floor": ["floor_wood"],
-    "wall": ["wall_wood"]
+    "wall": ["wall_wood"],
+    "has_door": true,
+    "may_spawn_boss": false
   },
   "Hermit's Garden": {
     "name": "Hermit's Garden",
     "description": "A carefully tended garden filled with diverse herbs and plants for medicinal purposes.",
     "entities": {
       "objects": [
-        "plants",
-        "flowers",
         "shrine",
         "cauldron"
+      ],
+      "decorations": ["plants",
+        "flowers"
       ],
       "npcs": ["hermit"],
       "allies": ["snake"],
       "monsters": []
     },
     "floor": ["ground_soil"],
-    "wall": ["flowers"]
+    "wall": ["flowers"],
+    "has_door": false,
+    "may_spawn_boss": false
   },
   "Ornithologist's Watchtower": {
     "name": "Ornithologist's Watchtower",
@@ -788,11 +871,14 @@
         "window",
         "feather"
       ],
+      "decorations": [],
       "npcs": ["ornithologist"],
       "allies": ["crow"],
       "monsters": []
     },
     "floor": ["wall_wood"],
-    "wall": ["wall_stone"]
+    "wall": ["wall_stone"],
+    "has_door": true,
+    "may_spawn_boss": false
   }
 }

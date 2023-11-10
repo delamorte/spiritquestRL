@@ -353,7 +353,6 @@ class Entity:
         if "xtra_info" in f_data.keys():
             self.xtra_info = f_data["xtra_info"]
         if self.category == "npcs":
-            self.ai.ally = True
             self.indicator_color = "light green"
         if f_data["size"] == "gigantic":
             self.boss = True

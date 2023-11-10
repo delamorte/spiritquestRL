@@ -350,7 +350,7 @@
       "brown"
     ],
     "corners": false,
-    "hue": false,
+    "hue": true,
     "blocks": false,
     "blocks_sight": false,
     "draw_floor": true,
