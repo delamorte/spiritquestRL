@@ -83,7 +83,7 @@
     "name": "Beast Tamer's Camp",
     "description": "A campsite where skilled trainers tame and nurture forest-dwelling beasts.",
     "entities": {
-      "objects": ["table_with_chair", "cage", "weapon_rack", "chair"],
+      "objects": ["table", "cage", "weapon_rack", "chair"],
       "decorations": [
         "fence",
         "tree"
@@ -203,7 +203,7 @@
     "name": "Druid Circle",
     "description": "A sacred space where druids perform rituals and commune with nature spirits.",
     "entities": {
-      "objects": ["holy symbol", "shrine"],
+      "objects": ["cross", "shrine"],
       "decorations": [
         "rocks",
         "plants"
@@ -325,16 +325,17 @@
     "description": "A cozy cottage inhabited by the curious and adventurous Goldilocks, filled with remnants of her past escapades.",
     "entities": {
       "objects": [
-        "window",
+      ],
+      "decorations": [
         "chair",
         "table",
         "bed"
       ],
-      "decorations": [],
       "monsters": [
         "bear"
       ]
     },
+    "windows": true,
     "floor": [
       "floor_wood"
     ],
@@ -740,9 +741,10 @@
         "moon_symbol",
         "book",
         "skull",
-        "table_with_chair"
+        "candle",
+        "candelabra"
       ],
-      "decorations": [],
+      "decorations": ["table_with_chair", "table", "chair"],
       "monsters": [
         "spirit",
         "imp",
@@ -751,6 +753,7 @@
         "chaos spirit"
       ]
     },
+    "windows": true,
     "floor": [
       "floor_wood"
     ],
@@ -769,12 +772,16 @@
         "skull",
         "cauldron",
         "table_with_chair",
-        "candle",
-        "window"],
+        "candle"
+      ],
       "decorations": [
+        "table_with_chair",
+        "table",
+        "chair"
       ],
       "monsters": []
     },
+    "windows": true,
     "floor": ["floor_wood"],
     "wall": ["wall_wood"],
     "has_door": true,
@@ -803,18 +810,19 @@
     "description": "A well-equipped laboratory where alchemists conduct experiments and create potions.",
     "entities": {
       "objects": [
-        "table",
         "flask",
         "crystal",
         "book",
-        "cauldron",
-        "window"
+        "cauldron"
       ],
-      "decorations": [],
+      "decorations": [
+        "table"
+      ],
       "npcs": ["alchemist"],
       "allies": ["imp"],
       "monsters": []
     },
+    "windows": true,
     "floor": ["floor_stone"],
     "wall": ["wall_stone"],
     "has_door": true,
@@ -826,7 +834,6 @@
     "entities": {
       "objects": [
         "torch",
-        "window",
         "bed",
         "table_with_chair",
         "lantern"
@@ -836,6 +843,7 @@
       "allies": ["crow", "bear"],
       "monsters": []
     },
+    "windows": true,
     "floor": ["floor_wood"],
     "wall": ["wall_wood"],
     "has_door": true,
@@ -849,7 +857,8 @@
         "shrine",
         "cauldron"
       ],
-      "decorations": ["plants",
+      "decorations": [
+        "plants",
         "flowers"
       ],
       "npcs": ["hermit"],
@@ -868,7 +877,6 @@
       "objects": [
         "cage",
         "book",
-        "window",
         "feather"
       ],
       "decorations": [],
@@ -876,6 +884,7 @@
       "allies": ["crow"],
       "monsters": []
     },
+    "windows": true,
     "floor": ["wall_wood"],
     "wall": ["wall_stone"],
     "has_door": true,

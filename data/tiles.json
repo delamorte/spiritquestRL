@@ -1651,7 +1651,7 @@
     ],
     "corners": true,
     "hue": true,
-    "blocks": false,
+    "blocks": true,
     "blocks_sight": false,
     "draw_floor": true,
     "light": true,

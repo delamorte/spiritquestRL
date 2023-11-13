@@ -211,6 +211,36 @@ class RoomAddition(Dungeon):
 
         return padded_room
 
+    def generate_room_cellular(self):
+        """Return the next step of the cave generation algorithm.
+
+        `tiles` is the input array. (0: wall, 1: floor)
+
+        If the 3x3 area around a tile (including itself) has `wall_rule` number of
+        walls then the tile will become a wall.
+        """
+        convolve_steps = self.cellular_iterations
+        rng = np.random.default_rng()
+        h = random.randint(self.cross_room_min_size, self.cellular_room_max_size)
+        w = random.randint(self.cross_room_min_size, self.cellular_room_max_size)
+        arr = rng.choice(2, (h, w),
+                         p=[1 - self.cellular_wall_probability, self.cellular_wall_probability])
+        room = np.pad(arr, 1, constant_values=1)
+
+        kernel = [[1, 1, 1], [1, 1, 1], [1, 1, 1]]  # 8-bit
+
+        for _ in range(convolve_steps):
+            neighbors = convolve2d(room == 0, kernel, "same")
+            room = np.where(neighbors < self.cellular_neighbors, 0, 1)  # Apply the wall rule.
+            room[[0, -1], :] = 1  # Ensure surrounding wall.
+            room[:, [0, -1]] = 1
+
+        # Remove isolated cells with flood fill
+        room = self.floodfill_by_xy_scipy(room)
+
+        return room
+
+
     def get_rooms_by_flood_fill(self, vault_room):
 
         rooms = []
@@ -268,32 +298,3 @@ class RoomAddition(Dungeon):
             padded_room = trimmed_room
 
         return padded_room
-
-    def generate_room_cellular(self):
-        """Return the next step of the cave generation algorithm.
-
-        `tiles` is the input array. (0: wall, 1: floor)
-
-        If the 3x3 area around a tile (including itself) has `wall_rule` number of
-        walls then the tile will become a wall.
-        """
-        convolve_steps = self.cellular_iterations
-        rng = np.random.default_rng()
-        h = random.randint(self.cross_room_min_size, self.cellular_room_max_size)
-        w = random.randint(self.cross_room_min_size, self.cellular_room_max_size)
-        arr = rng.choice(2, (h, w),
-                         p=[1 - self.cellular_wall_probability, self.cellular_wall_probability])
-        room = np.pad(arr, 1, constant_values=1)
-
-        kernel = [[1, 1, 1], [1, 1, 1], [1, 1, 1]]  # 8-bit
-
-        for _ in range(convolve_steps):
-            neighbors = convolve2d(room == 0, kernel, "same")
-            room = np.where(neighbors < self.cellular_neighbors, 0, 1)  # Apply the wall rule.
-            room[[0, -1], :] = 1  # Ensure surrounding wall.
-            room[:, [0, -1]] = 1
-
-        # Remove isolated cells with flood fill
-        room = self.floodfill_by_xy_scipy(room)
-
-        return room

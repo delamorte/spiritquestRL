@@ -178,7 +178,7 @@ class GameMap:
                         ground_top_tile = get_tile_object(name)
                         color = get_color(name, mod=self.owner.world_tendency)
                         top_tile = Entity(x, y,
-                               color, name, tile=ground_top_tile, char=ground_top_char)
+                                          color, name, tile=ground_top_tile, char=ground_top_char)
                         self.add_entity(top_tile)
 
                     if entity != 0:
@@ -333,7 +333,7 @@ class GameMap:
                 else:
                     self.tiles[x][y].spawnable = True
 
-        #debug
+        # debug
         # for room in self.algorithm.rooms:
         #     walls = room.inner
         #     for tile in walls:
@@ -542,12 +542,12 @@ class GameMap:
                 px, py = choice(list(self.biome.home.inner))
         if self.name == "dream":
             px, py = randint(1, self.width - 1), \
-                     randint(1, self.height - 1)
+                randint(1, self.height - 1)
 
             while not self.tiles[px][py].spawnable:
                 #    while self.is_blocked(px, py):
                 px, py = randint(1, self.width - 1), \
-                         randint(1, self.height - 1)
+                    randint(1, self.height - 1)
         player.x, player.y = px, py
 
         self.entities["player"] = [player]
@@ -597,37 +597,47 @@ class GameMap:
         """
         for room in self.algorithm.rooms:
 
-            room_size = len(room.inner)
-            room_max_entities = int(room_size / 3)
             entity_count = 0
             feature_data = json_data.data.biome_features[room.feature]
             room_entities = feature_data["entities"]
+
+            if "windows" in feature_data.keys() and feature_data["windows"]:
+                entity_name = "window"
+                nr_of_entities_to_place = self.get_room_population(room.size, "windows")
+                locations = list(room.outer)
+                tile = get_tile_object(entity_name)
+                color = get_color(entity_name)
+                for _ in nr_of_entities_to_place:
+                    x, y = choice(locations)
+                    entity = Entity(x, y, color, entity_name, tile, category="objects")
+                    self.add_entity(entity)
+
             for category, entities in room_entities.items():
                 if not entities:
                     continue
                 if not self.biome.biome_data["monsters"] and category == "monsters":
                     continue
-                if entity_count >= room_max_entities:
+                if entity_count >= room.max_entities:
                     break
-                nr_of_entities_to_place = self.get_room_population(room_size, category)
-                entities_to_place = choices(entities, k=nr_of_entities_to_place)
+                nr_of_entities_to_place, areas = self.get_room_population(room.size, category)
+                if category == "decorations":
+                    self.place_decorations(areas, entities, room)
+                    continue
+                else:
+                    entities_to_place = choices(entities, k=nr_of_entities_to_place)
 
                 for entity_name in entities_to_place:
-                    if entity_count >= room_max_entities:
+                    if entity_count >= room.max_entities:
                         break
                     # Choose random empty location in room
                     if category == "monsters" and room.floor_type == "water" and not room.wall_type == "water":
-                        cave = list(room.inner)
-                        walls = list(room.outer)
-                        locations = cave + walls
-                    elif entity_name == "window":
-                        locations = list(room.outer)
+                        inner = list(room.inner)
+                        outer = list(room.outer)
+                        locations = inner + outer
                     else:
                         locations = list(room.inner)
                     x, y = choice(locations)
-                    if entity_name == "window":
-                        pass
-                    elif category == "objects" and not entity_name == "window":
+                    if category == "objects":
                         while self.tiles[x][y].entities_on_tile:
                             x, y = choice(locations)
                     else:
@@ -653,7 +663,7 @@ class GameMap:
         }
         kernel = patterns_map[pattern]
         if radius > 1:
-            kernel = np.pad(kernel, radius-1, mode='edge')
+            kernel = np.pad(kernel, radius - 1, mode='edge')
         mask = np.zeros_like(a, dtype=bool)  # build empty mask
         mask[x, y] = True  # set target(s)
 
@@ -711,6 +721,57 @@ class GameMap:
 
         return None
 
+    def get_room_population(self, room_size, category):
+        decorations = None
+        entities_count = 1
+        if category == "monsters":
+            entities_count = int(ceil(room_size / 50) * randint(1, 3)) - 1
+        elif category == "npcs":
+            entities_count = 1
+        elif category == "allies":
+            entities_count = 1
+        elif category == "objects":
+            entities_count = randint(1, 3)
+        elif category == "windows":
+            entities_count = room_size / 10
+        elif category == "decorations":
+            decorations, entities_count = self.get_decorations(room_size)
+
+        return entities_count, decorations
+
+    def place_decorations(self, areas, entities, room):
+        while areas:
+            entity_name = choice(entities)
+
+            area = areas.pop()
+            locations = list(room.inner)
+            x, y = choice(locations)
+            while self.tiles[x][y].blocking_entity or self.tiles[x][y].blocked or np.count_nonzero(
+                    self.algorithm.level[y:y + area.shape[0], x:x + area.shape[1]]) > 0:
+                x, y = choice(locations)
+
+            tile = get_tile_object(entity_name)
+            color = get_color(entity_name, mod=self.owner.world_tendency)
+            for i, x2 in enumerate(range(x, x + len(area[1]))):
+                for j, y2 in enumerate(range(y, y + len(area[0]))):
+                    if area[j][i] == 0:
+                        entity = Entity(x2, y2, color, entity_name, tile, category="decorations")
+                        self.add_entity(entity)
+
+        return
+
+    @staticmethod
+    def get_decorations(room_size):
+        entities_count = 0
+        decorations = []
+        nr_of_decorations = int(room_size / 10)
+        for _ in range(nr_of_decorations + 1):
+            rng = np.random.default_rng()
+            arr = rng.choice(2, (2, 2), p=[0.2, 0.8])
+            decorations.append(arr)
+            entities_count += np.count_nonzero(arr)
+        return decorations, entities_count
+
     @staticmethod
     def entity_at_coordinates(entities, x, y):
         result = []
@@ -719,16 +780,3 @@ class GameMap:
                 if entity.x == x and entity.y == y:
                     result.append(entity)
         return result
-
-    @staticmethod
-    def get_room_population(room_size, category):
-        if category == "monsters":
-            return int(ceil(room_size / 50) * randint(1, 3)) - 1
-        elif category == "npcs":
-            return 1
-        elif category == "allies":
-            return 1
-        elif category == "objects":
-            return randint(1, 3)
-        else:
-            return 1

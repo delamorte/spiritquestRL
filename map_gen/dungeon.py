@@ -413,6 +413,8 @@ class Room:
         self.set_inner()
         self.set_outer()
         self.center = self.center()
+        self.size = len(self.inner)
+        self.max_entities = int(self.size / 2)
 
     def center(self):
         center_x = int((self.x1 + self.x2) / 2)

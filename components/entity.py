@@ -55,7 +55,7 @@ class Entity:
         :param inventory:
         :param stairs:
         :param summoner:
-        :param category: monsters, allies, npcs, objects, player, cursor
+        :param category: monsters, allies, npcs, objects, decorations, player, cursor
         :param wall:
         :param door:
         :param cursor:
