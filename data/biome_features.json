@@ -133,6 +133,8 @@
       "objects": [],
       "decorations": [
         "water",
+        "water",
+        "water",
         "plants",
         "rocks",
         "mushrooms",
@@ -160,6 +162,8 @@
     "entities": {
       "objects": ["flask"],
       "decorations": [
+        "water",
+        "water",
         "water",
         "rocks",
         "plants"
@@ -658,6 +662,8 @@
     "entities": {
       "objects": ["cross"],
       "decorations": [
+        "water",
+        "water",
         "water",
         "water lily",
         "rocks",

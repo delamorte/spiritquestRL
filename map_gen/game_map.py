@@ -756,6 +756,8 @@ class GameMap:
                 for j, y2 in enumerate(range(y, y + len(area[0]))):
                     if area[j][i] == 0:
                         entity = Entity(x2, y2, color, entity_name, tile, category="decorations")
+                        if entity.wall:
+                            entity.wall.set_attributes(self)
                         self.add_entity(entity)
 
         return
