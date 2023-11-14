@@ -11,6 +11,7 @@ class LightSource:
         self.light_walls = light_walls
         self.name = name
         self.visible = None
+        self.lit = True
 
     def initialize_fov(self, game_map):
         self.fov_map = np.full((game_map.width, game_map.height), fill_value=False)

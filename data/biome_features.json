@@ -891,7 +891,7 @@
       "monsters": []
     },
     "windows": true,
-    "floor": ["wall_wood"],
+    "floor": ["floor_wood"],
     "wall": ["wall_stone"],
     "has_door": true,
     "may_spawn_boss": false

@@ -346,7 +346,6 @@ class Entity:
 
         self.status_effects = status_effects_component
         self.animations = animations_component
-        self.light_source = True
         self.blocks = True
         self.abilities = True
 

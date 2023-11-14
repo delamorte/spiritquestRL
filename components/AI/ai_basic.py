@@ -49,8 +49,8 @@ class AIBasic:
             self.cant_see_player = False
 
         # If ally, follow player or chance to move randomly if already next to player
-        if self.ally and target.player:
-            self.follow_player(target, entities, game_map)
+        #if self.ally and target.player:
+        #    self.follow_player(target, entities, game_map)
 
         elif game_map.visible[target.x, target.y]:
 
@@ -185,6 +185,7 @@ class AIBasic:
         # If no possible actions
         if not skills:
             skill_choice = None
+            return None, None, None
         else:
             skill_choice = choices(skills, weights, k=1)[0]
 

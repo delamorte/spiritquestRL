@@ -12,15 +12,15 @@ from map_gen.dungeon import Dungeon, Room
 # ==== Room Addition ====
 class RoomAddition(Dungeon):
     def __init__(self, map_width=None, map_height=None, only_cellular=False, only_vaults=False,
-                 only_squares=False, squares_and_crosses=False, drunkard=False):
+                 only_squares=False, squares_and_crosses=False, drunkard=False, max_rooms=20, room_max_size=300):
         super().__init__(map_width=map_width, map_height=map_height)
         self.rooms = []
         self.rooms_list = []
         self.level = []
 
         self.room_min_size = 16  # min size in number of floor tiles, not height and width
-        self.room_max_size = 300  # min size in number of floor tiles, not height and width
-        self.max_rooms = 20
+        self.room_max_size = room_max_size  # min size in number of floor tiles, not height and width
+        self.max_rooms = max_rooms
 
         self.build_room_attempts = 500
         self.place_room_attempts = 10
@@ -104,7 +104,7 @@ class RoomAddition(Dungeon):
                         self.add_room(room)
                         # Connect rooms
 
-            if len(self.rooms) > self.max_rooms:
+            if len(self.rooms) >= self.max_rooms:
                 break
 
         self.connect_caves()

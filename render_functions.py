@@ -3,7 +3,7 @@ from textwrap import fill
 
 import numpy as np
 from bearlibterminal import terminal as blt
-from scipy.spatial.distance import cityblock
+from scipy.spatial.distance import chebyshev
 
 import options
 from color_functions import argb_from_color
@@ -11,6 +11,90 @@ from game_states import GameStates
 from helpers import get_article
 from map_gen.tilemap import get_color
 from ui.message import Message
+
+
+def get_light_adjusted_color(game_map, x, y, direction=None, cardinal=None, get_color_from=None):
+    if cardinal is not None and direction and game_map.tiles[x][y].corners:
+        if cardinal == 0 or cardinal == 2:
+            directions_to_corners = {
+                "nw": 1,
+                "sw": 0,
+                "se": 3,
+                "ne": 2,
+            }
+        else:
+            directions_to_corners = {
+                "nw": 3,
+                "sw": 2,
+                "se": 1,
+                "ne": 0,
+            }
+        corner_idx = directions_to_corners[direction]
+        return game_map.tiles[x][y].corners[corner_idx]
+    if game_map.tiles[x][y].corners and direction:
+        directions_to_corners = {
+            "nw": 2,
+            "sw": 3,
+            "se": 0,
+            "ne": 1,
+        }
+        corner_idx = directions_to_corners[direction]
+        return game_map.tiles[x][y].corners[corner_idx]
+
+    # if game_map.tiles[x][y].light_adjusted_color and not get_color_from:
+    #     return game_map.tiles[x][y].light_adjusted_color
+    if get_color_from:
+        c = blt.color_from_name(game_map.tiles[get_color_from[0]][get_color_from[1]].color)
+    else:
+        c = blt.color_from_name(game_map.tiles[x][y].color)
+
+    argb = argb_from_color(c)
+    a = argb[0]
+    r = min(int(argb[1] * game_map.light_map[x, y]), 255)
+    g = min(int(argb[2] * game_map.light_map[x, y]), 255)
+    b = min(int(argb[3] * game_map.light_map[x, y]), 255)
+
+    light_adjusted_color = blt.color_from_argb(a, r, g, b)
+
+    return light_adjusted_color
+
+
+def get_light_adjusted_corners(game_map, x, y, cardinal=None):
+    corners = []
+    room_id = game_map.tiles[x][y].room_id
+    get_color_from = None
+
+    if cardinal is not None:
+        if cardinal == 0 or cardinal == 2:
+            directions = {
+                "nw": (x, y - 1),
+                "sw": (x, y + 1),
+                "se": (x, y + 1),
+                "ne": (x, y - 1),
+            }
+        else:
+            directions = {
+                "nw": (x - 1, y),
+                "sw": (x - 1, y),
+                "se": (x + 1, y),
+                "ne": (x + 1, y),
+            }
+    else:
+        directions = {
+            "nw": (x - 1, y - 1),
+            "sw": (x - 1, y + 1),
+            "se": (x + 1, y + 1),
+            "ne": (x + 1, y - 1),
+        }
+
+    for direction, coords in directions.items():
+        x2, y2 = coords[0], coords[1]
+        if game_map.tiles[x2][y2].room_id != room_id or x2 >= game_map.width or x2 <= 0 or y2 >= game_map.height or y2 <= 0:
+            get_color_from = (x, y)
+        color = get_light_adjusted_color(game_map, x2, y2, direction, cardinal, get_color_from)
+        corners.append(color)
+
+    return corners
 
 
 class RenderFunctions:
@@ -191,9 +275,9 @@ class RenderFunctions:
                         light_level = 1.5
                     else:
                         light_level = 1.5
-                        # dist = float(cityblock(center, np.array([map_y, map_x])))
+                        # dist = float(chebyshev(center, np.array([map_y, map_x])))
                         # light_level = game_map.tiles[map_x][map_y].natural_light_level * \
-                        #              (1.0 / (1.05 + 0.035 * dist + 0.015 * dist * dist))
+                        #               (1.0 / (1.05 + 0.035 * dist + 0.015 * dist * dist))
 
                     if player.status_effects.has_effect(name="sneak") and game_map.tiles[map_x][map_y].targeting_zone:
                         light_level *= 0.5
@@ -229,6 +313,7 @@ class RenderFunctions:
         game_map = self.owner.levels.current_map
         game_camera = self.owner.game_camera
         for light in self.light_sources:
+
             light.recompute_fov(game_map)
             light_fov = np.where(light.fov_map)
             center = np.array([light.owner.y, light.owner.x])
@@ -236,36 +321,116 @@ class RenderFunctions:
             for j in range(light_fov[0].size):
                 x, y = int(light_fov[0][j]), int(light_fov[1][j])
                 if light.fov_map[x, y]:
-                    v = np.array([y, x])
-                    dist = float(cityblock(center, v))
-                    light_level = game_map.tiles[x][y].natural_light_level * \
-                                  (1.0 / (0.2 + 0.1 * dist + 0.010 * dist * dist))
+                    if light.lit:
+                        v = np.array([y, x])
+                        dist = float(chebyshev(center, v))
+                        light_level = game_map.tiles[x][y].natural_light_level * \
+                                      (1.5 / (0.3 + 0.1 * dist + 0.010 * dist))
 
-                    if game_map.light_map[x, y] < light_level:
-                        game_map.light_map[x, y] = light_level
+                        if game_map.light_map[x, y] < light_level:
+                            game_map.light_map[x, y] = light_level
+                    else:
+                        game_map.tiles[x][y].light_adjusted_color = None
+                        game_map.tiles[x][y].corners = None
 
         player_fov = np.where(game_map.visible)
         for j in range(player_fov[0].size):
             x, y = int(player_fov[0][j]), int(player_fov[1][j])
             cam_x, cam_y = game_camera.get_coordinates(x, y)
-            blt.layer(0)
-            c = blt.color_from_name(game_map.tiles[x][y].color)
-            argb = argb_from_color(c)
-            a = argb[0]
-            r = min(int(argb[1] * game_map.light_map[x, y]), 255)
-            g = min(int(argb[2] * game_map.light_map[x, y]), 255)
-            b = min(int(argb[3] * game_map.light_map[x, y]), 255)
-
-            blt.color(blt.color_from_argb(a, r, g, b))
-            blt.put(cam_x * options.data.tile_offset_x, cam_y * options.data.tile_offset_y,
-                    game_map.tiles[x][y].char)
-
             if len(game_map.tiles[x][y].entities_on_tile) > 0:
                 for entity in game_map.tiles[x][y].entities_on_tile:
 
                     if not entity.cursor:
                         self.clear(entity, cam_x, cam_y)
                         self.draw(entity, cam_x, cam_y)
+            if game_map.light_map[x, y] == 1.5:
+                continue
+            blt.layer(0)
+
+            light_adjusted_color = get_light_adjusted_color(game_map, x, y)
+            game_map.tiles[x][y].light_adjusted_color = light_adjusted_color
+
+            blt.color(light_adjusted_color)
+
+            blt.put(cam_x * options.data.tile_offset_x, cam_y * options.data.tile_offset_y,
+                    game_map.tiles[x][y].char)
+
+        blt.layer(0)
+
+        for light in self.light_sources:
+            if not light.lit:
+                continue
+            x, y = light.owner.x, light.owner.y
+            game_map.tiles[x][y].corners = None
+            room_id = game_map.tiles[x][y].room_id
+            for i in range(1, light.radius + 1):
+                nw = (x - i, y - i)
+                sw = (x - i, y + i)
+                se = (x + i, y + i)
+                ne = (x + i, y - i)
+
+                for corner in [nw, sw, se, ne]:
+                    x2, y2 = corner[0], corner[1]
+                    if x2 >= game_map.width or x2 <= 0 or y2 >= game_map.height or y2 <= 0:
+                        continue
+                    if not game_map.visible[x2, y2] or game_map.tiles[x2][y2].room_id != room_id:
+                        continue
+                    skip_tile = False
+                    if game_map.tiles[x2][y2].entities_on_tile:
+                        for entity in game_map.tiles[x2][y2].entities_on_tile:
+                            if entity.light_source and entity.light_source.lit:
+                                skip_tile = True
+                                break
+                    if skip_tile:
+                        continue
+
+                    corners = get_light_adjusted_corners(game_map, x2, y2)
+
+                    cam_x, cam_y = game_camera.get_coordinates(x2, y2)
+                    blt.put_ext(cam_x * options.data.tile_offset_x, cam_y * options.data.tile_offset_y, 0, 0,
+                                game_map.tiles[x2][y2].char, corners)
+                    game_map.tiles[x2][y2].corners = corners
+
+                try:
+                    n = game_map.tiles[x-i+1:x+i, y-i]
+                except IndexError as err:
+                    n = None
+                try:
+                    w = game_map.tiles[x - i, y-i+1:y+i]
+                except IndexError as err:
+                    w = None
+                try:
+                    s = game_map.tiles[x-i+1:x+i, y + i]
+                except IndexError as err:
+                    s = None
+                try:
+                    e = game_map.tiles[x + i, y-i+1:y+i]
+                except IndexError as err:
+                    e = None
+
+                for idx, cardinal in enumerate([n, w, s, e]):
+                    if cardinal is None:
+                        continue
+                    for tile in cardinal:
+                        x2, y2 = tile.x, tile.y
+                        if not game_map.visible[x2, y2] or game_map.tiles[x2][y2].room_id != room_id:
+                            continue
+                        if x2 >= game_map.width or x2 <= 0 or y2 >= game_map.height or y2 <= 0:
+                            continue
+                        skip_tile = False
+                        if game_map.tiles[x2][y2].entities_on_tile:
+                            for entity in game_map.tiles[x2][y2].entities_on_tile:
+                                if entity.light_source and entity.light_source.lit:
+                                    skip_tile = True
+                                    break
+                        if skip_tile:
+                            continue
+                        corners = get_light_adjusted_corners(game_map, x2, y2, cardinal=idx)
+
+                        cam_x, cam_y = game_camera.get_coordinates(x2, y2)
+                        blt.put_ext(cam_x * options.data.tile_offset_x, cam_y * options.data.tile_offset_y, 0, 0,
+                                    game_map.tiles[x2][y2].char, corners)
+                        game_map.tiles[x2][y2].corners = corners
 
     def draw_messages(self):
         message_log = self.owner.message_log

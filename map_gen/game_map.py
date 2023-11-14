@@ -67,7 +67,7 @@ class GameMap:
     def recompute_fov(self, entity):
 
         x, y = entity.x, entity.y
-        radius = entity.light_source.radius
+        radius = entity.fighter.fov
 
         # Update transparency map
         transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
@@ -293,6 +293,7 @@ class GameMap:
         #             }
 
         generators = {
+            "hub": RoomAddition(self.width, self.height, drunkard=True, max_rooms=1, only_squares=1),
             "messy_bsp": MessyBSPTree(self.width, self.height),
             "drunkard": RoomAddition(self.width, self.height, drunkard=True),
             "cellular": RoomAddition(self.width, self.height, only_cellular=True),
@@ -367,6 +368,7 @@ class GameMap:
             room.wall_type = wall_name
             for tile in room.inner:
                 x, y = tile[0], tile[1]
+                self.tiles[x][y].room_id = room.id_nr
                 self.tiles[x][y].natural_light_level = room.lightness
                 if self.tiles[x][y].entities_on_tile:
                     for entity in self.tiles[x][y].entities_on_tile:
@@ -377,6 +379,7 @@ class GameMap:
 
             for tile in room.outer:
                 x, y = tile[0], tile[1]
+                #self.tiles[x][y].room_id = room.id_nr
                 if wall_tile["draw_floor"]:
                     self.tiles[x][y].char = floor_tile
                     self.tiles[x][y].color = floor_color
@@ -435,6 +438,7 @@ class GameMap:
             for room in self.algorithm.rooms:
                 if room.feature == "Shaman's Retreat":
                     self.biome.home = room
+                    self.create_door(room=room, state="closed")
                     break
             x, y = choice(list(self.biome.home.inner))
             while self.tiles[x][y].blocking_entity:
@@ -560,7 +564,7 @@ class GameMap:
                     entity.light_source.initialize_fov(self)
 
     def create_door(self, room=None, state="open", tile=None, char=None,
-                    name="door", color=None, random=False, x=None, y=None):
+                    name="door", color=None, x=None, y=None):
 
         """
         Create a door entity in map. If no coordinates are given,
@@ -569,15 +573,12 @@ class GameMap:
         make sure that door cannot be placed there.
         """
 
-        if random:
-            walls = room.get_walls()
-            door_seed = randint(0, len(room.get_walls()) - 1)
-
-            while walls[door_seed][0] == 1 or walls[door_seed][0] == room.w - 1 or walls[door_seed][1] == 1 or \
-                    walls[door_seed][1] == room.h - 1:
-                door_seed = randint(0, len(room.get_walls()) - 1)
-            x = walls[door_seed][0]
-            y = walls[door_seed][1]
+        if not x or not y:
+            locations = list(room.outer)
+            x, y = choice(locations)
+            if self.tiles[x][y].entities_on_tile:
+                for entity in self.tiles[x][y].entities_on_tile:
+                    self.remove_entity(entity)
 
         if tile is None:
             tile = get_tile_object(name)
@@ -609,7 +610,11 @@ class GameMap:
                 color = get_color(entity_name)
                 for _ in nr_of_entities_to_place:
                     x, y = choice(locations)
+                    if self.tiles[x][y].entities_on_tile:
+                        for remove_entity in self.tiles[x][y].entities_on_tile:
+                            self.remove_entity(remove_entity)
                     entity = Entity(x, y, color, entity_name, tile, category="objects")
+
                     self.add_entity(entity)
 
             for category, entities in room_entities.items():
@@ -650,29 +655,7 @@ class GameMap:
                     self.add_entity(entity)
                     entity_count += 1
 
-    def get_cornering_tiles(self, x, y, a=None, radius=1, pattern="4bit", masked=False):
-        if not a:
-            a = self.tiles
-        patterns_map = {
-            "4bit": [[0, 1, 0],
-                     [1, 0, 1],
-                     [0, 1, 0]],
-            "8bit": [[1, 1, 1],
-                     [1, 0, 1],
-                     [1, 1, 1]]
-        }
-        kernel = patterns_map[pattern]
-        if radius > 1:
-            kernel = np.pad(kernel, radius - 1, mode='edge')
-        mask = np.zeros_like(a, dtype=bool)  # build empty mask
-        mask[x, y] = True  # set target(s)
 
-        # boolean indexing
-        neighbors = a[convolve2d(mask, kernel, mode='same').astype(bool)]
-        neighbours_masked = [1 if x.blocked else 0 for x in neighbors]
-        if masked:
-            return neighbours_masked
-        return neighbors
 
     def get_tile_direction(self, x, y):
         # Define the neighboring tile positions in the cardinal directions
@@ -687,7 +670,7 @@ class GameMap:
             "southeast": 3
         }
 
-        neighbors = self.get_cornering_tiles(x, y, pattern="8bit", masked=True)
+        neighbors = get_cornering_tiles(x, y, self.tiles, pattern="8bit", masked=True)
 
         # Determine and return the correct facing based on the neighboring tiles
         if neighbors[1] and neighbors[6] and not neighbors[4]:
@@ -782,3 +765,29 @@ class GameMap:
                 if entity.x == x and entity.y == y:
                     result.append(entity)
         return result
+
+
+def get_cornering_tiles(x, y, tiles, radius=1, pattern="4bit", masked=False):
+    patterns_map = {
+        "4bit": [[0, 1, 0],
+                 [1, 0, 1],
+                 [0, 1, 0]],
+        "8bit": [[1, 1, 1],
+                 [1, 0, 1],
+                 [1, 1, 1]],
+        "corners": [[1, 0, 1],
+                    [0, 0, 0],
+                    [1, 0, 1]]
+    }
+    kernel = patterns_map[pattern]
+    if radius > 1:
+        kernel = np.pad(kernel, radius - 1, mode='edge')
+    mask = np.zeros_like(tiles, dtype=bool)  # build empty mask
+    mask[x, y] = True  # set target(s)
+
+    # boolean indexing
+    neighbours = tiles[convolve2d(mask, kernel, mode='same').astype(bool)]
+    neighbours_masked = [1 if x.blocked else 0 for x in neighbours]
+    if masked:
+        return neighbours_masked
+    return neighbours

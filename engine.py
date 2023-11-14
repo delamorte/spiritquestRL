@@ -175,7 +175,7 @@ class Engine:
         summoner_component = Summoner()
         player = Entity(
             1, 1, "default", "player", layer=2,  tile=f_data,
-            blocks=True, light_source=True, category="player", indicator_color="gray", stand_on_messages=False,
+            blocks=True, category="player", indicator_color="gray", stand_on_messages=False,
             visible=True, inventory=True, summoner=summoner_component)
 
         player.player.set_avatar(choice)
@@ -376,6 +376,6 @@ class Engine:
 
 if __name__ == '__main__':
     engine = Engine()
-    engine.initialize(debug=True)
+    engine.initialize(debug=False)
     blt.close()
 

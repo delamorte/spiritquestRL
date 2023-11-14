@@ -26,13 +26,14 @@ class Levels:
         self.player.status_effects.remove_all()
 
         if not self.items:
-            game_map = self.create_biome_and_map(name="hub", biome_title="hub", width=40, height=40, generate_random=False)
+            game_map = self.create_biome_and_map(name="hub", biome_title="hub", width=40, height=40,
+                                                 generate_random=False, algorithm="hub")
             self.items[game_map.name] = game_map
             self.current_map = game_map
 
         if destination in self.items:
             game_map = self.items[destination]
-            #game_map.place_entities()
+            # game_map.place_entities()
             self.current_map = game_map
             self.player.fighter = self.player.player.avatar["player"]
             self.current_map.recompute_fov(self.player)
