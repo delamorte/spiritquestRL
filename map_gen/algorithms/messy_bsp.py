@@ -32,7 +32,7 @@ class MessyBSPTree(Dungeon):
         self.level = np.ones((self.map_height, self.map_width), dtype=np.int32)
         self._leafs = []
 
-        rootLeaf = Leaf(1, 1, self.map_width-1, self.map_height-1)
+        rootLeaf = Leaf(2, 2, self.map_width-2, self.map_height-2)
         self._leafs.append(rootLeaf)
 
         splitSuccessfully = True

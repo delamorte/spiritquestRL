@@ -12,7 +12,8 @@ from map_gen.dungeon import Dungeon, Room
 # ==== Room Addition ====
 class RoomAddition(Dungeon):
     def __init__(self, map_width=None, map_height=None, only_cellular=False, only_vaults=False,
-                 only_squares=False, squares_and_crosses=False, drunkard=False, max_rooms=20, room_max_size=300):
+                 only_squares=False, squares_and_crosses=False, drunkard=False, max_rooms=20, room_max_size=300,
+                 build_later=False, first_room_max_size=None):
         super().__init__(map_width=map_width, map_height=map_height)
         self.rooms = []
         self.rooms_list = []
@@ -25,6 +26,8 @@ class RoomAddition(Dungeon):
         self.build_room_attempts = 500
         self.place_room_attempts = 10
         self.max_tunnel_length = 20
+
+        self.first_room_max_size = None
 
         self.square_room_max_size = 12
         self.square_room_min_size = 6
@@ -56,6 +59,8 @@ class RoomAddition(Dungeon):
         self.squares_and_crosses = squares_and_crosses
         self.drunkard = drunkard
 
+        self.build_later = build_later
+
         self.name = "RoomAddition"
 
     def generate_level(self):
@@ -75,10 +80,11 @@ class RoomAddition(Dungeon):
             room_height, room_width = room_arr.shape
             if room_height >= self.map_height - 1 or room_width >= self.map_width - 1:
                 continue
-            x = random.randint(1, self.map_width - room_width - 1)
-            y = random.randint(1, self.map_height - room_height - 1)
+            x = random.randint(2, self.map_width - room_width - 2)
+            y = random.randint(2, self.map_height - room_height - 2)
             id_nr = len(self.rooms) + 1
-            new_room = Room(x, y, room_width, room_height, room_arr, id_nr=id_nr, algorithm=algorithm)
+            new_room = Room(x, y, room_width, room_height, room_arr, id_nr=id_nr, algorithm=algorithm,
+                            build_later=self.build_later)
 
             # Discard too small or too large rooms
             if len(new_room.inner) > self.room_max_size or len(new_room.inner) < self.room_min_size:
@@ -198,9 +204,13 @@ class RoomAddition(Dungeon):
         return room
 
     def generate_room_square(self, padding=1):
-        room_width = random.randint(self.square_room_min_size, self.square_room_max_size)
+        if len(self.rooms) == 0 and self.first_room_max_size:
+            room_max_size = self.first_room_max_size
+        else:
+            room_max_size = self.square_room_max_size
+        room_width = random.randint(self.square_room_min_size, room_max_size)
         room_height = random.randint(max(int(room_width * 0.5), self.square_room_min_size),
-                                     min(int(room_width * 1.5), self.square_room_max_size))
+                                     min(int(room_width * 1.5), room_max_size))
 
         room = np.zeros((room_height, room_width), dtype=np.int32)
         # If padding > 0, pad the room with walls
@@ -239,7 +249,6 @@ class RoomAddition(Dungeon):
         room = self.floodfill_by_xy_scipy(room)
 
         return room
-
 
     def get_rooms_by_flood_fill(self, vault_room):
 

@@ -78,8 +78,8 @@ class Levels:
 
     def make_debug_map(self, algorithm):
         if algorithm == "hub":
-            game_map = self.create_biome_and_map(name="debug", biome_title="hub", width=70, height=70,
-                                                 generate_random=False)
+            game_map = self.create_biome_and_map(name="hub", biome_title="hub", width=40, height=40,
+                                                 generate_random=False, algorithm="hub")
         else:
             game_map = self.create_biome_and_map(name="debug", width=40, height=40, algorithm=algorithm)
         return game_map

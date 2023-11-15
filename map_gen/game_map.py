@@ -293,7 +293,8 @@ class GameMap:
         #             }
 
         generators = {
-            "hub": RoomAddition(self.width, self.height, drunkard=True, max_rooms=1, only_squares=1),
+            "hub": RoomAddition(self.width, self.height, drunkard=True, only_squares=1, build_later=True,
+                                first_room_max_size=8),
             "messy_bsp": MessyBSPTree(self.width, self.height),
             "drunkard": RoomAddition(self.width, self.height, drunkard=True),
             "cellular": RoomAddition(self.width, self.height, only_cellular=True),
@@ -349,6 +350,9 @@ class GameMap:
                 feature_name = "Shaman's Retreat"
                 self.biome.home = feature_name
                 room.lightness = 0.8
+                room.build_later = False
+            elif room.build_later:
+                continue
             else:
                 feature_name = choice(self.biome.features)
             feature_data = json_data.data.biome_features[feature_name]
@@ -379,7 +383,7 @@ class GameMap:
 
             for tile in room.outer:
                 x, y = tile[0], tile[1]
-                #self.tiles[x][y].room_id = room.id_nr
+                self.tiles[x][y].room_id = room.id_nr
                 if wall_tile["draw_floor"]:
                     self.tiles[x][y].char = floor_tile
                     self.tiles[x][y].color = floor_color
@@ -399,12 +403,14 @@ class GameMap:
 
             for tile in tunnels:
                 x, y = tile[0], tile[1]
+                if self.tiles[x][y].room_id is not None:
+                    continue
                 floor_name = room.floor_type
                 floor_color = room.floor_color
                 floor_tile = get_tile(floor_name)
                 self.tiles[x][y].char = floor_tile
                 self.tiles[x][y].color = floor_color
-                if self.tiles[x][y].entities_on_tile and tile not in room.outer:
+                if self.tiles[x][y].entities_on_tile and tile not in room.outer and tile not in entrances:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
             for tile in entrances:
@@ -413,14 +419,17 @@ class GameMap:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
                 if room.has_door:
-                    self.create_door(state="closed", x=x, y=y)
+                    if self.biome.home == "Shaman's Retreat":
+                        state = "locked"
+                    else:
+                        state = "closed"
+                    self.create_door(state=state, x=x, y=y)
                     break
 
             for tile in room.outer:
                 x, y = tile[0], tile[1]
                 wall_name = room.wall_type
                 wall_tile = get_tile_object(wall_name)
-                facing = None
                 if wall_tile["corners"]:
                     facing = self.get_tile_direction(x, y)
                     if not facing:
@@ -438,7 +447,6 @@ class GameMap:
             for room in self.algorithm.rooms:
                 if room.feature == "Shaman's Retreat":
                     self.biome.home = room
-                    self.create_door(room=room, state="closed")
                     break
             x, y = choice(list(self.biome.home.inner))
             while self.tiles[x][y].blocking_entity:
@@ -597,7 +605,8 @@ class GameMap:
         Creates and adds monsters to all rooms in the map from the given pool.
         """
         for room in self.algorithm.rooms:
-
+            if room.build_later:
+                continue
             entity_count = 0
             feature_data = json_data.data.biome_features[room.feature]
             room_entities = feature_data["entities"]
@@ -654,8 +663,6 @@ class GameMap:
                     entity = Entity(x, y, color, entity_name, tile, category=category)
                     self.add_entity(entity)
                     entity_count += 1
-
-
 
     def get_tile_direction(self, x, y):
         # Define the neighboring tile positions in the cardinal directions
