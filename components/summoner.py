@@ -48,7 +48,7 @@ class Summoner:
             neighbours = game_map.get_neighbours(self.owner, radius=1, algorithm="square", empty_tiles=True)
             summon_tile = choice(neighbours)
             entity_name = name + " (ally)"
-            monster = Entity(summon_tile.x, summon_tile.y, 1,
+            monster = Entity(summon_tile.x, summon_tile.y,
                              color, entity_name, tile=f_data, blocks=True, fighter=fighter_component, ai=ai_component,
                              light_source=True, status_effects=status_effects_component, remarks=remarks,
                              indicator_color="light green", animations=animations_component)

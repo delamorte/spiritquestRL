@@ -121,9 +121,6 @@ class Entity:
         self.npc = npc
         self.dead = False
         self.visible = visible
-        self.light = tile["light"] if tile else True
-        self.neutral = tile["neutral"] if tile else True
-        self.chaos = tile["chaos"] if tile else True
 
         if self.category == "monsters" or self.category == "npcs" or self.category == "player":
             self.set_fighter_components()

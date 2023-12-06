@@ -293,8 +293,6 @@ class GameMap:
         #             }
 
         generators = {
-            "hub": RoomAddition(self.width, self.height, drunkard=True, only_squares=1, build_later=True,
-                                first_room_max_size=8),
             "messy_bsp": MessyBSPTree(self.width, self.height),
             "drunkard": RoomAddition(self.width, self.height, drunkard=True),
             "cellular": RoomAddition(self.width, self.height, only_cellular=True),
@@ -304,7 +302,10 @@ class GameMap:
             "squares_and_crosses": RoomAddition(self.width, self.height, squares_and_crosses=True),
         }
 
-        if not name:
+        if name == "hub":
+            map_algorithm = RoomAddition(self.width, self.height, drunkard=True, only_squares=1, build_later=True,
+                                         first_room_max_size=8)
+        elif not name:
             map_algorithm = choice(list(generators.values()))
         else:
             map_algorithm = generators[name]
@@ -736,9 +737,11 @@ class GameMap:
             area = areas.pop()
             locations = list(room.inner)
             x, y = choice(locations)
+            counter = 0
             while self.tiles[x][y].blocking_entity or self.tiles[x][y].blocked or np.count_nonzero(
-                    self.algorithm.level[y:y + area.shape[0], x:x + area.shape[1]]) > 0:
+                    self.algorithm.level[y:y + area.shape[0], x:x + area.shape[1]]) > 0 or counter > 10:
                 x, y = choice(locations)
+                counter += 1
 
             tile = get_tile_object(entity_name)
             color = get_color(entity_name, mod=self.owner.world_tendency)

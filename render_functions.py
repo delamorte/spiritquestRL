@@ -918,7 +918,11 @@ class RenderFunctions:
                 if atk.duration:
                     duration_str = atk.duration[atk.rank] + " turns"
                 if atk.damage:
-                    atk_str = ", " + atk.damage[atk.rank] + "+" + str(player.fighter.str_bonus) + " dmg" if (
+                    if atk.rank >= len(atk.damage):
+                        damage = atk.damage[-1]
+                    else:
+                        damage = atk.damage[atk.rank]
+                    atk_str = ", " + damage + "+" + str(player.fighter.str_bonus) + " dmg" if (
                         duration_str) \
                         else atk.damage[atk.rank] + "+" + str(player.fighter.str_bonus) + " dmg"
                 skill_str += chance_str + effect_str + duration_str + atk_str

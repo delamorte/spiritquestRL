@@ -69,7 +69,7 @@ class Levels:
                 return
             self.world_tendency = self.params.biome_modifier
 
-            game_map = self.create_biome_and_map(name="dream", biome_title=self.params.title, width=70, height=70)
+            game_map = self.create_biome_and_map(name="dream", biome_title=self.params.title, width=60, height=60)
             self.items[game_map.name] = game_map
             self.current_map = game_map
 
@@ -81,7 +81,7 @@ class Levels:
             game_map = self.create_biome_and_map(name="hub", biome_title="hub", width=40, height=40,
                                                  generate_random=False, algorithm="hub")
         else:
-            game_map = self.create_biome_and_map(name="debug", width=40, height=40, algorithm=algorithm)
+            game_map = self.create_biome_and_map(name="debug", width=60, height=60, algorithm=algorithm)
         return game_map
 
     def create_biome_and_map(self, name, width, height, biome_title=None, algorithm=None, generate_random=True):

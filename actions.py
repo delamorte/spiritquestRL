@@ -142,6 +142,8 @@ class Actions:
                 ability = self.owner.player.player.sel_utility
             else:
                 ability = self.owner.player.player.sel_attack
+                if not ability:
+                    return False
             result, target, targeting = self.owner.player.player.use_ability(self.owner.levels.current_map, ability)
             if target:
                 self.owner.render_functions.draw_stats(target)
