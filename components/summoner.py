@@ -51,7 +51,7 @@ class Summoner:
             monster = Entity(summon_tile.x, summon_tile.y,
                              color, entity_name, tile=f_data, blocks=True, fighter=fighter_component, ai=ai_component,
                              light_source=True, status_effects=status_effects_component, remarks=remarks,
-                             indicator_color="light green", animations=animations_component)
+                             indicator_color="light green", animations=animations_component, category="allies")
             monster.abilities = Abilities(monster, name)
             monster.light_source.initialize_fov(game_map)
             game_map.tiles[summon_tile.x][summon_tile.y].add_entity(monster)

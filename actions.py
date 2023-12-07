@@ -340,6 +340,7 @@ class Actions:
         for entity in self.owner.levels.current_map.entities["monsters"]:
             entity.visible = False
             visible = self.owner.levels.current_map.visible[entity.x, entity.y]
+            prev_pos_x, prev_pos_y = entity.x, entity.y
             if visible:
                 entity.visible = True
                 if entity.fighter:
@@ -371,13 +372,11 @@ class Actions:
                     self.owner.game_state = GameStates.PLAYER_TURN
 
                 elif entity.ai:
-                    prev_pos_x, prev_pos_y = entity.x, entity.y
+
                     combat_msg = entity.ai.take_turn(
                         self.owner.player, self.owner.levels.current_map, self.owner.levels.current_map.entities,
                         self.owner.time_counter)
                     self.owner.animations_buffer.extend(entity.animations.buffer)
-                    self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
-                    self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
 
                     self.owner.fov_recompute = True
                     if combat_msg:
@@ -405,6 +404,11 @@ class Actions:
                 entity.ai.move_to_last_known_location(self.owner.player,
                                                       self.owner.levels.current_map,
                                                       self.owner.levels.current_map.entities)
+
+            print("entity: {0}, prev_pos: {1},{2}, pos: {3},{4}".format(entity.name, prev_pos_x, prev_pos_y, entity.x,
+                                                                        entity.y))
+            self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
+            self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
 
         if not self.owner.game_state == GameStates.PLAYER_DEAD:
             self.owner.game_state = GameStates.PLAYER_TURN

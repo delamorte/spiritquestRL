@@ -23,7 +23,12 @@ class DebugMap:
         pass
 
     def show(self, draw_map):
-        draw_map(params=self.data)
+        if isinstance(self.data, str):
+            blank_map = True
+        else:
+            blank_map = False
+
+        draw_map(params=self.data, blank_map=blank_map)
 
         output = self.owner.show(self)
         if not output and self.sub_menu:

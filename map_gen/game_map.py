@@ -283,7 +283,7 @@ class GameMap:
         wall_component.set_attributes(self)
         return wall
 
-    def generate_map(self, name=None):
+    def generate_map(self, name=None, algorithm=None):
 
         # generators = {
         #               "random_walk": DrunkardsWalk(self.width, self.height),
@@ -302,7 +302,9 @@ class GameMap:
             "squares_and_crosses": RoomAddition(self.width, self.height, squares_and_crosses=True),
         }
 
-        if name == "hub":
+        if algorithm:
+            map_algorithm = algorithm
+        elif name == "hub":
             map_algorithm = RoomAddition(self.width, self.height, drunkard=True, only_squares=1, build_later=True,
                                          first_room_max_size=8)
         elif not name:

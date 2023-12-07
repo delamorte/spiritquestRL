@@ -30,7 +30,7 @@ class Entity:
     A generic object to represent players, enemies, items, etc.
     """
 
-    def __init__(self, x, y, color, name, tile=None, layer=1, char=None, blocks=False, player=None,
+    def __init__(self, x, y, color, name, tile=None, layer=2, char=None, blocks=False, player=None,
                  fighter=None, ai=None, interactable=None, pickable=None, openable=None,
                  item=None, inventory=None, stairs=None, summoner=None, category="objects",
                  wall=None, door=None, cursor=None, light_source=None, abilities=None,
@@ -219,6 +219,7 @@ class Entity:
                 game_map.tiles[x][y].blocking_entity):
             self.x = x
             self.y = y
+
 
     def get_path_to(self, target, entities, game_map):
         """Compute and return a path to the target position.
