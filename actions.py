@@ -405,8 +405,6 @@ class Actions:
                                                       self.owner.levels.current_map,
                                                       self.owner.levels.current_map.entities)
 
-            print("entity: {0}, prev_pos: {1},{2}, pos: {3},{4}".format(entity.name, prev_pos_x, prev_pos_y, entity.x,
-                                                                        entity.y))
             self.owner.levels.current_map.tiles[prev_pos_x][prev_pos_y].remove_entity(entity)
             self.owner.levels.current_map.tiles[entity.x][entity.y].add_entity(entity)
 

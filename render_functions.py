@@ -89,7 +89,8 @@ def get_light_adjusted_corners(game_map, x, y, cardinal=None):
 
     for direction, coords in directions.items():
         x2, y2 = coords[0], coords[1]
-        if game_map.tiles[x2][y2].room_id != room_id or x2 >= game_map.width or x2 <= 0 or y2 >= game_map.height or y2 <= 0:
+        if game_map.tiles[x2][
+            y2].room_id != room_id or x2 >= game_map.width or x2 <= 0 or y2 >= game_map.height or y2 <= 0:
             get_color_from = (x, y)
         color = get_light_adjusted_color(game_map, x2, y2, direction, cardinal, get_color_from)
         corners.append(color)
@@ -105,6 +106,9 @@ class RenderFunctions:
         self.ui_offset_y = ui_offset_y
 
     def draw(self, entity, x, y):
+        if (x <= 0 or y <= 0 or x * options.data.tile_offset_x > self.owner.ui.viewport.offset_x2 or y *
+                options.data.tile_offset_y > self.owner.ui.viewport.offset_y2):
+            return
         if entity.hidden:
             return
         game_map = self.owner.levels.current_map
@@ -183,8 +187,6 @@ class RenderFunctions:
                     results.append(Message(str(", layer: " + str(entity.layer)), extend_line=True))
                     results.append(
                         Message(str(", light: " + str(game_map.light_map[entity.x, entity.y])), extend_line=True))
-                    print(str(game_map.tiles[entity.x][entity.y].natural_light_level))
-
                     if entity.xtra_info:
                         results.append(Message(msg=entity.xtra_info + ".", style="xtra", extend_line=True))
 
@@ -252,11 +254,12 @@ class RenderFunctions:
         if game_map.height < game_camera.height:
             bound_y2 = game_map.height * self.owner.ui.offset_y
         # Draw all the tiles within the boundaries of the game camera
-        center = np.array([player.y, player.x])
         entities = []
+        map_xy = []
         for dy, y in enumerate(range(bound_y, bound_y2, self.owner.ui.offset_y), start=1):
             for dx, x in enumerate(range(bound_x, bound_x2, self.owner.ui.offset_x), start=1):
                 map_x, map_y = game_camera.x + dx, game_camera.y + dy
+                map_xy.append((map_x, map_y))
                 if game_map.width < game_camera.width:
                     map_x = dx
                 if game_map.height < game_camera.height:
@@ -392,19 +395,19 @@ class RenderFunctions:
                     game_map.tiles[x2][y2].corners = corners
 
                 try:
-                    n = game_map.tiles[x-i+1:x+i, y-i]
+                    n = game_map.tiles[x - i + 1:x + i, y - i]
                 except IndexError as err:
                     n = None
                 try:
-                    w = game_map.tiles[x - i, y-i+1:y+i]
+                    w = game_map.tiles[x - i, y - i + 1:y + i]
                 except IndexError as err:
                     w = None
                 try:
-                    s = game_map.tiles[x-i+1:x+i, y + i]
+                    s = game_map.tiles[x - i + 1:x + i, y + i]
                 except IndexError as err:
                     s = None
                 try:
-                    e = game_map.tiles[x + i, y-i+1:y+i]
+                    e = game_map.tiles[x + i, y - i + 1:y + i]
                 except IndexError as err:
                     e = None
 
@@ -745,9 +748,9 @@ class RenderFunctions:
                 if blt.has_input():
                     key = blt.read()
                     # if animation interrupted by key press, cache rest of the frames
-                    if animation.cached_alpha.size > 0:
+                    if animation.cached_alpha is not None and animation.cached_alpha.size > 0:
                         animation.cached_alpha = animation.cached_alpha[i:]
-                    if animation.dialog is None:
+                    if animation.dialog is None and animation.cached_frames is not None:
                         # Dialog doesn't have frame buffer
                         animation.cached_frames = animation.cached_frames[i:]
                     return key
