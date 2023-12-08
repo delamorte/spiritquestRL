@@ -1,14 +1,13 @@
 from math import ceil
 from random import random
-from components.entity import get_neighbours
-from ui.message import Message
 
 
 class StatusEffect:
     def __init__(self, owner, source, name, description=None, dps=None, delayed_damage=None, rank=None,
                  fly=None, sneak=None, reveal=None, invisibility=None, slow=None, drain_stats=None,
-                 hit_penalty=None, paralyze=None, duration=None, chance=None, color=None, power=None,
-                 heal=None, summoning=None, target_self=None):
+                 hit_penalty=None, paralyze=None, stun=None, duration=None, chance=None, color=None, power=None,
+                 heal=None, summon=None, target_self=None, drain_atk=None, boost_atk=None,
+                 boost_ac=None, boost_hp=None, boost_ev=None):
         self.owner = owner
         self.source = source
         self.name = name
@@ -21,109 +20,164 @@ class StatusEffect:
         self.reveal = reveal
         self.slow = slow
         self.invisibility = invisibility
+        self.inv_ev_boost = 0
         self.rank = rank
         self.color = color
         self.drain_stats = drain_stats
+        self.drain_atk = drain_atk
+        self.boost_atk = boost_atk
+        self.boost_ac = boost_ac
+        self.boost_hp = boost_hp
+        self.boost_ev = boost_ev
         self.hit_penalty = hit_penalty
         self.paralyze = paralyze
+        self.stun = stun
         self.duration = duration
         self.chance = chance
         self.power = power
         self.heal = heal
-        self.summoning = summoning
+        self.summon = summon
         self.target_self = target_self
         self.slow_amount = None
         self.process_instantly = False
+        self.active = False
 
         # Process buffs etc. instantly after casting
-        if self.fly or self.heal or self.reveal or self.invisibility or self.sneak or self.summoning:
+        if self.fly or self.heal or self.reveal or self.invisibility or self.sneak or self.summon:
             self.process_instantly = True
 
-    def process(self, game_map=None):
+    def process(self, game_map=None, fighter=None):
         msg = None
 
         if self.process_instantly:
             self.process_instantly = False
 
-        if self.source.dead and self.name == "strangle":
+        if self.source.owner.dead and self.name == "strangle":
             self.duration = 0
 
         if self.heal:
-            msg = self.owner.heal(self.power[self.rank])
+            msg = fighter.heal(self.power[self.rank])
             return self, msg
 
         if self.duration <= 0:
 
             if self.hit_penalty:
-                self.owner.hit_penalty -= self.hit_penalty[self.rank]
+                fighter.hit_penalty -= self.hit_penalty[self.rank]
             if self.drain_stats:
-                self.owner.ac += self.drain_stats[self.rank]
-                self.owner.ev += self.drain_stats[self.rank]
+                fighter.ac += self.power[self.rank]
+                fighter.ev += self.power[self.rank]
+            if self.drain_atk:
+                fighter.atk += self.power[self.rank]
+            if self.boost_atk:
+                fighter.atk -= self.power[self.rank]
+            if self.boost_ac:
+                fighter.ac -= self.power[self.rank]
+            if self.boost_hp:
+                fighter.hp -= self.power[self.rank]
+            if self.boost_ev:
+                fighter.ev -= self.power[self.rank]
             if self.slow_amount:
-                self.owner.mv_spd += self.slow_amount
+                fighter.mv_spd += self.slow_amount
             if self.delayed_damage:
-                self.owner.take_damage(self.delayed_damage)
-            if self.paralyze:
-                self.owner.paralyzed = False
+                fighter.take_damage(self.delayed_damage)
             if self.fly:
-                self.owner.ev -= self.fly_ev_boost
-                self.owner.flying = False
-            if self.reveal:
-                self.owner.revealing = False
-            if self.summoning:
-                self.summoning = None
-                self.owner.owner.summoner.summoning = None
-                self.owner.owner.summoner.rank = self.rank
-            self.owner.effects.remove(self.description)
+                fighter.ev -= self.fly_ev_boost
+            if self.invisibility:
+                fighter.ev -= self.inv_ev_boost
             return self, msg
 
-        if self.summoning:
-            self.owner.summoning = True
-            self.owner.owner.summoner.summoning = self.summoning
-            self.owner.owner.summoner.rank = self.rank
-
         if self.dps:
-            self.owner.take_damage(self.dps[self.rank])
+            fighter.take_damage(self.dps[self.rank])
 
         if self.hit_penalty:
-            if self.description not in self.owner.effects:
-                self.owner.hit_penalty += self.hit_penalty[self.rank]
+            if not self.active:
+                fighter.hit_penalty += self.hit_penalty[self.rank]
 
         if self.drain_stats:
-            if self.description not in self.owner.effects:
-                self.owner.hit_penalty -= self.drain_stats[self.rank]
-                self.owner.ac -= self.drain_stats[self.rank]
-                self.owner.ev -= self.drain_stats[self.rank]
+            if not self.active:
+                fighter.hit_penalty -= self.power[self.rank]
+                fighter.ac -= self.power[self.rank]
+                fighter.ev -= self.power[self.rank]
+
+        if self.drain_atk:
+            if not self.active:
+                fighter.atk -= self.power[self.rank]
+
+        if self.boost_atk:
+            if not self.active:
+                fighter.atk += self.power[self.rank]
+        
+        if self.boost_ac:
+            if not self.active:
+                fighter.ac += self.power[self.rank]
+
+        if self.boost_hp:
+            if not self.active:
+                fighter.hp += self.power[self.rank]
+
+        if self.boost_ev:
+            if not self.active:
+                fighter.ev += self.power[self.rank]
 
         if self.slow:
-            if self.description not in self.owner.effects:
-                self.slow_amount = self.owner.mv_spd - self.owner.mv_spd * self.slow[self.rank]
-                self.owner.mv_spd -= self.slow_amount
-
-        if self.paralyze:
-            if random() <= self.chance[self.rank]:
-                self.owner.paralyzed = True
-            else:
-                self.owner.paralyzed = True
+            if not self.active:
+                self.slow_amount = fighter.mv_spd - fighter.mv_spd * self.slow[self.rank]
+                fighter.mv_spd -= self.slow_amount
 
         if self.fly:
-            if self.description not in self.owner.effects:
-                self.fly_ev_boost = ceil(self.owner.ev * self.power[self.rank] - self.owner.ev)
-                self.owner.ev += self.fly_ev_boost
-                self.owner.flying = True
+            if not self.active:
+                self.fly_ev_boost = ceil(fighter.ev * self.power[self.rank] - fighter.ev)
+                fighter.ev += self.fly_ev_boost
 
         if self.reveal:
-            neighbours = get_neighbours(self.owner.owner, game_map.tiles, include_self=False,
-                                        fighters=False, mark_area=True,
-                                        radius=self.reveal.radius[self.rank], algorithm="square")
+            neighbours = game_map.get_neighbours(fighter.owner, include_self=False,
+                                                 fighters=False, mark_area=True,
+                                                 radius=self.reveal.radius[self.rank], algorithm="square")
             for entity in neighbours:
                 if entity.hidden:
                     entity.hidden = False
-            if self.description not in self.owner.effects:
-                self.owner.revealing = True
 
-        if self.description not in self.owner.effects:
-            self.owner.effects.append(self.description)
+        if self.invisibility:
+            if not self.active:
+                self.inv_ev_boost = ceil(fighter.ev * ceil(1 + self.power[self.rank]) - fighter.ev)
+                fighter.ev += self.inv_ev_boost
+                
+                if fighter.owner.player:
+                    neighbours = game_map.get_neighbours(fighter.owner, include_self=False,
+                                                         fighters=False, mark_area=True,
+                                                         radius=fighter.fov, algorithm="disc")
+                    for entity in neighbours:
+                        if entity.ai:
+                            if entity.ai.cant_see_player:
+                                # If player has already passed the initial sneak check, have a constant chance of
+                                # passing again
+                                if random() > 0.66:
+                                    entity.ai.cant_see_player = False
+                            elif random() <= self.power[self.rank]:
+                                # Initial sneak check
+                                entity.ai.cant_see_player = True
+                            else:
+                                entity.ai.cant_see_player = False
+
+        if self.sneak and fighter.owner.player:
+            neighbours = game_map.get_neighbours(fighter.owner, include_self=False,
+                                                 fighters=False, mark_area=True,
+                                                 radius=self.sneak.radius[self.rank], algorithm="square")
+
+            for entity in neighbours:
+                if entity.ai:
+                    if entity.ai.cant_see_player:
+                        # If player has already passed the initial sneak check, have a constant chance of passing
+                        # again
+                        if random() > 0.66:
+                            entity.ai.cant_see_player = False
+                    elif random() <= self.power[self.rank]:
+                        # Initial sneak check
+                        entity.ai.cant_see_player = True
+                    else:
+                        entity.ai.cant_see_player = False
+
         self.duration -= 1
+        self.active = True
 
         return None, msg

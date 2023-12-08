@@ -1,3 +1,6 @@
+from bearlibterminal import terminal as blt
+
+
 class AvatarInfo:
     def __init__(self, name="avatar_info", data=None, sub_menu=False, event=None):
         self.owner = None
@@ -6,10 +9,13 @@ class AvatarInfo:
         self.data = data
         self.sub_menu = sub_menu
         self.heading = "[color=white]The following spirits have awakened within you.."
+        self.sub_heading = None
         self.items = []
         self.items_icons = []
         self.sub_items = {}
-        self.margin = 6
+        self.margin_x = 6
+        self.margin_y = 6
+        self.align = blt.TK_ALIGN_LEFT
         self.event = event
         self.refresh()
 
@@ -27,6 +33,7 @@ class AvatarInfo:
             self.sub_items[k] = [exp]
 
     def show(self):
+        self.refresh()
         output = self.owner.show(self)
         if output:
             self.owner.handle_output(output)

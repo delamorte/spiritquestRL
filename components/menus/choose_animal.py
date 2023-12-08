@@ -1,5 +1,8 @@
+from bearlibterminal import terminal as blt
+
+import options
 from data import json_data
-from map_objects.tilemap import tilemap
+from map_gen.tilemap import get_tile
 
 
 class ChooseAnimal:
@@ -9,11 +12,14 @@ class ChooseAnimal:
         self.name = name
         self.data = data
         self.heading = "[color=white]Choose your spirit animal..."
+        self.sub_heading = None
         self.items = []
         self.items_icons = []
         self.sub_items = {}
         self.sub_menu = sub_menu
-        self.margin = 6
+        self.margin_x = 10
+        self.margin_y = 6
+        self.align = blt.TK_ALIGN_LEFT
         self.event = event
         self.refresh()
 
@@ -21,15 +27,15 @@ class ChooseAnimal:
         self.items = []
         self.items_icons = []
         self.sub_items = {}
-        animals = tilemap()["monsters"]
-        animals = {x: animals[x] for x in ("crow", "rat", "snake")}
-        for (k, v) in animals.items():
-            animal = json_data.data.fighters[k]
+        animals = {x: json_data.data.fighters[x] for x in options.data.initial_animals}
+        for k in animals:
+            animal = animals[k]
             stats = "hp: {0}, ac: {1}, ev: {2}, power: {3}".format(animal["hp"], animal["ac"], animal["ev"],
-                                                                   animal["power"])
+                                                                   animal["atk"])
             skills = "skills: {0}".format(", ".join(animal["player_abilities"]))
             self.items.append(k)
-            self.items_icons.append(v)
+            tile = get_tile(k)
+            self.items_icons.append(tile)
             self.sub_items[k] = [stats, skills]
 
     def show(self):

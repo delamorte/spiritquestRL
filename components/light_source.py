@@ -1,30 +1,27 @@
-from tcod import map
+import numpy as np
+from tcod.map import compute_fov
 
 
 class LightSource:
-    def __init__(self, radius=3, name=None, fov_map=None):
+    def __init__(self, radius=3, name=None, fov_map=None, light_walls=False):
         self.owner = None
         self.radius = radius
         self.fov_map = fov_map
         self.algorithm = 0
-        self.light_walls = True
+        self.light_walls = light_walls
         self.name = name
-        if self.name == "candle":
-            self.radius = 0
+        self.visible = None
+        self.lit = True
 
     def initialize_fov(self, game_map):
-        fov_map = map.Map(game_map.width, game_map.height)
-        fov_map.walkable[:] = True
-        fov_map.transparent[:] = True
+        self.fov_map = np.full((game_map.width, game_map.height), fill_value=False)
 
-        for y in range(game_map.height):
-            for x in range(game_map.width):
-                if game_map.tiles[x][y].blocked:
-                    fov_map.walkable[y, x] = False
-                if game_map.tiles[x][y].block_sight:
-                    fov_map.transparent[y, x] = False
+    def recompute_fov(self, game_map):
+        x, y = self.owner.x, self.owner.y
 
-        self.fov_map = fov_map
-
-    def recompute_fov(self, x, y):
-        self.fov_map.compute_fov(x, y, self.radius, self.light_walls, self.algorithm)
+        # Update visible tiles
+        self.fov_map[:] = compute_fov(
+            game_map.transparent,
+            (x, y),
+            radius=self.radius
+        )

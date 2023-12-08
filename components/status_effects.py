@@ -3,24 +3,36 @@ class StatusEffects:
         self.owner = None
         self.name = name
         self.items = []
-        self.poison = None
-        self.paralyze = None
-        self.blind = None
-        self.disease = None
 
     def add_item(self, item):
-        if item.description not in self.owner.fighter.effects:
+
+        if not self.has_effect(item.description):
             self.items.append(item)
 
     def remove_item(self, item):
         self.items.remove(item)
 
+    def remove_all(self):
+        self.items = []
+
+    def get_item(self, description):
+        effect = next((x for x in self.items if x.description == description), False)
+        return effect
+
+    def has_effect(self, description=None, name=None):
+        if name:
+            has_effect = next((True for x in self.items if x.name == name), False)
+        else:
+            has_effect = next((True for x in self.items if x.description == description), False)
+        return has_effect
+
     def process_effects(self, effect=None, game_map=None, self_targeting=False):
         results = []
         msgs = []
+        fighter = self.owner.fighter
 
         if effect:
-            processed_effect, msg = effect.process(game_map=game_map)
+            processed_effect, msg = effect.process(game_map=game_map, fighter=fighter)
             if processed_effect is not None:
                 self.items.remove(processed_effect)
             if msg:
@@ -29,7 +41,7 @@ class StatusEffects:
         elif self_targeting:
             for effect in self.items:
                 if effect.process_instantly:
-                    processed_effect, msg = effect.process(game_map=game_map)
+                    processed_effect, msg = effect.process(game_map=game_map, fighter=fighter)
                     if processed_effect is not None:
                         results.append(processed_effect)
                     if msg:
@@ -41,7 +53,7 @@ class StatusEffects:
                 return msgs
         else:
             for effect in self.items:
-                processed_effect, msg = effect.process(game_map=game_map)
+                processed_effect, msg = effect.process(game_map=game_map, fighter=fighter)
                 if processed_effect is not None:
                     results.append(processed_effect)
                 if msg:

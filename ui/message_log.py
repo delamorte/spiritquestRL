@@ -1,6 +1,6 @@
+import re
 from copy import copy
 from textwrap import wrap
-import re
 
 
 class MessageLog:

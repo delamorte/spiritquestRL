@@ -1,0 +1,185 @@
+{
+  "hub": {
+    "name": "hub",
+    "biome_type": "prefab",
+    "prefixes": [
+      "prefab"
+    ],
+    "features": [
+      "Shaman's Retreat",
+      "Druid Altar",
+      "Alchemist Laboratory",
+      "Ranger's Cabin",
+      "Hermit's Garden",
+      "Ornithologist's Watchtower",
+      "Overgrown Cemetery"
+    ],
+    "monsters": [
+    ],
+    "npcs": [
+    ],
+    "quests": [
+    ],
+    "quest_chances": [
+    ],
+    "bosses": [
+    ],
+    "tile": 181,
+    "wall": "tree",
+    "floor": "ground_soil"
+  },
+  "forest": {
+    "name": "forest",
+    "biome_type": "forest",
+    "prefixes": [
+      "autumn",
+      "dark",
+      "lush",
+      "swampy",
+      "verdant",
+      "dying",
+      "spooky",
+      "dense",
+      "enchanted",
+      "serene",
+      "mysterious",
+      "ancient",
+      "towering",
+      "majestic",
+      "vibrant",
+      "tranquil",
+      "breathtaking",
+      "wild",
+      "peaceful",
+      "teeming",
+      "emerald",
+      "ethereal",
+      "pristine"
+    ],
+    "features": [
+      "Rat Laboratory",
+      "Bat Cave",
+      "Moon Altar",
+      "Goldilocks' House",
+      "Crow Sanctuary",
+      "Witch's Hut",
+      "Overgrown Cemetery",
+      "Mystic Snake Coven",
+      "Ancient Tree",
+      "Enchanted Pond",
+      "Druid Circle",
+      "Fairy Glen",
+      "Ranger's Lookout",
+      "Mystic Caverns",
+      "Herb Garden",
+      "Waterfall Oasis",
+      "Giant's Stump",
+      "Wisp-lit Trail",
+      "Wildlife Sanctuary",
+      "Sunlit Grove",
+      "Beast Tamer's Camp",
+      "Witch's Hut"
+    ],
+    "monsters": [
+      "crow",
+      "rat",
+      "bat",
+      "snake",
+      "bear",
+      "felid"
+    ],
+    "npcs": [
+      "blacksmith",
+      "druid",
+      "ranger",
+      "ornithologist",
+      "herbalist"
+    ],
+    "quests": [
+      "rescue",
+      "hunt"
+    ],
+    "quest_chances": [
+      0.5,
+      0.5
+    ],
+    "bosses": [
+      "albino rat",
+      "king kobra",
+      "black crow king"
+    ],
+    "tile": 126,
+    "wall": "tree",
+    "floor": "ground_soil"
+  },
+  "swamp": {
+    "name": "swamp",
+    "biome_type": "swamp",
+    "prefixes": [
+      "murky",
+      "dank",
+      "oozing",
+      "soggy",
+      "mysterious",
+      "primordial",
+      "dense",
+      "intricate",
+      "lush",
+      "teeming",
+      "mossy",
+      "isolated",
+      "quaggy",
+      "dark",
+      "humid",
+      "serpentine",
+      "dreary",
+      "surreal",
+      "eerie",
+      "vast"
+    ],
+    "features": [
+      "Witch's Hut",
+      "Boggy Marshlands",
+      "Abandoned Ruins",
+      "Bioluminescent Glade",
+      "Misty Clearing",
+      "Monster's Lair",
+      "Bubbling Pools",
+      "Swamp Shaman's Circle",
+      "Overgrown Cemetery",
+      "Herbalist's Garden",
+      "Fairy Ring"
+    ],
+    "monsters": [
+      "crow",
+      "leech",
+      "frog",
+      "snake",
+      "mosquito",
+      "cockroach"
+    ],
+    "npcs": [
+      "blacksmith",
+      "druid",
+      "ranger",
+      "ornithologist",
+      "herbalist"
+    ],
+    "quests": [
+      "rescue",
+      "hunt"
+    ],
+    "quest_chances": [
+      0.5,
+      0.5
+    ],
+    "bosses": [
+      "albino rat",
+      "king kobra",
+      "black crow king"
+    ],
+    "tile": 411,
+    "wall": "wall_swamp",
+    "floor": "ground_soil"
+  }
+}

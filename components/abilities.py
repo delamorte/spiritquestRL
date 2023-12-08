@@ -1,27 +1,51 @@
+from random import sample, shuffle
+
 from components.ability import Ability
 from data import json_data
+from ui.message import Message
 
 
 class Abilities:
-    def __init__(self, name, capacity=None):
-        self.owner = None
-        self.name = name
+    def __init__(self, entity, name=None, capacity=None):
+        self.owner = entity
+        if name:
+            self.name = name
+        else:
+            self.name = entity.name
         self.capacity = capacity
         self.items = []
         self.weapon_skills = []
         self.attack_skills = []
         self.utility_skills = []
+        self.learnable = {}
+        self.unlocked = []
+        self.initial_abilities_max = 2
 
-        if name != "player":
+        if entity.name != "player":
             self.initialize_abilities()
 
-    def initialize_abilities(self, name=None):
-        if name is None:
-            name = self.name
-        if self.owner and self.owner.player:
-            initial_abilities = json_data.data.fighters[name]["player_abilities"]
+    def set_learnable(self, entity_name):
+        item = json_data.data.fighters[entity_name]
+        abilities = item["player_abilities"] if "player_abilities" in item.keys() else item["abilities"]
+        learned = [x.name for x in self.items]
+        learnable = list(filter(lambda x: x not in learned, abilities))
+        shuffle(learnable)
+        self.learnable[entity_name] = learnable
+
+    def initialize_abilities(self, entity_name=None, ability_name=None, learn=True):
+        if entity_name is None:
+            entity_name = self.name
+        if ability_name:
+            initial_abilities = [ability_name]
         else:
-            initial_abilities = json_data.data.fighters[name]["abilities"]
+            if self.owner and self.owner.player:
+                abilities = json_data.data.fighters[entity_name]["player_abilities"]
+                initial_abilities = sample(abilities[1:], self.initial_abilities_max)
+                initial_abilities.append(abilities[0])
+                self.learnable[entity_name] = list(set(initial_abilities) ^ set(abilities))
+                shuffle(self.learnable[entity_name])
+            else:
+                initial_abilities = json_data.data.fighters[entity_name]["abilities"]
         for n in initial_abilities:
             item = json_data.data.abilities[n]
             skill_type = item["skill_type"]
@@ -38,6 +62,8 @@ class Abilities:
             radius = item["radius"] if "radius" in item.keys() else []
             power = item["power"] if "power" in item.keys() else None
             chance = item["chance"] if "chance" in item.keys() else [1.0]
+            color = item["color"] if "color" in item.keys() else None
+            efx_icons = item["efx_icons"] if "efx_icons" in item.keys() else None
             needs_ai = item["needs_ai"] if "needs_ai" in item.keys() else None
             target_self = item["target_self"] if "target_self" in item.keys() else False
             target_other = item["target_other"] if "target_other" in item.keys() else False
@@ -52,9 +78,11 @@ class Abilities:
                         needs_ai=needs_ai, target_self=target_self, target_other=target_other,
                         player_only=player_only, power=power, requires_targeting=requires_targeting,
                         targets_fighters_only=targets_fighters_only, target_area=target_area,
-                        summoned_entities=summoned_entities)
-
-            self.add_item(a)
+                        summoned_entities=summoned_entities, color=color, efx_icons=efx_icons, owner=self.owner)
+            if learn:
+                self.add_item(a)
+            else:
+                return a
 
     def add_item(self, item):
         """Used when adding initial abilities"""
@@ -78,15 +106,53 @@ class Abilities:
 
         self.items.append(item)
 
-    def learn(self, item):
+    def learn(self, ability_name=None):
         """Used when learning new abilities"""
         results = []
 
         if self.capacity and len(self.items) >= self.capacity:
-            results.append("You can't learn any more abilities.")
+            results.append(Message(msg="You can't learn any more abilities.", style="level_up"))
 
         else:
-            results.append("You learn the {0}!".format(item.name))
-            self.items.append(item)
+            item = ability_name
+            results.append(Message(msg="You learn {0}!".format(item.capitalize()), style="level_up"))
+            self.initialize_abilities(ability_name=item)
+            unlocked = next((x for x in self.unlocked if x.name == item), False)
+            if unlocked:
+                self.unlocked.remove(unlocked)
+
+        return results
+
+    def unlock(self, entity_name=None, ability_name=None):
+        """Unlocking makes abilities available for learning by using skill points"""
+        results = []
+
+        if entity_name:
+            item = self.learnable[entity_name].pop(0)
+        else:
+            item = ability_name
+        results.append(Message(msg="You have unlocked {0}!".format(item.capitalize()), style="level_up"))
+        skill = self.initialize_abilities(ability_name=item, learn=False)
+        unlocked = next((x for x in self.unlocked if x.name == skill.name), False)
+        if not unlocked:
+            self.unlocked.append(skill)
+
+        return results
+
+    def learn_or_rank_up(self, ability_name):
+        results = []
+        for skill in self.items:
+            if skill.name == ability_name:
+                skill.rank_up()
+                msg = Message(
+                    msg="You have learned {0} (rank {1})!".format(
+                        ability_name.capitalize(), skill.rank + 1), style="level_up")
+                results.append(msg)
+                break
+
+        if not results:
+            results.extend(self.learn(ability_name=ability_name))
+
+        self.owner.player.skill_points -= 1
 
         return results

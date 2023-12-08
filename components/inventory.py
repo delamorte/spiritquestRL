@@ -2,7 +2,7 @@ from ui.message import Message
 
 
 class Inventory:
-    def __init__(self, capacity):
+    def __init__(self, capacity=20):
         self.owner = None
         self.capacity = capacity
         self.items = []

@@ -1,10 +1,27 @@
 from math import sqrt
+from random import randint, choice
+
 import numpy as np
 import tcod
 
-from game_states import GameStates
+from components.AI.ai_basic import AIBasic
+from components.AI.ai_caster import AICaster
+from components.abilities import Abilities
+from components.animation import Animation
+from components.animations import Animations
+from components.dialogue import Dialogue
+from components.fighter import Fighter
+from components.inventory import Inventory
+from components.item import Item
+from components.light_source import LightSource
+from components.npc import Npc
+from components.openable import Openable
+from components.player import Player
+from components.status_effects import StatusEffects
+from components.wall import Wall
+from data import json_data
 from helpers import get_article
-from map_objects.tilemap import tilemap
+from map_gen.tilemap import get_tile, get_tile_variant, get_tile_object
 from ui.message import Message
 
 
@@ -13,25 +30,74 @@ class Entity:
     A generic object to represent players, enemies, items, etc.
     """
 
-    def __init__(self, x, y, layer, char, color, name, blocks=False, player=None,
-                 fighter=None, ai=None, item=None, inventory=None, stairs=None, summoner=None,
+    def __init__(self, x, y, color, name, tile=None, layer=2, char=None, blocks=False, player=None,
+                 fighter=None, ai=None, interactable=None, pickable=None, openable=None,
+                 item=None, inventory=None, stairs=None, summoner=None, category="objects",
                  wall=None, door=None, cursor=None, light_source=None, abilities=None,
                  status_effects=None, stand_on_messages=True, boss=False, hidden=False, remarks=None,
-                 indicator_color="dark red"):
+                 indicator_color="dark red", animations=None, visible=False, dialogue=None, npc=None):
+        """
+        :param x:
+        :param y:
+        :param layer:
+        :param color:
+        :param name:
+        :param tile:
+        :param char:
+        :param blocks:
+        :param player:
+        :param fighter:
+        :param ai:
+        :param interactable:
+        :param pickable:
+        :param openable:
+        :param item:
+        :param inventory:
+        :param stairs:
+        :param summoner:
+        :param category: monsters, allies, npcs, objects, decorations, player, cursor
+        :param wall:
+        :param door:
+        :param cursor:
+        :param light_source:
+        :param abilities:
+        :param status_effects:
+        :param stand_on_messages:
+        :param boss:
+        :param hidden:
+        :param remarks:
+        :param indicator_color:
+        :param animations:
+        :param visible:
+        :param dialogue:
+        :param npc:
+        """
         self.x = x
         self.y = y
         self.layer = layer
-        self.char = char
-        if color is None:
+        if not color:
             color = "default"
         self.color = color
         self.name = name
+        if not tile:
+            tile = get_tile_object(name)
+        self.tile = tile
+        if not char:
+            if "tile_variants" in tile.keys():
+                char = get_tile_variant(name)
+            else:
+                char = get_tile(name, tile)
+        self.char = char
         self.colored_name = "[color={0}]{1}[color=default]".format(color, name.capitalize())
         self.blocks = blocks
         self.fighter = fighter
         self.summoner = summoner
         self.player = player
+        self.category = category
         self.ai = ai
+        self.interactable = interactable
+        self.pickable = pickable
+        self.openable = openable
         self.item = item
         self.inventory = inventory
         self.stairs = stairs
@@ -50,6 +116,16 @@ class Entity:
         self.hidden = hidden
         self.remarks = remarks
         self.indicator_color = indicator_color
+        self.animations = animations
+        self.dialogue = dialogue
+        self.npc = npc
+        self.dead = False
+        self.visible = visible
+
+        if self.category == "monsters" or self.category == "npcs" or self.category == "player":
+            self.set_fighter_components()
+        elif self.category == "objects":
+            self.set_object_components()
 
         # Set entity as component owner, so components can call their owner
         if self.player:
@@ -65,24 +141,41 @@ class Entity:
             self.item.owner = self
 
         if self.inventory:
+            inventory_component = Inventory()
+            self.inventory = inventory_component
             self.inventory.owner = self
 
         if self.stairs:
             self.stairs.owner = self
 
-        if self.wall:
+        if self.blocks and not self.fighter:
+            wall_component = Wall(name=name, tile=tile)
+            self.wall = wall_component
             self.wall.owner = self
 
-        if self.door:
+        if self.openable:
+            door_component = Openable(name, self.char)
+            self.door = door_component
             self.door.owner = self
+
+        if self.interactable or self.pickable:
+            item_component = Item(name, pickable=self.tile["pickable"], interactable=self.tile["interactable"],
+                                  light_source=self.tile["light_source"])
+            self.item = item_component
+            self.item.owner = self
 
         if self.cursor:
             self.cursor.owner = self
 
         if self.light_source:
+            light_component = LightSource(name=self.name, light_walls=False)
+            if self.fighter:
+                light_component.radius = self.fighter.fov
+            self.light_source = light_component
             self.light_source.owner = self
 
         if self.abilities:
+            self.abilities = Abilities(self)
             self.abilities.owner = self
 
         if self.status_effects:
@@ -91,12 +184,21 @@ class Entity:
         if self.summoner:
             self.summoner.owner = self
 
+        if self.animations:
+            self.animations.owner = self
+
+        if self.dialogue:
+            self.dialogue.owner = self
+
+        if self.npc:
+            self.npc.owner = self
+
     def move(self, dx, dy):
         # Move the entity by a given amount
         self.x += dx
         self.y += dy
 
-    def move_towards(self, target_x, target_y, game_map):
+    def move_towards(self, target_x, target_y, game_map, escape=False):
         dx = target_x - self.x
         dy = target_y - self.y
         distance = sqrt(dx ** 2 + dy ** 2)
@@ -104,75 +206,52 @@ class Entity:
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
 
+        if escape:
+            dx = -1 * dx
+            dy = -1 * dy
+
         if not (game_map.is_blocked(self.x + dx, self.y + dy) or
-                game_map.tiles[self.x+dx][self.y+dy].blocking_entity):
+                game_map.tiles[self.x + dx][self.y + dy].blocking_entity):
             self.move(dx, dy)
 
-    def move_to_tile(self, x, y):
-        self.x = x
-        self.y = y
+    def move_to_tile(self, game_map, x, y):
+        if not (game_map.is_blocked(x, y) or
+                game_map.tiles[x][y].blocking_entity):
+            self.x = x
+            self.y = y
 
-    def move_astar(self, target, entities, game_map):
 
-        fov_map = tcod.map.Map(game_map.width, game_map.height)
-        fov_map.walkable[:] = True
-        fov_map.transparent[:] = True
+    def get_path_to(self, target, entities, game_map):
+        """Compute and return a path to the target position.
 
-        for y1 in range(game_map.height):
-            for x1 in range(game_map.width):
-                if game_map.tiles[x1][y1].blocked or game_map.tiles[x1][y1].blocking_entity:
-                    fov_map.walkable[y1, x1] = False
-                if game_map.tiles[x1][y1].block_sight:
-                    fov_map.transparent[y1, x1] = False
+        If there is no valid path then returns an empty list.
+        """
+        # Copy the walkable array.
+        walkable = np.frompyfunc(lambda tile: not tile.blocked, 1, 1)
+        cost = np.array(walkable(game_map.tiles), dtype=np.int8)
 
-        for entity in entities["monsters"]:
-            if entity.blocks and entity != self and entity != target:
-                fov_map.walkable[entity.y, entity.x] = False
-                if entity.occupied_tiles is not None:
-                    fov_map.walkable[entity.y + 1, entity.x + 1] = False
-                    fov_map.walkable[entity.y, entity.x + 1] = False
-                    fov_map.walkable[entity.y + 1, entity.x] = False
-                fov_map.transparent[entity.y, entity.x] = True
+        blocking_entities = entities["monsters"] + entities["allies"] + entities["player"] + entities["npcs"] + entities["objects"]
 
-        for entity in entities["allies"]:
-            if entity.blocks and entity != self and entity != target:
-                fov_map.walkable[entity.y, entity.x] = False
-                if entity.occupied_tiles is not None:
-                    fov_map.walkable[entity.y + 1, entity.x + 1] = False
-                    fov_map.walkable[entity.y, entity.x + 1] = False
-                    fov_map.walkable[entity.y + 1, entity.x] = False
-                fov_map.transparent[entity.y, entity.x] = True
+        for entity in blocking_entities:
+            # Check that an entity blocks movement and the cost isn't zero (blocking.)
+            if entity.blocks and cost[entity.x, entity.y]:
+                # Add to the cost of a blocked position.
+                # A lower number means more enemies will crowd behind each other in
+                # hallways.  A higher number means enemies will take longer paths in
+                # order to surround the player.
+                cost[entity.x, entity.y] += 10
 
-        # Allocate a A* path
-        # The 1.41 is the normal diagonal cost of moving, it can be set as 0.0
-        # if diagonal moves are prohibited
-        astar = tcod.path.AStar(fov_map)
+        # Create a graph from the cost array and pass that graph to a new pathfinder.
+        graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=3)
+        pathfinder = tcod.path.Pathfinder(graph)
 
-        # Compute the path between self's coordinates and the target's
-        # coordinates
-        tcod.path_compute(astar, self.x, self.y, target.x, target.y)
+        pathfinder.add_root((self.x, self.y))  # Start position.
 
-        # Check if the path exists, and in this case, also the path is shorter than 25 tiles
-        # The path size matters if you want the monster to use alternative longer paths
-        # (for example through other rooms) if for example the player is in a corridor
-        # It makes sense to keep path size relatively low to keep the monsters
-        # from running around the map if there's an alternative path really far
-        # away
-        if not tcod.path_is_empty(astar) and tcod.path_size(astar) < 25:
-            # Find the next coordinates in the computed full path
-            x, y = tcod.path_walk(astar, True)
-            if x or y:
-                # Set self's coordinates to the next path tile
-                self.x = x
-                self.y = y
-                if self.occupied_tiles is not None:
-                    self.occupied_tiles = [(x, y), (x, y + 1), (x + 1, y + 1), (x + 1, y)]
-        else:
-            # Keep the old move function as a backup so that if there are no paths
-            # (for example another monster blocks a corridor)
-            # it will still try to move towards the player (closer to the
-            # corridor opening)
-            self.move_towards(target.x, target.y, game_map)
+        # Compute the path to the destination and remove the starting point.
+        path = pathfinder.path_to((target.x, target.y))[1:].tolist()
+
+        # Convert from List[List[int]] to List[Tuple[int, int]].
+        return [(int(index[0]), int(index[1])) for index in path]
 
     def distance_to(self, other):
         # Use Chebysev distance
@@ -186,92 +265,106 @@ class Entity:
 
     def kill(self):
         if self.player:
-            self.char = tilemap()["player_remains"]
             death_message = Message(msg="You died!", style="death")
+            self.dead = True
+
+        elif self.ai.ally:
+            self.light_source = None
+            self.blocks = False
+            self.fighter = None
+            self.ai = None
+            self.dead = True
+            return None
 
         else:
             death_message = Message("The {0} is dead!".format(self.name), style="death")
 
             if self.boss:
-                self.char = tilemap()["boss_remains"]
                 self.color = "darkest red"
             else:
-                self.char = tilemap()["monster_remains"]
                 self.color = "dark gray"
-                self.light_source = None
+
+            self.light_source = None
             self.blocks = False
             self.fighter = None
             self.ai = None
+            self.dead = True
             self.name = "remains of " + get_article(self.name) + " " + self.name
             self.layer = 1
 
         return death_message
 
-
-def get_neighbours(entity, game_map, radius=1, include_self=False, fighters=False, mark_area=False,
-                   algorithm="disc", empty_tiles=False, exclude_player=False):
-    """
-    :param exclude_player: excludes the player from the entities
-    :param empty_tiles: return empty tiles around entity
-    :param algorithm: the shape of the targeting area
-    :param mark_area: flags the neighbour area so draw_map can highlight it
-    :param entity:
-    :param game_map:
-    :param radius: radius
-    :param include_self: include self (center) in the list of entities
-    :param fighters: return only fighting entities
-    :return: list of entities surrounding the center in radius n
-    """
-
-    if algorithm == "melee":
-        algorithm = "square"
-        radius = 1
-
-    entities = []
-
-    def n_closest(x, n, d=1):
-        return x[n[0] - d:n[0] + d + 1, n[1] - d:n[1] + d + 1]
-
-    def n_disc(array):
-        a, b = entity.x, entity.y
-        n = game_map.shape[0]
-        r = radius
-
-        y, x = np.ogrid[-a:n - a, -b:n - b]
-        mask = x * x + y * y <= r * r
-
-        return array[mask]
-
-    if algorithm == "disc":
-        neighbours = n_disc(game_map).flatten()
-    elif algorithm == "square":
-        neighbours = n_closest(game_map, (entity.x, entity.y), d=radius).flatten()
-    else:
-        neighbours = n_closest(game_map, (entity.x, entity.y), d=radius).flatten()
-
-    tiles = []
-
-    for tile in neighbours:
-        if empty_tiles:
-            if not tile.blocked and not tile.blocking_entity:
-                tiles.append(tile)
+    def remark(self, chance=10, sneak=False, game_map=None):
+        if self.x > game_map.width - 5 or self.x < 5:
+            return
+        if self.animations.buffer:
+            return
+        if sneak:
+            remark = choice(json_data.data.remarks["sneaking"])
+        elif self.remarks:
+            remark = choice(self.remarks)
         else:
-            if mark_area:
-                tile.targeting_zone = True
-            else:
-                tile.targeting_zone = False
-            if tile.entities_on_tile:
-                if not include_self and tile.blocking_entity == entity:
-                    continue
-                elif fighters and exclude_player:
-                    fighting_entities = [entity for entity in tile.entities_on_tile if entity.fighter and not entity.player]
-                    entities.extend(fighting_entities)
-                elif fighters:
-                    fighting_entities = [entity for entity in tile.entities_on_tile if entity.fighter]
-                    entities.extend(fighting_entities)
-                else:
-                    entities.extend(tile.entities_on_tile)
-    if empty_tiles:
-        return tiles
-    else:
-        return entities
+            return
+        if chance >= (100 - randint(0, 100)):
+            self.animations.buffer.append(Animation(self, self, dialog=remark, target_self=True))
+
+    def set_fighter_components(self):
+        f_data = json_data.data.fighters[self.name]
+        fighter_component = Fighter(hp=f_data["hp"], ac=f_data["ac"], ev=f_data["ev"],
+                                    atk=f_data["atk"], mv_spd=f_data["mv_spd"],
+                                    atk_spd=f_data["atk_spd"], size=f_data["size"], fov=f_data["fov"])
+        self.fighter = fighter_component
+        self.remarks = f_data["remarks"]
+
+        npc_component = None
+        dialogue_component = None
+        status_effects_component = StatusEffects(self.name)
+        animations_component = Animations()
+
+        if "ai" in f_data.keys() and f_data["ai"] == "caster":
+            ai_component = AICaster()
+        elif "ai" in f_data.keys() and f_data["ai"] == "npc":
+            ai_component = AIBasic(passive=True)
+            npc_component = Npc(self.name)
+        elif self.category == "allies":
+            self.indicator_color = "light green"
+            self.name += " (friend)"
+            ai_component = AIBasic(ally=True)
+        else:
+            ai_component = AIBasic()
+
+        if "dialogue" in f_data.keys() and f_data["dialogue"]:
+            dialogue_component = Dialogue(self.name)
+
+        self.ai = ai_component
+        if npc_component:
+            self.npc = npc_component
+        if dialogue_component:
+            self.dialogue = dialogue_component
+
+        self.status_effects = status_effects_component
+        self.animations = animations_component
+        self.blocks = True
+        self.abilities = True
+
+        if "xtra_info" in f_data.keys():
+            self.xtra_info = f_data["xtra_info"]
+        if self.category == "npcs":
+            self.indicator_color = "light green"
+        if f_data["size"] == "gigantic":
+            self.boss = True
+            self.occupied_tiles = [(self.x, self.y), (self.x, self.y + 1), (self.x + 1, self.y + 1),
+                                   (self.x + 1, self.y)]
+
+        if self.category == "player":
+            player_component = Player(50)
+            self.player = player_component
+            self.player.set_char("player", self.tile)
+            self.player.avatar["player"] = self.fighter
+
+    def set_object_components(self):
+        self.openable = self.tile["openable"]
+        self.pickable = self.tile["pickable"]
+        self.interactable = self.tile["interactable"]
+        self.light_source = self.tile["light_source"]
+        self.blocks = self.tile["blocks"]
