@@ -12,15 +12,20 @@ from map_gen.dungeon import Dungeon, Room
 # ==== Room Addition ====
 class RoomAddition(Dungeon):
     def __init__(self, map_width=None, map_height=None, only_cellular=False, only_vaults=False,
-                 only_squares=False, squares_and_crosses=False, drunkard=False, max_rooms=20, room_max_size=300,
+                 only_squares=False, squares_and_crosses=False, drunkard=False, max_rooms=5, room_max_size=300,
                  build_later=False, first_room_max_size=None):
         super().__init__(map_width=map_width, map_height=map_height)
+
+        self.feature_rooms = []
         self.rooms = []
         self.rooms_list = []
         self.level = []
 
-        self.room_min_size = 16  # min size in number of floor tiles, not height and width
+        self.room_min_size = 30  # min size in number of floor tiles, not height and width
         self.room_max_size = room_max_size  # min size in number of floor tiles, not height and width
+        self.feature_room_min_size = 25
+        self.feature_room_min_h = 6
+        self.feature_room_min_w = 6
         self.max_rooms = max_rooms
 
         self.build_room_attempts = 500
@@ -29,21 +34,21 @@ class RoomAddition(Dungeon):
 
         self.first_room_max_size = None
 
-        self.square_room_max_size = 12
-        self.square_room_min_size = 6
+        self.square_room_max_size = 20
+        self.square_room_min_size = 10
 
-        self.cross_room_max_size = 14
-        self.cross_room_min_size = 4
+        self.cross_room_max_size = 20
+        self.cross_room_min_size = 10
 
         self.cellular_chance = 0.30  # probability that the first room will be a cavern
-        self.cellular_room_min_size = 6  # max height and width for cellular automata rooms
-        self.cellular_room_max_size = 14  # max height and width for cellular automata rooms
+        self.cellular_room_min_size = 10  # max height and width for cellular automata rooms
+        self.cellular_room_max_size = 30  # max height and width for cellular automata rooms
 
         self.conjoined_room_chance = 0.0  # chance to make room conjoined with other rooms
 
         self.first_vault_max_size = 1600
-        self.vault_max_size = 1100
         self.vault_size_offset = 200  # After enough rooms are placed, fetch smaller vaults
+        self.vault_max_size = 1200
 
         self.cellular_wall_probability = 0.45
         self.cellular_neighbors = 5
@@ -52,6 +57,10 @@ class RoomAddition(Dungeon):
         self.square_room_chance = 0.1
         self.cross_room_chance = 0.15
         self.vault_chance = 0.2
+
+        self.feature_cross_room_chance = 0.1
+        self.feature_square_room_chance = 0.6
+        self.feature_vault_chance = 0.2
 
         self.only_cellular = only_cellular
         self.only_vaults = only_vaults
@@ -80,8 +89,11 @@ class RoomAddition(Dungeon):
             room_height, room_width = room_arr.shape
             if room_height >= self.map_height - 1 or room_width >= self.map_width - 1:
                 continue
-            x = random.randint(2, self.map_width - room_width - 2)
-            y = random.randint(2, self.map_height - room_height - 2)
+            try:
+                x = random.randint(2, self.map_width - room_width - 2)
+                y = random.randint(2, self.map_height - room_height - 2)
+            except ValueError:
+                continue
             id_nr = len(self.rooms) + 1
             new_room = Room(x, y, room_width, room_height, room_arr, id_nr=id_nr, algorithm=algorithm,
                             build_later=self.build_later)
@@ -110,6 +122,8 @@ class RoomAddition(Dungeon):
                         self.add_room(room)
                         # Connect rooms
 
+            self.place_feature(new_room)
+
             if len(self.rooms) >= self.max_rooms:
                 break
 
@@ -118,47 +132,56 @@ class RoomAddition(Dungeon):
 
         return self.level
 
-    def generate_room(self, vault_size_offset=0):
+    def generate_room(self, vault_size_offset=0, max_w=None, max_h=None, feature=False):
         algorithm = None
         # select a room type to generate and return that room
-        if self.only_cellular:
-            self.conjoined_room_chance = 1.0
-            room = self.generate_room_cellular()
-            return room, "cellular"
-        if self.only_vaults:
-            vault_size = self.vault_max_size - vault_size_offset
-            room = self.generate_random_vault(vault_size)
-            return room, "vault"
-        if self.only_squares:
-            room = self.generate_room_square()
-            return room, "square"
-        if self.squares_and_crosses:
-            choice = random.random()
-            if choice < self.vault_chance:
-                room = self.generate_room_square()
-                algorithm = "square"
-            else:
-                room = self.generate_room_cross()
-                algorithm = "cross"
-            return room, algorithm
+        if not feature:
+            if self.only_cellular:
+                self.conjoined_room_chance = 1.0
+                room = self.generate_room_cellular(max_w, max_h)
+                return room, "cellular"
+            if self.only_vaults:
+                vault_size = self.vault_max_size - vault_size_offset
+                if max_w and max_h:
+                    vault_size = max_w * max_h
+                room = self.generate_random_vault(vault_size)
+                return room, "vault"
+            if self.only_squares:
+                room = self.generate_room_square(max_w=max_w, max_h=max_h)
+                return room, "square"
+            if self.squares_and_crosses:
+                choice = random.random()
+                if choice < self.vault_chance:
+                    room = self.generate_room_square()
+                    algorithm = "square"
+                else:
+                    room = self.generate_room_cross(max_w, max_h)
+                    algorithm = "cross"
+                return room, algorithm
         if self.rooms:
             # There is at least one room already
             choice = random.random()
 
-            if choice < self.vault_chance:
+            vault_chance = self.vault_chance if not feature else self.feature_vault_chance
+            square_room_chance = self.square_room_chance if not feature else self.feature_square_room_chance
+            cross_room_chance = self.cross_room_chance if not feature else self.feature_cross_room_chance
+
+            if choice < vault_chance:
                 vault_size = self.vault_max_size - vault_size_offset
+                if max_w and max_h:
+                    vault_size = max_w * max_h
                 room = self.generate_random_vault(vault_size)
                 algorithm = "vault"
 
             else:
-                if choice < self.square_room_chance:
-                    room = self.generate_room_square()
+                if choice < square_room_chance:
+                    room = self.generate_room_square(max_w=max_w, max_h=max_h)
                     algorithm = "square"
-                elif self.square_room_chance <= choice < (self.square_room_chance + self.cross_room_chance):
-                    room = self.generate_room_cross()
+                elif square_room_chance <= choice < (square_room_chance + cross_room_chance):
+                    room = self.generate_room_cross(max_w, max_h)
                     algorithm = "cross"
                 else:
-                    room = self.generate_room_cellular()
+                    room = self.generate_room_cellular(max_w, max_h)
                     algorithm = "cellular"
 
         else:  # it's the first room
@@ -169,19 +192,27 @@ class RoomAddition(Dungeon):
 
             else:
                 if choice < self.cellular_chance:
-                    room = self.generate_room_cellular()
+                    room = self.generate_room_cellular(max_w, max_h)
                     algorithm = "cellular"
                 else:
-                    room = self.generate_room_square()
+                    room = self.generate_room_square(max_w, max_h)
                     algorithm = "square"
 
         return room, algorithm
 
-    def generate_room_cross(self):
-        room_hor_width = int((random.randint(self.cross_room_min_size + 2, self.cross_room_max_size)) / 2 * 2)
-        room_ver_height = int((random.randint(self.cross_room_min_size + 2, self.cross_room_max_size)) / 2 * 3)
-        room_hor_height = int((random.randint(self.cross_room_min_size, room_ver_height - 2)) / 2 * 2)
-        room_ver_width = int((random.randint(self.cross_room_min_size, room_hor_width - 2)) / 2 * 1)
+    def generate_room_cross(self, max_w, max_h):
+        if max_w and max_h:
+            max_size = min(max_w, max_h)
+            min_size = self.feature_room_min_w
+        else:
+            max_size = self.cross_room_max_size
+            min_size = self.cross_room_min_size
+            max_w, max_h = max_size, max_size
+
+        room_hor_width = min(int((random.randint(min_size, max_size)) / 2 * 2), max_w)
+        room_ver_height = min(int((random.randint(min_size, max_size)) / 2 * 3), max_h)
+        room_hor_height = min(int((random.randint(min_size, room_ver_height)) / 2 * 2), max_h)
+        room_ver_width = min(int((random.randint(min_size, room_hor_width)) / 2 * 1), max_w)
 
         room = np.ones((room_ver_height, room_hor_width), dtype=np.int32)
 
@@ -203,14 +234,20 @@ class RoomAddition(Dungeon):
 
         return room
 
-    def generate_room_square(self, padding=1):
-        if len(self.rooms) == 0 and self.first_room_max_size:
+    def generate_room_square(self, max_w, max_h, padding=1):
+        room_min_size = self.square_room_min_size
+        if max_w and max_h:
+            room_max_size = min(max_w, max_h)
+            room_min_size = self.feature_room_min_w
+        elif len(self.rooms) == 0 and self.first_room_max_size:
             room_max_size = self.first_room_max_size
+            max_w, max_h = room_max_size, room_max_size
         else:
             room_max_size = self.square_room_max_size
-        room_width = random.randint(self.square_room_min_size, room_max_size)
-        room_height = random.randint(max(int(room_width * 0.5), self.square_room_min_size),
-                                     min(int(room_width * 1.5), room_max_size))
+            max_w, max_h = room_max_size, room_max_size
+        room_width = min(random.randint(room_min_size, room_max_size), max_w)
+        room_height = min(random.randint(max(int(room_width * 0.5), room_min_size),
+                                     min(int(room_width * 1.5), room_max_size)), max_h)
 
         room = np.zeros((room_height, room_width), dtype=np.int32)
         # If padding > 0, pad the room with walls
@@ -221,7 +258,7 @@ class RoomAddition(Dungeon):
 
         return padded_room
 
-    def generate_room_cellular(self):
+    def generate_room_cellular(self, max_w, max_h):
         """Return the next step of the cave generation algorithm.
 
         `tiles` is the input array. (0: wall, 1: floor)
@@ -231,8 +268,10 @@ class RoomAddition(Dungeon):
         """
         convolve_steps = self.cellular_iterations
         rng = np.random.default_rng()
-        h = random.randint(self.cross_room_min_size, self.cellular_room_max_size)
-        w = random.randint(self.cross_room_min_size, self.cellular_room_max_size)
+        max_width = max_w if max_w is not None else self.cellular_room_max_size
+        max_height = max_h if max_h is not None else self.cellular_room_max_size
+        h = random.randint(min(max_height - 1, self.cellular_room_min_size), max_height)
+        w = random.randint(min(max_width - 1, self.cellular_room_min_size), max_width)
         arr = rng.choice(2, (h, w),
                          p=[1 - self.cellular_wall_probability, self.cellular_wall_probability])
         room = np.pad(arr, 1, constant_values=1)
@@ -307,3 +346,28 @@ class RoomAddition(Dungeon):
             padded_room = trimmed_room
 
         return padded_room
+
+    def place_feature(self, parent_room):
+        for r in range(self.build_room_attempts * 2):
+            max_w = parent_room.w - 3
+            max_h = parent_room.h - 3
+            if max_h < self.feature_room_min_h or max_w < self.feature_room_min_w:
+                continue
+            room_arr, algorithm = self.generate_room(1200, max_w, max_h, feature=True)
+
+            room_height, room_width = room_arr.shape
+            if room_height >= parent_room.h - 1 or room_width >= parent_room.w - 1:
+                continue
+
+            try:
+                x = random.randint(parent_room.x1 + 2, parent_room.x2 - room_width - 2)
+                y = random.randint(parent_room.y1 + 2, parent_room.y2 - room_height - 2)
+            except ValueError:
+                continue
+
+            id_nr = len(self.feature_rooms) + 1
+            feature_room = Room(x, y, room_width, room_height, room_arr, id_nr=id_nr, algorithm=algorithm,
+                                feature_room=True, parent_room=parent_room)
+
+            self.add_room(feature_room, feature=True)
+            break

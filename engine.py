@@ -64,7 +64,7 @@ class Engine:
         #blt.composition(True)
         # Needed to avoid insta-close and flush the input queue
         blt.refresh()
-        blt.read()
+        # blt.read()
 
         if debug:
             global_options = options.Options(tile_height="24", tile_width="16", ui_size="32", debug=True)
@@ -376,6 +376,6 @@ class Engine:
 
 if __name__ == '__main__':
     engine = Engine()
-    engine.initialize(debug=False)
+    engine.initialize(debug=True)
     blt.close()
 

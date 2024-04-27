@@ -32,11 +32,15 @@ class Dungeon:
         self._currentRegion = None
         self._regions = None
         self.rooms = []
+        self.feature_rooms = []
         self.level = []
 
-    def add_room(self, room):
-        self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
-        self.rooms.append(room)
+    def add_room(self, room, feature=False):
+        if feature:
+            self.feature_rooms.append(room)
+        else:
+            self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
+            self.rooms.append(room)
 
     def clean_up_map(self, map_width, map_height, smoothing=None, filling=None, iterations=5):
         if smoothing:
@@ -75,7 +79,8 @@ class Dungeon:
 
                             for direction in [north, south, east, west]:
                                 dir_x, dir_y = direction[0], direction[1]
-                                if adjacent_room.x1 <= dir_x <= adjacent_room.x2 and adjacent_room.y1 <= dir_y <= adjacent_room.y2:
+                                if (adjacent_room.x1 <= dir_x <= adjacent_room.x2 and adjacent_room.y1 <= dir_y <=
+                                        adjacent_room.y2):
                                     start, target = (wall_x, wall_y), (dir_x, dir_y)
                                     path = self.get_path_to(start, target)
                                     if path and len(path) < max_length:
@@ -185,7 +190,6 @@ class Dungeon:
                             walls.add(direction)
 
         if self.room_min_size <= len(cave) <= 300:
-
             x1 = min(cave, key=lambda t: t[0])[0]
             x2 = max(cave, key=lambda t: t[0])[0]
             y1 = min(cave, key=lambda t: t[1])[1]
@@ -300,7 +304,7 @@ class Dungeon:
         }
         kernel = patterns_map[pattern]
         if radius > 1:
-            kernel = np.pad(kernel, radius-1, mode='edge')
+            kernel = np.pad(kernel, radius - 1, mode='edge')
         mask = np.zeros_like(a, dtype=bool)  # build empty mask
         mask[x, y] = True  # set target(s)
 
@@ -384,7 +388,7 @@ class Room:
     def __init__(self, x1=0, y1=0, w=0, h=0, nd_array=None,
                  wall_color="dark gray", floor_color="darkest amber", feature=None,
                  wall_type="wall_brick", floor_type="floor", tiled=False, name=None, lightness=0.8,
-                 id_nr=1, algorithm=None, build_later=False):
+                 id_nr=1, algorithm=None, build_later=False, feature_room=False, parent_room=None):
         self.x1 = int(x1)
         self.y1 = int(y1)
         self.w = int(w)
@@ -416,6 +420,8 @@ class Room:
         self.size = len(self.inner)
         self.max_entities = int(self.size / 2)
         self.build_later = build_later
+        self.feature_room = feature_room
+        self.parent_room = parent_room
 
     def center(self):
         center_x = int((self.x1 + self.x2) / 2)
@@ -428,14 +434,14 @@ class Room:
         inner = np.where(self.nd_array == 0)
         for i in range(inner[0].size):
             y, x = inner[0][i], inner[1][i]
-            self.inner.add((int(x+self.x1), int(y+self.y1)))
+            self.inner.add((int(x + self.x1), int(y + self.y1)))
 
     def set_outer(self):
         """Save the outer area (walls) of this room as a set of coordinates."""
         outer = np.where(self.nd_array == 1)
         for i in range(outer[0].size):
             y, x = outer[0][i], outer[1][i]
-            self.outer.add((int(x+self.x1), int(y+self.y1)))
+            self.outer.add((int(x + self.x1), int(y + self.y1)))
 
     def intersects(self, other, inner=False):
         """Return True if this room overlaps with another room.
@@ -451,10 +457,10 @@ class Room:
                 self.inner -= other.outer
             return bool(intersection)
         return (
-            self.x1 <= other.x2
-            and self.x2 >= other.x1
-            and self.y1 <= other.y2
-            and self.y2 >= other.y1
+                self.x1 <= other.x2
+                and self.x2 >= other.x1
+                and self.y1 <= other.y2
+                and self.y2 >= other.y1
         )
 
 
@@ -506,8 +512,8 @@ class Rect:
     def __init__(self, x, y, w, h, nd_array=None):
         self.x1 = x
         self.y1 = y
-        self.x2 = x+w
-        self.y2 = y+h
+        self.x2 = x + w
+        self.y2 = y + h
         self.width = w
         self.height = h
         self.nd_array = nd_array
@@ -525,8 +531,8 @@ class Rect:
     def intersects(self, other):
         """Return True if this room overlaps with another RectangularRoom."""
         return (
-            self.x1 <= other.x2
-            and self.x2 >= other.x1
-            and self.y1 <= other.y2
-            and self.y2 >= other.y1
+                self.x1 <= other.x2
+                and self.x2 >= other.x1
+                and self.y1 <= other.y2
+                and self.y2 >= other.y1
         )

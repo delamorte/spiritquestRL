@@ -348,7 +348,7 @@ class GameMap:
 
     def process_rooms(self):
 
-        for room in self.algorithm.rooms:
+        for room in self.algorithm.feature_rooms:
             if self.biome.biome_data["name"] == "hub" and not self.biome.home:
                 feature_name = "Shaman's Retreat"
                 self.biome.home = feature_name
@@ -360,6 +360,7 @@ class GameMap:
                 feature_name = choice(self.biome.features)
             feature_data = json_data.data.biome_features[feature_name]
             room.feature = feature_name
+            room.parent_room.feature = feature_name
             if feature_data["has_door"]:
                 room.has_door = True
             wall_name = choice(feature_data["wall"])
@@ -400,7 +401,7 @@ class GameMap:
                     wall.wall.set_attributes(self)
                 self.add_entity(wall)
 
-        for room in self.algorithm.rooms:
+        for room in self.algorithm.feature_rooms:
             tunnels = room.tunnel
             entrances = room.entrances
 
@@ -447,7 +448,7 @@ class GameMap:
 
     def process_prefabs(self):
         if self.biome.biome_data["name"] == "hub":
-            for room in self.algorithm.rooms:
+            for room in self.algorithm.feature_rooms:
                 if room.feature == "Shaman's Retreat":
                     self.biome.home = room
                     break
@@ -611,6 +612,8 @@ class GameMap:
             if room.build_later:
                 continue
             entity_count = 0
+            if not room.feature:
+                continue
             feature_data = json_data.data.biome_features[room.feature]
             room_entities = feature_data["entities"]
 
@@ -652,7 +655,10 @@ class GameMap:
                         outer = list(room.outer)
                         locations = inner + outer
                     else:
-                        locations = list(room.inner)
+                        if room.feature_room:
+                            locations = list(room.feature_room.inner)
+                        else:
+                            locations = list(room.inner)
                     x, y = choice(locations)
                     if category == "objects":
                         while self.tiles[x][y].entities_on_tile:
@@ -737,7 +743,11 @@ class GameMap:
             entity_name = choice(entities)
 
             area = areas.pop()
-            locations = list(room.inner)
+            if room.feature_room:
+                locations = list(room.feature_room.inner)
+            else:
+                locations = list(room.inner)
+
             x, y = choice(locations)
             counter = 0
             while self.tiles[x][y].blocking_entity or self.tiles[x][y].blocked or np.count_nonzero(
