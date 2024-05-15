@@ -202,9 +202,9 @@ class Dungeon:
             self.rooms.append(room)
 
     def connect_rooms(self):
-        for idx in range(len(self.rooms) - 1):
-            room_1 = self.rooms[idx]
-            room_2 = self.rooms[idx + 1]
+        for idx in range(len(self.feature_rooms) - 1):
+            room_1 = self.feature_rooms[idx]
+            room_2 = self.feature_rooms[idx + 1]
             for x, y in self.tunnel_between(room_2.center, room_1.center):
                 self.level[y][x] = 0
                 coords = (x, y)
@@ -230,15 +230,17 @@ class Dungeon:
         for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
             yield x, y
 
-    def connect_caves(self):
+    def connect_caves(self, connect_features=False):
+        rooms = self.rooms
         # Find the closest cave to the current cave
-        for current_cave_room in self.rooms:
+        for current_cave_room in rooms:
             current_cave = current_cave_room.inner
             for point1 in current_cave:
                 break  # get an element from cave1
             point2 = None
             distance = None
-            for next_cave_room in self.rooms:
+
+            for next_cave_room in rooms:
                 next_cave = next_cave_room.inner
                 if next_cave != current_cave and not self.check_connectivity(current_cave, next_cave):
                     # choose a random point from next_cave
@@ -253,6 +255,18 @@ class Dungeon:
 
             if point2:  # if all tunnels are connected, point2 == None
                 self.create_tunnel(point1, point2, current_cave_room)
+
+            if current_cave_room.feature_room:
+                current_cave = current_cave_room.feature_room.inner
+                next_cave = current_cave.difference(current_cave_room.inner)
+                if next_cave != current_cave and not self.check_connectivity(current_cave, next_cave):
+                    # choose a random point from next_cave
+                    for next_point in next_cave:
+                        break  # get an element from cave2
+                    point2 = next_point
+
+                if point2:  # if all tunnels are connected, point2 == None
+                    self.create_tunnel(point1, point2, current_cave_room)
 
     def check_connectivity(self, cave1, cave2):
         # floods cave1, then checks a point in cave2 for the flood
@@ -281,6 +295,9 @@ class Dungeon:
                         if self.level[direction[1]][direction[0]] == 0:
                             if direction not in to_be_filled and direction not in connected_region:
                                 to_be_filled.add(direction)
+
+        if not cave2 or len(cave2) == 0:
+            return False
 
         for end in cave2:
             break  # get an element from cave2
@@ -386,9 +403,9 @@ class Dungeon:
 
 class Room:
     def __init__(self, x1=0, y1=0, w=0, h=0, nd_array=None,
-                 wall_color="dark gray", floor_color="darkest amber", feature=None,
+                 wall_color="dark gray", floor_color="darkest amber", feature_name=None,
                  wall_type="wall_brick", floor_type="floor", tiled=False, name=None, lightness=0.8,
-                 id_nr=1, algorithm=None, build_later=False, feature_room=False, parent_room=None):
+                 id_nr=1, algorithm=None, build_later=False, feature=False, feature_room=None, parent_room=None):
         self.x1 = int(x1)
         self.y1 = int(y1)
         self.w = int(w)
@@ -403,7 +420,7 @@ class Room:
         self.has_door = False
         self.wall_color = wall_color
         self.floor_color = floor_color
-        self.feature = feature
+        self.feature_name = feature_name
         self.tiled = tiled
         self.name = name
         self.lightness = lightness
@@ -420,6 +437,7 @@ class Room:
         self.size = len(self.inner)
         self.max_entities = int(self.size / 2)
         self.build_later = build_later
+        self.feature = feature
         self.feature_room = feature_room
         self.parent_room = parent_room
 

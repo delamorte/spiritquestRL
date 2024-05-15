@@ -97,9 +97,9 @@
       "ground_soil"
     ],
     "wall": [
-      "wall_wood"
+      "fence"
     ],
-    "has_door": false,
+    "has_door": true,
     "may_spawn_boss": false
   },
   "Bioluminescent Glade": {
@@ -329,11 +329,11 @@
     "description": "A cozy cottage inhabited by the curious and adventurous Goldilocks, filled with remnants of her past escapades.",
     "entities": {
       "objects": [
-      ],
-      "decorations": [
         "chair",
         "table",
         "bed"
+      ],
+      "decorations": [
       ],
       "monsters": [
         "bear"
@@ -392,7 +392,7 @@
     "wall": [
       "wall_wood"
     ],
-    "has_door": false,
+    "has_door": true,
     "may_spawn_boss": false
   },
   "Misty Clearing": {
@@ -548,7 +548,7 @@
     "wall": [
       "fence"
     ],
-    "has_door": true,
+    "has_door": false,
     "may_spawn_boss": false
   },
   "Ranger's Lookout": {
@@ -748,9 +748,12 @@
         "book",
         "skull",
         "candle",
-        "candelabra"
+        "candelabra",
+        "table_with_chair",
+        "table",
+        "chair"
       ],
-      "decorations": ["table_with_chair", "table", "chair"],
+      "decorations": [],
       "monsters": [
         "spirit",
         "imp",
@@ -781,9 +784,6 @@
         "candle"
       ],
       "decorations": [
-        "table_with_chair",
-        "table",
-        "chair"
       ],
       "monsters": []
     },
@@ -822,7 +822,6 @@
         "cauldron"
       ],
       "decorations": [
-        "table"
       ],
       "npcs": ["alchemist"],
       "allies": ["imp"],

@@ -359,8 +359,8 @@ class GameMap:
             else:
                 feature_name = choice(self.biome.features)
             feature_data = json_data.data.biome_features[feature_name]
-            room.feature = feature_name
-            room.parent_room.feature = feature_name
+            room.feature_name = feature_name
+            room.parent_room.feature_name = feature_name
             if feature_data["has_door"]:
                 room.has_door = True
             wall_name = choice(feature_data["wall"])
@@ -417,18 +417,6 @@ class GameMap:
                 if self.tiles[x][y].entities_on_tile and tile not in room.outer and tile not in entrances:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
-            for tile in entrances:
-                x, y = tile[0], tile[1]
-                if self.tiles[x][y].entities_on_tile:
-                    for entity in self.tiles[x][y].entities_on_tile:
-                        self.remove_entity(entity)
-                if room.has_door:
-                    if self.biome.home == "Shaman's Retreat":
-                        state = "locked"
-                    else:
-                        state = "closed"
-                    self.create_door(state=state, x=x, y=y)
-                    break
 
             for tile in room.outer:
                 x, y = tile[0], tile[1]
@@ -449,7 +437,7 @@ class GameMap:
     def process_prefabs(self):
         if self.biome.biome_data["name"] == "hub":
             for room in self.algorithm.feature_rooms:
-                if room.feature == "Shaman's Retreat":
+                if room.feature_name == "Shaman's Retreat":
                     self.biome.home = room
                     break
             x, y = choice(list(self.biome.home.inner))
@@ -612,34 +600,39 @@ class GameMap:
             if room.build_later:
                 continue
             entity_count = 0
-            if not room.feature:
+            if not room.feature_name:
                 continue
-            feature_data = json_data.data.biome_features[room.feature]
+            feature_data = json_data.data.biome_features[room.feature_name]
             room_entities = feature_data["entities"]
 
-            if "windows" in feature_data.keys() and feature_data["windows"]:
-                entity_name = "window"
-                nr_of_entities_to_place = self.get_room_population(room.size, "windows")
-                locations = list(room.outer)
-                tile = get_tile_object(entity_name)
-                color = get_color(entity_name)
-                for _ in nr_of_entities_to_place:
-                    x, y = choice(locations)
-                    if self.tiles[x][y].entities_on_tile:
-                        for remove_entity in self.tiles[x][y].entities_on_tile:
-                            self.remove_entity(remove_entity)
-                    entity = Entity(x, y, color, entity_name, tile, category="objects")
-
-                    self.add_entity(entity)
+            # if "windows" in feature_data.keys() and feature_data["windows"] and room.feature_room:
+            #     feature_room = room.feature_room
+            #     entity_name = "window"
+            #     nr_of_entities_to_place = self.get_room_population(room, "windows")
+            #     locations = list(feature_room.outer)
+            #     tile = get_tile_object(entity_name)
+            #     color = get_color(entity_name)
+            #     if not locations:
+            #         continue
+            #     for _ in nr_of_entities_to_place:
+            #         x, y = choice(locations)
+            #         if self.tiles[x][y].entities_on_tile:
+            #             for remove_entity in self.tiles[x][y].entities_on_tile:
+            #                 self.remove_entity(remove_entity)
+            #         entity = Entity(x, y, color, entity_name, tile, category="objects")
+            #
+            #         self.add_entity(entity)
 
             for category, entities in room_entities.items():
+                if category == "windows":
+                    continue
                 if not entities:
                     continue
                 if not self.biome.biome_data["monsters"] and category == "monsters":
                     continue
                 if entity_count >= room.max_entities:
                     break
-                nr_of_entities_to_place, areas = self.get_room_population(room.size, category)
+                nr_of_entities_to_place, areas = self.get_room_population(room, category)
                 if category == "decorations":
                     self.place_decorations(areas, entities, room)
                     continue
@@ -655,14 +648,19 @@ class GameMap:
                         outer = list(room.outer)
                         locations = inner + outer
                     else:
-                        if room.feature_room:
+                        if room.feature_room and category == "objects":
                             locations = list(room.feature_room.inner)
                         else:
-                            locations = list(room.inner)
+                            if room.feature_room:
+                                locations = list(room.inner.difference(room.feature_room.outer))
+                            else:
+                                locations = list(room.inner)
                     x, y = choice(locations)
                     if category == "objects":
-                        while self.tiles[x][y].entities_on_tile:
+                        counter = 0
+                        while counter < 10 and self.tiles[x][y].entities_on_tile:
                             x, y = choice(locations)
+                            counter += 1
                     else:
                         while self.tiles[x][y].blocking_entity or self.tiles[x][y].blocked:
                             x, y = choice(locations)
@@ -672,6 +670,21 @@ class GameMap:
                     entity = Entity(x, y, color, entity_name, tile, category=category)
                     self.add_entity(entity)
                     entity_count += 1
+
+        for room in self.algorithm.feature_rooms:
+            entrances = room.entrances
+            for tile in entrances:
+                x, y = tile[0], tile[1]
+                if self.tiles[x][y].entities_on_tile:
+                    for entity in self.tiles[x][y].entities_on_tile:
+                        self.remove_entity(entity)
+                if room.has_door:
+                    if self.biome.home == "Shaman's Retreat":
+                        state = "locked"
+                    else:
+                        state = "closed"
+                    self.create_door(state=state, x=x, y=y)
+
 
     def get_tile_direction(self, x, y):
         # Define the neighboring tile positions in the cardinal directions
@@ -720,10 +733,11 @@ class GameMap:
 
         return None
 
-    def get_room_population(self, room_size, category):
+    def get_room_population(self, room, category):
         decorations = None
         entities_count = 1
         if category == "monsters":
+            room_size = room.size
             entities_count = int(ceil(room_size / 50) * randint(1, 3)) - 1
         elif category == "npcs":
             entities_count = 1
@@ -732,8 +746,10 @@ class GameMap:
         elif category == "objects":
             entities_count = randint(1, 3)
         elif category == "windows":
+            room_size = room.feature_room.size
             entities_count = room_size / 10
         elif category == "decorations":
+            room_size = room.feature_room.size
             decorations, entities_count = self.get_decorations(room_size)
 
         return entities_count, decorations
@@ -744,14 +760,17 @@ class GameMap:
 
             area = areas.pop()
             if room.feature_room:
-                locations = list(room.feature_room.inner)
+                if room.feature_room.has_door or room.has_door:
+                    locations = list(room.feature_room.inner)
+                else:
+                    locations = list(room.inner.difference(room.feature_room.outer))
             else:
                 locations = list(room.inner)
 
             x, y = choice(locations)
             counter = 0
-            while self.tiles[x][y].blocking_entity or self.tiles[x][y].blocked or np.count_nonzero(
-                    self.algorithm.level[y:y + area.shape[0], x:x + area.shape[1]]) > 0 or counter > 10:
+            while counter < 10 and self.tiles[x][y].blocking_entity or self.tiles[x][y].blocked or np.count_nonzero(
+                    self.algorithm.level[y:y + area.shape[0], x:x + area.shape[1]]) > 0:
                 x, y = choice(locations)
                 counter += 1
 

@@ -716,14 +716,14 @@ class RenderFunctions:
                 for room in game_map.algorithm.rooms:
                     random_point = next(iter(room.inner))
                     if x == random_point[0] and y == random_point[1]:
-                        print("Room: {0}, x1: {1}, y1: {2}, size: {3}, algorithm: {4}".format(room.feature, room.x1,
+                        print("Room: {0}, x1: {1}, y1: {2}, size: {3}, algorithm: {4}".format(room.feature_name, room.x1,
                                                                                               room.y1,
                                                                                               room.nd_array.size,
                                                                                               room.algorithm))
                         blt.color(None)
                         blt.layer(7)
-                        blt.puts(x0 + x * 2, y0 + y, "{0}: {1}".format(room.id_nr, room.feature))
-                        # blt.puts(x0 + x*2, y0 + y + 1, "{0}".format(room.feature))
+                        blt.puts(x0 + x * 2, y0 + y, "{0}: {1}".format(room.id_nr, room.feature_name))
+                        # blt.puts(x0 + x*2, y0 + y + 1, "{0}".format(room.feature_name))
                         break
         return
 

@@ -58,7 +58,7 @@ class RoomAddition(Dungeon):
         self.cross_room_chance = 0.15
         self.vault_chance = 0.2
 
-        self.feature_cross_room_chance = 0.1
+        self.feature_cross_room_chance = 0.0
         self.feature_square_room_chance = 0.6
         self.feature_vault_chance = 0.2
 
@@ -128,6 +128,7 @@ class RoomAddition(Dungeon):
                 break
 
         self.connect_caves()
+        self.connect_rooms()
         # self.adjacent_rooms_scan()
 
         return self.level
@@ -367,7 +368,10 @@ class RoomAddition(Dungeon):
 
             id_nr = len(self.feature_rooms) + 1
             feature_room = Room(x, y, room_width, room_height, room_arr, id_nr=id_nr, algorithm=algorithm,
-                                feature_room=True, parent_room=parent_room)
+                                feature=True, parent_room=parent_room)
+            if feature_room.size > parent_room.size:
+                continue
+            parent_room.feature_room = feature_room
 
             self.add_room(feature_room, feature=True)
             break
