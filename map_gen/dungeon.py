@@ -32,12 +32,14 @@ class Dungeon:
         self._currentRegion = None
         self._regions = None
         self.rooms = []
+        self.vaults = []
         self.feature_rooms = []
         self.level = []
 
     def add_room(self, room, feature=False):
         if feature:
             self.feature_rooms.append(room)
+            self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
         else:
             self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
             self.rooms.append(room)
@@ -60,12 +62,16 @@ class Dungeon:
     def get_adjacent_walls(self, x, y, room=None):  # finds the walls in 8 directions
         return self.get_neighbours(x, y, pattern="8bit", wall_count=True)
 
-    def adjacent_rooms_scan(self, max_length=20):
+    def adjacent_rooms_scan(self, max_length=20, room=None):
         """
         Scan for nearby rooms, then check if a walkable path shorter than 10 exists between the rooms and
         add to adjacent rooms.
         """
-        for current_room in self.rooms:
+        if not room:
+            rooms = self.rooms
+        else:
+            rooms = [room]
+        for current_room in rooms:
             walls = current_room.outer
             for wall in walls:
                 wall_x, wall_y = wall[0], wall[1]
@@ -89,20 +95,24 @@ class Dungeon:
                                         if current_room.id_nr not in adjacent_room.adjacent_room_ids:
                                             adjacent_room.adjacent_room_ids.append(current_room.id_nr)
 
-        for room in self.rooms:
+        for room in rooms:
             print("current room: {0}, adjacent rooms: {1}".format(room.id_nr, room.adjacent_room_ids))
 
-    def adjacent_rooms_path_scan(self, max_length=20):
+    def adjacent_rooms_path_scan(self, max_length=20, room=None):
         """
         Compare room to other rooms, pick two random points and get the shortest path. If path < 10, add room to
         adjacent rooms.
         """
-        for current_room in self.rooms:
+        if not room:
+            rooms = self.rooms
+        else:
+            rooms = [room]
+        for current_room in rooms:
             for adjacent_room in self.rooms:
                 if current_room != adjacent_room:
-                    for point1 in current_room.cave:
+                    for point1 in current_room.inner:
                         break  # get an element from cave1
-                    for point2 in adjacent_room.cave:
+                    for point2 in adjacent_room.inner:
                         break  # get an element from cave1
                     path = self.get_path_to(point1, point2)
                     if path and len(path) < max_length:
@@ -111,7 +121,7 @@ class Dungeon:
                         if current_room.id_nr not in adjacent_room.adjacent_room_ids:
                             adjacent_room.adjacent_room_ids.append(current_room.id_nr)
 
-        for room in self.rooms:
+        for room in rooms:
             print("current room: {0}, adjacent rooms: {1}".format(room.id_nr, room.adjacent_room_ids))
 
     def get_path_to(self, start, target):
@@ -200,6 +210,29 @@ class Dungeon:
 
             room = Room(x1=x1, y1=y1, w=w, h=h, id_nr=id_nr)
             self.rooms.append(room)
+
+    def connect_vault_to_nearest(self, vault, closest_room):
+        room_1 = vault
+        room_2 = closest_room
+        for x, y in self.tunnel_between(room_2.center, room_1.center):
+            self.level[y][x] = 0
+            coords = (x, y)
+            if coords in room_1.outer and coords not in room_1.entrances:
+                room_1.entrances.add(coords)
+            if coords in room_2.outer and coords not in room_2.entrances:
+                room_2.entrances.add(coords)
+
+    def connect_vaults_to_features(self):
+        for idx in range(len(self.vaults) - 1):
+            room_1 = self.vaults[idx]
+            room_2 = self.feature_rooms[idx]
+            for x, y in self.tunnel_between(room_2.center, room_1.center):
+                self.level[y][x] = 0
+                coords = (x, y)
+                if coords in room_1.outer and coords not in room_1.entrances:
+                    room_1.entrances.add(coords)
+                if coords in room_2.outer and coords not in room_2.entrances:
+                    room_2.entrances.add(coords)
 
     def connect_rooms(self):
         for idx in range(len(self.feature_rooms) - 1):

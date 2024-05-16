@@ -3,6 +3,7 @@ import random
 import numpy as np
 from scipy.ndimage import label
 from scipy.signal import convolve2d
+from scipy.spatial import KDTree
 
 import options
 from map_gen.algorithms.drunkards import DrunkardsWalk
@@ -18,6 +19,7 @@ class RoomAddition(Dungeon):
 
         self.feature_rooms = []
         self.rooms = []
+        self.vaults = []
         self.rooms_list = []
         self.level = []
 
@@ -129,9 +131,21 @@ class RoomAddition(Dungeon):
 
         self.connect_caves()
         self.connect_rooms()
-        # self.adjacent_rooms_scan()
+        self.connect_vaults_to_features()
+        isolated_rooms = self.get_rooms_by_flood_fill()
+        if isolated_rooms:
+            for isolated_room in isolated_rooms:
+                closest_room = self.get_closest_room(isolated_room)
+                self.connect_vault_to_nearest(isolated_room, closest_room)
 
         return self.level
+
+    def get_closest_room(self, isolated_room):
+        center_points = [room.center for room in self.feature_rooms]
+        tree = KDTree(center_points)
+        closest = tree.query(isolated_room.center)[1]
+        return self.rooms[closest]
+
 
     def generate_room(self, vault_size_offset=0, max_w=None, max_h=None, feature=False):
         algorithm = None
@@ -290,10 +304,13 @@ class RoomAddition(Dungeon):
 
         return room
 
-    def get_rooms_by_flood_fill(self, vault_room):
+    def get_rooms_by_flood_fill(self, vault_room=None):
 
         rooms = []
-        room_arr = vault_room.nd_array
+        if not vault_room:
+            room_arr = self.level
+        else:
+            room_arr = vault_room.nd_array
 
         # Use scipy.ndimage.label to label all separated clusters (rooms) in an array
         col, row = np.where(room_arr == 0)
@@ -315,13 +332,20 @@ class RoomAddition(Dungeon):
             trimmed_room = room[floors[0].min():floors[0].max() + 1,
                            floors[1].min():floors[1].max() + 1]
             padded_room = np.pad(trimmed_room, 1, constant_values=1)
-            id_nr = len(self.rooms) + 1
+            id_nr = len(self.rooms) + 1 + len(self.vaults)
             room_height, room_width = padded_room.shape
             y1_offset = floors[0][0] - 1
             x1_offset = floors[1][0] - 1
-            new_room = Room(vault_room.x1 + x1_offset, vault_room.y1 + y1_offset, room_width,
+            if vault_room:
+                x1 = vault_room.x1 + x1_offset
+                y1 = vault_room.y1 + y1_offset
+            else:
+                x1 = x1_offset
+                y1 = y1_offset
+            new_room = Room(x1, y1, room_width,
                             room_height, padded_room, id_nr=id_nr, algorithm="vault")
             rooms.append(new_room)
+            self.vaults.append(new_room)
 
         return rooms
 

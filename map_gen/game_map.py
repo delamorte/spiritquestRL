@@ -335,6 +335,8 @@ class GameMap:
                         wall.wall.set_attributes(self)
                     self.add_entity(wall)
 
+                elif map_algorithm.level[y][x] == 2:
+                    self.create_door(state="closed", x=x, y=y)
                 else:
                     self.tiles[x][y].spawnable = True
 
@@ -662,7 +664,8 @@ class GameMap:
                     self.add_entity(entity)
                     entity_count += 1
 
-        for room in self.algorithm.feature_rooms:
+        rooms_with_entrances = self.algorithm.feature_rooms + self.algorithm.vaults
+        for room in rooms_with_entrances:
             entrances = room.entrances
             for tile in entrances:
                 x, y = tile[0], tile[1]
