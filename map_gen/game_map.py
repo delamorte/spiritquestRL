@@ -632,38 +632,29 @@ class GameMap:
                     continue
                 if entity_count >= room.max_entities:
                     break
-                nr_of_entities_to_place, areas = self.get_room_population(room, category)
-                if category == "decorations":
-                    self.place_decorations(areas, entities, room)
-                    continue
+                nr_of_entities_to_place = self.get_room_population(room, category)
+                entities_to_place = choices(entities, k=nr_of_entities_to_place)
+
+                # Get spawnable locations
+                if category == "monsters" and room.floor_type == "water" and not room.wall_type == "water":
+                    inner = room.inner
+                    outer = room.outer
+                    locations = inner + outer
                 else:
-                    entities_to_place = choices(entities, k=nr_of_entities_to_place)
+                    if room.feature_room and category == "objects":
+                        locations = room.feature_room.inner
+                    else:
+                        if room.feature_room:
+                            locations = room.inner.difference(room.feature_room.outer)
+                        else:
+                            locations = room.inner
 
                 for entity_name in entities_to_place:
-                    if entity_count >= room.max_entities:
+                    if entity_count >= room.max_entities or len(locations) == 0:
                         break
-                    # Choose random empty location in room
-                    if category == "monsters" and room.floor_type == "water" and not room.wall_type == "water":
-                        inner = list(room.inner)
-                        outer = list(room.outer)
-                        locations = inner + outer
-                    else:
-                        if room.feature_room and category == "objects":
-                            locations = list(room.feature_room.inner)
-                        else:
-                            if room.feature_room:
-                                locations = list(room.inner.difference(room.feature_room.outer))
-                            else:
-                                locations = list(room.inner)
-                    x, y = choice(locations)
-                    if category == "objects":
-                        counter = 0
-                        while counter < 10 and self.tiles[x][y].entities_on_tile:
-                            x, y = choice(locations)
-                            counter += 1
-                    else:
-                        while self.tiles[x][y].blocking_entity or self.tiles[x][y].blocked:
-                            x, y = choice(locations)
+
+                    # Choose a random spawnable location
+                    x, y = locations.pop()
 
                     tile = get_tile_object(entity_name)
                     color = get_color(entity_name, mod=self.owner.world_tendency)
@@ -734,8 +725,8 @@ class GameMap:
         return None
 
     def get_room_population(self, room, category):
-        decorations = None
         entities_count = 1
+        room_size = room.feature_room.size
         if category == "monsters":
             room_size = room.size
             entities_count = int(ceil(room_size / 50) * randint(1, 3)) - 1
@@ -744,59 +735,16 @@ class GameMap:
         elif category == "allies":
             entities_count = 1
         elif category == "objects":
-            entities_count = randint(1, 3)
+            #entities_count = randint(1, 3)
+            #decorations, entities_count = self.get_decorations(room_size)
+            entities_count = randint(1, max(2, int(room_size / 10)))
         elif category == "windows":
-            room_size = room.feature_room.size
             entities_count = room_size / 10
         elif category == "decorations":
-            room_size = room.feature_room.size
-            decorations, entities_count = self.get_decorations(room_size)
+            room_size = room.size
+            entities_count = randint(5, max(6, int(room_size / 10)))
 
-        return entities_count, decorations
-
-    def place_decorations(self, areas, entities, room):
-        while areas:
-            entity_name = choice(entities)
-
-            area = areas.pop()
-            if room.feature_room:
-                if room.feature_room.has_door or room.has_door:
-                    locations = list(room.feature_room.inner)
-                else:
-                    locations = list(room.inner.difference(room.feature_room.outer))
-            else:
-                locations = list(room.inner)
-
-            x, y = choice(locations)
-            counter = 0
-            while counter < 10 and self.tiles[x][y].blocking_entity or self.tiles[x][y].blocked or np.count_nonzero(
-                    self.algorithm.level[y:y + area.shape[0], x:x + area.shape[1]]) > 0:
-                x, y = choice(locations)
-                counter += 1
-
-            tile = get_tile_object(entity_name)
-            color = get_color(entity_name, mod=self.owner.world_tendency)
-            for i, x2 in enumerate(range(x, x + len(area[1]))):
-                for j, y2 in enumerate(range(y, y + len(area[0]))):
-                    if area[j][i] == 0:
-                        entity = Entity(x2, y2, color, entity_name, tile, category="decorations")
-                        if entity.wall:
-                            entity.wall.set_attributes(self)
-                        self.add_entity(entity)
-
-        return
-
-    @staticmethod
-    def get_decorations(room_size):
-        entities_count = 0
-        decorations = []
-        nr_of_decorations = int(room_size / 10)
-        for _ in range(nr_of_decorations + 1):
-            rng = np.random.default_rng()
-            arr = rng.choice(2, (2, 2), p=[0.2, 0.8])
-            decorations.append(arr)
-            entities_count += np.count_nonzero(arr)
-        return decorations, entities_count
+        return entities_count
 
     @staticmethod
     def entity_at_coordinates(entities, x, y):
