@@ -115,24 +115,22 @@ class RoomAddition(Dungeon):
             # If there are no intersections then the room is valid.
 
             self.add_room(new_room)
-
+            self.place_feature(new_room)
             # A vault is a prefab which may consist of multiple rooms, use flood fill to add inner rooms
             if algorithm == "vault":
-                rooms = self.get_rooms_by_flood_fill(new_room)
+                rooms = self.get_rooms_by_flood_fill(new_room, prefab=True)
                 if rooms:
                     for room in rooms:
-                        self.add_room(room)
+                        self.add_room(room, vault=True)
                         # Connect rooms
-
-            self.place_feature(new_room)
 
             if len(self.rooms) >= self.max_rooms:
                 break
 
         self.connect_caves()
         self.connect_rooms()
-        self.connect_vaults_to_features()
-        isolated_rooms = self.get_rooms_by_flood_fill()
+        #self.connect_vaults_to_features()
+        isolated_rooms = self.get_rooms_by_flood_fill(prefab=False, connect_only=True)
         if isolated_rooms:
             for isolated_room in isolated_rooms:
                 closest_room = self.get_closest_room(isolated_room)
@@ -304,10 +302,10 @@ class RoomAddition(Dungeon):
 
         return room
 
-    def get_rooms_by_flood_fill(self, vault_room=None):
+    def get_rooms_by_flood_fill(self, vault_room=None, prefab=False, connect_only=False):
 
         rooms = []
-        if not vault_room:
+        if not prefab:
             room_arr = self.level
         else:
             room_arr = vault_room.nd_array
@@ -344,8 +342,8 @@ class RoomAddition(Dungeon):
                 y1 = y1_offset
             new_room = Room(x1, y1, room_width,
                             room_height, padded_room, id_nr=id_nr, algorithm="vault")
+
             rooms.append(new_room)
-            self.vaults.append(new_room)
 
         return rooms
 

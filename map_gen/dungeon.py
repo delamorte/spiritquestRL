@@ -36,9 +36,12 @@ class Dungeon:
         self.feature_rooms = []
         self.level = []
 
-    def add_room(self, room, feature=False):
+    def add_room(self, room, feature=False, vault=False):
         if feature:
             self.feature_rooms.append(room)
+            self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
+        elif vault:
+            self.vaults.append(room)
             self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
         else:
             self.level[room.y1:room.y1 + room.h, room.x1:room.x1 + room.w] = room.nd_array
@@ -214,6 +217,10 @@ class Dungeon:
     def connect_vault_to_nearest(self, vault, closest_room):
         room_1 = vault
         room_2 = closest_room
+        if closest_room.feature_room:
+            closest_room.feature_room.vaults.append(vault)
+        else:
+            closest_room.vaults.append(vault)
         for x, y in self.tunnel_between(room_2.center, room_1.center):
             self.level[y][x] = 0
             coords = (x, y)
@@ -473,6 +480,7 @@ class Room:
         self.feature = feature
         self.feature_room = feature_room
         self.parent_room = parent_room
+        self.vaults = []
 
     def center(self):
         center_x = int((self.x1 + self.x2) / 2)

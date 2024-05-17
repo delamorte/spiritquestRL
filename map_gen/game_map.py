@@ -335,8 +335,6 @@ class GameMap:
                         wall.wall.set_attributes(self)
                     self.add_entity(wall)
 
-                elif map_algorithm.level[y][x] == 2:
-                    self.create_door(state="closed", x=x, y=y)
                 else:
                     self.tiles[x][y].spawnable = True
 
@@ -402,6 +400,7 @@ class GameMap:
                 if wall.wall:
                     wall.wall.set_attributes(self)
                 self.add_entity(wall)
+                self.algorithm.level[y][x] = 1
 
         for room in self.algorithm.feature_rooms:
             tunnels = room.tunnel
@@ -434,6 +433,11 @@ class GameMap:
                             if entity.name == wall_name:
                                 entity.char = char
 
+        isolated_rooms = self.algorithm.get_rooms_by_flood_fill(prefab=False)
+        if isolated_rooms:
+            for isolated_room in isolated_rooms:
+                closest_room = self.algorithm.get_closest_room(isolated_room)
+                self.algorithm.connect_vault_to_nearest(isolated_room, closest_room)
         self.create_entities_in_rooms()
 
     def process_prefabs(self):
@@ -664,8 +668,7 @@ class GameMap:
                     self.add_entity(entity)
                     entity_count += 1
 
-        rooms_with_entrances = self.algorithm.feature_rooms + self.algorithm.vaults
-        for room in rooms_with_entrances:
+        for room in self.algorithm.feature_rooms:
             entrances = room.entrances
             for tile in entrances:
                 x, y = tile[0], tile[1]
@@ -678,7 +681,18 @@ class GameMap:
                     else:
                         state = "closed"
                     self.create_door(state=state, x=x, y=y)
-
+            if room.vaults:
+                for vault in room.vaults:
+                    if len(vault.entrances) == 0:
+                        continue
+                    for entrance_xy in vault.entrances:
+                        break
+                    x, y = entrance_xy[0], entrance_xy[1]
+                    if self.tiles[x][y].entities_on_tile:
+                        for entity in self.tiles[x][y].entities_on_tile:
+                            self.remove_entity(entity)
+                    state = "closed"
+                    self.create_door(state=state, x=x, y=y)
 
     def get_tile_direction(self, x, y):
         # Define the neighboring tile positions in the cardinal directions
