@@ -3,7 +3,6 @@ import random
 import numpy as np
 from scipy.ndimage import label
 from scipy.signal import convolve2d
-from scipy.spatial import KDTree
 
 import options
 from map_gen.algorithms.drunkards import DrunkardsWalk
@@ -128,6 +127,7 @@ class RoomAddition(Dungeon):
                 break
 
         self.connect_caves()
+        self.connect_caves(connect_features=True)
         self.connect_rooms()
         #self.connect_vaults_to_features()
         isolated_rooms = self.get_rooms_by_flood_fill(prefab=False, connect_only=True)
@@ -137,13 +137,6 @@ class RoomAddition(Dungeon):
                 self.connect_vault_to_nearest(isolated_room, closest_room)
 
         return self.level
-
-    def get_closest_room(self, isolated_room):
-        center_points = [room.center for room in self.feature_rooms]
-        tree = KDTree(center_points)
-        closest = tree.query(isolated_room.center)[1]
-        return self.rooms[closest]
-
 
     def generate_room(self, vault_size_offset=0, max_w=None, max_h=None, feature=False):
         algorithm = None
@@ -241,9 +234,11 @@ class RoomAddition(Dungeon):
     def generate_random_vault(self, max_size=None):
         if not max_size:
             max_size = self.vault_max_size
+        if max_size < 64:
+            max_size = 200
         if options.data.vault_thread:
             options.data.vault_thread.join()
-        room = random.choice([x for x in options.data.vaults_data if x.size < self.vault_max_size])
+        room = random.choice([x for x in options.data.vaults_data if x.size < max_size])
 
         return room
 
@@ -376,8 +371,7 @@ class RoomAddition(Dungeon):
             max_h = parent_room.h - 3
             if max_h < self.feature_room_min_h or max_w < self.feature_room_min_w:
                 continue
-            room_arr, algorithm = self.generate_room(1200, max_w, max_h, feature=True)
-
+            room_arr, algorithm = self.generate_room(max_w=max_w, max_h=max_h, feature=True)
             room_height, room_width = room_arr.shape
             if room_height >= parent_room.h - 1 or room_width >= parent_room.w - 1:
                 continue

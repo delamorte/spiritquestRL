@@ -20,6 +20,7 @@ from math import sqrt
 
 import numpy as np
 from scipy.signal import convolve2d
+from scipy.spatial import KDTree
 from tcod import tcod
 
 from color_functions import random_color
@@ -216,18 +217,27 @@ class Dungeon:
 
     def connect_vault_to_nearest(self, vault, closest_room):
         room_1 = vault
+        center = room_1.center
+        if room_1.center[0] > self.map_width:
+            center[0] = self.map_width - 1
+        if room_1.center[1] > self.map_height:
+            center[1] = self.map_height - 1
         room_2 = closest_room
         if closest_room.feature_room:
             closest_room.feature_room.vaults.append(vault)
         else:
             closest_room.vaults.append(vault)
-        for x, y in self.tunnel_between(room_2.center, room_1.center):
+        for x, y in self.tunnel_between(room_2.center, center):
             self.level[y][x] = 0
             coords = (x, y)
-            if coords in room_1.outer and coords not in room_1.entrances:
+            if coords in room_1.outer and coords not in room_1.tunnel:
+                #room_1.tunnel.add(coords)
                 room_1.entrances.add(coords)
-            if coords in room_2.outer and coords not in room_2.entrances:
+            if coords in room_2.outer and coords not in room_2.tunnel:
+                #room_2.tunnel.add(coords)
                 room_2.entrances.add(coords)
+                if not room_2.doors:
+                    room_2.doors.append(coords)
 
     def connect_vaults_to_features(self):
         for idx in range(len(self.vaults) - 1):
@@ -250,8 +260,20 @@ class Dungeon:
                 coords = (x, y)
                 if coords in room_1.outer and coords not in room_1.entrances:
                     room_1.entrances.add(coords)
+                    if not room_1.doors:
+                        room_1.doors.append(coords)
                 if coords in room_2.outer and coords not in room_2.entrances:
                     room_2.entrances.add(coords)
+                    if not room_2.doors:
+                        room_2.doors.append(coords)
+
+
+    def get_closest_room(self, isolated_room):
+        center_points = [room.center for room in self.feature_rooms]
+        tree = KDTree(center_points)
+        closest = tree.query(isolated_room.center)[1]
+        return self.rooms[closest]
+
 
     def tunnel_between(self, start, end):
         """Return an L-shaped tunnel between these two points."""
@@ -271,7 +293,10 @@ class Dungeon:
             yield x, y
 
     def connect_caves(self, connect_features=False):
-        rooms = self.rooms
+        if connect_features:
+            rooms = self.feature_rooms
+        else:
+            rooms = self.rooms
         # Find the closest cave to the current cave
         for current_cave_room in rooms:
             current_cave = current_cave_room.inner
@@ -299,7 +324,7 @@ class Dungeon:
             if current_cave_room.feature_room:
                 current_cave = current_cave_room.feature_room.inner
                 next_cave = current_cave.difference(current_cave_room.inner)
-                if next_cave != current_cave and not self.check_connectivity(current_cave, next_cave):
+                if len(next_cave) > 0 and next_cave != current_cave and not self.check_connectivity(current_cave, next_cave):
                     # choose a random point from next_cave
                     for next_point in next_cave:
                         break  # get an element from cave2
@@ -380,6 +405,7 @@ class Dungeon:
         current_cave_walls = current_cave_room.outer
         current_cave_tunnel = current_cave_room.tunnel
         current_cave_entrances = current_cave_room.entrances
+        current_cave_doors = current_cave_room.doors
 
         while (drunkard_x, drunkard_y) not in current_cave:
             # ==== Choose Direction ====
@@ -431,6 +457,8 @@ class Dungeon:
                     self.level[drunkard_y][drunkard_x] = 0
                     wall = (drunkard_x, drunkard_y)
                     if wall in current_cave_walls and wall not in current_cave_entrances:
+                        if not current_cave_doors:
+                            current_cave_doors.append(wall)
                         current_cave_entrances.add(wall)
                     else:
                         current_cave_tunnel.add(wall)
@@ -473,6 +501,7 @@ class Room:
         self.outer = set()
         self.set_inner()
         self.set_outer()
+        self.tiles = self.inner.union(self.outer)
         self.center = self.center()
         self.size = len(self.inner)
         self.max_entities = int(self.size / 2)
@@ -481,6 +510,7 @@ class Room:
         self.feature_room = feature_room
         self.parent_room = parent_room
         self.vaults = []
+        self.doors = []
 
     def center(self):
         center_x = int((self.x1 + self.x2) / 2)

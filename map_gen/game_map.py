@@ -386,6 +386,8 @@ class GameMap:
                 self.tiles[x][y].color = floor_color
 
             for tile in room.outer:
+                if tile in room.entrances or tile in room.tunnel:
+                    continue
                 x, y = tile[0], tile[1]
                 self.tiles[x][y].room_id = room.id_nr
                 if wall_tile["draw_floor"]:
@@ -401,6 +403,16 @@ class GameMap:
                     wall.wall.set_attributes(self)
                 self.add_entity(wall)
                 self.algorithm.level[y][x] = 1
+
+        #self.connect_caves()
+        #self.algorithm.connect_caves()
+        self.algorithm.connect_caves(connect_features=True)
+        self.algorithm.connect_rooms()
+        isolated_rooms = self.algorithm.get_rooms_by_flood_fill(prefab=False)
+        if isolated_rooms:
+            for isolated_room in isolated_rooms:
+                closest_room = self.algorithm.get_closest_room(isolated_room)
+                self.algorithm.connect_vault_to_nearest(isolated_room, closest_room)
 
         for room in self.algorithm.feature_rooms:
             tunnels = room.tunnel
@@ -418,6 +430,7 @@ class GameMap:
                 if self.tiles[x][y].entities_on_tile and tile not in room.outer and tile not in entrances:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
+                    self.algorithm.level[y][x] = 0
 
             for tile in room.outer:
                 x, y = tile[0], tile[1]
@@ -433,11 +446,6 @@ class GameMap:
                             if entity.name == wall_name:
                                 entity.char = char
 
-        isolated_rooms = self.algorithm.get_rooms_by_flood_fill(prefab=False)
-        if isolated_rooms:
-            for isolated_room in isolated_rooms:
-                closest_room = self.algorithm.get_closest_room(isolated_room)
-                self.algorithm.connect_vault_to_nearest(isolated_room, closest_room)
         self.create_entities_in_rooms()
 
     def process_prefabs(self):
@@ -672,27 +680,28 @@ class GameMap:
             entrances = room.entrances
             for tile in entrances:
                 x, y = tile[0], tile[1]
+                self.tiles[x][y].color = "red"
                 if self.tiles[x][y].entities_on_tile:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
-                if room.has_door:
+                if room.has_door and room.doors:
                     if self.biome.home == "Shaman's Retreat":
                         state = "locked"
                     else:
                         state = "closed"
-                    self.create_door(state=state, x=x, y=y)
+                    for door in room.doors:
+                        door_x, door_y = door[0], door[1]
+                        self.create_door(state=state, x=door_x, y=door_y)
             if room.vaults:
                 for vault in room.vaults:
                     if len(vault.entrances) == 0:
                         continue
-                    for entrance_xy in vault.entrances:
-                        break
-                    x, y = entrance_xy[0], entrance_xy[1]
-                    if self.tiles[x][y].entities_on_tile:
-                        for entity in self.tiles[x][y].entities_on_tile:
-                            self.remove_entity(entity)
-                    state = "closed"
-                    self.create_door(state=state, x=x, y=y)
+                    for tile in vault.entrances:
+                        x, y = tile[0], tile[1]
+                        self.tiles[x][y].color = "red"
+                        if self.tiles[x][y].entities_on_tile:
+                            for entity in self.tiles[x][y].entities_on_tile:
+                                self.remove_entity(entity)
 
     def get_tile_direction(self, x, y):
         # Define the neighboring tile positions in the cardinal directions
