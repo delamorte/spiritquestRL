@@ -732,20 +732,14 @@ class GameMap:
                         state = "closed"
 
                     doors.add(self.create_door(state=state, x=x, y=y))
-            # if room.vaults:
-            #     for vault in room.vaults:
-            #         for door in vault.entrances:
-            #             x, y = door[0], door[1]
-            #             if self.tiles[x][y].entities_on_tile:
-            #                 for entity in self.tiles[x][y].entities_on_tile:
-            #                     self.remove_entity(entity)
-                        # self.create_door(state="closed", x=x, y=y)
-                        # self.tiles[x][y].color = "yellow"
 
         # Scan for doors and remove 1-tile adjacent ones
         for door in doors:
             neighbours = self.get_neighbours(door, only_visible=False)
             if neighbours:
+                if len(neighbours) >= 5:
+                    self.remove_entity(door)
+                    continue
                 for neighbour in neighbours:
                     if neighbour.door:
                         self.remove_entity(door)

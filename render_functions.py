@@ -696,10 +696,9 @@ class RenderFunctions:
                 blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
 
                 for i, room in enumerate(game_map.algorithm.rooms):
-                    if (x, y) in room.inner:
+                    if (x, y) in room.inner or (room.feature_room and (x, y) in room.feature_room.inner):
                         # blt.color(room.id_color)
                         blt.color(game_map.tiles[x][y].color)
-                        print(game_map.tiles[x][y].color)
 
                         blt.layer(4)
                         blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
