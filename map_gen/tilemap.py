@@ -47,6 +47,7 @@ def get_tile_variant(name, variant_idx=None, facing=None, variant_char=None, no_
     elif variant_char:
         tile = variant_char
     else:
+        variants.append(base_tile["tile"])
         tile = choice(variants)
     hex_tile = int(base_tile["hex"], 0) + tile
     return hex_tile

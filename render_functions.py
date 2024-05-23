@@ -699,6 +699,7 @@ class RenderFunctions:
                     if (x, y) in room.inner:
                         # blt.color(room.id_color)
                         blt.color(game_map.tiles[x][y].color)
+                        print(game_map.tiles[x][y].color)
 
                         blt.layer(4)
                         blt.put(x0 + x * 2, y0 + y, game_map.tiles[x][y].char)
@@ -713,13 +714,15 @@ class RenderFunctions:
                         #     blt.put(x0 + x * 2, y0 + y, "@")
 
                 # draw room id and feature name
-                for room in game_map.algorithm.rooms:
+                for room in game_map.algorithm.feature_rooms:
                     random_point = next(iter(room.inner))
                     if x == random_point[0] and y == random_point[1]:
-                        print("Room: {0}, x1: {1}, y1: {2}, size: {3}, algorithm: {4}".format(room.feature_name, room.x1,
-                                                                                              room.y1,
-                                                                                              room.nd_array.size,
-                                                                                              room.algorithm))
+                        print("Room: {0}, x1: {1}, y1: {2}, size: {3}, algorithm: {4}, floor color: {5}".format(
+                            room.feature_name, room.x1,
+                            room.y1,
+                            room.nd_array.size,
+                            room.algorithm,
+                            room.floor_color))
                         blt.color(None)
                         blt.layer(7)
                         blt.puts(x0 + x * 2, y0 + y, "{0}: {1}".format(room.id_nr, room.feature_name))

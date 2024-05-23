@@ -1,3 +1,4 @@
+import random
 from math import ceil
 from random import choice, choices, randint
 
@@ -84,8 +85,9 @@ class GameMap:
         self.explored |= self.visible
 
     def get_neighbours(self, entity, radius=1, include_self=False, fighters=False, mark_area=False,
-                       algorithm="square", empty_tiles=False, exclude_player=False):
+                       algorithm="square", empty_tiles=False, exclude_player=False, only_visible=True):
         """
+        :param only_visible: return only neighbours who are in visible radius
         :param exclude_player: excludes the player from the entities
         :param empty_tiles: return empty tiles around entity
         :param algorithm: the shape of the targeting area
@@ -135,7 +137,7 @@ class GameMap:
                 else:
                     tile.targeting_zone = False
                 if tile.entities_on_tile:
-                    if not include_self and tile.blocking_entity == entity:
+                    if not include_self and tile.x == entity.x and tile.y == entity.y:
                         continue
                     elif fighters and exclude_player:
                         fighting_entities = [entity for entity in tile.entities_on_tile if
@@ -147,9 +149,15 @@ class GameMap:
                     else:
                         entities.extend(tile.entities_on_tile)
         if empty_tiles:
-            return list(filter(lambda tile: self.visible[tile.x, tile.y], tiles))
+            if only_visible:
+                return list(filter(lambda tile: self.visible[tile.x, tile.y], tiles))
+            else:
+                return tiles
         else:
-            return list(filter(lambda entity: self.visible[entity.x, entity.y], entities))
+            if only_visible:
+                return list(filter(lambda entity: self.visible[entity.x, entity.y], entities))
+            else:
+                return entities
 
     def process_room(self, room, exclude_light_y=None):
         entities = []
@@ -348,6 +356,7 @@ class GameMap:
 
     def process_rooms(self):
 
+        print("processing rooms..")
         for room in self.algorithm.feature_rooms:
             if self.biome.biome_data["name"] == "hub" and not self.biome.home:
                 feature_name = "Shaman's Retreat"
@@ -374,7 +383,8 @@ class GameMap:
             floor_tile = get_tile(floor_name)
             room.floor_type = floor_name
             room.wall_type = wall_name
-            for tile in room.inner:
+            room.floor_color = floor_color
+            for tile in room.tiles:
                 x, y = tile[0], tile[1]
                 self.tiles[x][y].room_id = room.id_nr
                 self.tiles[x][y].natural_light_level = room.lightness
@@ -386,9 +396,14 @@ class GameMap:
                 self.tiles[x][y].color = floor_color
 
             for tile in room.outer:
-                if tile in room.entrances or tile in room.tunnel:
-                    continue
                 x, y = tile[0], tile[1]
+                if tile in room.entrances:
+                    continue
+                if self.algorithm.level[y][x] == 0:
+                    if tile in room.borders:
+                        room.entrances.add(tile)
+                    else:
+                        continue
                 self.tiles[x][y].room_id = room.id_nr
                 if wall_tile["draw_floor"]:
                     self.tiles[x][y].char = floor_tile
@@ -402,35 +417,50 @@ class GameMap:
                 if wall.wall:
                     wall.wall.set_attributes(self)
                 self.add_entity(wall)
-                self.algorithm.level[y][x] = 1
+                self.tiles[x][y].spawnable = False
 
         #self.connect_caves()
         #self.algorithm.connect_caves()
-        self.algorithm.connect_caves(connect_features=True)
-        self.algorithm.connect_rooms()
-        isolated_rooms = self.algorithm.get_rooms_by_flood_fill(prefab=False)
-        if isolated_rooms:
-            for isolated_room in isolated_rooms:
-                closest_room = self.algorithm.get_closest_room(isolated_room)
-                self.algorithm.connect_vault_to_nearest(isolated_room, closest_room)
+        #print("find isolated rooms")
+        #isolated_rooms = self.algorithm.get_rooms_by_flood_fill(prefab=False)
+        # if isolated_rooms:
+        #     for isolated_room in isolated_rooms:
+        #         #closest_room = self.algorithm.get_closest_room(isolated_room)
+        #         #self.algorithm.connect_vault_to_nearest(isolated_room, closest_room)
+        #
+        #         for tile in isolated_room.inner:
+        #             x, y = tile[0], tile[1]
+        #             if x >= self.width or y >= self.height:
+        #                 continue
+        #             self.tiles[x][y].color = "purple"
+        #
+        #         for tile in isolated_room.outer:
+        #             x, y = tile[0], tile[1]
+        #             if x >= self.width or y >= self.height:
+        #                 continue
+        #             self.tiles[x][y].color = "blue"
 
+        #print("connect isolated rooms")
+        #self.algorithm.connect_caves(connect_features=True, isolated_rooms=isolated_rooms)
+        #print("make sure all rooms are traversible")
+        #self.algorithm.connect_rooms()
+
+        print("creating footprints and adjusting wall corners..")
         for room in self.algorithm.feature_rooms:
             tunnels = room.tunnel
-            entrances = room.entrances
+
+            trail_name = choice(self.biome.biome_data["trail"])
+            trail_color = get_color(trail_name)
+            trail_tile = get_tile_object(trail_name)
 
             for tile in tunnels:
-                x, y = tile[0], tile[1]
-                if self.tiles[x][y].room_id is not None:
-                    continue
-                floor_name = room.floor_type
-                floor_color = room.floor_color
-                floor_tile = get_tile(floor_name)
-                self.tiles[x][y].char = floor_tile
-                self.tiles[x][y].color = floor_color
-                if self.tiles[x][y].entities_on_tile and tile not in room.outer and tile not in entrances:
-                    for entity in self.tiles[x][y].entities_on_tile:
-                        self.remove_entity(entity)
-                    self.algorithm.level[y][x] = 0
+                if tile not in self.algorithm.all_feature_tiles:
+                    x, y = tile[0], tile[1]
+                    # create trail
+                    create_steps = random.random()
+                    if create_steps > 0.5:
+                        entity = Entity(x, y, trail_color, trail_name, trail_tile, category="decorations")
+                        self.add_entity(entity)
 
             for tile in room.outer:
                 x, y = tile[0], tile[1]
@@ -446,6 +476,7 @@ class GameMap:
                             if entity.name == wall_name:
                                 entity.char = char
 
+        print("room processed")
         self.create_entities_in_rooms()
 
     def process_prefabs(self):
@@ -636,8 +667,9 @@ class GameMap:
             #         entity = Entity(x, y, color, entity_name, tile, category="objects")
             #
             #         self.add_entity(entity)
-
+            print("placing entities")
             for category, entities in room_entities.items():
+
                 if category == "windows":
                     continue
                 if not entities:
@@ -663,12 +695,14 @@ class GameMap:
                         else:
                             locations = room.inner
 
+                spawnable_locations = [(x, y) for (x, y) in locations if self.tiles[x][y].spawnable]
+
                 for entity_name in entities_to_place:
-                    if entity_count >= room.max_entities or len(locations) == 0:
+                    if entity_count >= room.max_entities or len(spawnable_locations) == 0:
                         break
 
                     # Choose a random spawnable location
-                    x, y = locations.pop()
+                    x, y = choice(spawnable_locations)
 
                     tile = get_tile_object(entity_name)
                     color = get_color(entity_name, mod=self.owner.world_tendency)
@@ -676,32 +710,46 @@ class GameMap:
                     self.add_entity(entity)
                     entity_count += 1
 
+        print("clearing entrances")
+
+        doors = set()
         for room in self.algorithm.feature_rooms:
             entrances = room.entrances
             for tile in entrances:
                 x, y = tile[0], tile[1]
-                self.tiles[x][y].color = "red"
+                #self.tiles[x][y].color = "pink"
+                self.tiles[x][y].char = get_tile(room.floor_type)
+                self.tiles[x][y].color = get_color(room.floor_type)
+
                 if self.tiles[x][y].entities_on_tile:
                     for entity in self.tiles[x][y].entities_on_tile:
                         self.remove_entity(entity)
-                if room.has_door and room.doors:
+
+                if room.has_door:
                     if self.biome.home == "Shaman's Retreat":
                         state = "locked"
                     else:
                         state = "closed"
-                    for door in room.doors:
-                        door_x, door_y = door[0], door[1]
-                        self.create_door(state=state, x=door_x, y=door_y)
-            if room.vaults:
-                for vault in room.vaults:
-                    if len(vault.entrances) == 0:
-                        continue
-                    for tile in vault.entrances:
-                        x, y = tile[0], tile[1]
-                        self.tiles[x][y].color = "red"
-                        if self.tiles[x][y].entities_on_tile:
-                            for entity in self.tiles[x][y].entities_on_tile:
-                                self.remove_entity(entity)
+
+                    doors.add(self.create_door(state=state, x=x, y=y))
+            # if room.vaults:
+            #     for vault in room.vaults:
+            #         for door in vault.entrances:
+            #             x, y = door[0], door[1]
+            #             if self.tiles[x][y].entities_on_tile:
+            #                 for entity in self.tiles[x][y].entities_on_tile:
+            #                     self.remove_entity(entity)
+                        # self.create_door(state="closed", x=x, y=y)
+                        # self.tiles[x][y].color = "yellow"
+
+        # Scan for doors and remove 1-tile adjacent ones
+        for door in doors:
+            neighbours = self.get_neighbours(door, only_visible=False)
+            if neighbours:
+                for neighbour in neighbours:
+                    if neighbour.door:
+                        self.remove_entity(door)
+
 
     def get_tile_direction(self, x, y):
         # Define the neighboring tile positions in the cardinal directions

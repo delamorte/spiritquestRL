@@ -115,26 +115,43 @@ class RoomAddition(Dungeon):
 
             self.add_room(new_room)
             self.place_feature(new_room)
-            # A vault is a prefab which may consist of multiple rooms, use flood fill to add inner rooms
+            #A vault is a prefab which may consist of multiple rooms, use flood fill to add inner rooms
             if algorithm == "vault":
                 rooms = self.get_rooms_by_flood_fill(new_room, prefab=True)
                 if rooms:
                     for room in rooms:
+                        if room.x2 >= self.map_width or room.y2 >= self.map_height:
+                            continue
                         self.add_room(room, vault=True)
                         # Connect rooms
 
             if len(self.rooms) >= self.max_rooms:
                 break
 
+        #self.connect_caves(connect_features=True)
+
+        #self.connect_vaults_to_features()
+        for room in self.feature_rooms:
+            self.all_feature_walls = self.all_feature_walls.union(room.borders)
+            self.all_feature_tiles = self.all_feature_tiles.union(room.tiles)
         self.connect_caves()
         self.connect_caves(connect_features=True)
-        self.connect_rooms()
-        #self.connect_vaults_to_features()
+        #self.connect_rooms()
+
         isolated_rooms = self.get_rooms_by_flood_fill(prefab=False, connect_only=True)
         if isolated_rooms:
-            for isolated_room in isolated_rooms:
-                closest_room = self.get_closest_room(isolated_room)
-                self.connect_vault_to_nearest(isolated_room, closest_room)
+            self.connect_caves(connect_features=True, isolated_rooms=isolated_rooms)
+        #
+        #     for isolated_room in isolated_rooms:
+        #         closest_room = self.get_closest_room(isolated_room)
+        #         self.connect_vault_to_nearest(isolated_room, closest_room)
+
+        print("level generated")
+
+        for room in self.feature_rooms:
+            for tile in room.entrances:
+                x, y = tile[0], tile[1]
+                self.level[y][x] = 2
 
         return self.level
 
@@ -335,8 +352,11 @@ class RoomAddition(Dungeon):
             else:
                 x1 = x1_offset
                 y1 = y1_offset
+
             new_room = Room(x1, y1, room_width,
                             room_height, padded_room, id_nr=id_nr, algorithm="vault")
+            if new_room.x2 >= self.map_width or new_room.y2 >= self.map_height:
+                continue
 
             rooms.append(new_room)
 

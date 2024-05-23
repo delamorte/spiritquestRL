@@ -421,7 +421,7 @@
     ],
     "ascii": ".",
     "colors": [
-      "darker amber"
+      "darker brown"
     ],
     "corners": false,
     "hue": true,
@@ -521,6 +521,30 @@
     "ascii": ".",
     "colors": [
       "darker tan"
+    ],
+    "corners": false,
+    "hue": true,
+    "blocks": false,
+    "blocks_sight": false,
+    "draw_floor": true,
+    "light": true,
+    "neutral": true,
+    "chaos": true,
+    "openable": false,
+    "interactable": false,
+    "pickable": false,
+    "light_source": false,
+    "stairs": false
+  },
+  "ground_trail": {
+    "name": "trail",
+    "hex": "0xE400",
+    "tile": 3,
+    "tile_variants": [
+    ],
+    "ascii": ".",
+    "colors": [
+      "brown"
     ],
     "corners": false,
     "hue": true,

@@ -35,6 +35,8 @@ class Dungeon:
         self.rooms = []
         self.vaults = []
         self.feature_rooms = []
+        self.all_feature_walls = set()
+        self.all_feature_tiles = set()
         self.level = []
 
     def add_room(self, room, feature=False, vault=False):
@@ -217,56 +219,34 @@ class Dungeon:
 
     def connect_vault_to_nearest(self, vault, closest_room):
         room_1 = vault
-        center = room_1.center
-        if room_1.center[0] > self.map_width:
-            center[0] = self.map_width - 1
-        if room_1.center[1] > self.map_height:
-            center[1] = self.map_height - 1
         room_2 = closest_room
         if closest_room.feature_room:
             closest_room.feature_room.vaults.append(vault)
         else:
             closest_room.vaults.append(vault)
-        for x, y in self.tunnel_between(room_2.center, center):
-            self.level[y][x] = 0
-            coords = (x, y)
-            if coords in room_1.outer and coords not in room_1.tunnel:
-                #room_1.tunnel.add(coords)
-                room_1.entrances.add(coords)
-            if coords in room_2.outer and coords not in room_2.tunnel:
-                #room_2.tunnel.add(coords)
-                room_2.entrances.add(coords)
-                if not room_2.doors:
-                    room_2.doors.append(coords)
-
-    def connect_vaults_to_features(self):
-        for idx in range(len(self.vaults) - 1):
-            room_1 = self.vaults[idx]
-            room_2 = self.feature_rooms[idx]
-            for x, y in self.tunnel_between(room_2.center, room_1.center):
-                self.level[y][x] = 0
-                coords = (x, y)
-                if coords in room_1.outer and coords not in room_1.entrances:
-                    room_1.entrances.add(coords)
-                if coords in room_2.outer and coords not in room_2.entrances:
-                    room_2.entrances.add(coords)
+        self.create_connection(room_1, room_2)
 
     def connect_rooms(self):
         for idx in range(len(self.feature_rooms) - 1):
             room_1 = self.feature_rooms[idx]
             room_2 = self.feature_rooms[idx + 1]
-            for x, y in self.tunnel_between(room_2.center, room_1.center):
-                self.level[y][x] = 0
-                coords = (x, y)
-                if coords in room_1.outer and coords not in room_1.entrances:
-                    room_1.entrances.add(coords)
-                    if not room_1.doors:
-                        room_1.doors.append(coords)
-                if coords in room_2.outer and coords not in room_2.entrances:
-                    room_2.entrances.add(coords)
-                    if not room_2.doors:
-                        room_2.doors.append(coords)
+            self.create_connection(room_1, room_2)
 
+    def create_connection(self, room_1, room_2):
+        entry_door_created = False
+        destination_door_created = False
+        for x, y in self.tunnel_between(room_1.center, room_2.center):
+            coords = (x, y)
+
+            self.level[y][x] = 0
+
+            if not entry_door_created and coords in room_1.borders:
+                room_1.entrances.add(coords)
+                entry_door_created = True
+
+            elif not destination_door_created and coords in room_2.borders:
+                room_2.entrances.add(coords)
+                destination_door_created = True
 
     def get_closest_room(self, isolated_room):
         center_points = [room.center for room in self.feature_rooms]
@@ -274,8 +254,7 @@ class Dungeon:
         closest = tree.query(isolated_room.center)[1]
         return self.rooms[closest]
 
-
-    def tunnel_between(self, start, end):
+    def btunnel_between(self, start, end):
         """Return an L-shaped tunnel between these two points."""
         x1, y1 = start
         x2, y2 = end
@@ -292,17 +271,22 @@ class Dungeon:
         for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
             yield x, y
 
-    def connect_caves(self, connect_features=False):
+    def connect_caves(self, connect_features=False, isolated_rooms=None):
         if connect_features:
-            rooms = self.feature_rooms
+            if isolated_rooms:
+                rooms = isolated_rooms + self.feature_rooms.copy()
+            else:
+                rooms = self.feature_rooms.copy()
         else:
             rooms = self.rooms
+
         # Find the closest cave to the current cave
         for current_cave_room in rooms:
             current_cave = current_cave_room.inner
             for point1 in current_cave:
                 break  # get an element from cave1
             point2 = None
+            destination_cave = None
             distance = None
 
             for next_cave_room in rooms:
@@ -316,22 +300,11 @@ class Dungeon:
                     if new_distance is not None and distance is not None and (
                             new_distance < distance) or distance is None:
                         point2 = next_point
+                        destination_cave = next_cave_room
                         distance = new_distance
 
             if point2:  # if all tunnels are connected, point2 == None
-                self.create_tunnel(point1, point2, current_cave_room)
-
-            if current_cave_room.feature_room:
-                current_cave = current_cave_room.feature_room.inner
-                next_cave = current_cave.difference(current_cave_room.inner)
-                if len(next_cave) > 0 and next_cave != current_cave and not self.check_connectivity(current_cave, next_cave):
-                    # choose a random point from next_cave
-                    for next_point in next_cave:
-                        break  # get an element from cave2
-                    point2 = next_point
-
-                if point2:  # if all tunnels are connected, point2 == None
-                    self.create_tunnel(point1, point2, current_cave_room)
+                self.create_tunnel(point1, point2, current_cave_room, destination_cave, connect_features)
 
     def check_connectivity(self, cave1, cave2):
         # floods cave1, then checks a point in cave2 for the flood
@@ -373,41 +346,20 @@ class Dungeon:
         else:
             return False
 
-    def get_neighbours(self, x, y, a=None, radius=1, pattern="4bit", wall_count=False):
-        if not a:
-            a = self.level
-        patterns_map = {
-            "4bit": [[0, 1, 0],
-                     [1, 0, 1],
-                     [0, 1, 0]],
-            "8bit": [[1, 1, 1],
-                     [1, 0, 1],
-                     [1, 1, 1]]
-        }
-        kernel = patterns_map[pattern]
-        if radius > 1:
-            kernel = np.pad(kernel, radius - 1, mode='edge')
-        mask = np.zeros_like(a, dtype=bool)  # build empty mask
-        mask[x, y] = True  # set target(s)
-
-        # boolean indexing
-        neighbors = a[convolve2d(mask, kernel, mode='same').astype(bool)]
-        if wall_count:
-            return np.count_nonzero(neighbors)
-        return neighbors
-
-    def create_tunnel(self, point1, point2, current_cave_room):
+    def create_tunnel(self, point1, point2, current_cave_room, destination_cave_room, connect_features):
         # run a heavily weighted random Walk
         # from point1 to point2
         drunkard_x = point2[0]
         drunkard_y = point2[1]
         current_cave = current_cave_room.inner
-        current_cave_walls = current_cave_room.outer
         current_cave_tunnel = current_cave_room.tunnel
         current_cave_entrances = current_cave_room.entrances
-        current_cave_doors = current_cave_room.doors
+        entry_door_created = False
+        destination_door_created = False
 
-        while (drunkard_x, drunkard_y) not in current_cave:
+        destination = current_cave
+
+        while (drunkard_x, drunkard_y) not in destination:
             # ==== Choose Direction ====
             north = 1.0
             south = 1.0
@@ -454,14 +406,45 @@ class Dungeon:
                 drunkard_x += dx
                 drunkard_y += dy
                 if self.level[drunkard_y][drunkard_x] == 1:
-                    self.level[drunkard_y][drunkard_x] = 0
                     wall = (drunkard_x, drunkard_y)
-                    if wall in current_cave_walls and wall not in current_cave_entrances:
-                        if not current_cave_doors:
-                            current_cave_doors.append(wall)
+                    # If going through starting point room borders, create door
+                    if connect_features and not entry_door_created and wall in current_cave_room.borders:
+                        self.level[drunkard_y][drunkard_x] = 0
                         current_cave_entrances.add(wall)
-                    else:
-                        current_cave_tunnel.add(wall)
+                        entry_door_created = True
+                    # If going through destination point room borders, create door
+                    elif connect_features and not destination_door_created and wall in destination_cave_room.borders:
+                        self.level[drunkard_y][drunkard_x] = 0
+                        destination_cave_room.entrances.add(wall)
+                        destination_door_created = True
+                    # Drunk must not break feature room walls on the way
+                    if wall not in self.all_feature_walls:
+                        self.level[drunkard_y][drunkard_x] = 0
+                        if wall not in self.all_feature_tiles:
+                            current_cave_tunnel.add(wall)
+
+    def get_neighbours(self, x, y, a=None, radius=1, pattern="4bit", wall_count=False):
+        if not a:
+            a = self.level
+        patterns_map = {
+            "4bit": [[0, 1, 0],
+                     [1, 0, 1],
+                     [0, 1, 0]],
+            "8bit": [[1, 1, 1],
+                     [1, 0, 1],
+                     [1, 1, 1]]
+        }
+        kernel = patterns_map[pattern]
+        if radius > 1:
+            kernel = np.pad(kernel, radius - 1, mode='edge')
+        mask = np.zeros_like(a, dtype=bool)  # build empty mask
+        mask[x, y] = True  # set target(s)
+
+        # boolean indexing
+        neighbors = a[convolve2d(mask, kernel, mode='same').astype(bool)]
+        if wall_count:
+            return np.count_nonzero(neighbors)
+        return neighbors
 
     @staticmethod
     def distance_formula(point1, point2):
@@ -472,7 +455,7 @@ class Dungeon:
 class Room:
     def __init__(self, x1=0, y1=0, w=0, h=0, nd_array=None,
                  wall_color="dark gray", floor_color="darkest amber", feature_name=None,
-                 wall_type="wall_brick", floor_type="floor", tiled=False, name=None, lightness=0.8,
+                 wall_type="wall_brick", floor_type="ground_soil", tiled=False, name=None, lightness=0.8,
                  id_nr=1, algorithm=None, build_later=False, feature=False, feature_room=None, parent_room=None):
         self.x1 = int(x1)
         self.y1 = int(y1)
@@ -497,20 +480,24 @@ class Room:
         self.id_color = random_color()
         self.adjacent_room_ids = []
         self.algorithm = algorithm
-        self.inner = set()
-        self.outer = set()
-        self.set_inner()
-        self.set_outer()
-        self.tiles = self.inner.union(self.outer)
         self.center = self.center()
-        self.size = len(self.inner)
-        self.max_entities = int(self.size / 2)
         self.build_later = build_later
         self.feature = feature
         self.feature_room = feature_room
         self.parent_room = parent_room
         self.vaults = []
         self.doors = []
+        self.inner = set()
+        self.outer = set()
+        self.borders = set()
+        self.set_inner()
+        self.set_outer()
+        self.set_borders()
+        self.tiles = self.inner.union(self.outer)
+        if self.parent_room:
+            self.parent_room.inner = self.parent_room.inner.difference(self.tiles)
+        self.size = len(self.inner)
+        self.max_entities = int(self.size / 2)
 
     def center(self):
         center_x = int((self.x1 + self.x2) / 2)
@@ -531,6 +518,10 @@ class Room:
         for i in range(outer[0].size):
             y, x = outer[0][i], outer[1][i]
             self.outer.add((int(x + self.x1), int(y + self.y1)))
+
+    def set_borders(self):
+        self.borders = set(
+            [(x, y) for (x, y) in self.outer if x == self.x1 or x == self.x2 - 1 or y == self.y1 or y == self.y2 - 1])
 
     def intersects(self, other, inner=False):
         """Return True if this room overlaps with another room.

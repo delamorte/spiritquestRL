@@ -110,7 +110,8 @@
     ],
     "tile": 126,
     "wall": "tree",
-    "floor": "ground_soil"
+    "floor": "ground_soil",
+    "trail": ["footprints"]
   },
   "swamp": {
     "name": "swamp",
@@ -180,6 +181,7 @@
     ],
     "tile": 411,
     "wall": "wall_swamp",
-    "floor": "ground_soil"
+    "floor": "ground_soil",
+    "trail": ["footprints"]
   }
 }
