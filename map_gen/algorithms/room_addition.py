@@ -259,7 +259,7 @@ class RoomAddition(Dungeon):
 
         return room
 
-    def generate_room_square(self, max_w, max_h, padding=1):
+    def generate_room_square(self, max_w=None, max_h=None, padding=1):
         room_min_size = self.square_room_min_size
         if max_w and max_h:
             room_max_size = min(max_w, max_h)

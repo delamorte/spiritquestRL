@@ -447,21 +447,6 @@ class GameMap:
 
         print("creating footprints and adjusting wall corners..")
         for room in self.algorithm.feature_rooms:
-            tunnels = room.tunnel
-
-            trail_name = choice(self.biome.biome_data["trail"])
-            trail_color = get_color(trail_name)
-            trail_tile = get_tile_object(trail_name)
-
-            for tile in tunnels:
-                if tile not in self.algorithm.all_feature_tiles:
-                    x, y = tile[0], tile[1]
-                    # create trail
-                    create_steps = random.random()
-                    if create_steps > 0.5:
-                        entity = Entity(x, y, trail_color, trail_name, trail_tile, category="decorations")
-                        self.add_entity(entity)
-
             for tile in room.outer:
                 x, y = tile[0], tile[1]
                 wall_name = room.wall_type
@@ -475,6 +460,24 @@ class GameMap:
                         for entity in self.tiles[x][y].entities_on_tile:
                             if entity.name == wall_name:
                                 entity.char = char
+
+            tunnels = room.tunnel
+
+            if "trail" not in self.biome.biome_data.keys():
+                continue
+
+            trail_name = choice(self.biome.biome_data["trail"])
+            trail_color = get_color(trail_name)
+            trail_tile = get_tile_object(trail_name)
+
+            for tile in tunnels:
+                if tile not in self.algorithm.all_feature_tiles:
+                    x, y = tile[0], tile[1]
+                    # create trail
+                    create_steps = random.random()
+                    if create_steps > 0.5:
+                        entity = Entity(x, y, trail_color, trail_name, trail_tile, category="decorations")
+                        self.add_entity(entity)
 
         print("room processed")
         self.create_entities_in_rooms()
