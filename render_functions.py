@@ -1027,3 +1027,10 @@ class RenderFunctions:
             blt.layer(i)
             blt.clear_area(1, 1, w, h)
             i += 1
+
+    def clear_menu(self, frame):
+        i = 0
+        while i <= 5:
+            blt.layer(i)
+            blt.clear_area(frame.left, frame.top, frame.width, frame.height)
+            i += 1

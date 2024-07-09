@@ -2,6 +2,8 @@ from random import choice, shuffle
 
 from bearlibterminal import terminal as blt
 
+from components.menus.menu_item import MenuItem
+
 
 class DialogueMenu:
     def __init__(self, name="dialogue", data=None, sub_menu=False, event=None):
@@ -9,14 +11,9 @@ class DialogueMenu:
         self.title_screen = False
         self.name = name
         self.data = data
-        self.heading = "[color=white]{0}: ".format(self.data.dialogue_json["actor"])
-        self.sub_heading = None
+        self.heading = "[color=light amber]{0}: \n[color=default]".format(self.data.dialogue_json["actor"])
         self.items = []
-        self.items_icons = []
-        self.sub_items = {}
         self.sub_menu = sub_menu
-        self.margin_x = 6
-        self.margin_y = 1
         self.align = blt.TK_ALIGN_LEFT
         self.event = event
         self.options = {}
@@ -29,8 +26,6 @@ class DialogueMenu:
         if not self.first_interaction and self.data.prompt_state is None:
             return
         self.items = []
-        self.items_icons = []
-        self.sub_items = {}
         self.options = {}
         line_1 = ""
         if self.first_interaction:
@@ -39,12 +34,13 @@ class DialogueMenu:
 
         line_2 = choice(self.data.dialogue_json["dialogue"]["prompts"][self.data.prompt_state])
 
-        self.sub_heading = "{0}\n\n{1}\n".format(line_1, line_2)
+        self.heading += "\n{0}\n\n{1}\n".format(line_1, line_2)
 
         for item in self.data.dialogue_json["dialogue"]["answers"][self.data.prompt_state]:
             for option in item["choices"]:
                 self.options[option] = item["go_to"]
-                self.items.append(option)
+                menu_item = MenuItem(option)
+                self.items.append(menu_item)
         shuffle(self.items)
 
     def show(self):

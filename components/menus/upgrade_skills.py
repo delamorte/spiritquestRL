@@ -1,5 +1,6 @@
 from bearlibterminal import terminal as blt
 
+from components.menus.menu_item import MenuItem
 from ui.message import Message
 
 
@@ -10,45 +11,42 @@ class UpgradeSkills:
         self.name = name
         self.data = data
         self.heading = "[color=white]The following abilities have awakened within you..."
-        self.sub_heading = None
         self.items = []
-        self.items_icons = []
-        self.sub_items = {}
         self.sub_menu = sub_menu
-        self.margin_x = 6
-        self.margin_y = 7
         self.align = blt.TK_ALIGN_LEFT
         self.event = event
         self.refresh()
 
     def refresh(self):
         self.items = []
-        self.items_icons = []
-        self.sub_items = {}
         abilities = self.data.abilities
         skill_points = self.data.player.skill_points
-        self.sub_heading = "[color=yellow]You have {0} skill points".format(skill_points)
+        self.heading += "\n[color=yellow]You have {0} skill points".format(skill_points)
 
         for skill in abilities.items:
-            self.items.append(skill.name)
-            self.items_icons.append(skill.icon)
-            description = "[color=white]{0}".format(skill.get_description())
+            icon = skill.icon
+            item_str = skill.name
+            description = "\n [color=white]{0}".format(skill.get_description())
             next_rank_description = ""
             upgradeable = skill.rank < skill.max_rank
             if upgradeable:
                 next_rank_description =\
-                    "[color=lighter blue]Rank {0}[color=white] -> {1}".format(skill.rank+2,
+                    "\n [color=lighter blue]Rank {0}[color=white] -> {1}".format(skill.rank+2,
                                                                               skill.get_description(rank=skill.rank+1))
 
-            self.sub_items[skill.name] = [skill.description, description, next_rank_description]
+            item_str += "\n" + skill.description + description + next_rank_description
+            menu_item = MenuItem(skill.name, item_str, icon)
+            self.items.append(menu_item)
 
         for skill in abilities.unlocked:
-            self.items.append(skill.name)
-            self.items_icons.append(skill.icon)
-            learn_str = "[color=lighter yellow]New skill[color=white]"
+            icon = skill.icon
+            item_str = skill.name
+            learn_str = "\n [color=lighter yellow]New skill[color=white]"
             description = skill.get_description()
 
-            self.sub_items[skill.name] = [learn_str, skill.description, description]
+            item_str += "\n" + learn_str + "\n" + skill.description + "\n" + description
+            menu_item = MenuItem(skill.name, item_str, icon)
+            self.items.append(menu_item)
 
     def show(self):
         self.refresh()

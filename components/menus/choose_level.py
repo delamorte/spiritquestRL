@@ -3,6 +3,7 @@ from random import choice
 from bearlibterminal import terminal as blt
 
 import options
+from components.menus.menu_item import MenuItem
 from map_gen.tilemap import get_tile
 
 
@@ -13,35 +14,31 @@ class ChooseLevel:
         self.name = name
         self.data = data
         self.heading = "[color=white]Choose your destination..."
-        self.sub_heading = None
         self.items = []
-        self.items_icons = []
-        self.sub_items = {}
         self.sub_menu = sub_menu
-        self.margin_x = 6
-        self.margin_y = 6
         self.align = blt.TK_ALIGN_LEFT
         self.event = event
         self.refresh()
 
     def refresh(self):
         self.items = []
-        self.items_icons = []
-        self.sub_items = {}
         for item in self.data:
             name = item.title
-            self.items.append(name)
             if options.data.gfx == "oryx":
-                self.items_icons.append(get_tile(item.biome_data["wall"]))
+                tile = get_tile(item.biome_data["wall"])
+                icon = tile
             else:
-                self.items_icons.append("#")
+                icon = None
             quest = item.quest
             if quest == "rescue":
                 npc = item.quest_npc
             else:
                 npc = choice(item.biome_data["monsters"])
-            quest_title = quest.capitalize() + ":" + " " + npc.capitalize()
-            self.sub_items[name] = [quest_title]
+            quest_title = "\n" + quest.capitalize() + ":" + " " + npc.capitalize()
+
+            item_str = name + quest_title
+            menu_item = MenuItem(name, item_str, icon)
+            self.items.append(menu_item)
 
     def show(self):
         output = self.owner.show(self)

@@ -9,11 +9,8 @@ class MapGen:
         self.data = data
         self.sub_menu = sub_menu
         self.heading = None
-        self.sub_heading = None
         self.items = ["hub", "messy_bsp", "drunkard", "cellular", "room_addition", "squares",
                       "squares_and_crosses"]
-        self.items_icons = []
-        self.sub_items = {}
         self.margin_x = 0
         self.margin_y = 1
         self.align = blt.TK_ALIGN_CENTER

@@ -1,8 +1,7 @@
-from math import floor
+from math import ceil
 
 from bearlibterminal import terminal as blt
 
-import options
 from components.menus.avatar_info import AvatarInfo
 from components.menus.choose_animal import ChooseAnimal
 from components.menus.choose_level import ChooseLevel
@@ -12,9 +11,96 @@ from components.menus.level_up import LevelUp
 from components.menus.map_gen import MapGen
 from components.menus.upgrade_skills import UpgradeSkills
 from game_states import GameStates
-from map_gen.tilemap import get_color
-from ui.elements import UIElements
 
+
+class MessageList(object):
+    def __init__(self):
+        self.total_height = 1
+        self.texts = []
+        self.heights = []
+
+    def update_heights(self, width):
+        self.heights = [blt.measure(text.get_text(), width)[1] for text in self.texts]
+        # recompute total height, including the blank lines between messages
+        self.total_height = sum(self.heights) + len(self.texts) - 1
+
+    def append(self, message):
+        self.texts.append(message)
+
+    def __len__(self):
+        return len(self.texts)
+
+    def __getitem__(self, key):
+        return self.texts[key], self.heights[key]
+
+
+class FrameWithScrollbar(object):
+    def __init__(self, contents):
+        self.offset = 0
+        self.width = 0
+        self.height = 0
+        self.scrollbar_height = 0
+        self.scrollbar_column = 0
+        self.scrollbar_offset = 0
+        self.left = self.top = self.width = self.height = 0
+        self.contents = contents
+
+    def update_geometry(self, left, top, width, height):
+        # Save current scroll position
+        current_offset_percentage = self.offset / self.contents.total_height
+
+        # Update frame dimensions
+        self.left = left
+        self.top = top
+        self.width = width
+        self.height = height
+
+        # Calculate new message list height
+        self.contents.update_heights(width)
+
+        # Scrollbar
+        #self.scrollbar_height = 1
+        self.scrollbar_height = min(
+            int(ceil(self.height * self.height / self.contents.total_height)), self.height)
+
+        # Try to recover scroll position
+        self.offset = int(self.contents.total_height *
+                          current_offset_percentage)
+        self.offset = min(
+            self.offset, self.contents.total_height - self.height)
+        if self.contents.total_height <= self.height:
+            self.offset = 0
+
+    def scroll_to_pixel(self, py):
+        py -= self.top * blt.state(blt.TK_CELL_HEIGHT)
+        factor = py / (self.height * blt.state(blt.TK_CELL_HEIGHT))
+        self.offset = int(self.contents.total_height * factor)
+        self.offset = max(
+            0, min(self.contents.total_height - self.height, self.offset))
+
+    def scroll(self, dy):
+        self.offset = max(
+            0, min(self.contents.total_height - self.height, self.offset + dy))
+
+    def draw(self):
+        # Frame background
+        blt.layer(0)
+        blt.color("transparent")
+        blt.clear_area(self.left, self.top, self.width, self.height)
+
+        # Scroll bar
+        blt.bkcolor("transparent")
+        blt.clear_area(self.left + self.width, self.top, 1, self.height)
+        #blt.bkcolor("default")
+        blt.color("dark orange")
+        self.scrollbar_column = self.left + self.width
+        self.scrollbar_offset = int(
+            (self.top + (self.height - self.scrollbar_height) * (
+                self.offset / (self.contents.total_height - self.height))) *
+            blt.state(blt.TK_CELL_HEIGHT))
+        for i in range(self.scrollbar_height):
+            blt.put_ext(self.scrollbar_column, i, 0,
+                        self.scrollbar_offset, 0x2588)
 
 class Menus:
     def __init__(self, main_menu=None, choose_animal=None, choose_level=None, avatar_info=None,
@@ -32,10 +118,12 @@ class Menus:
         self.current_menu = None
         self.text_wrap = 60
         self.sel_index = 0
-        self.center_x = 0
-        self.center_y = 0
         self.viewport_w = 0
         self.viewport_h = 0
+        self.padding_left = 10
+        self.padding_right = 10
+        self.padding_top = 15
+        self.padding_bottom = 15
 
         if self.main_menu:
             self.main_menu.owner = self
@@ -56,83 +144,78 @@ class Menus:
         if self.map_gen:
             self.map_gen.owner = self
 
-    def refresh(self):
-        self.center_x = self.owner.ui.viewport.offset_center_x
-        self.center_y = self.owner.ui.viewport.offset_center_y - 5
-        self.viewport_w = self.owner.ui.viewport.offset_w
-        self.viewport_h = self.owner.ui.viewport.offset_h
-
     def show(self, menu):
         self.current_menu = menu
         self.owner.game_state = GameStates.MENU
         self.sel_index = 0
+        self.viewport_w = self.owner.ui.viewport.offset_w
+        self.viewport_h = self.owner.ui.viewport.offset_h
         output = MenuData(name=self.current_menu.name)
-        self.refresh()
+        message_list = MessageList()
+        frame = FrameWithScrollbar(message_list)
+
+        for item in menu.items:
+            message_list.append(item)
+
+        frame.update_geometry(
+            self.padding_left + 1,
+            self.padding_top,
+            self.viewport_w + 5 - (self.padding_left + self.padding_right),
+            self.viewport_h - (self.padding_top + self.padding_bottom))
 
         while output.menu_actions_left:
-            if (blt.state(floor(blt.TK_WIDTH)) != self.owner.ui.screen_w or
-                    blt.state(floor(blt.TK_HEIGHT)) != self.owner.ui.screen_h):
 
-                self.owner.ui = UIElements()
-                self.owner.ui.owner = self.owner
-                self.refresh()
-                self.owner.ui.draw()
-                blt.refresh()
-                self.owner.fov_recompute = True
-
+            # frame.draw()
             blt.layer(0)
-            self.owner.render_functions.clear_camera(3)
-            blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 5,
-                     menu.heading, self.text_wrap, 0, menu.align)
+            blt.color("white")
+            self.owner.render_functions.clear_camera(5)
+            # self.owner.render_functions.clear_menu(frame)
+            current_line = 0
+            line_index = 0
+            # Draw heading
+            blt.puts(self.padding_left, self.padding_top - 3, menu.heading,
+                     frame.width, align=blt.TK_ALIGN_CENTER)
 
-            if menu.sub_heading:
-                blt.color(None)
-                blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y - 3,
-                         menu.sub_heading, self.text_wrap, 0, menu.align)
+            for item, height in message_list:
+                item.color = "white"
+                selected = line_index == self.sel_index
+                blt.color("white")
 
-            for i, sel in enumerate(menu.items):
-                selected = i == self.sel_index
-                blt.color("orange" if selected else "light_gray")
-                blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + 1 + i * menu.margin_y, "%s%s" %
-                         ("[U+203A]" if selected else " ", sel), self.text_wrap, 0, menu.align)
+                if current_line + height >= frame.offset:
+                    # stop when message is below frame
+                    if current_line - frame.offset > frame.height:
+                        break
+                    # drawing message
+                    if selected:
+                        blt.color("orange")
+                        item.color = "orange"
 
-                blt.color(None)
+                    text = "%s%s" % ("[U+203A] " if selected else " ", item.get_text())
+                    blt.puts(self.padding_left, self.padding_top + current_line -
+                             frame.offset + 5, text, frame.width, align=blt.TK_ALIGN_CENTER)
 
-                if sel in menu.sub_items:
-                    for j, sub_sel in enumerate(menu.sub_items[sel]):
-                        blt.puts(int(self.center_x / 2) + menu.margin_x, self.center_y + 1 + i * menu.margin_y + j + 1,
-                                 sub_sel, self.text_wrap, 0, menu.align)
+                current_line += height + 1
+                line_index += 1
 
-                if menu.items_icons:
-                    # Draw icon tile
-                    blt.layer(1)
-                    color = get_color(sel)
-                    if color is None or color == "default":
-                        color = "amber"
-                    blt.color(color)
-                    if options.data.gfx == "ascii":
-                        blt.puts(int(self.center_x / 2),
-                                 self.center_y + 1 + i * menu.margin_y, menu.items_icons[i], 0, 0, menu.align)
-                    else:
-                        blt.puts(int(self.center_x / 2), self.center_y + 1 +
-                                 i * menu.margin_y - 1, "[U+" + hex(menu.items_icons[i]) + "]", 0, 0, menu.align)
-
+            #blt.crop(self.padding_left, self.padding_top, frame.width, frame.height)
             blt.refresh()
 
-            sel = menu.items[self.sel_index] if menu.items else None
+            sel = menu.items[self.sel_index].value if menu.items else None
             key = blt.read()
 
-            output = self.handle_input(output, key, sel, menu.items)
+            output = self.handle_input(output, key, sel, menu.items, frame)
             if output.event == "break":
                 if menu.title_screen:
                     exit()
                 else:
                     self.owner.game_state = GameStates.PLAYER_TURN
+                    self.owner.render_functions.clear_camera(5)
                     break
             elif output.params or output.sub_menu or not output.menu_actions_left:
+                self.owner.render_functions.clear_camera(5)
                 return output
 
-    def handle_input(self, output, key, sel, items):
+    def handle_input(self, output, key, sel, items, frame):
 
         if key == blt.TK_CLOSE:
             exit()
@@ -142,9 +225,17 @@ class Menus:
         elif key == blt.TK_UP:
             if self.sel_index > 0:
                 self.sel_index -= 1
+            frame.scroll(-(frame.contents.heights[self.sel_index]))
         elif key == blt.TK_DOWN:
             if self.sel_index < len(items) - 1:
                 self.sel_index += 1
+            frame.scroll(frame.contents.heights[self.sel_index])
+        elif key == blt.TK_RESIZED:
+            frame.update_geometry(
+                self.padding_left,
+                self.padding_top,
+                blt.state(blt.TK_WIDTH) - (self.padding_left + self.padding_right + 1),
+                blt.state(blt.TK_HEIGHT) - (self.padding_top + self.padding_bottom))
         elif key == blt.TK_ENTER:
             if sel == "Resume game":
                 output.event = "break"
@@ -188,7 +279,7 @@ class Menus:
         elif data.event == "debug_map":
             debug_map_data = MenuData(name="debug_map", params=data.params, sub_menu=True, prev_menu=self.current_menu)
             self.owner.menus.create_or_show_menu(debug_map_data)
-            self.owner.render_functions.clear_camera(4)
+            self.owner.render_functions.clear_camera(5)
         elif self.current_menu.event == "level_change":
             self.owner.levels.biome = data.params
         self.owner.game_state = GameStates.PLAYER_TURN

@@ -9,10 +9,7 @@ class DebugMap:
         self.data = data
         self.sub_menu = sub_menu
         self.heading = None
-        self.sub_heading = None
         self.items = []
-        self.items_icons = []
-        self.sub_items = {}
         self.margin_x = 6
         self.margin_y = 6
         self.align = blt.TK_ALIGN_LEFT

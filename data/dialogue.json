@@ -237,9 +237,9 @@
           },
           {
             "choices": [
-              "Exit"
+              "Return"
             ],
-            "go_to": "999",
+            "go_to": null,
             "set_state": null
           }
         ],
@@ -271,7 +271,7 @@
       }
     }
   },
-  "Ornithologist": {
+  "ornithologist": {
     "actor": "Ornithologist",
     "remarks": [
       "Help!"
@@ -309,9 +309,9 @@
           },
           {
             "choices": [
-              "Exit"
+              "Return"
             ],
-            "go_to": "999",
+            "go_to": null,
             "set_state": null
           }
         ],
@@ -381,9 +381,9 @@
           },
           {
             "choices": [
-              "Exit"
+              "Return"
             ],
-            "go_to": "999",
+            "go_to": null,
             "set_state": null
           }
         ],
@@ -453,9 +453,9 @@
           },
           {
             "choices": [
-              "Exit"
+              "Return"
             ],
-            "go_to": "999",
+            "go_to": null,
             "set_state": null
           }
         ],
@@ -527,7 +527,7 @@
             "choices": [
               "Return"
             ],
-            "go_to": "999",
+            "go_to": null,
             "set_state": null
           }
         ],

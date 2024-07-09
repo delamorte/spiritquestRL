@@ -136,7 +136,7 @@ def show_msg_history(message_log, name, viewport_w, viewport_h):
             blt.clear_area(1, 1, w, h)
             i += 1
         current_line = 0
-        blt.puts(padding_left, padding_top - frame.offset, prompt, frame.width)
+        blt.puts(padding_left, padding_top - frame.offset, prompt, frame.width, align=blt.TK_ALIGN_CENTER)
         for text, height in messages:
             if current_line + height >= frame.offset:
                 # stop when message is below frame
@@ -144,7 +144,7 @@ def show_msg_history(message_log, name, viewport_w, viewport_h):
                     break
                 # drawing message
                 blt.puts(padding_left, padding_top + current_line -
-                         frame.offset + 5, text, frame.width)
+                         frame.offset + 5, text, frame.width, align=blt.TK_ALIGN_CENTER)
             current_line += height + 1
 
         blt.crop(padding_left, padding_top, frame.width, frame.height)

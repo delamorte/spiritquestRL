@@ -60,7 +60,7 @@ class Levels:
 
         elif destination == "dream":
             level_choices = []
-            for i in range(5):
+            for i in range(20):
                 biome = Biome()
                 level_choices.append(biome)
             level_data = MenuData(name="choose_level", params=level_choices)
