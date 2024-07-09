@@ -866,7 +866,6 @@
         "plants",
         "flowers"
       ],
-      "npcs": ["hermit"],
       "allies": ["snake"],
       "monsters": []
     },

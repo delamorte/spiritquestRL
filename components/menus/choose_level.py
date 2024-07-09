@@ -35,9 +35,9 @@ class ChooseLevel:
                 self.items_icons.append(get_tile(item.biome_data["wall"]))
             else:
                 self.items_icons.append("#")
-            quest = choice(item.biome_data["quests"])
+            quest = item.quest
             if quest == "rescue":
-                npc = choice(item.biome_data["npcs"])
+                npc = item.quest_npc
             else:
                 npc = choice(item.biome_data["monsters"])
             quest_title = quest.capitalize() + ":" + " " + npc.capitalize()

@@ -12,7 +12,7 @@ class Levels:
         self.tileset = options.data.gfx
         self.player = None
         self.items = {}
-        self.params = None
+        self.biome = None
         self.world_tendency = 0
         self.current_map = None
 
@@ -26,8 +26,8 @@ class Levels:
         self.player.status_effects.remove_all()
 
         if not self.items:
-            game_map = self.create_biome_and_map(name="hub", biome_title="hub", width=40, height=40,
-                                                 generate_random=False, algorithm="hub")
+            self.biome = Biome(title="hub", generate_random=False)
+            game_map = self.create_map_from_biome(name="hub", width=40, height=40, algorithm="hub")
             self.items[game_map.name] = game_map
             self.current_map = game_map
 
@@ -67,9 +67,8 @@ class Levels:
             self.owner.menus.create_or_show_menu(level_data)
             if not self.owner.menus.choose_level.event:
                 return
-            self.world_tendency = self.params.biome_modifier
 
-            game_map = self.create_biome_and_map(name="dream", biome_title=self.params.title, width=60, height=60)
+            game_map = self.create_map_from_biome(name="dream", width=60, height=60)
             self.items[game_map.name] = game_map
             self.current_map = game_map
 
@@ -78,25 +77,27 @@ class Levels:
 
     def make_debug_map(self, algorithm):
         if algorithm == "hub":
-            game_map = self.create_biome_and_map(name="hub", biome_title="hub", width=40, height=40,
-                                                 generate_random=False, algorithm="hub")
+            self.biome = Biome(title="hub", generate_random=False)
+            game_map = self.create_map_from_biome(name="hub", width=40, height=40, algorithm="hub")
         else:
-            game_map = self.create_biome_and_map(name="debug", width=60, height=60, algorithm=algorithm)
+            self.biome = Biome(title="debug", generate_random=True)
+            game_map = self.create_map_from_biome(name="debug", width=60, height=60, algorithm=algorithm)
         return game_map
 
-    def create_biome_and_map(self, name, width, height, biome_title=None, algorithm=None, generate_random=True):
-        biome = Biome(biome_modifier=self.world_tendency, title=biome_title, generate_random=generate_random)
+    def create_map_from_biome(self, name, width, height, algorithm=None):
         game_map = GameMap(width=width,
                            height=height,
                            name=name,
-                           biome=biome)
+                           biome=self.biome)
         game_map.owner = self
-        game_map.biome = biome
+        game_map.biome = self.biome
         game_map.generate_map(name=algorithm)
         game_map.process_rooms()
         game_map.process_prefabs()
         if not self.owner.debug:
             game_map.place_player()
+            if game_map.biome.quest == "rescue":
+                game_map.place_npcs()
             game_map.init_light_sources()
         transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
         game_map.transparent = transparency(game_map.tiles)

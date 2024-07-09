@@ -8,7 +8,7 @@ class Biome:
     def __init__(self, title=None, biome_type=None, biome_data=None, biome_prefix=None,
                  biome_suffix=None, biome_modifier=0, biome_monster=None,
                  biome_monster_chance=0.7, features=None, secrets=None,
-                 npcs=None, quests=None, bosses=None, generate_random=True):
+                 npcs=None, quest=None, bosses=None, generate_random=True):
         self.title = title
         self.biome_type = biome_type
         self.biome_data = biome_data
@@ -20,8 +20,8 @@ class Biome:
         self.home = None
         self.features = features
         self.secrets = secrets
-        self.npcs = npcs
-        self.quests = quests
+        self.quest_npc = npcs
+        self.quest = quest
         self.bosses = bosses
         self.generate_random = generate_random
         self.generate_biome_params(title)
@@ -58,9 +58,9 @@ class Biome:
         if self.biome_data["features"]:
             self.features = self.biome_data["features"]
         if self.biome_data["quests"]:
-            self.quests = choice(self.biome_data["quests"])
+            self.quest = choice(self.biome_data["quests"])
         if self.biome_data["npcs"]:
-            self.npcs = choice(self.biome_data["npcs"])
+            self.quest_npc = choice(self.biome_data["npcs"])
         if self.biome_data["bosses"]:
             self.bosses = choice(self.biome_data["bosses"])
 

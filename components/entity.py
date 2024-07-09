@@ -220,10 +220,8 @@ class Entity:
             self.x = x
             self.y = y
 
-
     def get_path_to(self, target, entities, game_map):
         """Compute and return a path to the target position.
-
         If there is no valid path then returns an empty list.
         """
         # Copy the walkable array.

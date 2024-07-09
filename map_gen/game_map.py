@@ -301,7 +301,7 @@ class GameMap:
         #             }
 
         generators = {
-            "messy_bsp": MessyBSPTree(self.width, self.height),
+            #"messy_bsp": MessyBSPTree(self.width, self.height),
             "drunkard": RoomAddition(self.width, self.height, drunkard=True),
             "cellular": RoomAddition(self.width, self.height, only_cellular=True),
             "room_addition": RoomAddition(self.width, self.height),
@@ -589,21 +589,54 @@ class GameMap:
         player = self.owner.player
         px, py = 0, 0
         if self.biome.biome_data["name"] == "hub":
-            px, py = choice(list(self.biome.home.inner))
-            while self.tiles[px][py].blocking_entity:
-                px, py = choice(list(self.biome.home.inner))
-        if self.name == "dream":
-            px, py = randint(1, self.width - 1), \
-                randint(1, self.height - 1)
+            locations = self.biome.home.inner
+            spawnable_locations = [(x, y) for (x, y) in locations if self.tiles[x][y].spawnable]
+            px, py = choice(spawnable_locations)
 
-            while not self.tiles[px][py].spawnable:
-                #    while self.is_blocked(px, py):
-                px, py = randint(1, self.width - 1), \
-                    randint(1, self.height - 1)
+            # DEBUG
+            self.place_npcs(debug=True)
+        if self.name == "dream":
+            start_room = choice(self.algorithm.rooms)
+            locations = start_room.outer
+            spawnable_locations = [(x, y) for (x, y) in locations if self.tiles[x][y].spawnable]
+            px, py = choice(spawnable_locations)
+
+            # px, py = randint(1, self.width - 1), \
+            #     randint(1, self.height - 1)
+            #
+            # while not self.tiles[px][py].spawnable:
+            #     #    while self.is_blocked(px, py):
+            #     px, py = randint(1, self.width - 1), \
+            #         randint(1, self.height - 1)
         player.x, player.y = px, py
 
         self.entities["player"] = [player]
         self.add_entity(player)
+
+    def place_npcs(self, debug=False):
+        if debug:
+            npc = "blacksmith"
+        else:
+            npc = self.biome.quest_npc
+        if not npc:
+            return
+        if debug:
+            npc_room = self.biome.home
+        else:
+            npc_rooms = [room for room in self.algorithm.feature_rooms if npc in room.feature_name.lower()]
+            if not npc_rooms:
+                npc_room = choice(self.algorithm.feature_rooms)
+            else:
+                npc_room = choice(npc_rooms)
+        locations = npc_room.inner
+        spawnable_locations = [(x, y) for (x, y) in locations if self.tiles[x][y].spawnable]
+
+        x, y = choice(spawnable_locations)
+
+        tile = get_tile_object(npc)
+        color = get_color(npc, mod=self.owner.world_tendency)
+        entity = Entity(x, y, color, npc, tile, category="npcs")
+        self.add_entity(entity)
 
     def init_light_sources(self):
         for category, entities in self.entities.items():

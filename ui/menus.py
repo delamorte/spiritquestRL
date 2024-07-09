@@ -190,7 +190,7 @@ class Menus:
             self.owner.menus.create_or_show_menu(debug_map_data)
             self.owner.render_functions.clear_camera(4)
         elif self.current_menu.event == "level_change":
-            self.owner.levels.params = data.params
+            self.owner.levels.biome = data.params
         self.owner.game_state = GameStates.PLAYER_TURN
 
     def create_or_show_menu(self, data):

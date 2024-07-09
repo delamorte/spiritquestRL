@@ -248,13 +248,16 @@ class Dungeon:
                 room_2.entrances.add(coords)
                 destination_door_created = True
 
-    def get_closest_room(self, isolated_room):
+    def get_closest_or_furthest_room(self, starting_room, closest=True):
         center_points = [room.center for room in self.feature_rooms]
         tree = KDTree(center_points)
-        closest = tree.query(isolated_room.center)[1]
-        return self.rooms[closest]
+        if closest:
+            room_idx = tree.query(starting_room.center)[1]
+        else:
+            room_idx = tree.query(starting_room.center)[1]
+        return self.rooms[room_idx]
 
-    def btunnel_between(self, start, end):
+    def tunnel_between(self, start, end):
         """Return an L-shaped tunnel between these two points."""
         x1, y1 = start
         x2, y2 = end
