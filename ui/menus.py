@@ -173,7 +173,7 @@ class Menus:
             current_line = 0
             line_index = 0
             # Draw heading
-            blt.puts(self.padding_left, self.padding_top - 3, menu.heading,
+            blt.puts(self.padding_left, self.padding_top - 3, menu.heading.text_lines,
                      frame.width, align=blt.TK_ALIGN_CENTER)
 
             for item, height in message_list:

@@ -323,7 +323,10 @@ class Entity:
             ai_component = AICaster()
         elif "ai" in f_data.keys() and f_data["ai"] == "npc":
             ai_component = AIBasic(passive=True)
-            npc_component = Npc(self.name)
+            quest = f_data["quest"] if "quest" in f_data.keys() else None
+            home = f_data["home"] if "home" in f_data.keys() else None
+            action = f_data["action"] if "action" in f_data.keys() else None
+            npc_component = Npc(self.name, quest, home, action)
         elif self.category == "allies":
             self.indicator_color = "light green"
             self.name += " (friend)"
@@ -332,7 +335,7 @@ class Entity:
             ai_component = AIBasic()
 
         if "dialogue" in f_data.keys() and f_data["dialogue"]:
-            dialogue_component = Dialogue(self.name)
+            dialogue_component = Dialogue(name=self.name, npc=npc_component)
 
         self.ai = ai_component
         if npc_component:

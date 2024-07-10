@@ -12,7 +12,6 @@ from components.openable import Openable
 from components.stairs import Stairs
 from components.wall import Wall
 from data import json_data
-from map_gen.algorithms.messy_bsp import MessyBSPTree
 from map_gen.algorithms.room_addition import RoomAddition
 from map_gen.tile import Tile
 from map_gen.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant
@@ -20,6 +19,7 @@ from map_gen.tilemap import get_tile, get_color, get_tile_by_value, get_tile_obj
 
 class GameMap:
     def __init__(self, width, height, name, biome=None, title=None, dungeon_level=0):
+        self.player_start_room = None
         self.algorithm = None
         self.owner = None
         self.entities = {
@@ -301,7 +301,7 @@ class GameMap:
         #             }
 
         generators = {
-            #"messy_bsp": MessyBSPTree(self.width, self.height),
+            # "messy_bsp": MessyBSPTree(self.width, self.height),
             "drunkard": RoomAddition(self.width, self.height, drunkard=True),
             "cellular": RoomAddition(self.width, self.height, only_cellular=True),
             "room_addition": RoomAddition(self.width, self.height),
@@ -419,10 +419,10 @@ class GameMap:
                 self.add_entity(wall)
                 self.tiles[x][y].spawnable = False
 
-        #self.connect_caves()
-        #self.algorithm.connect_caves()
-        #print("find isolated rooms")
-        #isolated_rooms = self.algorithm.get_rooms_by_flood_fill(prefab=False)
+        # self.connect_caves()
+        # self.algorithm.connect_caves()
+        # print("find isolated rooms")
+        # isolated_rooms = self.algorithm.get_rooms_by_flood_fill(prefab=False)
         # if isolated_rooms:
         #     for isolated_room in isolated_rooms:
         #         #closest_room = self.algorithm.get_closest_room(isolated_room)
@@ -440,10 +440,10 @@ class GameMap:
         #                 continue
         #             self.tiles[x][y].color = "blue"
 
-        #print("connect isolated rooms")
-        #self.algorithm.connect_caves(connect_features=True, isolated_rooms=isolated_rooms)
-        #print("make sure all rooms are traversible")
-        #self.algorithm.connect_rooms()
+        # print("connect isolated rooms")
+        # self.algorithm.connect_caves(connect_features=True, isolated_rooms=isolated_rooms)
+        # print("make sure all rooms are traversible")
+        # self.algorithm.connect_rooms()
 
         print("creating footprints and adjusting wall corners..")
         for room in self.algorithm.feature_rooms:
@@ -594,26 +594,20 @@ class GameMap:
             px, py = choice(spawnable_locations)
 
             # DEBUG
-            self.place_npcs(debug=True)
+            self.place_quest_npc(debug=True)
         if self.name == "dream":
             start_room = choice(self.algorithm.rooms)
+            self.player_start_room = start_room
             locations = start_room.outer
             spawnable_locations = [(x, y) for (x, y) in locations if self.tiles[x][y].spawnable]
             px, py = choice(spawnable_locations)
 
-            # px, py = randint(1, self.width - 1), \
-            #     randint(1, self.height - 1)
-            #
-            # while not self.tiles[px][py].spawnable:
-            #     #    while self.is_blocked(px, py):
-            #     px, py = randint(1, self.width - 1), \
-            #         randint(1, self.height - 1)
         player.x, player.y = px, py
 
         self.entities["player"] = [player]
         self.add_entity(player)
 
-    def place_npcs(self, debug=False):
+    def place_quest_npc(self, debug=False):
         if debug:
             npc = "blacksmith"
         else:
@@ -625,11 +619,13 @@ class GameMap:
         else:
             npc_rooms = [room for room in self.algorithm.feature_rooms if npc in room.feature_name.lower()]
             if not npc_rooms:
-                npc_room = choice(self.algorithm.feature_rooms)
+                npc_room = self.algorithm.get_closest_or_furthest_room(self.player_start_room, closest=False)
             else:
-                npc_room = choice(npc_rooms)
+                npc_room = self.algorithm.get_closest_or_furthest_room(self.player_start_room, rooms=npc_rooms,
+                                                                       closest=False)
         locations = npc_room.inner
-        spawnable_locations = [(x, y) for (x, y) in locations if self.tiles[x][y].spawnable]
+        spawnable_locations = [(x, y) for (x, y) in locations if
+                               self.tiles[x][y].spawnable and not self.tiles[x][y].blocked]
 
         x, y = choice(spawnable_locations)
 
@@ -753,7 +749,7 @@ class GameMap:
             entrances = room.entrances
             for tile in entrances:
                 x, y = tile[0], tile[1]
-                #self.tiles[x][y].color = "pink"
+                # self.tiles[x][y].color = "pink"
                 self.tiles[x][y].char = get_tile(room.floor_type)
                 self.tiles[x][y].color = get_color(room.floor_type)
 
@@ -779,7 +775,6 @@ class GameMap:
                 for neighbour in neighbours:
                     if neighbour.door:
                         self.remove_entity(door)
-
 
     def get_tile_direction(self, x, y):
         # Define the neighboring tile positions in the cardinal directions
@@ -839,8 +834,8 @@ class GameMap:
         elif category == "allies":
             entities_count = 1
         elif category == "objects":
-            #entities_count = randint(1, 3)
-            #decorations, entities_count = self.get_decorations(room_size)
+            # entities_count = randint(1, 3)
+            # decorations, entities_count = self.get_decorations(room_size)
             entities_count = randint(1, max(2, int(room_size / 10)))
         elif category == "windows":
             entities_count = room_size / 10

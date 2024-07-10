@@ -1,8 +1,9 @@
-from random import choice, shuffle
+from random import choice
 
 from bearlibterminal import terminal as blt
 
 from components.menus.menu_item import MenuItem
+from game_states import NpcStates
 
 
 class DialogueMenu:
@@ -11,37 +12,42 @@ class DialogueMenu:
         self.title_screen = False
         self.name = name
         self.data = data
-        self.heading = "[color=light amber]{0}: \n[color=default]".format(self.data.dialogue_json["actor"])
+        self.heading = MenuItem(self.data.npc.name, dialogue=True)
         self.items = []
         self.sub_menu = sub_menu
         self.align = blt.TK_ALIGN_LEFT
         self.event = event
         self.options = {}
-        self.prev_state = None
-        self.next_state = None
-        self.first_interaction = True
+        self.prev_choice = None
+        self.next_choice = None
         # self.refresh()
 
     def refresh(self):
-        if not self.first_interaction and self.data.prompt_state is None:
+        self.heading.reset()
+        if self.data.npc.state == NpcStates.IDLE and self.data.current_choice is None:
             return
+        elif self.data.npc.state == NpcStates.SHOP:
+            print("TODO: open shop menu")
+            self.data.npc.set_state(self.data.npc.prev_state)
         self.items = []
         self.options = {}
-        line_1 = ""
-        if self.first_interaction:
-            line_1 = choice(self.data.dialogue_json["dialogue"]["idle"])
-            self.first_interaction = False
 
-        line_2 = choice(self.data.dialogue_json["dialogue"]["prompts"][self.data.prompt_state])
+        line_1 = choice(self.data.dialogue_json["dialogue"][self.data.npc.state.value])
+        self.heading.append(line_1)
+        dialogue_state = self.data.npc.state.value
 
-        self.heading += "\n{0}\n\n{1}\n".format(line_1, line_2)
+        if self.data.current_choice:
+            line_2 = choice(self.data.dialogue_json["dialogue"]["choices"][self.data.current_choice])
+            self.heading.append(line_2)
+            dialogue_state = self.data.current_choice
 
-        for item in self.data.dialogue_json["dialogue"]["answers"][self.data.prompt_state]:
+        for item in self.data.dialogue_json["dialogue"]["player"][dialogue_state]:
             for option in item["choices"]:
-                self.options[option] = item["go_to"]
+                self.options[option] = {}
+                self.options[option]["choice"] = item["go_to"]
+                self.options[option]["state"] = item["set_state"] if "set_state" in item.keys() else None
                 menu_item = MenuItem(option)
                 self.items.append(menu_item)
-        shuffle(self.items)
 
     def show(self):
         self.refresh()
@@ -49,10 +55,13 @@ class DialogueMenu:
         output = self.owner.show(self)
         if output:
             if output.params in self.options:
-                self.prev_state = self.data.prompt_state
-                self.next_state = self.options[output.params]
-                self.data.prompt_state = self.next_state
-                if self.next_state is None:
+                self.prev_choice = self.data.current_choice
+                self.next_choice = self.options[output.params]["choice"]
+                state = self.options[output.params]["state"]
+                if state:
+                    self.data.npc.set_state(state)
+                self.data.current_choice = self.next_choice
+                if self.next_choice is None:
                     output.sub_menu = False
                 else:
                     output.sub_menu = True

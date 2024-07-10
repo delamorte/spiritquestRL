@@ -11,7 +11,7 @@ class MainMenu:
         self.title_screen = title_screen
         self.data = data
         self.align = blt.TK_ALIGN_CENTER
-        self.heading = "[color=white]Spirit Quest RL"
+        self.heading = MenuItem("[color=white]Spirit Quest RL")
         self.items = [MenuItem("New game"), MenuItem("Exit")]
         if options.data.debug:
             self.items.insert(0, MenuItem("Map generator"))

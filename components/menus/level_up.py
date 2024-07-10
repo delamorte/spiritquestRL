@@ -10,8 +10,8 @@ class LevelUp:
         self.name = name
         self.data = data
         self.sub_menu = sub_menu
-        self.heading = "[color=white]You have gained more wisdom. You feel a stronger bond with one particular " \
-                       "spirit... "
+        self.heading = MenuItem("[color=white]You have gained more wisdom. You feel a stronger bond with one particular " \
+                       "spirit... ")
         self.items = []
         self.align = blt.TK_ALIGN_LEFT
         self.event = event
@@ -19,7 +19,6 @@ class LevelUp:
 
     def refresh(self):
         self.items = []
-        item_str = ""
         animals = self.data.player.char
         exclude = self.data.player.max_lvl_avatars
         avatars = {x: animals[x] for x in animals if x not in exclude}
@@ -64,8 +63,8 @@ class LevelUp:
                                                         str(potential_exp),
                                                         next_exp_interval)
             icon = v
-            item_str = row_1 + row_2 + row_3
-            menu_item = MenuItem(k, item_str, icon)
+            text_lines = row_1 + row_2 + row_3
+            menu_item = MenuItem(k, text_lines, icon)
             self.items.append(menu_item)
 
     def show(self):

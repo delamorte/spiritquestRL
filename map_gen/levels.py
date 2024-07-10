@@ -97,7 +97,7 @@ class Levels:
         if not self.owner.debug:
             game_map.place_player()
             if game_map.biome.quest == "rescue":
-                game_map.place_npcs()
+                game_map.place_quest_npc()
             game_map.init_light_sources()
         transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
         game_map.transparent = transparency(game_map.tiles)

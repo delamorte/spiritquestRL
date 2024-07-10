@@ -10,7 +10,7 @@ class AvatarInfo:
         self.name = name
         self.data = data
         self.sub_menu = sub_menu
-        self.heading = "[color=white]The following spirits have awakened within you.."
+        self.heading = MenuItem("[color=white]The following spirits have awakened within you..")
         self.items = []
         self.align = blt.TK_ALIGN_LEFT
         self.event = event
@@ -23,9 +23,9 @@ class AvatarInfo:
         avatars = {x: animals[x] for x in animals if x not in exclude}
         for (k, v) in avatars.items():
             extra = "\n EXP: " + str(self.data.player.char_exp[k])
-            item_str = k + extra
+            text_lines = k + extra
             icon = v
-            menu_item = MenuItem(k, item_str, icon)
+            menu_item = MenuItem(k, text_lines, icon)
             self.items.append(menu_item)
 
     def show(self):

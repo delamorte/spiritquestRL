@@ -10,7 +10,7 @@ class UpgradeSkills:
         self.title_screen = False
         self.name = name
         self.data = data
-        self.heading = "[color=white]The following abilities have awakened within you..."
+        self.heading = MenuItem("[color=white]The following abilities have awakened within you...")
         self.items = []
         self.sub_menu = sub_menu
         self.align = blt.TK_ALIGN_LEFT
@@ -21,11 +21,11 @@ class UpgradeSkills:
         self.items = []
         abilities = self.data.abilities
         skill_points = self.data.player.skill_points
-        self.heading += "\n[color=yellow]You have {0} skill points".format(skill_points)
+        self.heading.append("[color=yellow]You have {0} skill points".format(skill_points))
 
         for skill in abilities.items:
             icon = skill.icon
-            item_str = skill.name
+            text_lines = skill.name
             description = "\n [color=white]{0}".format(skill.get_description())
             next_rank_description = ""
             upgradeable = skill.rank < skill.max_rank
@@ -34,18 +34,18 @@ class UpgradeSkills:
                     "\n [color=lighter blue]Rank {0}[color=white] -> {1}".format(skill.rank+2,
                                                                               skill.get_description(rank=skill.rank+1))
 
-            item_str += "\n" + skill.description + description + next_rank_description
-            menu_item = MenuItem(skill.name, item_str, icon)
+            text_lines += "\n" + skill.description + description + next_rank_description
+            menu_item = MenuItem(skill.name, text_lines, icon)
             self.items.append(menu_item)
 
         for skill in abilities.unlocked:
             icon = skill.icon
-            item_str = skill.name
+            text_lines = skill.name
             learn_str = "\n [color=lighter yellow]New skill[color=white]"
             description = skill.get_description()
 
-            item_str += "\n" + learn_str + "\n" + skill.description + "\n" + description
-            menu_item = MenuItem(skill.name, item_str, icon)
+            text_lines += "\n" + learn_str + "\n" + skill.description + "\n" + description
+            menu_item = MenuItem(skill.name, text_lines, icon)
             self.items.append(menu_item)
 
     def show(self):

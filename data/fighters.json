@@ -42,7 +42,10 @@
     "chaos": false,
     "abilities": [],
     "ai": "npc",
+    "quest": true,
     "dialogue": true,
+    "home": "Workshop",
+    "action": "Upgrade weapon",
     "remarks": [
       "Hmm."
     ]
@@ -67,7 +70,10 @@
     "chaos": false,
     "abilities": [],
     "ai": "npc",
+    "quest": true,
     "dialogue": true,
+    "home": "Grove",
+    "action": "Exchange rewards",
     "remarks": [
       "Hmm."
     ]
@@ -92,7 +98,10 @@
     "chaos": false,
     "abilities": [],
     "ai": "npc",
+    "quest": true,
     "dialogue": true,
+    "home": "Laboratory",
+    "action": "Exchange rewards",
     "remarks": [
       "Hmm."
     ]
@@ -110,7 +119,10 @@
     "tile": 461,
     "ascii": "@",
     "ai": "npc",
+    "quest": true,
     "dialogue": true,
+    "home": "Garden",
+    "action": "Exchange rewards",
     "colors": [
       "pink"
     ],
@@ -142,32 +154,10 @@
     "chaos": false,
     "abilities": [],
     "ai": "npc",
+    "quest": true,
     "dialogue": true,
-    "remarks": [
-      "Hmm."
-    ]
-  },
-  "hermit": {
-    "hp": 20,
-    "ac": 1,
-    "ev": 5,
-    "atk": 5,
-    "mv_spd": 1,
-    "atk_spd": 1,
-    "size": "normal",
-    "fov": 6,
-    "hex": "0xE000",
-    "tile": 483,
-    "ascii": "@",
-    "colors": [
-      "orange"
-    ],
-    "light": false,
-    "neutral": false,
-    "chaos": false,
-    "abilities": [],
-    "ai": "npc",
-    "dialogue": true,
+    "home": "Grove",
+    "action": "Animal companions",
     "remarks": [
       "Hmm."
     ]
@@ -192,7 +182,10 @@
     "chaos": false,
     "abilities": [],
     "ai": "npc",
+    "quest": true,
     "dialogue": true,
+    "home": "Watchtower",
+    "action": "Upgrade skills",
     "remarks": [
       "Hmm."
     ]

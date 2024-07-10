@@ -13,7 +13,7 @@ class ChooseLevel:
         self.title_screen = False
         self.name = name
         self.data = data
-        self.heading = "[color=white]Choose your destination..."
+        self.heading = MenuItem("[color=white]Choose your destination...")
         self.items = []
         self.sub_menu = sub_menu
         self.align = blt.TK_ALIGN_LEFT
@@ -36,8 +36,8 @@ class ChooseLevel:
                 npc = choice(item.biome_data["monsters"])
             quest_title = "\n" + quest.capitalize() + ":" + " " + npc.capitalize()
 
-            item_str = name + quest_title
-            menu_item = MenuItem(name, item_str, icon)
+            text_lines = name + quest_title
+            menu_item = MenuItem(name, text_lines, icon)
             self.items.append(menu_item)
 
     def show(self):

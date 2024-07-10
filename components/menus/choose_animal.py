@@ -12,7 +12,7 @@ class ChooseAnimal:
         self.title_screen = False
         self.name = name
         self.data = data
-        self.heading = "[color=white]Choose your spirit animal..."
+        self.heading = MenuItem("[color=white]Choose your spirit animal...")
         self.items = []
         self.sub_menu = sub_menu
         self.margin_x = 10
@@ -31,8 +31,8 @@ class ChooseAnimal:
             skills = "\n skills: {0}".format(", ".join(animal["player_abilities"]))
             tile = get_tile(k)
             icon = tile
-            item_str = k + stats + skills
-            menu_item = MenuItem(k, item_str, icon)
+            text_lines = k + stats + skills
+            menu_item = MenuItem(k, text_lines, icon)
             self.items.append(menu_item)
 
 

@@ -248,8 +248,10 @@ class Dungeon:
                 room_2.entrances.add(coords)
                 destination_door_created = True
 
-    def get_closest_or_furthest_room(self, starting_room, closest=True):
-        center_points = [room.center for room in self.feature_rooms]
+    def get_closest_or_furthest_room(self, starting_room, rooms=None, closest=True):
+        if not rooms:
+            rooms = self.feature_rooms
+        center_points = [room.center for room in rooms]
         tree = KDTree(center_points)
         if closest:
             room_idx = tree.query(starting_room.center)[1]

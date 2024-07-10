@@ -25,7 +25,7 @@
       "quest_completed": [
         "Thanks for helping me get home friend!"
       ],
-      "prompts": {
+      "choices": {
         "100": [
           "Will you listen to my request?",
           "Will you listen to my *CAW!* ..I mean, request?",
@@ -57,7 +57,7 @@
           "Well, that sucks."
         ]
       },
-      "answers": {
+      "player": {
         "100": [
           {
             "choices": [
@@ -199,294 +199,6 @@
       }
     }
   },
-  "herbalist": {
-    "actor": "Herbalist",
-    "remarks": [
-      "Help!"
-    ],
-    "dialogue": {
-      "idle": [
-        "Good day friend! How may I help you?",
-        "Greetings."
-      ],
-      "quest_initiated": [
-        "Thanks for helping me get home friend! Come see me at the garden back in town."
-      ],
-      "quest_failed": [
-        "NO!"
-      ],
-      "quest_completed": [
-        "Good day friend! How may I help you?"
-      ],
-      "prompts": {
-        "100": [
-          "How may I help you?"
-        ],
-        "999": [
-          "Have a good one."
-        ]
-      },
-      "answers": {
-        "100": [
-          {
-            "choices": [
-              "Shop"
-            ],
-            "go_to": "200",
-            "set_state": "shop"
-          },
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": null,
-            "set_state": null
-          }
-        ],
-        "quest_initiated": [
-          {
-            "choices": [
-              "OK."
-            ],
-            "go_to": "100",
-            "set_state": "quest_completed"
-          }
-        ],
-        "quest_completed": [
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": "quest_completed"
-          }
-        ],
-        "quest_failed": [
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": "quest_failed"
-          }
-        ]
-      }
-    }
-  },
-  "ornithologist": {
-    "actor": "Ornithologist",
-    "remarks": [
-      "Help!"
-    ],
-    "dialogue": {
-      "idle": [
-        "Good day friend! How may I help you?",
-        "Greetings."
-      ],
-      "quest_initiated": [
-        "Thanks for helping me get home friend! Come see me at the watchtower back in town."
-      ],
-      "quest_failed": [
-        "NO!"
-      ],
-      "quest_completed": [
-        "Good day friend! How may I help you?"
-      ],
-      "prompts": {
-        "100": [
-          "How may I help you?"
-        ],
-        "999": [
-          "Have a good one."
-        ]
-      },
-      "answers": {
-        "100": [
-          {
-            "choices": [
-              "Upgrade skills"
-            ],
-            "go_to": "200",
-            "set_state": "shop"
-          },
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": null,
-            "set_state": null
-          }
-        ],
-        "quest_initiated": [
-          {
-            "choices": [
-              "OK."
-            ],
-            "go_to": "100",
-            "set_state": "quest_completed"
-          }
-        ],
-        "quest_completed": [
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": "quest_completed"
-          }
-        ],
-        "quest_failed": [
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": "quest_failed"
-          }
-        ]
-      }
-    }
-  },
-  "druid": {
-    "actor": "Druid",
-    "remarks": [
-      "Help!"
-    ],
-    "dialogue": {
-      "idle": [
-        "Good day friend! How may I help you?",
-        "Greetings."
-      ],
-      "quest_initiated": [
-        "Thanks for helping me get home friend! Come see me at the grove back in town."
-      ],
-      "quest_failed": [
-        "NO!"
-      ],
-      "quest_completed": [
-        "Good day friend! How may I help you?"
-      ],
-      "prompts": {
-        "100": [
-          "How may I help you?"
-        ],
-        "999": [
-          "Have a good one."
-        ]
-      },
-      "answers": {
-        "100": [
-          {
-            "choices": [
-              "Exchange rewards"
-            ],
-            "go_to": "200",
-            "set_state": "shop"
-          },
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": null,
-            "set_state": null
-          }
-        ],
-        "quest_initiated": [
-          {
-            "choices": [
-              "OK."
-            ],
-            "go_to": "100",
-            "set_state": "quest_completed"
-          }
-        ],
-        "quest_completed": [
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": "quest_completed"
-          }
-        ],
-        "quest_failed": [
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": "quest_failed"
-          }
-        ]
-      }
-    }
-  },
-  "ranger": {
-    "actor": "Ranger",
-    "remarks": [
-      "Help!"
-    ],
-    "dialogue": {
-      "idle": [
-        "Good day friend! How may I help you?",
-        "Greetings."
-      ],
-      "quest_initiated": [
-        "Thanks for helping me get home friend! Come see me at the cabin back in town."
-      ],
-      "quest_failed": [
-        "NO!"
-      ],
-      "quest_completed": [
-        "Good day friend! How may I help you?"
-      ],
-      "prompts": {
-        "100": [
-          "How may I help you?"
-        ],
-        "999": [
-          "Have a good one."
-        ]
-      },
-      "answers": {
-        "100": [
-          {
-            "choices": [
-              "Animal companions"
-            ],
-            "go_to": "200",
-            "set_state": "shop"
-          },
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": null,
-            "set_state": null
-          }
-        ],
-        "quest_initiated": [
-          {
-            "choices": [
-              "OK."
-            ],
-            "go_to": "100",
-            "set_state": "quest_completed"
-          }
-        ],
-        "quest_completed": [
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": "quest_completed"
-          }
-        ],
-        "quest_failed": [
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": "quest_failed"
-          }
-        ]
-      }
-    }
-  },
   "blacksmith": {
     "actor": "Blacksmith",
     "remarks": [
@@ -506,7 +218,7 @@
       "quest_completed": [
         "Good day friend! How may I help you?"
       ],
-      "prompts": {
+      "choices": {
         "100": [
           "How may I help you?"
         ],
@@ -514,13 +226,22 @@
           "Have a good one."
         ]
       },
-      "answers": {
-        "100": [
+      "player": {
+        "quest_initiated": [
+          {
+            "choices": [
+              "OK."
+            ],
+            "go_to": null,
+            "set_state": "quest_completed"
+          }
+        ],
+        "quest_completed": [
           {
             "choices": [
               "Upgrade weapon"
             ],
-            "go_to": "200",
+            "go_to": null,
             "set_state": "shop"
           },
           {
@@ -528,24 +249,7 @@
               "Return"
             ],
             "go_to": null,
-            "set_state": null
-          }
-        ],
-        "quest_initiated": [
-          {
-            "choices": [
-              "OK."
-            ],
-            "go_to": "100",
             "set_state": "quest_completed"
-          }
-        ],
-        "quest_completed": [
-          {
-            "choices": [
-              "Return"
-            ],
-            "go_to": "quest_completed"
           }
         ],
         "quest_failed": [
@@ -553,7 +257,71 @@
             "choices": [
               "Return"
             ],
-            "go_to": "quest_failed"
+            "set_state": "quest_failed"
+          }
+        ]
+      }
+    }
+  },
+  "quest_npc": {
+    "actor": "{actor_name}",
+    "remarks": [
+      "Help!"
+    ],
+    "dialogue": {
+      "idle": [
+        "Good day friend!",
+        "Greetings."
+      ],
+      "quest_initiated": [
+        "Thanks for helping me get home friend! Come see me at the {actor_home} back in town."
+      ],
+      "quest_failed": [
+        "NO!"
+      ],
+      "quest_completed": [
+        "Good day friend! How may I help you?"
+      ],
+      "choices": {
+        "100": [
+          "How may I help you?"
+        ],
+        "999": [
+          "Have a good one."
+        ]
+      },
+      "player": {
+        "quest_initiated": [
+          {
+            "choices": [
+              "OK."
+            ],
+            "go_to": null,
+            "set_state": "quest_completed"
+          }
+        ],
+        "quest_completed": [
+          {
+            "choices": [
+              "{actor_action}"
+            ],
+            "go_to": null,
+            "set_state": "shop"
+          },
+          {
+            "choices": [
+              "Return"
+            ],
+            "go_to": null,
+            "set_state": "quest_completed"
+          }
+        ],
+        "quest_failed": [
+          {
+            "choices": [
+              "Return"
+            ],
+            "set_state": "quest_failed"
           }
         ]
       }
