@@ -12,7 +12,7 @@ class DialogueMenu:
         self.title_screen = False
         self.name = name
         self.data = data
-        self.heading = MenuItem(self.data.npc.name, dialogue=True)
+        self.header = MenuItem(self.data.npc.name.capitalize(), dialogue=True, npc=self.data.npc)
         self.items = []
         self.sub_menu = sub_menu
         self.align = blt.TK_ALIGN_LEFT
@@ -23,7 +23,7 @@ class DialogueMenu:
         # self.refresh()
 
     def refresh(self):
-        self.heading.reset()
+        self.header.reset()
         if self.data.npc.state == NpcStates.IDLE and self.data.current_choice is None:
             return
         elif self.data.npc.state == NpcStates.SHOP:
@@ -33,12 +33,12 @@ class DialogueMenu:
         self.options = {}
 
         line_1 = choice(self.data.dialogue_json["dialogue"][self.data.npc.state.value])
-        self.heading.append(line_1)
+        self.header.append(line_1)
         dialogue_state = self.data.npc.state.value
 
         if self.data.current_choice:
             line_2 = choice(self.data.dialogue_json["dialogue"]["choices"][self.data.current_choice])
-            self.heading.append(line_2)
+            self.header.append(line_2)
             dialogue_state = self.data.current_choice
 
         for item in self.data.dialogue_json["dialogue"]["player"][dialogue_state]:
@@ -46,7 +46,7 @@ class DialogueMenu:
                 self.options[option] = {}
                 self.options[option]["choice"] = item["go_to"]
                 self.options[option]["state"] = item["set_state"] if "set_state" in item.keys() else None
-                menu_item = MenuItem(option)
+                menu_item = MenuItem(option, npc=self.data.npc)
                 self.items.append(menu_item)
 
     def show(self):

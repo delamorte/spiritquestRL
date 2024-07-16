@@ -10,7 +10,7 @@ class AvatarInfo:
         self.name = name
         self.data = data
         self.sub_menu = sub_menu
-        self.heading = MenuItem("[color=white]The following spirits have awakened within you..")
+        self.header = MenuItem("[color=white]The following spirits have awakened within you..")
         self.items = []
         self.align = blt.TK_ALIGN_LEFT
         self.event = event

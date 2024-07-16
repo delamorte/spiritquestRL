@@ -172,8 +172,8 @@ class Menus:
             # self.owner.render_functions.clear_menu(frame)
             current_line = 0
             line_index = 0
-            # Draw heading
-            blt.puts(self.padding_left, self.padding_top - 3, menu.heading.text_lines,
+            # Draw header
+            blt.puts(self.padding_left, self.padding_top - 3, menu.header.text_lines,
                      frame.width, align=blt.TK_ALIGN_CENTER)
 
             for item, height in message_list:
@@ -338,6 +338,7 @@ class Menus:
                 dialogue_menu = DialogueMenu(data=data.params)
                 self.dialogue = dialogue_menu
                 self.dialogue.owner = self
+                self.dialogue.show()
         elif data.name == "map_gen":
             if self.map_gen:
                 self.map_gen.data = data.params

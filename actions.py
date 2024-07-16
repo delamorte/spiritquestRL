@@ -2,9 +2,10 @@ from bearlibterminal import terminal as blt
 
 from components.cursor import Cursor
 from components.entity import Entity
-from game_states import GameStates
+from components.stairs import Stairs
+from game_states import GameStates, NpcStates
 from helpers import get_article
-from map_gen.tilemap import get_tile
+from map_gen.tilemap import get_tile, get_tile_object, get_color
 from ui.menus import MenuData
 from ui.message import Message
 from ui.message_history import show_msg_history
@@ -97,7 +98,20 @@ class Actions:
                         self.owner.message_log.send(interact_msg)
                 elif entity.npc:
                     entity.npc.interaction(self.owner.menus)
-                    self.owner.menus.dialogue.show()
+                    if entity.npc.state == NpcStates.QUEST_COMPLETED:
+                        name = "holy symbol"
+                        portal = get_tile_object(name)
+                        color = get_color(name)
+                        stairs_component = Stairs(("dream", entity.x, entity.y), ["hub"], name)
+                        portal = Entity(entity.x, entity.y, color, name, tile=portal,
+                                        stairs=stairs_component)
+                        self.owner.levels.current_map.add_entity(portal)
+                        portal.xtra_info = "Wake up and return back to town with '<' or '>'"
+                        self.owner.levels.current_map.remove_entity(entity)
+                        self.owner.levels.hub.add_entity(entity)
+                        # TODO: create npc room in hub and spawn npc there
+                        self.owner.levels.current_map.init_light_sources()
+
                     self.owner.fov_recompute = True
                     return True
             if interact_msg:

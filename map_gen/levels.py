@@ -15,6 +15,7 @@ class Levels:
         self.biome = None
         self.world_tendency = 0
         self.current_map = None
+        self.hub = None
 
     def change(self, destination=None):
         # Clear animation buffer on level change
@@ -30,6 +31,7 @@ class Levels:
             game_map = self.create_map_from_biome(name="hub", width=40, height=40, algorithm="hub")
             self.items[game_map.name] = game_map
             self.current_map = game_map
+            self.hub = game_map
 
         if destination in self.items:
             game_map = self.items[destination]

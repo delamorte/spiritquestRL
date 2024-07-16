@@ -8,7 +8,7 @@ class DebugMap:
         self.name = name
         self.data = data
         self.sub_menu = sub_menu
-        self.heading = None
+        self.header = None
         self.items = []
         self.margin_x = 6
         self.margin_y = 6

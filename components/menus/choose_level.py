@@ -13,7 +13,7 @@ class ChooseLevel:
         self.title_screen = False
         self.name = name
         self.data = data
-        self.heading = MenuItem("[color=white]Choose your destination...")
+        self.header = MenuItem("[color=white]Choose your destination...")
         self.items = []
         self.sub_menu = sub_menu
         self.align = blt.TK_ALIGN_LEFT

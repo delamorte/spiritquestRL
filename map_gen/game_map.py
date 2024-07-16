@@ -13,6 +13,7 @@ from components.stairs import Stairs
 from components.wall import Wall
 from data import json_data
 from map_gen.algorithms.room_addition import RoomAddition
+from map_gen.dungeon import TiledRoom, Room
 from map_gen.tile import Tile
 from map_gen.tilemap import get_tile, get_color, get_tile_by_value, get_tile_object, get_tile_variant
 
@@ -158,6 +159,86 @@ class GameMap:
                 return list(filter(lambda entity: self.visible[entity.x, entity.y], entities))
             else:
                 return entities
+
+    def generate_hub(self):
+
+        # Set ground tiles
+        for y in range(1, self.height - 1):
+            for x in range(1, self.width - 1):
+                self.tiles[x][y].color = "#423023"
+                self.tiles[x][y].char = get_tile("ground_soil")
+
+        # Generate a house
+        w = h = 10
+        # x1, y1 = self.get_rand_unoccupied_space(w, h)
+        # home = Room(x1, y1, w, h, "#6b3d24", "#423023", wall="wall_brick", floor="floor_wood", name="home")
+        # objects = self.create_room(home)
+        # door_home = self.create_door(home, "open", random=True)
+        objects = []
+        shaman_room = TiledRoom(name="home", lightness=0.8, filename="hub_shaman")
+        x1, y1 = self.get_random_unoccupied_space(w, h)
+        shaman_room.update_coordinates(x1, y1)
+        excludes_y = (shaman_room.y2-1,)
+        objects.extend(self.create_room(shaman_room, exclude_light_y=excludes_y))
+
+        # Generate dungeon entrance
+        # Make sure room doesn't overlap with existing rooms
+        w = h = 10
+        x1, y1 = self.get_random_unoccupied_space(w, h)
+        d_entrance = Room(x1, y1, w, h, "dark amber", "darkest amber", wall="wall_brick", name="d_entrance")
+
+        objects.extend(self.create_room(d_entrance))
+        door_d_entrance = self.create_door(d_entrance, "locked", random=True)
+
+        graveyard = TiledRoom(name="graveyard", lightness=0.5, filename="graveyard")
+        x1, y1 = self.get_random_unoccupied_space(w, h)
+        graveyard.update_coordinates(x1, y1)
+        excludes_y = (graveyard.y2-1, graveyard.y1,)
+        objects.extend(self.create_room(graveyard, exclude_light_y=excludes_y))
+
+        doors = [door_d_entrance]
+
+        objects.extend(self.generate_trees(1, 1, self.width - 1, self.height - 1, 20))
+
+        # objects.extend(self.create_entities())
+
+        center_x, center_y = self.rooms["d_entrance"].get_center()
+
+        stairs_component = Stairs(("hub", center_x, center_y), ["debug"], "stairs down", 0)
+        char = get_tile("stairs_down")
+        stairs_down = Entity(center_x, center_y, 1, "dark amber", "stairs to a mysterious cavern",
+                             char=char, stairs=stairs_component)
+        stairs_down.xtra_info = "You feel an ominous presence. Go down with '<' or '>'"
+        self.tiles[center_x][center_y].add_entity(stairs_down)
+        self.create_decor()
+        # objects = flatten(objects)
+        map_stairs = [stairs_down]
+        map_items = []
+        map_objects = []
+        for obj in objects:
+            if obj.door:
+                doors.append(obj)
+            elif obj.stairs:
+                map_stairs.append(obj)
+            elif obj.item:
+                map_items.append(obj)
+            else:
+                map_objects.append(obj)
+
+        # Place player
+        center_x, center_y = self.rooms["home"].get_center()
+        self.owner.player.x, self.owner.player.y = center_x - 1, center_y - 1
+
+        self.entities = {"objects": objects, "stairs": map_stairs, "doors": doors, "items": map_items, "npcs": []}
+
+        npcs = []
+        npc_name = "black crow king"
+        npcs.append((npc_name, get_tile(npc_name)))
+        location = self.get_random_unoccupied_space_near_room(shaman_room)
+        self.create_entities(npcs, "npcs", location=location)
+
+        transparency = np.frompyfunc(lambda tile: not tile.block_sight, 1, 1)
+        self.transparent = transparency(self.tiles)
 
     def process_room(self, room, exclude_light_y=None):
         entities = []

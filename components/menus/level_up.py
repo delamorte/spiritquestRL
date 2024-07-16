@@ -10,7 +10,7 @@ class LevelUp:
         self.name = name
         self.data = data
         self.sub_menu = sub_menu
-        self.heading = MenuItem("[color=white]You have gained more wisdom. You feel a stronger bond with one particular " \
+        self.header = MenuItem("[color=white]You have gained more wisdom. You feel a stronger bond with one particular " \
                        "spirit... ")
         self.items = []
         self.align = blt.TK_ALIGN_LEFT

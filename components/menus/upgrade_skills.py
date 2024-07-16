@@ -10,7 +10,7 @@ class UpgradeSkills:
         self.title_screen = False
         self.name = name
         self.data = data
-        self.heading = MenuItem("[color=white]The following abilities have awakened within you...")
+        self.header = MenuItem("[color=white]The following abilities have awakened within you...")
         self.items = []
         self.sub_menu = sub_menu
         self.align = blt.TK_ALIGN_LEFT
@@ -21,7 +21,7 @@ class UpgradeSkills:
         self.items = []
         abilities = self.data.abilities
         skill_points = self.data.player.skill_points
-        self.heading.append("[color=yellow]You have {0} skill points".format(skill_points))
+        self.header.append("[color=yellow]You have {0} skill points".format(skill_points))
 
         for skill in abilities.items:
             icon = skill.icon

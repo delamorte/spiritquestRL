@@ -14,7 +14,10 @@ class LightSource:
         self.lit = True
 
     def initialize_fov(self, game_map):
-        self.fov_map = np.full((game_map.width, game_map.height), fill_value=False)
+        if self.fov_map is None:
+            self.fov_map = np.full((game_map.width, game_map.height), fill_value=False)
+        else:
+            self.recompute_fov(game_map)
 
     def recompute_fov(self, game_map):
         x, y = self.owner.x, self.owner.y

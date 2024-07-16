@@ -12,7 +12,7 @@ class ChooseAnimal:
         self.title_screen = False
         self.name = name
         self.data = data
-        self.heading = MenuItem("[color=white]Choose your spirit animal...")
+        self.header = MenuItem("[color=white]Choose your spirit animal...")
         self.items = []
         self.sub_menu = sub_menu
         self.margin_x = 10
